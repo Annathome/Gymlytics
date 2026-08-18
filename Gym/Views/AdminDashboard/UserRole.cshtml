@@ -1,0 +1,531 @@
+﻿@model Gym.Models.PagedResult<Gym.Models.UserRoleViewModel>
+@{
+    ViewData["Title"] = "User Role";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>User Roles</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inria+Serif:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #fafafa;
+            margin: 0;
+            color: #1a1a1a;
+        }
+
+        .page-wrap {
+            max-width: 1040px;
+            margin: 0 auto;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+
+            .page-header h1 {
+                font-size: 1.75rem;
+                font-weight: 700;
+                margin: 0 0 4px 0;
+            }
+
+            .page-header p {
+                color: #6b7280;
+                margin: 0;
+                font-size: 0.95rem;
+            }
+
+        .btn-invite {
+            background: #fff;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            padding: 10px 18px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #1a1a1a;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+            text-decoration: none;
+            transition: background 0.15s ease;
+        }
+
+            .btn-invite:hover {
+                background: #f3f4f6;
+                color: #1a1a1a;
+            }
+
+        .alert-banner {
+            border-radius: 10px;
+            padding: 12px 16px;
+            margin-bottom: 16px;
+            font-size: 0.9rem;
+        }
+
+        .alert-success {
+            background: #dcfce7;
+            color: #15803d;
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        /* Banner Styles for Confirmation Alerts */
+        .alert-warning-banner {
+            background: #fffbeb;
+            border: 1px solid #fef3c7;
+            border-radius: 10px;
+            padding: 14px 18px;
+            margin-bottom: 16px;
+            font-size: 0.9rem;
+            color: #92400e;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .alert-warning-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-confirm-danger {
+            background: #b91c1c;
+            color: #fff;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.82rem;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+            .btn-confirm-danger:hover {
+                background: #991b1b;
+                color: #fff;
+            }
+
+        .btn-confirm-cancel {
+            background: #e5e7eb;
+            color: #374151;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.82rem;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+            .btn-confirm-cancel:hover {
+                background: #d1d5db;
+                color: #1f2937;
+            }
+
+        .card {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            overflow: visible;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead th {
+            text-align: left;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #9ca3af;
+            padding: 14px 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        tbody td {
+            padding: 16px 20px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 0.9rem;
+            vertical-align: middle;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .user-cell {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: #dbeafe;
+            color: #1e40af;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .badge-role, .badge-status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 999px;
+            font-size: 0.78rem;
+            font-weight: 600;
+        }
+
+        .badge-super-admin {
+            background: #ede9fe;
+            color: #6d28d9;
+        }
+
+        .badge-staff {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .badge-trainer {
+            background: #dcfce7;
+            color: #15803d;
+        }
+
+        .badge-default {
+            background: #f3f4f6;
+            color: #6b7280;
+        }
+
+        .badge-active {
+            background: #dcfce7;
+            color: #15803d;
+        }
+
+        .badge-pending {
+            background: #fef3c7;
+            color: #b45309;
+        }
+
+        .badge-suspended {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .access-text {
+            color: #4b5563;
+        }
+
+        .last-login {
+            color: #4b5563;
+        }
+
+        .actions-cell {
+            position: relative;
+            text-align: right;
+        }
+
+        .menu-dots-btn {
+            background: none;
+            border: none;
+            color: #9ca3af;
+            font-size: 1.1rem;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 6px;
+        }
+
+            .menu-dots-btn:hover {
+                background: #f3f4f6;
+            }
+
+        .action-menu {
+            display: none;
+            position: absolute;
+            right: 20px;
+            top: 40px;
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+            min-width: 180px;
+            z-index: 20;
+            overflow: hidden;
+        }
+
+            .action-menu.open {
+                display: block;
+            }
+
+            .action-menu form, .action-menu a {
+                margin: 0;
+            }
+
+        .action-menu-item {
+            display: block;
+            width: 100%;
+            text-align: left;
+            background: none;
+            border: none;
+            padding: 10px 16px;
+            font-size: 0.85rem;
+            color: #1a1a1a;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+            .action-menu-item:hover {
+                background: #f9fafb;
+                color: #1a1a1a;
+            }
+
+            .action-menu-item.danger {
+                color: #b91c1c;
+            }
+
+        .footer-note {
+            margin-top: 20px;
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
+            font-size: 0.85rem;
+            color: #6b7280;
+        }
+
+            .footer-note strong {
+                display: block;
+                color: #1a1a1a;
+                font-size: 0.9rem;
+                margin-bottom: 8px;
+            }
+
+        .footer-note-items {
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+
+        .footer-note-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .pager {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 16px;
+            font-size: 0.85rem;
+            color: #6b7280;
+        }
+
+        .pager-disabled {
+            pointer-events: none;
+            opacity: 0.4;
+        }
+    </style>
+</head>
+<body>
+    <div class="page-wrap pt-5">
+        <div class="page-header">
+            <div>
+                <h1>User roles</h1>
+                <p>Login authentication and access control</p>
+            </div>
+            <a asp-controller="Account" asp-action="RegisterStaff" class="btn-invite">
+                + Invite user
+            </a>
+        </div>
+
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert-banner alert-success">@TempData["SuccessMessage"]</div>
+        }
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert-banner alert-error">@TempData["ErrorMessage"]</div>
+        }
+
+        <!-- Inline Suspend Confirmation Banner -->
+        @if (ViewBag.ConfirmSuspendId != null)
+        {
+            var targetUser = Model?.Items.FirstOrDefault(u => u.Id == (int)ViewBag.ConfirmSuspendId);
+            if (targetUser != null)
+            {
+                <div class="alert-warning-banner">
+                    <div>
+                        <strong>Suspend @targetUser.DisplayName?</strong> They will no longer be able to log in.
+                    </div>
+                    <div class="alert-warning-actions">
+                        <form asp-controller="AdminDashboard" asp-action="SuspendUser" asp-route-id="@targetUser.Id" method="post" class="d-inline">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn-confirm-danger">Yes, Suspend</button>
+                        </form>
+                        <a asp-action="UserRole" class="btn-confirm-cancel">Cancel</a>
+                    </div>
+                </div>
+            }
+        }
+
+        <!-- Inline Delete Confirmation Banner -->
+        @if (ViewBag.ConfirmDeleteId != null)
+        {
+            var targetUser = Model?.Items.FirstOrDefault(u => u.Id == (int)ViewBag.ConfirmDeleteId);
+            if (targetUser != null)
+            {
+                <div class="alert-warning-banner">
+                    <div>
+                        <strong>Delete @targetUser.DisplayName permanently?</strong> This action cannot be undone.
+                    </div>
+                    <div class="alert-warning-actions">
+                        <form asp-controller="AdminDashboard" asp-action="DeleteUser" asp-route-id="@targetUser.Id" method="post" class="d-inline">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn-confirm-danger">Yes, Delete</button>
+                        </form>
+                        <a asp-action="UserRole" class="btn-confirm-cancel">Cancel</a>
+                    </div>
+                </div>
+            }
+        }
+
+        <div class="card">
+            <table>
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th>Access</th>
+                        <th>Last login</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model == null || Model.Items.Count == 0)
+                    {
+                        <tr><td colspan="6" class="text-center text-muted py-4">No users found.</td></tr>
+                    }
+                    else
+                    {
+                        @foreach (var user in Model.Items)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="user-cell">
+                                        <div class="avatar">@user.Initials</div>
+                                        <div>
+                                            <div>@user.DisplayName</div>
+                                            <div style="font-size:0.78rem;color:#9ca3af;">@user.Email</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge-role @user.RoleBadgeClass">@user.RoleLabel</span>
+                                </td>
+                                <td>
+                                    <span class="badge-status @user.StatusBadgeClass">@user.Status</span>
+                                </td>
+                                <td class="access-text">@user.Access</td>
+                                <td class="last-login">@user.LastLoginDisplay</td>
+                                <td class="actions-cell">
+                                    <button type="button" class="menu-dots-btn" onclick="toggleMenu('@user.Id')">&#8942;</button>
+                                    <div class="action-menu" id="menu-@user.Id">
+                                        <a class="action-menu-item" asp-controller="AdminDashboard" asp-action="UserActivity" asp-route-id="@user.Id">
+                                            View activity
+                                        </a>
+
+                                        @if (user.Status == "Active")
+                                        {
+                                            <a class="action-menu-item" asp-action="UserRole" asp-route-confirmSuspendId="@user.Id">
+                                                Suspend account
+                                            </a>
+                                        }
+                                        @if (user.Status == "Suspended")
+                                        {
+                                            <form asp-controller="AdminDashboard" asp-action="ReactivateUser" asp-route-id="@user.Id" method="post">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="action-menu-item">Reactivate account</button>
+                                            </form>
+                                        }
+
+                                        <a class="action-menu-item danger" asp-action="UserRole" asp-route-confirmDeleteId="@user.Id">
+                                            Delete account
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @if (Model != null && Model.Items.Count > 0)
+        {
+            <div class="pager">
+                <span>Page @Model.Page of @Model.TotalPages &middot; @Model.TotalCount users</span>
+                <div style="display:flex;gap:8px;">
+                    <a asp-action="UserRole" asp-route-page="@(Model.Page - 1)"
+                       class="btn-invite @(Model.HasPrevious ? "" : "pager-disabled")">
+                        Previous
+                    </a>
+                    <a asp-action="UserRole" asp-route-page="@(Model.Page + 1)"
+                       class="btn-invite @(Model.HasNext ? "" : "pager-disabled")">
+                        Next
+                    </a>
+                </div>
+            </div>
+        }
+
+        <div class="footer-note">
+            <div>
+                <strong>Login security</strong>
+                <div class="footer-note-items">
+                    <div class="footer-note-item">🔒 Password + email verification</div>
+                    <div class="footer-note-item">⏱️ Session auto-expires after 30 min idle</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function toggleMenu(id) {
+            var menu = document.getElementById('menu-' + id);
+            var wasOpen = menu.classList.contains('open');
+            document.querySelectorAll('.action-menu.open').forEach(function (m) { m.classList.remove('open'); });
+            if (!wasOpen) menu.classList.add('open');
+        }
+
+        document.addEventListener('click', function (e) {
+            if (!e.target.closest('.actions-cell')) {
+                document.querySelectorAll('.action-menu.open').forEach(function (m) { m.classList.remove('open'); });
+            }
+        });
+    </script>
+</body>
+</html>

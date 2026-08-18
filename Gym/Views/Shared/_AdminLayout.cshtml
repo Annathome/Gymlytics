@@ -1,0 +1,439 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Gymlytics</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/Gymlytics.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inria+Serif:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .nav-header {
+            position: sticky;
+            top: 0;
+            width: 280px;
+            min-height: 100vh;
+            background: rgb(8,75,2);
+        }
+
+        .navbar {
+            height: 100%;
+        }
+
+        .container.g-3 {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            padding: 20px;
+        }
+
+        .navbar-logo {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            object-fit: cover;
+            align-content: start;
+            border: 2px solid rgb(14, 197, 45);
+            padding: 0;
+        }
+
+        .admin-top {
+            display: flex;
+            flex-direction: row;
+            position: relative;
+            gap: 20px;
+        }
+
+        .navbar-brand {
+            font-family: "Inria Serif",serif;
+            color: white;
+            font-size: 28px;
+            margin-top: 10px;
+        }
+
+        .nav.container {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        .navbar-nav {
+            list-style: none;
+            padding: 0;
+            margin-top: 40px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .nav-link {
+            font-family: "Inria Serif",serif;
+            color: white !important;
+            text-decoration: none;
+            font-size: 16px;
+        }
+
+        .icon {
+            color: white;
+            font-size: 1.3rem;
+        }
+
+        button {
+            background: transparent;
+            border: none;
+            text-align: left;
+            width: 100%;
+            padding: 10px;
+        }
+
+            button:hover {
+                border: 2px solid rgb(124,239,114);
+            }
+
+        .btn-admin {
+            margin-top: auto;
+            padding: 20px 0;
+            text-decoration: none;
+            border-color: none;
+        }
+
+            .btn-admin div {
+                display: flex;
+                align-items: center;
+                gap: 15px;
+            }
+
+            .btn-admin button:hover {
+                background-color: rgb(14, 197, 45);
+            }
+
+        .nav-admin {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: rgb(124,239,114);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: black;
+            font-weight: bold;
+        }
+
+        .admin-link {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        hr {
+            border: 5px solid rgb(0,0,0);
+        }
+
+        .btn-admin span {
+            color: white;
+            margin: 0;
+            font-family: "Inria Serif",serif;
+        }
+
+        .admin-logout {
+            display: none;
+            position: absolute;
+            bottom: 80px;
+            left: 40px;
+            width: 400px;
+            background-color: rgb(8, 61, 2);
+            border-radius: 15px;
+            flex-direction: column;
+            padding: 25px;
+            z-index: 1000;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+            .admin-logout.show {
+                display: flex !important;
+            }
+
+        .email
+        {
+            display: flex;
+            flex-direction: row;
+            gap:20px;
+        }
+
+        .top-log {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .top {
+            display: flex;
+            flex-direction: row;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .top-log label {
+            color: rgb(211, 211, 211);
+            font-family: "Inria Serif",serif;
+            font-size: 16px;
+        }
+
+            .top-log label span {
+                color: #ffffff;
+                font-weight: bold;
+            }
+
+        .top .initials-circle {
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgb(0, 163, 0);
+            border-radius: 50%;
+            color: #ffffff !important;
+            font-size: 22px;
+            font-weight: bold;
+            font-family: "Inria Serif",serif;
+        }
+
+        .top h3 {
+            color: #ffffff !important;
+            font-size: 22px;
+            font-weight: bold;
+            font-family: "Inria Serif",serif;
+            margin: 0;
+        }
+
+        .verified-badge {
+            background-color: #ffffff;
+            color: #000000;
+            border-radius: 20px;
+            padding: 2px 10px;
+            font-size: 12px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            width: fit-content;
+            font-family: sans-serif;
+            margin-top: 5px;
+        }
+
+            .verified-badge i {
+                color: #00a300;
+                font-size: 14px;
+            }
+
+        .separator {
+            border-top: 1px solid rgba(255,255,255,0.1);
+            margin: 20px 0;
+        }
+
+        .bottom-log a {
+            text-decoration: none;
+            color: rgb(157, 219, 157) !important;
+            font-family: "Inria Serif",serif;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+            .bottom-log a:hover {
+                color: #ffffff !important;
+            }
+
+        .btn-log {
+            width: 100%;
+            background-color: rgb(0, 210, 0);
+            border-radius: 10px;
+            padding: 12px;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+            .btn-log:active {
+                background-color: rgb(124,239,114);
+                transform: scale(0.98);
+            }
+
+            .btn-log span {
+                color: #ffffff !important;
+                font-family: "Inria Serif",serif;
+                font-size: 16px;
+                font-weight: bold;
+            }
+
+    </style>
+</head>
+
+<body>
+    <header class="nav-header">
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm  border-bottom box-shadow mb-3 ">
+            <div class="container g-3">
+                <section class="admin-top">
+                    <img src="/images/Yokok.jpg" alt="Yokok Gym" class="navbar-logo " />
+                    <h1 class="navbar-brand">YOKOKS</h1>
+                </section>
+
+                <div class="nav container ">
+                    <ul class="navbar-nav flex-column">
+
+                        <button class="nav-item ">
+                            <i class="icon bi bi-columns-gap"></i>
+                            <a class="nav-link " asp-area="" asp-controller="Dashboard" asp-action="Index">DASHBOARD</a>
+                        </button>
+                        <button class="nav-item ">
+                            <i class="icon bi bi-people-fill"></i>
+                            <a class="nav-link " asp-area="" asp-controller="Home" asp-action="Privacy">MEMBER</a>
+                        </button>
+                        <button class="nav-item ">
+                            <i class="icon bi bi-person-fill-check"></i>
+                            <a class="nav-link " asp-area="" asp-controller="Home" asp-action="Privacy">ATTENDANCE</a>
+                        </button>
+                        <button class="nav-item ">
+                            <i class="icon bi bi-tools"></i>
+                            <a class="nav-link " asp-area="" asp-controller="Home" asp-action="Privacy">EQUIPMENT</a>
+                        </button>
+                        <button class="nav-item ">
+                            <i class="icon bi bi-clipboard2-check"></i>
+                            <a class="nav-link " asp-area="" asp-controller="Home" asp-action="Privacy">TRAINER SCHEDULE</a>
+                        </button>
+                        <button class="nav-item ">
+                            <i class="icon bi bi-cash-coin"></i>
+                            <a class="nav-link " asp-area="" asp-controller="Home" asp-action="Privacy">PAYMENT</a>
+                        </button>
+                        <button class="nav-item">
+                            <i class="icon bi bi-person-walking"></i>
+                            <a class="nav-link " asp-area="" asp-controller="Home" asp-action="Privacy">WALK-INS</a>
+                        </button>
+                        <button class="nav-item">
+                            <i class="icon bi bi-bell-fill"></i>
+                            <a class="nav-link " asp-area="" asp-controller="Home" asp-action="Privacy">NOTIFICATIONS</a>
+                        </button>
+                        <button class="nav-item">
+                            <i class="icon bi bi-person-fill-gear"></i>
+                            <a class="nav-link " asp-area="" asp-controller="AdminDashboard" asp-action="UserRole">USER ROLE</a>
+                        </button>
+
+
+                    </ul>
+                    <section class="btn-admin">
+                        <hr />
+                        <div>
+                            <button class="nav-admin m-0 admin-Popup-btn" id="btn-view">
+                                <div>AD</div>
+                            </button>
+                            <label>
+                                <a class="admin-link admin-Popup-btn"> ADMIN</a>
+                                <span>Administrator</span>
+                            </label>
+                        </div>
+                    </section>
+
+                </div>
+
+                @using System.Security.Claims
+                @{
+                    var userName = User.Identity?.Name ?? "Administrator";
+                    var userRole = User.FindFirst(ClaimTypes.Role)?.Value ?? "Admin";
+                    var userEmail = User.FindFirst(ClaimTypes.Email)?.Value ?? "No Email";
+                    var userContact = User.FindFirst(ClaimTypes.MobilePhone)?.Value ?? "No Contact";
+                    // Using placeholders based on the provided image
+                    userName = "Ann";
+                    userContact = "0928 291 7918";
+                    userEmail = "kristalbarcelo@gmail.com";
+                    var initials = !string.IsNullOrEmpty(userName) && userName.Length >= 2 ? userName.Substring(0, 2).ToUpper() : "AN";
+                }
+
+                <section>
+                    <div class="admin-logout" id="adminLogout">
+                        <section class="top-log">
+                            <div class="top">
+                                <div class="initials-circle">@initials</div>
+                                <h3>@userRole</h3>
+                            </div>
+                            <div class="separator"></div>
+                            <label>Name: <span>@userName</span></label>
+                            <label>Contact: <span>@userContact</span></label>
+                            <div class="email">
+                                <label>Email: <span>@userEmail</span></label>
+                                <div class="verified-badge">
+                                    <i class="bi bi-check-circle-fill"></i>
+                                    Verified
+                                </div>
+                            </div>
+                        </section>
+
+                        <div class="separator"></div>
+
+                        <section class="bottom-log">
+                            <a class="change-pass" asp-controller="Account" asp-action="">
+                                <i class="bi bi-key-fill"></i>
+                                Change Password
+                            </a>
+
+                            <form method="post" asp-controller="Account" asp-action="Logout">
+                                <button type="submit" class="btn-log"><span>LOGOUT</span></button>
+                            </form>
+                        </section>
+                    </div>
+                </section>
+
+            </div>
+        </nav>
+    </header>
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const btn = document.querySelectorAll('.admin-Popup-btn');
+            const Popup = document.getElementById('adminLogout');
+
+            btn.forEach(function (button) {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    Popup.classList.toggle('show');
+                });
+            });
+
+            document.addEventListener('click', function (e) {
+                if(!Popup.contains(e.target) && !e.target.closest('.admin-Popup-btn')) {
+
+                    Popup.classList.remove('show');
+                }
+            });
+        });
+    </script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

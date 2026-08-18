@@ -1,0 +1,16 @@
+﻿@{
+    ViewData["Title"] = "Check Your Email";
+    Layout = "~/Views/Shared/_LoginLayout.cshtml";
+}
+
+<div class="container mt-5 text-center" style="max-width: 450px;">
+    <h3 class="mb-3">Check your inbox</h3>
+    <p class="text-muted">
+        We sent a confirmation link to <strong>@ViewBag.Email</strong>.
+        Click it to verify the account and complete registration.
+    </p>
+    <!-- Fixed: added asp-controller="AdminDashboard" -->
+    <a asp-controller="AdminDashboard" asp-action="UserRole" class="btn btn-outline-secondary mt-2">
+        Back to User Role Dashboard
+    </a>
+</div>

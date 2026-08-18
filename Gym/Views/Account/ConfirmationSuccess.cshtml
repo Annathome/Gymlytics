@@ -1,0 +1,12 @@
+﻿@{
+    ViewData["Title"] = "Account Confirmed";
+    Layout = "~/Views/Shared/_LoginLayout.cshtml";
+}
+
+<div class="container mt-5 text-center" style="max-width: 450px;">
+    <div class="card shadow-sm p-4">
+        <h3 class="mb-3 text-success">✓ Registration Successful!</h3>
+        <p class="text-muted">Your staff account credentials have been saved and your account is active.</p>
+        <a asp-controller="Account" asp-action="Login" class="btn btn-success w-100 mt-2">Go to Login</a>
+    </div>
+</div>

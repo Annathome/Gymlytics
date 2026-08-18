@@ -1,0 +1,253 @@
+﻿@model Gym.Models.LoginViewModel
+@{
+    ViewData["Title"] = "Login Page";
+    Layout = "~/Views/Shared/_LoginLayout.cshtml";
+}
+
+<style>
+    *, *::before, *::after {
+        box-sizing: border-box;
+        padding: 0;
+        margin: 0;
+    }
+
+    body {
+        min-height: 100vh;
+        width: 100%;
+        background: rgb(96,94,105);
+        font-family: 'Inria Serif', serif;
+        overflow-x: hidden;
+    }
+
+    .login-wrap {
+        position: relative;
+        width: 100%;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+
+    .bg {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 1;
+    }
+
+    .login-form {
+        position: relative;
+        z-index: 2;
+        width: 100%;
+        max-width: 450px;
+        max-height: 90vh;
+        background-color: rgba(255, 255, 255, 0.92);
+        display: flex;
+        flex-direction: column;
+        padding: 30px;
+        border-radius: 30px;
+        border: 3px solid rgb(96,94,105);
+        box-shadow: 0px 8px 24px rgba(0, 0, 0, 0.25);
+        overflow-y: auto;
+    }
+
+        .login-form::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .login-form::-webkit-scrollbar-thumb {
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+        }
+
+    .title {
+        text-align: center;
+        margin-bottom: 12px;
+    }
+
+        .title img {
+            height: 75px;
+            width: 75px;
+            border-radius: 50%;
+            border: 2px solid #fff;
+            object-fit: cover;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+
+    .role {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-transform: uppercase;
+        font-size: 1.1rem;
+        font-style: italic;
+        font-weight: 300;
+        color: rgba(0, 0, 0, 0.7);
+        letter-spacing: 1px;
+    }
+
+        .role::before,
+        .role::after {
+            content: "";
+            flex: 1;
+            border-bottom: 2px dotted rgba(0, 0, 0, 0.3);
+            margin: 0 10px;
+        }
+
+    .reminder {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+        .reminder h6 {
+            font-size: 0.85rem;
+            color: rgba(0, 0, 0, 0.65);
+            letter-spacing: 0.5px;
+            line-height: 1.4;
+            margin: 0;
+        }
+
+        .reminder .highlight {
+            font-weight: 700;
+            color: rgba(0, 0, 0, 0.85);
+        }
+
+    form {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        gap: 15px;
+    }
+
+    .form-group label {
+        color: rgb(14, 160, 38);
+        font-weight: 700;
+        font-size: 0.95rem;
+        margin-bottom: 6px;
+        display: block;
+    }
+
+    .form-group input {
+        border: 1.5px solid rgb(14, 197, 45);
+        padding: 10px 14px;
+        width: 100%;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        outline: none;
+        background: #fff;
+        transition: all 0.2s ease-in-out;
+    }
+
+        .form-group input::placeholder {
+            color: rgba(14, 160, 38, 0.5);
+        }
+
+        .form-group input:focus {
+            border-color: rgb(14, 197, 45);
+            box-shadow: 0 0 0 3px rgba(14, 197, 45, 0.2);
+        }
+
+    .btn-submit {
+        width: 100%;
+        height: 45px;
+        background: rgb(178, 233, 197);
+        color: #000;
+        border: none;
+        font-size: 1rem;
+        font-weight: 700;
+        border-radius: 8px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        transition: background 0.2s ease-in-out, color 0.2s ease-in-out;
+    }
+
+        .btn-submit:hover {
+            background: rgb(14, 197, 45);
+            color: #fff;
+        }
+
+    .divider {
+        display: flex;
+        align-items: center;
+        text-align: center;
+        color: rgba(0, 0, 0, 0.5);
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin: 2px 0;
+    }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+        }
+
+        .divider span {
+            padding: 0 10px;
+        }
+</style>
+
+<section class="login-wrap">
+    <img src="~/images/login.png" alt="login background" class="bg" />
+
+    <div class="login-form">
+        <div class="title">
+            <img src="~/images/Yokok.jpg" alt="Gym logo" />
+            <div class="role">
+                <h3 class="m-0 fs-5">LOGIN ACCESS</h3>
+            </div>
+        </div>
+
+        <div class="reminder">
+            <h6>
+                To access your role account, please sign in with your <span class="highlight">verified Username and Password</span>.
+                <br /><br />
+                <span>Access is restricted to authorized Yokoks staff.</span>
+            </h6>
+        </div>
+
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success text-center py-2 mb-3 small">
+                @TempData["SuccessMessage"]
+            </div>
+        }
+
+        <form asp-controller="Account" asp-action="Login" method="post">
+            @Html.AntiForgeryToken()
+
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-2 small text-center"></div>
+
+            <div class="form-group">
+                <label asp-for="Username" class="form-label">Username</label>
+                <input asp-for="Username" class="form-control" placeholder="Enter Username" required />
+                <span asp-validation-for="Username" class="text-danger small"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Password" class="form-label">Password</label>
+                <input asp-for="Password" type="password" class="form-control" placeholder="Enter Password" required />
+                <span asp-validation-for="Password" class="text-danger small"></span>
+            </div>
+
+            <button type="submit" class="btn-submit mt-2">Login</button>
+
+            <div class="divider">
+                <span>OR</span>
+            </div>
+
+            <a asp-controller="MainHomepage" asp-action="Index" class="btn-submit">
+                Back to Home Page
+            </a>
+        </form>
+    </div>
+</section>

@@ -1,0 +1,246 @@
+﻿@model Gym.Models.AdminViewModel
+@{
+    ViewData["Title"] = "Admin Registration";
+    Layout = "~/Views/Shared/_LoginLayout.cshtml";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Registration</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inria+Serif:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap" rel="stylesheet">
+
+    <style>
+        /* 1. Added border-box to fix padding/width overflow issues */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            padding: 0;
+            margin: 0;
+        }
+
+        body {
+            min-height: 100vh;
+            width: 100vw;
+            background: rgb(96,94,105);
+            display: flex;
+            align-items: center; /* 2. Flex centering replaces hardcoded margins */
+            justify-content: center;
+            overflow-x: hidden;
+            font-family: 'Inria Serif', serif;
+        }
+
+        .login-wrap {
+            position: relative;
+            width: 100vw;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .bg {
+            width: 100vw;
+            height: 100vh;
+            object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        .login-form {
+            position: relative;
+            z-index: 2;
+            width: 90%;
+            max-width: 450px; /* limits width on large screens */
+            max-height: 95vh; /* Prevents form from clipping off top/bottom */
+            background-color: rgba(255, 255, 255, 0.9);
+            display: flex;
+            flex-direction: column;
+            padding: 30px 25px;
+            border-radius: 40px;
+            border: 3px solid rgb(96,94,105);
+            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
+            overflow-y: auto;
+        }
+
+            /* Custom scrollbar for a cleaner look */
+            .login-form::-webkit-scrollbar {
+                width: 6px;
+            }
+
+            .login-form::-webkit-scrollbar-thumb {
+                background-color: rgba(0,0,0,0.2);
+                border-radius: 10px;
+            }
+
+        .title {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+            .title img {
+                height: 70px;
+                width: 70px;
+                border-radius: 50%;
+                border: 2px solid rgb(255,255,255);
+                object-fit: cover;
+                margin-bottom: 10px;
+            }
+
+        .role {
+            display: flex;
+            align-items: center;
+            justify-content: center; /* Centers the text and dotted lines */
+            text-transform: uppercase;
+            font-size: 18px;
+            font-style: italic;
+            font-weight: 300;
+            color: rgba(0,0,0,0.6);
+            letter-spacing: 1px;
+        }
+
+            .role::before,
+            .role::after {
+                content: "";
+                flex: 1;
+                border-bottom: 2px dotted rgba(0,0,0,0.4);
+                margin: 0 10px;
+            }
+
+        .reminder {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+            .reminder h6 {
+                font-size: 0.85rem;
+                color: rgba(0,0,0,0.6);
+                letter-spacing: 0.5px;
+                line-height: 1.4;
+            }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 12px; /* Uniform spacing between inputs */
+            width: 100%;
+        }
+
+        .form-group {
+            width: 100%;
+        }
+
+            .form-group label {
+                color: rgb(14,197,45);
+                font-weight: 600;
+                font-size: 1rem;
+                margin-bottom: 5px;
+                display: block;
+            }
+
+            .form-group input {
+                border: 1px solid rgb(14,197,45);
+                padding: 10px 12px;
+                width: 100%;
+                border-radius: 8px;
+                font-size: 1rem;
+                outline: none;
+                transition: all 0.2s ease-in-out;
+            }
+
+                .form-group input::placeholder {
+                    color: rgba(14,197,45, 0.6);
+                }
+
+                .form-group input:focus,
+                .form-group input:hover {
+                    border-color: rgb(14,197,45);
+                    box-shadow: 2px 2px 4px rgba(96,94,105, 0.3);
+                    background: #fff;
+                }
+
+        .btn-submit {
+            width: 100%;
+            height: 45px;
+            margin-top: 10px;
+            background: rgb(178,233,197);
+            color: #000;
+            border: none;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s ease-in-out, color 0.2s ease-in-out;
+        }
+
+            .btn-submit:hover {
+                background: rgb(14,197,45);
+                color: #fff;
+            }
+    </style>
+</head>
+<body>
+    <section class="login-wrap">
+        <img src="~/images/login.png" alt="login background" class="bg" />
+
+        <div class="login-form">
+            <div class="title">
+                <img src="~/images/Yokok.jpg" alt="Gym Logo" />
+                <div class="role"> <h3>ADMIN SETUP</h3> </div>
+            </div>
+
+            <div class="reminder">
+                <h6>Create the main system administrator account.<br />This step can only be performed once.</h6>
+            </div>
+
+            <form asp-controller="Account" asp-action="RegisterAdmin" method="post">
+                @Html.AntiForgeryToken()
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-2 small text-center"></div>
+
+                <!-- 3. ADDED FULL NAME FIELD -->
+                <div class="form-group">
+                    <label asp-for="FullName" class="form-label">Full Name</label>
+                    <input asp-for="FullName" class="form-control" placeholder="Enter Full Name" required />
+                    <span asp-validation-for="FullName" class="text-danger small"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Username" class="form-label">Username</label>
+                    <input asp-for="Username" class="form-control" placeholder="Enter Username" required />
+                    <span asp-validation-for="Username" class="text-danger small"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Email" class="form-label">Gmail Address</label>
+                    <input asp-for="Email" type="email" class="form-control" placeholder="example@gmail.com" required />
+                    <span asp-validation-for="Email" class="text-danger small"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="PhoneNumber" class="form-label">Phone Number</label>
+                    <input asp-for="PhoneNumber" class="form-control" placeholder="Enter Phone Number" required />
+                    <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Password" class="form-label">Password</label>
+                    <input asp-for="Password" type="password" class="form-control" placeholder="Enter Password" required />
+                    <span asp-validation-for="Password" class="text-danger small"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="ConfirmPassword" class="form-label">Confirm Password</label>
+                    <input asp-for="ConfirmPassword" type="password" class="form-control" placeholder="Confirm Password" required />
+                    <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+                </div>
+
+                <button type="submit" class="btn-submit">Complete Setup & Lock</button>
+            </form>
+        </div>
+    </section>
+</body>
+</html>

@@ -1,0 +1,134 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Gymlytics</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/Gymlytics.styles.css" asp-append-version="true" />
+    <link href="https://fonts.googleapis.com/css2?family=Inria+Serif:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+        }
+
+        .navbar {
+            background: rgb(139,139,139, 0.7);
+            position: sticky;
+            z-index: 1000;
+            top: 0;
+            padding: 30px;
+        }
+
+        .navbar-logo {
+            padding: 0;
+            height: 50px;
+            width: 50px;
+            border-radius: 50px;
+        }
+
+        .navbar-brand {
+            font-family: "Inria Serif", serif;
+            font-size: 20px;
+            padding: 10px;
+            align-self: center;
+            font-weight: 100;
+        }
+
+        .navbar-nav {
+            margin-left: 40%;
+            font-size: 20px;
+            font-family: "Inria Serif", serif;
+        }
+
+        .nav-link {
+            color: rgb(0,0,0) !important;
+        }
+
+            .nav-link:hover {
+                transform: scale(1.1);
+            }
+
+        /* Updated button link styling */
+        .btn-log {
+            border: 2px solid rgb(14, 197, 45);
+            border-radius: 3px;
+            padding: 10px 20px;
+            background-color: transparent;
+            font-size: 20px;
+            color: rgb(0, 0, 0) !important;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+            white-space: nowrap;
+        }
+
+            .btn-log:hover {
+                background: rgba(14, 197, 45, 0.2);
+                color: rgb(0, 0, 0) !important;
+                transform: scale(1.05);
+            }
+    </style>
+</head>
+
+<body>
+    <header class="nav-header">
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm border-bottom box-shadow mb-3">
+            <div class="container-fluid">
+                <img src="/images/Yokok.jpg" alt="Yokok Gym" class="navbar-logo" />
+                <h1 class="navbar-brand">YOKOKS</h1>
+
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1">
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="MainHomepage" asp-action="Index">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Privacy">Services</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Privacy">Pricing</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Privacy">Trainer</a>
+                        </li>
+                    </ul>
+
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                            <button type="submit" class="btn-log">LOG OUT</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <a class="btn-log" asp-area="Identity" asp-controller="Account" asp-action="Login">LOG IN</a>
+                    }
+                </div>
+            </div>
+        </nav>
+    </header>
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            &copy; 2026 - Gymlytics - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+        </div>
+    </footer>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
