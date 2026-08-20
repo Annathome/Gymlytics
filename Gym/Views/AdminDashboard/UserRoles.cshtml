@@ -381,11 +381,11 @@
                         <strong>Suspend @targetUser.DisplayName?</strong> They will no longer be able to log in.
                     </div>
                     <div class="alert-warning-actions">
-                        <form asp-controller="AdminDashboard" asp-action="SuspendUser" asp-route-id="@targetUser.Id" method="post" class="d-inline">
+                        <form asp-controller="Admin" asp-action="SuspendUser" asp-route-id="@targetUser.Id" method="post" class="d-inline">
                             @Html.AntiForgeryToken()
                             <button type="submit" class="btn-confirm-danger">Yes, Suspend</button>
                         </form>
-                        <a asp-action="UserRole" class="btn-confirm-cancel">Cancel</a>
+                        <a asp-action="UserRoles" class="btn-confirm-cancel">Cancel</a>
                     </div>
                 </div>
             }
@@ -402,11 +402,11 @@
                         <strong>Delete @targetUser.DisplayName permanently?</strong> This action cannot be undone.
                     </div>
                     <div class="alert-warning-actions">
-                        <form asp-controller="AdminDashboard" asp-action="DeleteUser" asp-route-id="@targetUser.Id" method="post" class="d-inline">
+                        <form asp-controller="Admin" asp-action="DeleteUser" asp-route-id="@targetUser.Id" method="post" class="d-inline">
                             @Html.AntiForgeryToken()
                             <button type="submit" class="btn-confirm-danger">Yes, Delete</button>
                         </form>
-                        <a asp-action="UserRole" class="btn-confirm-cancel">Cancel</a>
+                        <a asp-action="UserRoles" class="btn-confirm-cancel">Cancel</a>
                     </div>
                 </div>
             }
@@ -454,13 +454,13 @@
                                 <td class="actions-cell">
                                     <button type="button" class="menu-dots-btn" onclick="toggleMenu('@user.Id')">&#8942;</button>
                                     <div class="action-menu" id="menu-@user.Id">
-                                        <a class="action-menu-item" asp-controller="AdminDashboard" asp-action="UserActivity" asp-route-id="@user.Id">
+                                        <a class="action-menu-item" asp-controller="Admin" asp-action="UserActivity" asp-route-id="@user.Id">
                                             View activity
                                         </a>
 
                                         @if (user.Status == "Active")
                                         {
-                                            <a class="action-menu-item" asp-action="UserRole" asp-route-confirmSuspendId="@user.Id">
+                                            <a class="action-menu-item" asp-action="UserRoles" asp-route-confirmSuspendId="@user.Id">
                                                 Suspend account
                                             </a>
                                         }
@@ -472,7 +472,7 @@
                                             </form>
                                         }
 
-                                        <a class="action-menu-item danger" asp-action="UserRole" asp-route-confirmDeleteId="@user.Id">
+                                        <a class="action-menu-item danger" asp-action="UserRoles" asp-route-confirmDeleteId="@user.Id">
                                             Delete account
                                         </a>
                                     </div>
@@ -489,11 +489,11 @@
             <div class="pager">
                 <span>Page @Model.Page of @Model.TotalPages &middot; @Model.TotalCount users</span>
                 <div style="display:flex;gap:8px;">
-                    <a asp-action="UserRole" asp-route-page="@(Model.Page - 1)"
+                    <a asp-action="UserRoles" asp-route-page="@(Model.Page - 1)"
                        class="btn-invite @(Model.HasPrevious ? "" : "pager-disabled")">
                         Previous
                     </a>
-                    <a asp-action="UserRole" asp-route-page="@(Model.Page + 1)"
+                    <a asp-action="UserRoles" asp-route-page="@(Model.Page + 1)"
                        class="btn-invite @(Model.HasNext ? "" : "pager-disabled")">
                         Next
                     </a>

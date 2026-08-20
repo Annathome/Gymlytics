@@ -1,0 +1,402 @@
+﻿@model Gym.Models.TrainerDashboardViewModel
+
+@{
+    ViewData["Title"] = "Trainer Schedule";
+    // Explicit root-relative path ensures MVC finds the layout without routing errors
+    Layout = "~/Views/Shared/_TrainerLayout.cshtml";
+
+    // Safe fallbacks in case model fields are null
+    var todaysSessions = Model?.TodaysSessions ?? new List<Gym.Models.SessionViewModel>();
+    var weeklySchedule = Model?.WeeklySchedule ?? new Dictionary<string, int>();
+
+    var today = DateTime.Today;
+    int currentDayOfWeek = (int)today.DayOfWeek;
+    int daysFromMonday = (currentDayOfWeek == 0 ? 7 : currentDayOfWeek) - 1;
+    var mondayDate = today.AddDays(-daysFromMonday);
+}
+
+<style>
+    :root {
+        --bg-app: #fcfcfc;
+        --bg-card: #f8fafc;
+        --border-color: #e2e8f0;
+        --text-primary: #0f172a;
+        --text-secondary: #64748b;
+        --accent-blue-bg: #cbe3f7;
+        --accent-blue-light: #eff6ff;
+        --accent-blue-text: #1d4ed8;
+        --badge-green-bg: #dcfce7;
+        --badge-green-text: #15803d;
+        --badge-red-bg: #fee2e2;
+        --badge-red-text: #b91c1c;
+    }
+
+    .main-wrapper {
+        flex: 1;
+        padding: 32px 48px;
+        max-width: 100vw;
+        margin: 0 auto;
+    }
+
+    .dashboard-header {
+        margin-bottom: 28px;
+    }
+
+        .dashboard-header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin: 0 0 4px 0;
+            letter-spacing: -0.5px;
+            color: var(--text-primary);
+        }
+
+        .dashboard-header p {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin: 0;
+        }
+
+    /* Alerts */
+    .alert {
+        padding: 12px 16px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    .alert-success {
+        background-color: var(--badge-green-bg);
+        color: var(--badge-green-text);
+        border: 1px solid #bbf7d0;
+    }
+
+    .alert-danger {
+        background-color: var(--badge-red-bg);
+        color: var(--badge-red-text);
+        border: 1px solid #fecaca;
+    }
+
+    /* Stats Grid */
+    .statistics-container {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+
+    .stat-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        height: 100px;
+    }
+
+    .stat-label {
+        font-size: 13px;
+        color: var(--text-secondary);
+        font-weight: 500;
+    }
+
+    .stat-value {
+        font-size: 26px;
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+
+    /* Cards & Lists */
+    .card-section {
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        padding: 20px;
+        margin-bottom: 24px;
+        background: #ffffff;
+    }
+
+    .section-title {
+        font-size: 15px;
+        font-weight: 700;
+        margin: 0 0 16px 0;
+        color: var(--text-primary);
+    }
+
+    .sessions-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .session-item {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 12px 16px;
+        background: var(--bg-card);
+        border-radius: 12px;
+    }
+
+    .time-badge {
+        width: 48px;
+        height: 48px;
+        background: var(--accent-blue-bg);
+        color: var(--accent-blue-text);
+        border-radius: 10px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        line-height: 1.1;
+        flex-shrink: 0;
+    }
+
+    .time-num {
+        font-size: 14px;
+        font-weight: 700;
+    }
+
+    .time-period {
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
+    .session-info {
+        flex: 1;
+    }
+
+    .session-name {
+        font-size: 14px;
+        font-weight: 600;
+        margin: 0 0 2px 0;
+        color: var(--text-primary);
+    }
+
+    .session-meta {
+        font-size: 12px;
+        color: var(--text-secondary);
+        margin: 0;
+    }
+
+    .status-badge {
+        font-size: 12px;
+        font-weight: 600;
+        padding: 5px 14px;
+        border-radius: 20px;
+    }
+
+    .badge-confirmed, .badge-scheduled {
+        background-color: var(--badge-green-bg);
+        color: var(--badge-green-text);
+    }
+
+    .badge-full, .badge-cancelled {
+        background-color: var(--badge-red-bg);
+        color: var(--badge-red-text);
+    }
+
+    .session-actions {
+        display: flex;
+        gap: 6px;
+        margin-left: 8px;
+    }
+
+    .btn-action {
+        border: none;
+        border-radius: 6px;
+        padding: 6px 12px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: opacity 0.2s ease;
+    }
+
+        .btn-action:hover {
+            opacity: 0.85;
+        }
+
+    .btn-confirm {
+        background-color: var(--badge-green-bg);
+        color: var(--badge-green-text);
+    }
+
+    .btn-cancel {
+        background-color: var(--badge-red-bg);
+        color: var(--badge-red-text);
+    }
+
+    /* Weekly Grid */
+    .weekly-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 8px;
+    }
+
+    .day-card {
+        background: var(--accent-blue-light);
+        border-radius: 12px;
+        padding: 12px 4px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+        transition: border-color 0.2s ease;
+    }
+
+        .day-card:hover {
+            border: 1px solid var(--accent-blue-text);
+        }
+
+        .day-card.is-today {
+            background: #ffffff;
+            border: 1.5px solid #000000;
+        }
+
+    .day-name {
+        font-size: 12px;
+        color: var(--text-secondary);
+        font-weight: 500;
+    }
+
+    .day-count {
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--accent-blue-text);
+    }
+
+    .day-card.is-today .day-count {
+        color: var(--text-primary);
+    }
+
+    .empty-message {
+        color: var(--text-secondary);
+        font-size: 14px;
+        margin: 0;
+        text-align: center;
+        padding: 12px;
+    }
+</style>
+
+<main class="main-wrapper">
+
+    <!-- Flash Messages -->
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+    }
+
+    <header class="dashboard-header">
+        <h1>My schedule</h1>
+        <p>@DateTime.Now.ToString("dddd, MMM d") · @(Model?.TodaysSessionCount ?? 0) sessions today</p>
+    </header>
+
+    <!-- Stat Cards -->
+    <div class="statistics-container">
+        <div class="stat-card">
+            <div class="stat-label">Sessions today</div>
+            <div class="stat-value">@(Model?.TodaysSessionCount ?? 0)</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Sessions this week</div>
+            <div class="stat-value">@(Model?.UpcomingSessionCount ?? 0)</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Active clients</div>
+            <div class="stat-value">@(Model?.TotalClients ?? 0)</div>
+        </div>
+    </div>
+
+    <!-- Today's Sessions -->
+    <section class="card-section">
+        <h2 class="section-title">Today's sessions</h2>
+        <div class="sessions-list">
+            @if (todaysSessions.Any())
+            {
+                foreach (var session in todaysSessions)
+                {
+                    var statusClass = session.Status switch
+                    {
+                        Gym.Models.SessionStatus.Confirmed => "badge-confirmed",
+                        Gym.Models.SessionStatus.Full => "badge-full",
+                        Gym.Models.SessionStatus.Cancelled => "badge-cancelled",
+                        _ => "badge-scheduled"
+                    };
+
+                    <div class="session-item">
+                        <div class="time-badge">
+                            <span class="time-num">@session.StartTime.ToString("h")</span>
+                            <span class="time-period">@session.StartTime.ToString("tt")</span>
+                        </div>
+
+                        <div class="session-info">
+                            <div class="session-name">@session.SessionType</div>
+                            <div class="session-meta">
+                                @session.StartTime.ToString("h:mm") – @session.EndTime.ToString("h:mm tt") · @session.Room
+                            </div>
+                        </div>
+
+                        <span class="status-badge @statusClass">@session.Status</span>
+
+                        <div class="session-actions">
+                            @if (session.Status != Gym.Models.SessionStatus.Confirmed)
+                            {
+                                <form asp-controller="Trainer" asp-action="ConfirmSession" method="post" style="display:inline;">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="sessionId" value="@session.SessionId" />
+                                    <button type="submit" class="btn-action btn-confirm" title="Confirm Session">Confirm</button>
+                                </form>
+                            }
+
+                            @if (session.Status != Gym.Models.SessionStatus.Cancelled)
+                            {
+                                <form asp-controller="Trainer" asp-action="CancelSession" method="post" style="display:inline;">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="sessionId" value="@session.SessionId" />
+                                    <button type="submit" class="btn-action btn-cancel" title="Cancel Session">Cancel</button>
+                                </form>
+                            }
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <p class="empty-message">No sessions scheduled for today.</p>
+            }
+        </div>
+    </section>
+
+    <!-- Weekly Grid -->
+    <section class="card-section">
+        <h2 class="section-title">This week</h2>
+        <div class="weekly-grid">
+            @{
+                var daysOfWeek = new[] { "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" };
+                var todayName = DateTime.Now.ToString("ddd");
+            }
+
+            @for (int i = 0; i < daysOfWeek.Length; i++)
+            {
+                var day = daysOfWeek[i];
+                var targetDate = mondayDate.AddDays(i);
+                var count = weeklySchedule.ContainsKey(day) ? weeklySchedule[day] : 0;
+                var isToday = string.Equals(day, todayName, StringComparison.OrdinalIgnoreCase);
+
+                <a href="@Url.Action("Schedule", "Trainer", new { date = targetDate.ToString("yyyy-MM-dd") })"
+                   class="day-card @(isToday ? "is-today" : "")">
+                    <span class="day-name">@day</span>
+                    <span class="day-count">@count</span>
+                </a>
+            }
+        </div>
+    </section>
+
+</main>

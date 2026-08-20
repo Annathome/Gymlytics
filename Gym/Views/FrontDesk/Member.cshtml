@@ -1,0 +1,706 @@
+﻿@model Gym.Models.MembersPageViewModel
+
+@{
+    ViewData["Title"] = "Members";
+    Layout = "~/Views/Shared/_FrontDeskLayout.cshtml";
+}
+
+<style>
+    .page-container {
+        width: 80vw;
+        margin: 24px 0;
+        padding: 0 32px;
+        box-sizing: border-box;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        color: #1a1a1a;
+    }
+
+    .header-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 24px;
+    }
+
+    .header-title h1 {
+        font-size: 28px;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .header-subtitle {
+        font-size: 14px;
+        color: #666;
+        margin-top: 4px;
+    }
+
+    .btn-add {
+        background-color: #ffffff;
+        border: 1px solid #d0d5dd;
+        color: #344054;
+        padding: 8px 16px;
+        font-weight: 600;
+        font-size: 14px;
+        border-radius: 8px;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
+    }
+
+        .btn-add:hover {
+            background-color: #f9fafb;
+        }
+
+    /* SUCCESS BANNER */
+    .success-banner {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background-color: #dcfce7;
+        border: 1px solid #86efac;
+        color: #166534;
+        padding: 12px 16px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 500;
+        margin-bottom: 16px;
+    }
+
+        .success-banner button {
+            background: none;
+            border: none;
+            color: #166534;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            line-height: 1;
+            padding: 0 0 0 12px;
+        }
+
+    /* FILTER BAR */
+    .filter-bar {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 16px;
+        align-items: center;
+    }
+
+    .search-box {
+        position: relative;
+        flex: 1;
+        max-width: 700px;
+    }
+
+        .search-box input {
+            width: 100%;
+            padding: 8px 12px 8px 36px;
+            border: 1px solid #e4e4e7;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            box-sizing: border-box;
+        }
+
+            .search-box input:focus {
+                border-color: #a1a1aa;
+            }
+
+        .search-box svg {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #71717a;
+            pointer-events: none;
+        }
+
+    .dropdown-filters {
+        display: flex;
+        gap: 12px;
+    }
+
+    .filter-select {
+        padding: 8px 12px;
+        border: 1px solid #e4e4e7;
+        border-radius: 8px;
+        font-size: 14px;
+        background-color: #fff;
+        color: #18181b;
+        cursor: pointer;
+        min-width: 140px;
+    }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: #a1a1aa;
+        }
+
+    .search-btn {
+        padding: 8px 10px;
+        border: 1px solid #18181b;
+        border-radius: 8px;
+        background-color: #18181b;
+        color: white;
+        font-size: 14px;
+        font-weight: 400;
+        cursor: pointer;
+        max-width: 100px;
+        text-align: center;
+        position: relative;
+        z-index: 1;
+    }
+
+        .search-btn:hover {
+            background-color: #27272a;
+        }
+
+    /* TABLE */
+    .table-card {
+        border: 1px solid #e4e4e7;
+        border-radius: 12px;
+        background-color: #fff;
+        overflow: visible;
+    }
+
+    .members-table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+        font-size: 14px;
+    }
+
+        .members-table th {
+            color: #71717a;
+            font-weight: 500;
+            padding: 12px 16px;
+            border-bottom: 1px solid #f4f4f5;
+        }
+
+        .members-table td {
+            padding: 14px 16px;
+            border-bottom: 1px solid #f4f4f5;
+            vertical-align: middle;
+        }
+
+        .members-table tr:last-child td {
+            border-bottom: none;
+        }
+
+    .member-cell {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-weight: 600;
+    }
+
+    .avatar-circle {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: 600;
+        flex-shrink: 0;
+    }
+
+    /* STATUS */
+    .status-badge {
+        display: inline-block;
+        padding: 3px 10px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .badge-active {
+        background-color: #dcfce7;
+        color: #15803d;
+    }
+
+    .badge-overdue {
+        background-color: #fef3c7;
+        color: #b45309;
+    }
+
+    .badge-expiringsoon {
+        background-color: #ffedd5;
+        color: #c2410c;
+    }
+
+    .badge-expired {
+        background-color: #fee2e2;
+        color: #b91c1c;
+    }
+
+    .badge-inactive {
+        background-color: #f4f4f5;
+        color: #52525b;
+    }
+
+    /* ACTION MENU */
+    .action-cell {
+        position: relative;
+        text-align: right;
+    }
+
+    .action-btn {
+        background: none;
+        border: none;
+        color: #a1a1aa;
+        cursor: pointer;
+        font-size: 16px;
+        padding: 4px 8px;
+        border-radius: 6px;
+    }
+
+        .action-btn:hover {
+            color: #52525b;
+            background-color: #f4f4f5;
+        }
+
+    .action-menu {
+        display: none;
+        position: absolute;
+        right: 16px;
+        top: calc(100% - 4px);
+        background: #fff;
+        border: 1px solid #e4e4e7;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(16, 24, 40, 0.1);
+        min-width: 140px;
+        z-index: 20;
+        overflow: hidden;
+    }
+
+        .action-menu.open {
+            display: block;
+        }
+
+        .action-menu form {
+            margin: 0;
+        }
+
+    .menu-item {
+        width: 100%;
+        text-align: left;
+        background: none;
+        border: none;
+        padding: 10px 14px;
+        font-size: 13px;
+        color: #27272a;
+        cursor: pointer;
+    }
+
+        .menu-item:hover {
+            background-color: #f4f4f5;
+        }
+
+    .menu-item-danger {
+        color: #b91c1c;
+    }
+
+        .menu-item-danger:hover {
+            background-color: #fee2e2;
+        }
+
+    /* PAGINATION */
+    .pagination-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 12px;
+        font-size: 13px;
+        color: #71717a;
+    }
+
+    .pagination-arrows {
+        display: flex;
+        gap: 8px;
+    }
+
+        .pagination-arrows a {
+            border: 1px solid #e4e4e7;
+            padding: 4px 12px;
+            border-radius: 6px;
+            background: #fff;
+            color: #71717a;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+            .pagination-arrows a:hover:not(.disabled) {
+                background-color: #f4f4f5;
+                color: #18181b;
+            }
+
+            .pagination-arrows a.disabled {
+                opacity: 0.4;
+                pointer-events: none;
+                background-color: #fafafa;
+            }
+
+    /* CUSTOM MODAL STYLES */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
+
+    .modal-card {
+        background: #fff;
+        padding: 24px;
+        border-radius: 12px;
+        width: 400px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        font-family: inherit;
+    }
+
+        .modal-card h3 {
+            margin-top: 0;
+            font-size: 18px;
+            font-weight: 700;
+            color: #1a1a1a;
+        }
+
+        .modal-card p {
+            font-size: 14px;
+            color: #52525b;
+            margin-bottom: 24px;
+        }
+
+    .modal-buttons {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+    }
+
+    .btn-cancel {
+        background-color: #f4f4f5;
+        border: 1px solid #e4e4e7;
+        color: #3f3f46;
+        padding: 8px 16px;
+        font-size: 14px;
+        font-weight: 600;
+        border-radius: 8px;
+        cursor: pointer;
+    }
+
+        .btn-cancel:hover {
+            background-color: #e4e4e7;
+        }
+
+    .btn-confirm-delete {
+        background-color: #b91c1c;
+        border: 1px solid #b91c1c;
+        color: #fff;
+        padding: 8px 16px;
+        font-size: 14px;
+        font-weight: 600;
+        border-radius: 8px;
+        cursor: pointer;
+    }
+
+        .btn-confirm-delete:hover {
+            background-color: #991b1b;
+        }
+</style>
+
+<div class="page-container">
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="success-banner" id="successBanner">
+            <span>@TempData["SuccessMessage"]</span>
+            <button type="button" onclick="document.getElementById('successBanner').remove()">&times;</button>
+        </div>
+    }
+
+    <!-- HEADER -->
+    <div class="header-row">
+        <div class="header-title">
+            <h1>Members</h1>
+            <div class="header-subtitle">
+                @Model.ListViewModel.ActiveCount active · @Model.ListViewModel.PendingPaymentCount pending payment
+            </div>
+        </div>
+
+        <a asp-action="AddMember" asp-controller="FrontDesk" class="btn-add">
+            <span>+</span> Add member
+        </a>
+    </div>
+
+    <!-- FILTERS -->
+    <form method="get" asp-action="Member" asp-controller="FrontDesk" id="memberFilterForm">
+        <input type="hidden" name="page" value="1" />
+
+        <div class="filter-bar">
+            <!-- SEARCH BAR -->
+            <div class="search-box">
+                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+                <input type="text"
+                       id="searchTermInput"
+                       name="searchTerm"
+                       value="@Model.ListViewModel.SearchTerm"
+                       placeholder="Search by name or ID..." />
+            </div>
+
+            <button type="submit" class="search-btn">Search</button>
+
+            <!-- DROPDOWNS -->
+            <div class="dropdown-filters">
+                <!-- STATUS -->
+                <select name="selectedStatus" class="filter-select">
+                    <option value="">All statuses</option>
+                    @foreach (var status in Enum.GetValues<MemberStatus>())
+                    {
+                        if (Model.ListViewModel.SelectedStatus == status)
+                        {
+                            <option value="@((int)status)" selected>@status</option>
+                        }
+                        else
+                        {
+                            <option value="@((int)status)">@status</option>
+                        }
+                    }
+                </select>
+
+                <!-- PLAN -->
+                <select name="selectedPlan" class="filter-select">
+                    <option value="">All plans</option>
+                    @foreach (var plan in Enum.GetValues<MembershipPlanType>())
+                    {
+                        if (Model.ListViewModel.SelectedPlan == plan)
+                        {
+                            <option value="@((int)plan)" selected>@plan</option>
+                        }
+                        else
+                        {
+                            <option value="@((int)plan)">@plan</option>
+                        }
+                    }
+                </select>
+            </div>
+        </div>
+    </form>
+
+    <!-- DATA TABLE -->
+    <div class="table-card">
+        <table class="members-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Member</th>
+                    <th>Plan</th>
+                    <th>Schedule</th>
+                    <th>Joined</th>
+                    <th>Expires</th>
+                    <th>Status</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.ListViewModel.Members != null && Model.ListViewModel.Members.Any())
+                {
+                    var avatarColors = new[]
+                    {
+                                new { Bg = "#dbeafe", Text = "#1d4ed8" },
+                                new { Bg = "#fef3c7", Text = "#b45309" },
+                                new { Bg = "#e0e7ff", Text = "#4338ca" },
+                                new { Bg = "#fee2e2", Text = "#b91c1c" }
+                                };
+
+                    int index = 0;
+
+                    foreach (var member in Model.ListViewModel.Members)
+                    {
+                        var color = avatarColors[index % avatarColors.Length];
+                        index++;
+
+                        string statusClass = member.Status switch
+                        {
+                            Gym.Models.MemberStatus.Active => "badge-active",
+                            Gym.Models.MemberStatus.Overdue => "badge-overdue",
+                            Gym.Models.MemberStatus.ExpiringSoon => "badge-expiringsoon",
+                            Gym.Models.MemberStatus.Expired => "badge-expired",
+                            Gym.Models.MemberStatus.Inactive => "badge-inactive",
+                            _ => "badge-active"
+                        };
+
+                        string statusText = member.Status switch
+                        {
+                            Gym.Models.MemberStatus.ExpiringSoon => "Expiring soon",
+                            _ => member.Status.ToString()
+                        };
+
+                        <tr>
+                            <!-- ID -->
+                            <td>@member.Id</td>
+
+                            <!-- MEMBER -->
+                            <td>
+                                <div class="member-cell">
+                                    <div class="avatar-circle" style="background-color: @color.Bg; color: @color.Text;">
+                                        @member.Initials
+                                    </div>
+                                    <span>@member.FullName</span>
+                                </div>
+                            </td>
+
+                            <!-- PLAN -->
+                            <td>@member.Plan</td>
+
+                            <!-- SCHEDULE -->
+                            <td>@(member.Schedule ?? "—")</td>
+
+                            <!-- JOINED -->
+                            <td>@member.JoinedDate.ToString("MMM d, yyyy")</td>
+
+                            <!-- EXPIRATION -->
+                            <td>
+                                @if (member.ExpirationDate != DateTime.MinValue)
+                                {
+                                    @member.ExpirationDate.ToString("MMM d, yyyy")
+                                }
+                                else
+                                {
+                                    @:N/A
+                                }
+                            </td>
+
+                            <!-- STATUS -->
+                            <td>
+                                <span class="status-badge @statusClass">
+                                    @statusText
+                                </span>
+                            </td>
+
+                            <!-- ACTION -->
+                            <td class="action-cell">
+                                <button type="button" class="action-btn" onclick="toggleActionMenu(event, this)">&#8226;&#8226;&#8226;</button>
+
+                                <div class="action-menu">
+                                    <!-- Reactivate Option -->
+                                    <form asp-action="ReactivateMember" asp-controller="FrontDesk" method="post">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@member.Id" />
+                                        <button type="submit" class="menu-item">Reactivate</button>
+                                    </form>
+
+                                    <!-- Delete Option (Triggers Custom Modal) -->
+                                    <button type="button" class="menu-item menu-item-danger" onclick="openDeleteModal(@member.Id, '@member.FullName')">Delete</button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="8" style="text-align: center; color: #71717a; padding: 24px;">
+                            No members found.
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- PAGINATION -->
+    <div class="pagination-bar">
+        <span>
+            Showing @Model.ListViewModel.Members.Count of @Model.ListViewModel.TotalCount
+            (page @Model.ListViewModel.Page of @Model.ListViewModel.TotalPages)
+        </span>
+
+        <div class="pagination-arrows">
+            <a asp-action="Member"
+               asp-route-searchTerm="@Model.ListViewModel.SearchTerm"
+               asp-route-selectedStatus="@Model.ListViewModel.SelectedStatus"
+               asp-route-selectedPlan="@Model.ListViewModel.SelectedPlan"
+               asp-route-page="@(Model.ListViewModel.Page - 1)"
+               class="@(!Model.ListViewModel.HasPrevious ? "disabled" : "")">&lt;</a>
+
+            <a asp-action="Member"
+               asp-route-searchTerm="@Model.ListViewModel.SearchTerm"
+               asp-route-selectedStatus="@Model.ListViewModel.SelectedStatus"
+               asp-route-selectedPlan="@Model.ListViewModel.SelectedPlan"
+               asp-route-page="@(Model.ListViewModel.Page + 1)"
+               class="@(!Model.ListViewModel.HasNext ? "disabled" : "")">&gt;</a>
+        </div>
+    </div>
+</div>
+
+<!-- CUSTOM DELETE CONFIRMATION MODAL -->
+<div id="deleteModal" class="modal-overlay" style="display: none;">
+    <div class="modal-card">
+        <h3>Confirm Deletion</h3>
+        <p id="deleteModalMessage">Are you sure you want to remove this member?</p>
+        <div class="modal-buttons">
+            <button type="button" class="btn-cancel" onclick="closeDeleteModal()">Cancel</button>
+            <form id="deleteForm" asp-action="DeleteMember" asp-controller="FrontDesk" method="post" style="display:inline;">
+                @Html.AntiForgeryToken()
+                <input type="hidden" id="deleteMemberId" name="id" />
+                <button type="submit" class="btn-confirm-delete">Delete</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function closeAllActionMenus(except) {
+        document.querySelectorAll('.action-menu.open').forEach(function (menu) {
+            if (menu !== except) menu.classList.remove('open');
+        });
+    }
+
+    function toggleActionMenu(event, button) {
+        event.stopPropagation();
+        var menu = button.nextElementSibling;
+        var isOpen = menu.classList.contains('open');
+        closeAllActionMenus(isOpen ? null : menu);
+        menu.classList.toggle('open', !isOpen);
+    }
+
+    document.addEventListener('click', function () {
+        closeAllActionMenus(null);
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+        var searchInput = document.getElementById('searchTermInput');
+        var searchForm = document.getElementById('memberFilterForm');
+
+        if (searchInput && searchForm) {
+            searchInput.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    searchForm.submit();
+                }
+            });
+        }
+    });
+
+    function openDeleteModal(memberId, memberName) {
+        document.getElementById('deleteMemberId').value = memberId;
+        document.getElementById('deleteModalMessage').innerText = `Remove ${memberName} from the active roster?`;
+        document.getElementById('deleteModal').style.display = 'flex';
+    }
+
+    function closeDeleteModal() {
+        document.getElementById('deleteModal').style.display = 'none';
+    }
+</script>

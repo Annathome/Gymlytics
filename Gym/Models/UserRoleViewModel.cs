@@ -8,16 +8,11 @@ namespace Gym.Models
         public string FullName { get; set; } = string.Empty;
         public string Username { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
-
-        /// "MainAdmin" | "Admin" | "Trainer" | "Staff"
         public string Role { get; set; } = string.Empty;
-
-        /// "Pending" | "Active" | "Suspended"
         public string Status { get; set; } = "Active";
-
         public DateTime? LastLoginAt { get; set; }
 
-        // ---- Computed display helpers used by the UserRoles view ----
+        // ---- Computed Display Helpers ----
 
         public string DisplayName => FullName;
 
@@ -47,8 +42,7 @@ namespace Gym.Models
 
         public string RoleBadgeClass => Role switch
         {
-            "MainAdmin" => "badge-super-admin",
-            "Admin" => "badge-super-admin",
+            "MainAdmin" or "Admin" => "badge-super-admin",
             "Staff" => "badge-staff",
             "Trainer" => "badge-trainer",
             _ => "badge-default"
@@ -61,22 +55,17 @@ namespace Gym.Models
             _ => "badge-active"
         };
 
-        public string Access
+        public string Access => Status switch
         {
-            get
+            "Suspended" => "No access (suspended)",
+            "Pending" => "Awaiting confirmation",
+            _ => Role switch
             {
-                if (Status == "Suspended") return "No access (suspended)";
-                if (Status == "Pending") return "Awaiting confirmation";
-
-                return Role switch
-                {
-                    "MainAdmin" or "Admin" => "Full access",
-                    "Trainer" => "Trainer tools",
-                    _ => "Standard access"
-                
-                };
+                "MainAdmin" or "Admin" => "Full access",
+                "Trainer" => "Trainer tools",
+                _ => "Standard access"
             }
-        }
+        };
 
         public string LastLoginDisplay
         {

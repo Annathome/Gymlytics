@@ -1,8 +1,11 @@
 using System.Text;
+using Gym.Data;
+using Gym.Models;
 using Gym.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -21,14 +24,40 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
     options.KnownProxies.Clear();
 });
 
-// 1. Register Custom Application Services
+// ==========================================
+// 1. Register Database Context & Data Repositories
+// ==========================================
+builder.Services.AddDbContext<GymDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Open generic repository registration
+builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+
+// Explicitly register specific entity repositories required by AdminService
+builder.Services.AddScoped<IRepository<Client>, Repository<Client>>();
+builder.Services.AddScoped<IRepository<Payment>, Repository<Payment>>();
+builder.Services.AddScoped<IRepository<Session>, Repository<Session>>();
+builder.Services.AddScoped<IRepository<Equipment>, Repository<Equipment>>();
+builder.Services.AddScoped<IRepository<SessionAttendee>, Repository<SessionAttendee>>();
+
+// ==========================================
+// 2. Register Application & Domain Services
+// ==========================================
+// Core Utilities
 builder.Services.AddScoped<GmailValidationService>();
 builder.Services.AddScoped<HashingService>();
 builder.Services.AddScoped<SetupService>();
 builder.Services.AddSingleton<PendingRegistrationService>();
 builder.Services.AddScoped<JwtTokenService>();
 
-// 2. Configure Dual Authentication (Cookies for Web + JWT for API)
+// Gymlytics Business Services
+builder.Services.AddScoped<ITrainerService, TrainerService>();
+builder.Services.AddScoped<IAdminService, AdminService>();
+builder.Services.AddScoped<IMemberService, MemberService>();
+
+// ==========================================
+// 3. Configure Dual Authentication (Cookies for Web + JWT for API)
+// ==========================================
 var jwtSettings = builder.Configuration.GetSection("Jwt");
 var key = Encoding.UTF8.GetBytes(jwtSettings["Key"]!);
 
@@ -56,7 +85,9 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-// 3. Session middleware
+// ==========================================
+// 4. Session & Authorization Middleware Configuration
+// ==========================================
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {

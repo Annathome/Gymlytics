@@ -1,0 +1,512 @@
+﻿@model Gym.Models.MembersPageViewModel
+
+@{
+    ViewData["Title"] = "Add Member";
+    Layout =null;
+
+    var addMember = Model.AddMemberViewModel;
+}
+
+<style>
+    .add-member-container {
+        width: 85vw;
+        margin: 24px 0;
+        padding: 0 32px;
+        box-sizing: border-box;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        color: #1a1a1a;
+        font-size: 14px; /* Increased base font size */
+    }
+
+    .add-member-header {
+        margin-bottom: 20px;
+    }
+
+        .add-member-header h1 {
+            font-size: 28px; /* Larger main title */
+            font-weight: 700;
+            margin: 0;
+        }
+
+    .add-member-subtitle {
+        font-size: 14px; /* Larger subtitle */
+        color: #666;
+        margin-top: 4px;
+    }
+
+    .member-form {
+        width: 100%;
+    }
+
+    .form-section {
+        border: 1px solid #dedede;
+        border-radius: 10px;
+        padding: 16px;
+        margin-bottom: 16px;
+        background: #fff;
+    }
+
+    .section-title {
+        font-size: 12px; /* Larger section titles */
+        font-weight: 700;
+        color: #555;
+        letter-spacing: 0.5px;
+        margin-bottom: 12px;
+        text-transform: uppercase;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-bottom: 12px;
+    }
+
+        .form-row:last-child {
+            margin-bottom: 0;
+        }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+        .form-group.full {
+            grid-column: 1 / -1;
+        }
+
+    .form-label {
+        font-size: 12px; /* Larger labels */
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 6px;
+    }
+
+    .form-control,
+    .form-select {
+        width: 100%;
+        height: 38px; /* Taller input for better click target */
+        padding: 6px 12px;
+        border: 1px solid #d9d9d9;
+        border-radius: 6px;
+        background-color: #fff;
+        color: #222;
+        font-size: 13px; /* Larger text inside inputs */
+        box-sizing: border-box;
+        outline: none;
+    }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: #666;
+        }
+
+    textarea.form-control {
+        height: 70px; /* Taller text area */
+        resize: vertical;
+    }
+
+    .training-days {
+        display: flex;
+        gap: 8px;
+        width: 100%;
+    }
+
+    .day-button {
+        flex: 1;
+        height: 36px; /* Taller day buttons */
+        border: 1px solid #d5d5d5;
+        border-radius: 6px;
+        background: #fff;
+        color: #333;
+        font-size: 12px; /* Larger text for days */
+        font-weight: 500;
+        cursor: pointer;
+    }
+
+        .day-button.selected {
+            background-color: #dbeafe;
+            border-color: #93c5fd;
+            color: #2563eb;
+            font-weight: 600;
+        }
+
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 12px;
+    }
+
+    .btn-cancel {
+        height: 38px;
+        padding: 0 16px;
+        border: 1px solid #d9d9d9;
+        border-radius: 6px;
+        background: #fff;
+        color: #333;
+        font-size: 13px; /* Larger action text */
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 500;
+    }
+
+    .btn-register {
+        height: 38px;
+        padding: 0 16px;
+        border: 1px solid #bdbdbd;
+        border-radius: 6px;
+        background: #111; /* Slightly bolder register button style */
+        color: #fff;
+        font-size: 13px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-weight: 500;
+    }
+
+        .btn-register:hover {
+            background-color: #333;
+        }
+
+    .btn-cancel:hover {
+        background-color: #f8f8f8;
+    }
+
+    .validation-message {
+        color: #dc2626;
+        font-size: 11px; /* Larger validation text */
+        margin-top: 4px;
+    }
+
+    .validation-summary {
+        color: #dc2626;
+        font-size: 12px;
+        margin-bottom: 12px;
+    }
+
+    @@media (max-width: 700px) {
+        .add-member-container {
+            width: 100%;
+            padding: 0 16px;
+        }
+
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+
+        .form-group.full {
+            grid-column: auto;
+        }
+
+        .training-days {
+            flex-wrap: wrap;
+        }
+
+        .day-button {
+            flex: 0 0 calc(25% - 6px);
+        }
+    }
+</style>
+
+<div class="add-member-container">
+
+    <!-- HEADER -->
+    <div class="add-member-header">
+        <h1>Add member</h1>
+        <div class="add-member-subtitle">
+            Register a new member and assign their trainer and schedule
+        </div>
+    </div>
+
+    <form asp-action="AddMember"
+          asp-controller="FrontDesk"
+          method="post"
+          class="member-form">
+
+        @Html.AntiForgeryToken()
+
+        <div asp-validation-summary="ModelOnly"
+             class="validation-summary">
+        </div>
+
+        <!-- ==========================================
+             PERSONAL DETAILS
+        =========================================== -->
+        <div class="form-section">
+            <div class="section-title">
+                Personal details
+            </div>
+
+            <div class="form-row">
+                <!-- FULL NAME -->
+                <div class="form-group">
+                    <label asp-for="AddMemberViewModel.FullName" class="form-label">
+                        Full name
+                    </label>
+                    <input asp-for="AddMemberViewModel.FullName"
+                           class="form-control"
+                           placeholder="Juan Dela Cruz" />
+                    <span asp-validation-for="AddMemberViewModel.FullName" class="validation-message"></span>
+                </div>
+
+                <!-- DATE OF BIRTH -->
+                <div class="form-group">
+                    <label asp-for="AddMemberViewModel.DateOfBirth" class="form-label">
+                        Date of birth
+                    </label>
+                    <input asp-for="AddMemberViewModel.DateOfBirth"
+                           type="date"
+                           class="form-control" />
+                    <span asp-validation-for="AddMemberViewModel.DateOfBirth" class="validation-message"></span>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <!-- CONTACT -->
+                <div class="form-group">
+                    <label asp-for="AddMemberViewModel.ContactNumber" class="form-label">
+                        Contact number
+                    </label>
+                    <input asp-for="AddMemberViewModel.ContactNumber"
+                           class="form-control"
+                           placeholder="09XX XXX XXXX" />
+                    <span asp-validation-for="AddMemberViewModel.ContactNumber" class="validation-message"></span>
+                </div>
+
+                <!-- EMAIL -->
+                <div class="form-group">
+                    <label asp-for="AddMemberViewModel.Email" class="form-label">
+                        Email
+                    </label>
+                    <input asp-for="AddMemberViewModel.Email"
+                           type="email"
+                           class="form-control"
+                           placeholder="juan@email.com" />
+                    <span asp-validation-for="AddMemberViewModel.Email" class="validation-message"></span>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <!-- EMERGENCY CONTACT -->
+                <div class="form-group full">
+                    <label asp-for="AddMemberViewModel.EmergencyContact" class="form-label">
+                        Emergency contact
+                    </label>
+                    <input asp-for="AddMemberViewModel.EmergencyContact"
+                           class="form-control"
+                           placeholder="Name and number" />
+                </div>
+            </div>
+        </div>
+
+        <!-- ==========================================
+             MEMBERSHIP PLAN
+        =========================================== -->
+        <div class="form-section">
+            <div class="section-title">
+                Membership plan
+            </div>
+
+            <div class="form-row">
+                <!-- PLAN -->
+                <div class="form-group">
+                    <label asp-for="AddMemberViewModel.SelectedPlanId" class="form-label">
+                        Plan type
+                    </label>
+                    <select asp-for="AddMemberViewModel.SelectedPlanId"
+                            asp-items="addMember.PlanOptions"
+                            class="form-select">
+                        <option value="">Select plan</option>
+                    </select>
+                    <span asp-validation-for="AddMemberViewModel.SelectedPlanId" class="validation-message"></span>
+                </div>
+
+                <!-- START DATE -->
+                <div class="form-group">
+                    <label asp-for="AddMemberViewModel.StartDate" class="form-label">
+                        Start date
+                    </label>
+                    <input asp-for="AddMemberViewModel.StartDate"
+                           type="date"
+                           class="form-control" />
+                    <span asp-validation-for="AddMemberViewModel.StartDate" class="validation-message"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==========================================
+             TRAINER ASSIGNMENT
+        =========================================== -->
+        <div class="form-section">
+            <div class="section-title">
+                Trainer assignment
+            </div>
+
+            <!-- TRAINER -->
+            <div class="form-row">
+                <div class="form-group full">
+                    <label asp-for="AddMemberViewModel.SelectedTrainerId" class="form-label">
+                        Assign trainer
+                    </label>
+                    <select asp-for="AddMemberViewModel.SelectedTrainerId"
+                            asp-items="addMember.TrainerOptions"
+                            class="form-select">
+                        <option value="">No trainer (self-guided)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- TRAINING DAYS -->
+            <div class="form-row">
+                <div class="form-group full">
+                    <label class="form-label">Training days</label>
+                    <div class="training-days">
+                        <button type="button" class="day-button" data-day="Monday">Mon</button>
+                        <button type="button" class="day-button" data-day="Tuesday">Tue</button>
+                        <button type="button" class="day-button" data-day="Wednesday">Wed</button>
+                        <button type="button" class="day-button" data-day="Thursday">Thu</button>
+                        <button type="button" class="day-button" data-day="Friday">Fri</button>
+                        <button type="button" class="day-button" data-day="Saturday">Sat</button>
+                        <button type="button" class="day-button" data-day="Sunday">Sun</button>
+                    </div>
+                    <div id="selectedDaysContainer"></div>
+                </div>
+            </div>
+
+            <!-- TIME SLOT -->
+            <div class="form-row">
+                <div class="form-group full">
+                    <label asp-for="AddMemberViewModel.SelectedTimeSlot" class="form-label">
+                        Preferred time slot
+                    </label>
+                    <select asp-for="AddMemberViewModel.SelectedTimeSlot"
+                            asp-items="addMember.TimeSlotOptions"
+                            class="form-select">
+                        <option value="">Select time slot</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==========================================
+             FOLLOW-UP
+        =========================================== -->
+        <div class="form-section">
+            <div class="section-title">
+                Follow-up
+            </div>
+
+            <div class="form-row">
+                <!-- CALL DATE -->
+                <div class="form-group">
+                    <label asp-for="AddMemberViewModel.CallDate" class="form-label">
+                        Client call date
+                    </label>
+                    <input asp-for="AddMemberViewModel.CallDate"
+                           type="date"
+                           class="form-control" />
+                </div>
+
+                <!-- PURPOSE -->
+                <div class="form-group">
+                    <label asp-for="AddMemberViewModel.CallPurpose" class="form-label">
+                        Call purpose
+                    </label>
+                    <select asp-for="AddMemberViewModel.CallPurpose"
+                            asp-items="addMember.PurposeOptions"
+                            class="form-select">
+                    </select>
+                </div>
+            </div>
+
+            <!-- NOTES -->
+            <div class="form-row">
+                <div class="form-group full">
+                    <label asp-for="AddMemberViewModel.Notes" class="form-label">
+                        Notes
+                    </label>
+                    <textarea asp-for="AddMemberViewModel.Notes"
+                              class="form-control"
+                              placeholder="Any goals, health notes, or preferences to pass to the trainer..."></textarea>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==========================================
+             BUTTONS
+        =========================================== -->
+        <div class="form-actions">
+            <a asp-action="Member"
+               asp-controller="FrontDesk"
+               class="btn-cancel">
+                Cancel
+            </a>
+
+            <!--
+                FIXED: removed asp-action="Member" / asp-controller="FrontDesk"
+                from this button. Those attributes generate a `formaction`
+                that overrides the <form>'s own action="AddMember", so the
+                POST was being sent to Member (a [HttpGet]-only action) and
+                getting rejected with 405 — the form never actually saved.
+                Now it just submits normally to AddMember (POST), which on
+                success calls RedirectToAction(nameof(Member)), landing you
+                back on the list with the new member in the table.
+            -->
+            <button type="submit" class="btn-register">
+                <span>✓</span>
+                Register member
+            </button>
+        </div>
+
+    </form>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const dayButtons = document.querySelectorAll(".day-button");
+        const selectedDaysContainer = document.getElementById("selectedDaysContainer");
+
+        const existingDays = @Html.Raw(
+                                                System.Text.Json.JsonSerializer.Serialize(addMember.SelectedDays)
+                                );
+
+        function updateSelectedDays() {
+            selectedDaysContainer.innerHTML = "";
+            dayButtons.forEach(function (button) {
+                const day = button.dataset.day;
+                if (button.classList.contains("selected")) {
+                    const input = document.createElement("input");
+                    input.type = "hidden";
+                    input.name = "AddMemberViewModel.SelectedDays";
+                    input.value = day;
+                    selectedDaysContainer.appendChild(input);
+                }
+            });
+        }
+
+        dayButtons.forEach(function (button) {
+            if (existingDays.includes(button.dataset.day)) {
+                button.classList.add("selected");
+            }
+        });
+
+        updateSelectedDays();
+
+        dayButtons.forEach(function (button) {
+            button.addEventListener("click", function () {
+                button.classList.toggle("selected");
+                updateSelectedDays();
+            });
+        });
+    });
+</script>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

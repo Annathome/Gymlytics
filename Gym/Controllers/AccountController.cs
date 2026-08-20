@@ -131,6 +131,8 @@ namespace Gym.Controllers
                 ExpiresUtc = DateTimeOffset.UtcNow.AddHours(2)
             };
 
+
+
             await HttpContext.SignInAsync(
                 CookieAuthenticationDefaults.AuthenticationScheme,
                 new ClaimsPrincipal(claimsIdentity),
@@ -285,9 +287,9 @@ namespace Gym.Controllers
         {
             return role switch
             {
-                "Admin" or "MainAdmin" => RedirectToAction("ADashboard", "AdminDashboard"),
-                "Trainer" => RedirectToAction("Index", "MainHomepage"),
-                "Staff" => RedirectToAction("Login", "Account"),
+                "Admin" or "MainAdmin" => RedirectToAction("ADashboard", "Admin"),
+                "Trainer" => RedirectToAction("Schedule", "Trainer"),
+                "Staff" => RedirectToAction("Member", "FrontDesk"),
                 _ => RedirectToAction("Index", "MainHomepage")
             };
         }
