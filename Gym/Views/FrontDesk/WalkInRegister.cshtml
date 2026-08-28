@@ -1,0 +1,211 @@
+@model Gym.Models.WalkInRegistrationViewModel
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Walk-in Client Registration</title>
+
+    <link rel="stylesheet" href="~/css/view-theme.css" asp-append-version="true" />
+    <link href="https://fonts.googleapis.com/css2?family=Inria+Serif:wght@300;400;700&display=swap" rel="stylesheet" />
+    <style>
+            * {
+                box-sizing: border-box
+            }
+
+            ;
+            body {
+                margin: 0;
+                background: #fff;
+                font: 15px Arial,sans-serif;
+                color: #102630
+            }
+
+            .page {
+                width: min(760px,calc(100% - 30px));
+                margin: 24px auto
+            }
+
+            .title h1 {
+                margin: 0 0 7px;
+                font-size: 28px
+            }
+
+            .title p {
+                margin: 0 0 28px;
+                color: #59645e
+            }
+
+            .form-card {
+                border-top: 7px solid rgb(8,61,2);
+                padding: 28px 34px;
+                background: #fff;
+                box-shadow: 0 3px 16px rgba(0,0,0,.1);
+                border-radius: 7px
+            }
+
+            .section-title {
+                font-size: 19px;
+                margin: 0 0 18px;
+                padding-bottom: 10px;
+                border-bottom: 1px solid #ccd5cf
+            }
+
+            .group {
+                margin-bottom: 17px
+            }
+
+                .group label {
+                    display: block;
+                    margin-bottom: 6px;
+                    font-size: 12px;
+                    font-weight: 700;
+                    letter-spacing: .6px;
+                    text-transform: uppercase
+                }
+
+            .required {
+                color: #b91c1c
+            }
+
+            .control {
+                width: 100%;
+                height: 47px;
+                border: 1px solid #c8d3cd;
+                background: #f3f9fc;
+                padding: 0 14px;
+                font-size: 15px
+            }
+
+                .control[readonly] {
+                    color: #26382e;
+                    cursor: default
+                }
+
+            .check {
+                display: flex;
+                align-items: flex-start;
+                gap: 12px;
+                margin: 12px 0 22px
+            }
+
+                .check input {
+                    width: 18px;
+                    height: 18px
+                }
+
+            .validation {
+                color: #b91c1c;
+                font-size: 12px;
+                margin-top: 4px;
+                display: block
+            }
+
+            .summary {
+                color: #b91c1c;
+                margin-bottom: 14px
+            }
+
+            .actions {
+                display: flex;
+                justify-content: flex-end;
+                gap: 14px;
+                padding-top: 22px;
+                border-top: 1px solid #ccd5cf
+            }
+
+            .cancel, .submit {
+                padding: 13px 25px;
+                border-radius: 3px;
+                font-weight: 700;
+                text-decoration: none;
+                font-size: 13px
+            }
+
+            .cancel {
+                border: 1px solid #89958d;
+                color: #39443d;
+                background: #fff
+            }
+
+            .submit {
+                border: 1px solid rgb(8,61,2);
+                background: rgb(8,61,2);
+                color: #fff;
+                cursor: pointer
+            }
+
+            @@media(max-width:600px) {
+                .form-card {
+                    padding: 22px 18px
+                }
+
+                .title h1 {
+                    font-size: 23px
+                }
+
+                .actions {
+                    flex-direction: column-reverse
+                }
+
+                .cancel, .submit {
+                    text-align: center;
+                    width: 100%
+                }
+            }
+    </style>
+</head>
+<body>
+    <main class="page">
+        <header class="title">
+            <h1>Walk-in Client Registration</h1>
+            <p>Quickly register temporary visitors, guests, and trial participants for facility access.</p>
+        </header>
+        <form asp-action="WalkInRegister" asp-controller="FrontDesk" method="post" class="form-card">
+            @Html.AntiForgeryToken()<div asp-validation-summary="ModelOnly" class="summary"></div>
+            <h2 class="section-title">Guest Details</h2>
+            <div class="group">
+                <label asp-for="FirstName">First Name <span class="required">*</span> </label>
+                <input class="control" asp-for="FirstName" placeholder="e.g. Jane" />
+                <span class="validation" asp-validation-for="FirstName"> </span>
+                </div>
+            <div class="group">
+                <label asp-for="LastName">Last Name <span class="required">*</span> </label>
+                <input class="control" asp-for="LastName" placeholder="e.g. Doe" />
+                <span class="validation" asp-validation-for="LastName"></span>
+            </div>
+            <div class="group">
+                <label asp-for="ContactNumber">Contact Number <span class="required">*</span> </label>
+                <input class="control" asp-for="ContactNumber" placeholder="(555) 000-0000" />
+                <span class="validation" asp-validation-for="ContactNumber"></span>
+            </div>
+            <div class="group">
+                <label asp-for="Email" id="emailLabel">Email (optional)</label>
+                <input class="control" asp-for="Email" placeholder="jane.doe@example.com" /> 
+                <span class="validation" asp-validation-for="Email"> </span>
+            </div>
+            <div class="group">
+                <label asp-for="ReasonForVisit">Reason for Visit <span class="required">*</span>
+                    </label><select class="control" asp-for="ReasonForVisit">
+                        <option>Day Pass </option>
+                        <option>Guest Tour</option>
+                        <option>Trial Session</option>
+                        <option>Event</option></select>
+                    </div>
+            <h2 class="section-title" style="margin-top:26px">Payment Details</h2>
+            <div class="group">
+                <label asp-for="AmountPaid">Amount Paid <span class="required">*</span></label>
+                <input class="control" asp-for="AmountPaid" type="number" min="0.01" step="0.01" placeholder="0.00" />
+                <span class="validation" asp-validation-for="AmountPaid"></span>
+            </div>
+            <div class="actions">
+                <a class="cancel" asp-action="WalkInClient">CANCEL</a>
+                <button class="submit" type="submit">♙ &nbsp; REGISTER CLIENT </button>
+            </div>
+        </form>
+    </main>
+</body>
+</html>

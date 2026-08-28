@@ -1,0 +1,567 @@
+@model Gym.Models.AdminAttendanceViewModel
+@{
+    ViewData["Title"] = "Admin Attendance";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<style>
+    @@import url('https://fonts.googleapis.com/css2?family=Inria+Serif:wght@300;400;700&display=swap');
+
+    body > .container {
+        max-width: none !important;
+        width: 100% !important;
+        padding: 0 !important;
+        font-family: "Inria Serif",serif;
+    }
+
+    /* .aa {
+        min-height: 100vh;
+        padding: 25px 38px;
+        background: #101311;
+        color: #f4f6f4;
+        font-family: Arial, sans-serif;
+    } */
+
+    /* Toolbar */
+    .aa-toolbar {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        padding-bottom: 18px;
+        border-bottom: 1px solid #303430;
+    }
+
+    .aa-search {
+        display: flex;
+        gap: 10px;
+        flex: 1;
+        max-width: 804px;
+    }
+
+        .aa-search input {
+            flex: 1;
+            height: 45px;
+            padding: 0 15px;
+            background: #1b1e1c;
+            border: 1px solid #8d958f;
+            color: #fff;
+            outline: 0;
+        }
+
+            .aa-search input:focus {
+                outline: 0;
+                box-shadow: none;
+                border-color: #8d958f;
+            }
+
+        .aa-search button {
+            width: 92px;
+            height: 45px;
+            border: 0;
+            background: #b7ff1b;
+            color: #101510;
+            font-size: 10px;
+            font-weight: 800;
+        }
+
+    /* Export menu */
+    .aa-export {
+        position: relative;
+        margin-left: auto;
+    }
+
+        .aa-export summary {
+            list-style: none;
+            cursor: pointer;
+            border: 1px solid #7fae1b;
+            color: #b7ff1b;
+            padding: 12px 16px;
+            font-size: 10px;
+            font-weight: 800;
+        }
+
+            .aa-export summary::-webkit-details-marker {
+                display: none;
+            }
+
+    .aa-export-menu {
+        position: absolute;
+        right: 0;
+        top: 45px;
+        z-index: 100;
+        width: 160px;
+        padding: 5px;
+        background: #171b18;
+        border: 1px solid #3c433d;
+    }
+
+        .aa-export-menu a,
+        .aa-export-menu button {
+            display: block;
+            width: 100%;
+            padding: 9px 10px;
+            border: 0;
+            background: transparent;
+            color: #dce3dd;
+            text-align: left;
+            text-decoration: none;
+            font: 11px Arial;
+        }
+
+            .aa-export-menu a:hover,
+            .aa-export-menu button:hover {
+                background: #293029;
+                color: #b7ff1b;
+            }
+
+    /* Heading */
+    .aa-heading {
+        margin: 22px 0;
+    }
+
+        .aa-heading h1 {
+            margin: 0 0 5px;
+            font-size: 30px;
+            color: #dce3dd;
+            font-weight: 700;
+            font-family: "Inria Serif",serif;
+
+        }
+
+        .aa-heading p {
+            margin: 0;
+            color: #b7ff1b;
+            font-size: 10px;
+        }
+
+    /* Stats */
+    .aa-stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin-bottom: 24px;
+        margin-top: 20px;
+        margin-bottom: 30px;
+    }
+
+    .aa-stat {
+        padding: 17px;
+        background: #1d201e;
+        border: 1px solid #343a35;
+        border-radius: 4px;
+
+    }
+
+    .aa-label {
+        color: #aeb6b0;
+        font-size: 9px;
+        font-weight: 800;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+    }
+
+    .aa-value {
+        margin-top: 10px;
+        font-size: 28px;
+        font-weight: 800;
+    }
+
+        .aa-value.active {
+            color: #b7ff1b;
+        }
+
+    /* Card / table */
+    .aa-card {
+        overflow: visible;
+        border: 1px solid #303630;
+        background: #1b1e1c;
+        margin-top:5px;
+    }
+
+        .aa-card h2 {
+            margin: 0;
+            padding: 14px;
+            background: #343735;
+            font-size: 13px;
+        }
+
+    .aa-table-wrap {
+        overflow: visible;
+    }
+
+    .aa-table {
+        width: 100%;
+        table-layout: fixed;
+        border-collapse: collapse;
+    }
+
+        .aa-table th,
+        .aa-table td {
+            padding: 13px;
+            text-align: left;
+            border-bottom: 1px solid #313632;
+            overflow-wrap: anywhere;
+        }
+
+        .aa-table th {
+            color: #cbd1cc;
+            font-size: 9px;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+        }
+
+        .aa-table td {
+            font-size: 12px;
+        }
+
+    .aa-member {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        font-weight: 700;
+    }
+
+    .aa-avatar {
+        display: grid;
+        place-items: center;
+        flex: 0 0 33px;
+        width: 33px;
+        height: 33px;
+        border-radius: 50%;
+        background: #27372b;
+        color: #b7ff1b;
+        font-size: 10px;
+    }
+
+    .aa-badge {
+        padding: 4px 8px;
+        background: #353735;
+        color: #c4cac5;
+        font-size: 9px;
+        font-weight: 800;
+        text-transform: uppercase;
+    }
+
+        .aa-badge.active {
+            background: #293226;
+            color: #b7ff1b;
+        }
+
+        .aa-badge.checked-out {
+            background: #28343a;
+            color: #a9dff5;
+        }
+
+    /* Row actions */
+    .aa-action {
+        position: relative;
+        text-align: center;
+        overflow: visible !important;
+    }
+
+    .aa-actions {
+        position: relative;
+        display: inline-block;
+    }
+
+        .aa-actions summary {
+            display: grid;
+            place-items: center;
+            width: 30px;
+            height: 30px;
+            list-style: none;
+            cursor: pointer;
+            border: 1px solid #3b423c;
+            color: #d5dbd6;
+        }
+
+            .aa-actions summary::-webkit-details-marker {
+                display: none;
+            }
+
+    .aa-menu {
+        position: absolute;
+        right: 0;
+        top: 35px;
+        z-index: 100;
+        min-width: 125px;
+        padding: 5px;
+        background: #202421;
+        border: 1px solid #414841;
+    }
+
+        .aa-menu button {
+            display: block;
+            width: 100%;
+            padding: 9px 11px;
+            border: 0;
+            background: transparent;
+            color: #e5eae6;
+            text-align: left;
+            font-size: 11px;
+        }
+
+            .aa-menu button:hover {
+                background: #303630;
+                color: #b7ff1b;
+            }
+
+            .aa-menu button:disabled {
+                opacity: .35;
+                cursor: not-allowed;
+            }
+
+    .aa-empty {
+        text-align: center !important;
+        color: #929b94;
+        padding: 35px !important;
+    }
+
+    /* Pager */
+    .aa-pager {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 17px 13px;
+    }
+
+    .aa-info {
+        color: #aeb6b0;
+        font-size: 10px;
+    }
+
+    .aa-pages {
+        display: flex;
+        gap: 10px;
+    }
+
+    .aa-page {
+        display: grid;
+        place-items: center;
+        min-width: 78px;
+        height: 32px;
+        border-radius: 3px;
+        background: #b7ff1b;
+        color: #101510;
+        text-decoration: none;
+        font-size: 9px;
+        font-weight: 800;
+        text-transform: uppercase;
+    }
+
+        .aa-page.disabled {
+            opacity: .35;
+            pointer-events: none;
+        }
+
+    /* Responsive */
+    @@media (max-width: 800px) {
+        .aa {
+            padding: 18px;
+        }
+
+        .aa-stats {
+            grid-template-columns: 1fr;
+        }
+
+        .aa-table th,
+        .aa-table td {
+            padding: 8px 5px;
+            font-size: 9px;
+        }
+
+        .aa-avatar {
+            display: none;
+        }
+    }
+
+    /* Print */
+    @@media print {
+        @@page {
+            size: landscape;
+            margin: 12mm;
+        }
+
+        .nav-header,
+        .admin-logout,
+        .aa-toolbar,
+        .aa-stats,
+        .aa-pager,
+        .aa-action,
+        .aa-table th:last-child,
+        .aa-table td:last-child {
+            display: none !important;
+        }
+
+        body > .container,
+        body > .container main {
+            width: 100% !important;
+            max-width: none !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        .aa {
+            min-height: 0;
+            padding: 0;
+            background: #fff !important;
+            color: #111 !important;
+        }
+
+        .aa-heading {
+            margin: 0 0 16px;
+        }
+
+            .aa-heading p {
+                color: #444;
+            }
+
+        .aa-card,
+        .aa-table {
+            background: #fff !important;
+            color: #111 !important;
+        }
+
+            .aa-card h2,
+            .aa-table th {
+                background: #eee !important;
+                color: #111 !important;
+            }
+
+            .aa-table td,
+            .aa-table th {
+                border-color: #aaa !important;
+            }
+
+        .aa-member {
+            color: #111 !important;
+        }
+
+        .aa-avatar,
+        .aa-badge {
+            color: #111 !important;
+            background: #eee !important;
+            border: 1px solid #aaa;
+        }
+    }
+</style>
+
+<section class="aa">
+
+    <div class="aa-toolbar">
+        <div class="aa-heading">
+            <h1>Attendance</h1>
+            <p>Live check-ins and member attendance</p>
+        </div>
+
+        <details class="aa-export">
+            <summary>↧ EXPORT</summary>
+            <div class="aa-export-menu">
+                <button type="button" onclick="printAttendanceReport()">PDF / Print</button>
+                <a asp-action="ExportAttendance" asp-route-format="doc" asp-route-searchTerm="@Model.SearchTerm">Word document</a>
+                <a asp-action="ExportAttendance" asp-route-format="csv" asp-route-searchTerm="@Model.SearchTerm">CSV / Excel</a>
+                <a asp-action="ExportAttendance" asp-route-format="txt" asp-route-searchTerm="@Model.SearchTerm">Text file</a>
+            </div>
+        </details>
+    </div>
+
+    <div class="aa-stats">
+        <div class="aa-stat">
+            <div class="aa-label">Members checked in</div>
+            <div class="aa-value">@Model.MembersCheckedIn</div>
+        </div>
+        <div class="aa-stat">
+            <div class="aa-label">Walk-ins today</div>
+            <div class="aa-value">@Model.WalkInsToday</div>
+        </div>
+        <div class="aa-stat">
+            <div class="aa-label">Currently in gym</div>
+            <div class="aa-value active">@Model.CurrentlyInGym</div>
+        </div>
+    </div>
+
+    <form class="aa-search" method="get" asp-controller="Admin" asp-action="Attendance">
+        <input name="searchTerm" value="@Model.SearchTerm" placeholder="Search member, ID, membership, or status..." />
+        <button type="submit">SEARCH</button>
+    </form>
+
+    <div class="aa-card">
+        <h2>Live Log</h2>
+        <div class="aa-table-wrap">
+            <table class="aa-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Type</th>
+                        <th>Membership</th>
+                        <th>Check-in</th>
+                        <th>Check-out</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Members.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="7" class="aa-empty">No members found.</td>
+                        </tr>
+                    }
+                    @foreach (var member in Model.Members)
+                    {
+                        var badgeClass = member.Status.ToLowerInvariant().Replace(' ', '-');
+                        <tr>
+                            <td>
+                                <div class="aa-member">
+                                    <span class="aa-avatar">@member.Initials</span>
+                                    <span>@member.FullName</span>
+                                </div>
+                            </td>
+                            <td>Member</td>
+                            <td>@member.Membership</td>
+                            <td>@(member.CheckInAt?.ToString("h:mm tt") ?? "—")</td>
+                            <td>@(member.CheckOutAt?.ToString("h:mm tt") ?? "—")</td>
+                            <td><span class="aa-badge @badgeClass">@member.Status</span></td>
+                            <td class="aa-action">
+                                <details class="aa-actions">
+                                    <summary title="Attendance actions">⋮</summary>
+                                    <div class="aa-menu">
+                                        <form asp-controller="Admin" asp-action="UpdateAttendance" method="post">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@member.ClientId" />
+                                            <input type="hidden" name="attendanceAction" value="checkin" />
+                                            <button type="submit" disabled="@(!member.CanCheckIn)">Check In</button>
+                                        </form>
+                                        <form asp-controller="Admin" asp-action="UpdateAttendance" method="post">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@member.ClientId" />
+                                            <input type="hidden" name="attendanceAction" value="checkout" />
+                                            <button type="submit" disabled="@(!member.CanCheckOut)">Check Out</button>
+                                        </form>
+                                    </div>
+                                </details>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="aa-pager">
+            <span class="aa-info">Page @Model.Page of @Model.TotalPages · @Model.TotalCount member(s)</span>
+            <div class="aa-pages">
+                <a class="aa-page @(Model.Page <= 1 ? "disabled" : "")" asp-action="Attendance" asp-route-searchTerm="@Model.SearchTerm" asp-route-page="@(Model.Page - 1)">Previous</a>
+                <a class="aa-page @(Model.Page >= Model.TotalPages ? "disabled" : "")" asp-action="Attendance" asp-route-searchTerm="@Model.SearchTerm" asp-route-page="@(Model.Page + 1)">Next</a>
+            </div>
+        </div>
+    </div>
+
+</section>
+
+<script>
+    function printAttendanceReport() {
+        const menu = document.querySelector('.aa-export');
+        if (menu) menu.open = false;
+        window.print();
+    }
+</script>

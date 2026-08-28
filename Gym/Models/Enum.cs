@@ -2,43 +2,51 @@
 {
     public enum UserRole
     {
-        Admin,
-        Trainer,
-        Client
+        Admin = 0,
+        Trainer = 1,
+        Client = 2
     }
 
     public enum SessionStatus
     {
-        Scheduled,
-        Confirmed,
-        Completed,
-        Cancelled,
-        Full
+        Scheduled = 0,
+        Confirmed = 1,
+        Completed = 2,
+        Cancelled = 3,
+        Full = 4
     }
 
     public enum PaymentStatus
     {
-        Paid,
-        Pending,
-        Overdue,
-        Unpaid
+        Paid = 0,
+        Pending = 1,
+        Overdue = 2,
+        Unpaid = 3
     }
 
     public enum MemberStatus
     {
-        Active,
-        Inactive,
-        Overdue,
-        ExpiringSoon,
-        Expired
+        Active = 0,
+        Inactive = 1,
+        Overdue = 2,
+        ExpiringSoon = 3,
+        Expired = 4,
+        Canceled = 5,
+        Terminated = 6,
+        PendingPayment = 7
     }
 
     public enum MembershipPlanType
     {
-        Monthly,
-        Quarterly,
-        Annual
+        Monthly = 0,
+        Quarterly = 1,
+        Annual = 2
     }
 
-
+    public enum GymGoal
+    {
+        MuscleGain = 0,
+        WeightLoss = 1,
+        Cardio = 2
+    }
 }

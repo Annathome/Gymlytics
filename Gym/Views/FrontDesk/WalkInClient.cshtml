@@ -1,0 +1,389 @@
+@model List<Gym.Models.WalkInClientListItem>
+
+@{
+    Layout = "~/Views/Shared/_FrontDeskLayout.cshtml";
+    ViewData["Title"] = "Walk-in Clients";
+}
+
+<style>
+    body > .container {
+        max-width: none;
+        margin: 0;
+        padding: 0 28px;
+    }
+
+    .wi-page {
+        width: min(1100px, calc(100vw - 360px));
+        margin: 26px auto;
+        font: 15px Arial, sans-serif;
+        color: #102630;
+    }
+
+    .wi-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        margin-bottom: 18px;
+    }
+
+        .wi-head h1 {
+            font-size: 24px;
+            margin: 0 0 5px;
+        }
+
+        .wi-head p {
+            margin: 0;
+            color: #637069;
+        }
+
+    .wi-add {
+        border: 0;
+        background: rgb(8, 61, 2);
+        color: #fff;
+        text-decoration: none;
+        padding: 11px 18px;
+        border-radius: 6px;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    .wi-card {
+        overflow: hidden;
+        border: 1px solid #d7e5e9;
+        border-radius: 8px;
+        background: #fff;
+    }
+
+    .wi-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+        .wi-table th {
+            padding: 14px 20px;
+            background: #e5f4fb;
+            text-align: left;
+            font-size: 13px;
+            letter-spacing: 0.5px;
+        }
+
+        .wi-table td {
+            padding: 17px 20px;
+            border-top: 1px solid #edf0ee;
+        }
+
+    .reason {
+        display: inline-block;
+        background: #e3f1f7;
+        padding: 6px 8px;
+        font-size: 12px;
+    }
+
+    .wi-pay { border: 0; border-radius: 6px; background: #083d02; color: #fff; padding: 9px 16px; font-weight: 700; cursor: pointer; }
+    .wi-pay:disabled { background:#d8e0dc; color:#647169; cursor:not-allowed; }
+    .wi-visits { display: block; margin-top: 4px; color: #738078; font-size: 12px; }
+    .wi-modal-backdrop { display:none; position:fixed; inset:0; z-index:1200; align-items:center; justify-content:center; padding:20px; background:rgba(7,25,15,.58); }
+    .wi-modal-backdrop.show { display:flex; }
+    .wi-modal { width:min(430px,100%); padding:24px; border-radius:10px; background:#fff; box-shadow:0 18px 55px rgba(0,0,0,.25); }
+    .wi-register-modal { width:min(720px,100%); max-height:calc(100vh - 40px); overflow-y:auto; }
+    .wi-form-grid { display:grid; grid-template-columns:1fr 1fr; gap:15px; }
+    .wi-form-group { margin-bottom:15px; }
+    .wi-form-group.full { grid-column:1 / -1; }
+    .wi-form-group label { display:block; margin-bottom:6px; font-size:12px; font-weight:700; text-transform:uppercase; }
+    .wi-form-group input, .wi-form-group select { width:100%; height:44px; padding:0 12px; border:1px solid #cad6d0; border-radius:5px; box-sizing:border-box; }
+    .wi-modal h2 { margin:0 0 7px; font-size:21px; }
+    .wi-modal p { margin:0 0 20px; color:#65726b; }
+    .wi-modal label { display:block; margin-bottom:7px; font-weight:700; }
+    .wi-modal input { width:100%; height:44px; padding:0 12px; border:1px solid #cad6d0; border-radius:6px; box-sizing:border-box; font-size:16px; }
+    .wi-modal-actions { display:flex; justify-content:flex-end; gap:10px; margin-top:22px; }
+    .wi-cancel { padding:10px 17px; border:1px solid #aebbb3; border-radius:6px; background:#fff; cursor:pointer; }
+
+    .wi-success {
+        margin-bottom: 16px;
+        padding: 12px 15px;
+        border: 1px solid #9fd2a8;
+        background: #edf9ef;
+        color: #176729;
+        border-radius: 7px;
+    }
+
+    .wi-error {
+        margin-bottom: 16px;
+        padding: 12px 15px;
+        border: 1px solid #efb3b3;
+        background: #fff0f0;
+        color: #a51f1f;
+        border-radius: 7px;
+    }
+
+    .wi-search {
+        display: grid;
+        grid-template-columns: minmax(280px, 650px) 86px;
+        gap: 10px;
+        width: min(100%, 746px);
+        margin: 0 0 18px;
+    }
+
+        .wi-search input {
+            width: 100%;
+            min-width: 0;
+            height: 43px;
+            border: 1px solid #cad6d0;
+            border-radius: 6px;
+            padding: 0 14px;
+            font-size: 15px;
+            box-sizing: border-box;
+        }
+
+        .wi-search button {
+            width: 86px;
+            height: 43px;
+            padding: 0;
+            border: 0;
+            border-radius: 6px;
+            background: rgb(8, 61, 2);
+            color: #fff;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+    @@media (max-width: 760px) {
+        .wi-page {
+            width: calc(100vw - 40px);
+        }
+
+        .wi-head {
+            align-items: flex-start;
+            gap: 15px;
+        }
+
+        .wi-card {
+            overflow-x: auto;
+        }
+
+        .wi-table {
+            min-width: 760px;
+        }
+    }
+
+    @@media (max-width: 600px) {
+        .wi-form-grid { grid-template-columns:1fr; }
+        .wi-search {
+            grid-template-columns: minmax(0, 1fr) 76px;
+            width: 100%;
+        }
+
+            .wi-search button {
+                width: 76px;
+            }
+    }
+</style>
+
+<main class="wi-page">
+
+    <header class="wi-head">
+        <div>
+            <h1>Walk-in Client Registration</h1>
+
+            <p>
+                Quickly register a new visitor and grant temporary facility access.
+            </p>
+        </div>
+
+        <button type="button" class="wi-add" id="openWalkInRegistration">
+            ＋ Register Walk-in
+        </button>
+    </header>
+
+    @if (TempData["SuccessMessage"] is string message)
+    {
+        <div class="wi-success">
+            @message
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] is string error)
+    {
+        <div class="wi-error">
+            @error
+        </div>
+    }
+
+    <h2 style="font-size: 18px; margin: 0 0 14px;">
+        Recent Walk-in Registrations
+    </h2>
+
+    <form class="wi-search" method="get" asp-action="WalkInClient">
+        <input name="searchTerm"
+               value="@ViewBag.SearchTerm"
+               placeholder="Search by name, contact, email, or visit reason..." />
+
+        <button type="submit">
+            Search
+        </button>
+    </form>
+
+    <section class="wi-card">
+        <table class="wi-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Contact</th>
+                    <th>Reason for Visit</th>
+                    <th>Last Visit</th>
+                    <th>Date Registered</th>
+                    <th>Payment</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @if (Model.Count == 0)
+                {
+                    <tr>
+                        <td colspan="6" style="text-align: center; color: #77827b;">
+                            No walk-in registrations yet.
+                        </td>
+                    </tr>
+                }
+
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>
+                            @item.FirstName @item.LastName
+                        </td>
+
+                        <td>
+                            @item.ContactNumber
+                        </td>
+
+                        <td>
+                            <span class="reason">
+                                @item.ReasonForVisit
+                            </span>
+                        </td>
+
+                        <td>
+                            @item.LastVisitAt.ToString("MMM d, yyyy · h:mm tt")
+                            <span class="wi-visits">@item.VisitCount visit(s)</span>
+                        </td>
+
+                        <td>
+                            @item.FirstRegisteredAt.ToString("MMM d, yyyy")
+                        </td>
+
+                        <td>
+                            <button type="button" class="wi-pay"
+                                    data-id="@item.WalkInClientId"
+                                    data-name="@item.FirstName @item.LastName"
+                                    disabled="@(item.LastVisitAt.Date == DateTime.Today)">
+                                @(item.LastVisitAt.Date == DateTime.Today ? "Registered today" : "Payment")
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </section>
+
+</main>
+
+<div class="wi-modal-backdrop" id="walkInRegistrationModal" aria-hidden="true">
+    <section class="wi-modal wi-register-modal" role="dialog" aria-modal="true" aria-labelledby="walkInRegistrationTitle">
+        <h2 id="walkInRegistrationTitle">Register walk-in client</h2>
+        <p>Each client can be registered only once per day. Receipts are emailed automatically when an email address is provided.</p>
+        <form asp-action="WalkInRegister" asp-controller="FrontDesk" method="post" id="walkInRegistrationForm">
+            @Html.AntiForgeryToken()
+            <div class="wi-form-grid">
+                <div class="wi-form-group">
+                    <label for="walkInFirstName">First name *</label>
+                    <input id="walkInFirstName" name="FirstName" required />
+                </div>
+                <div class="wi-form-group">
+                    <label for="walkInLastName">Last name *</label>
+                    <input id="walkInLastName" name="LastName" required />
+                </div>
+                <div class="wi-form-group">
+                    <label for="walkInContact">Contact number *</label>
+                    <input id="walkInContact" name="ContactNumber" required />
+                </div>
+                <div class="wi-form-group">
+                    <label for="walkInEmail">Email (optional)</label>
+                    <input id="walkInEmail" name="Email" type="email" />
+                </div>
+                <div class="wi-form-group">
+                    <label for="walkInReason">Reason for visit *</label>
+                    <select id="walkInReason" name="ReasonForVisit" required>
+                        <option>Day Pass</option><option>Guest Tour</option><option>Trial Session</option><option>Event</option>
+                    </select>
+                </div>
+                <div class="wi-form-group">
+                    <label for="walkInAmount">Amount paid (₱) *</label>
+                    <input id="walkInAmount" name="AmountPaid" type="number" min="0.01" step="0.01" required />
+                </div>
+            </div>
+            <div class="wi-modal-actions">
+                <button type="button" class="wi-cancel" id="closeWalkInRegistration">Cancel</button>
+                <button type="submit" class="wi-pay">Register client</button>
+            </div>
+        </form>
+    </section>
+</div>
+
+<div class="wi-modal-backdrop" id="walkInPaymentModal" aria-hidden="true">
+    <section class="wi-modal" role="dialog" aria-modal="true" aria-labelledby="walkInPaymentTitle">
+        <h2 id="walkInPaymentTitle">Record walk-in payment</h2>
+        <p id="walkInPaymentClient"></p>
+        <form asp-action="RecordWalkInPayment" method="post" id="walkInPaymentForm">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="id" id="walkInPaymentId" />
+            <label for="walkInPaymentAmount">Cash amount (₱)</label>
+            <input type="number" name="amount" id="walkInPaymentAmount" min="0.01" step="0.01" required />
+            <div class="wi-modal-actions">
+                <button type="button" class="wi-cancel" id="closeWalkInPayment">Cancel</button>
+                <button type="submit" class="wi-pay">Confirm payment</button>
+            </div>
+        </form>
+    </section>
+</div>
+
+<script>
+    (() => {
+        const registrationModal = document.getElementById('walkInRegistrationModal');
+        const closeRegistration = () => { registrationModal.classList.remove('show'); registrationModal.setAttribute('aria-hidden', 'true'); };
+        document.getElementById('openWalkInRegistration').addEventListener('click', () => {
+            registrationModal.classList.add('show');
+            registrationModal.setAttribute('aria-hidden', 'false');
+            document.getElementById('walkInFirstName').focus();
+        });
+        document.getElementById('closeWalkInRegistration').addEventListener('click', closeRegistration);
+        registrationModal.addEventListener('click', event => { if (event.target === registrationModal) closeRegistration(); });
+        document.getElementById('walkInRegistrationForm').addEventListener('submit', event => {
+            const button = event.currentTarget.querySelector('button[type="submit"]');
+            button.disabled = true;
+            button.textContent = 'Registering...';
+        });
+
+        const modal = document.getElementById('walkInPaymentModal');
+        const idInput = document.getElementById('walkInPaymentId');
+        const amountInput = document.getElementById('walkInPaymentAmount');
+        const clientText = document.getElementById('walkInPaymentClient');
+        const close = () => { modal.classList.remove('show'); modal.setAttribute('aria-hidden', 'true'); };
+        document.querySelectorAll('.wi-pay[data-id]').forEach(button => button.addEventListener('click', () => {
+            idInput.value = button.dataset.id;
+            clientText.textContent = button.dataset.name + ' · Cash only';
+            amountInput.value = '';
+            modal.classList.add('show');
+            modal.setAttribute('aria-hidden', 'false');
+            amountInput.focus();
+        }));
+        document.getElementById('closeWalkInPayment').addEventListener('click', close);
+        modal.addEventListener('click', event => { if (event.target === modal) close(); });
+        document.getElementById('walkInPaymentForm').addEventListener('submit', event => {
+            const button = event.currentTarget.querySelector('button[type="submit"]');
+            button.disabled = true;
+            button.textContent = 'Processing...';
+        });
+    })();
+</script>

@@ -33,13 +33,15 @@ namespace Gym.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginViewModel model)
         {
-            var (isValid, userRole, userId, username, email, phone, errorMessage) =
+            var (isValid, userRole, userId, username, fullName, email, phone, errorMessage) =
                 await _setupService.ValidateUserAsync(model.Username, model.Password);
 
             if (!isValid)
             {
                 return Unauthorized(new { message = errorMessage ?? "Invalid credentials." });
             }
+
+            await _setupService.RecordLoginAsync(userId);
 
             // Generate the JWT token string
             var token = _jwtTokenService.GenerateToken(userId, username ?? model.Username, userRole);
@@ -50,6 +52,7 @@ namespace Gym.Controllers
                 token = token,
                 userId,
                 username = username ?? model.Username,
+                fullName,
                 role = userRole,
                 email,
                 phone

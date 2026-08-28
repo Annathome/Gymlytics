@@ -1,0 +1,40 @@
+@model Gym.Models.SessionReminderResponseViewModel
+@{
+    Layout = null;
+    var confirmed = Model.Response == "Confirmed";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Session @Model.Response - YOKOKS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inria+Serif:wght@400;700&display=swap" rel="stylesheet" />
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 24px; background: #eef5f1; color: #183028; font-family: "Inria Serif", serif; }
+        .response-card { width: min(540px, 100%); overflow: hidden; border-radius: 12px; background: #fff; box-shadow: 0 18px 45px rgba(16,55,31,.16); }
+        .response-head { padding: 24px 28px; background: @(confirmed ? "#08752a" : "#b42318"); color: #fff; }
+        .response-head h1 { margin: 0; font-size: 28px; }
+        .response-body { padding: 28px; }
+        .response-body p { font-size: 17px; line-height: 1.55; }
+        .details { margin: 22px 0; padding: 16px; border-left: 4px solid @(confirmed ? "#0ec52d" : "#d92d20"); background: #f4f8f5; }
+        .details div + div { margin-top: 8px; }
+        .done { display: block; width: 100%; margin-top: 24px; padding: 12px; border: 0; border-radius: 7px; background: #083d02; color: #fff; font: 700 16px "Inria Serif", serif; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <main class="response-card">
+        <header class="response-head"><h1>Session @Model.Response</h1></header>
+        <section class="response-body">
+            <p>Thank you, <strong>@Model.MemberName</strong>.</p>
+            <p>@Model.Message</p>
+            <div class="details">
+                <div><strong>Trainer:</strong> @Model.TrainerName</div>
+                <div><strong>Session date:</strong> @Model.SessionDate.ToString("MMMM d, yyyy")</div>
+            </div>
+            <button class="done" type="button" onclick="window.close()">Close</button>
+        </section>
+    </main>
+</body>
+</html>

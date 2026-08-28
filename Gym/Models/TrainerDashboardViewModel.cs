@@ -75,5 +75,28 @@ namespace Gym.Models
 
         // Weekly Schedule Summary (e.g., {"Mon": 3, "Tue": 5})
         public Dictionary<string, int> WeeklySchedule { get; set; } = new Dictionary<string, int>();
+        public DateTime SelectedDate { get; set; } = DateTime.Today;
+        public DateTime WeekStart { get; set; } = DateTime.Today;
+        public int WeeklyMemberCount { get; set; }
+        public List<TrainerDayScheduleViewModel> AssignedWeek { get; set; } = new();
+    }
+
+    public class TrainerDayScheduleViewModel
+    {
+        public DateTime Date { get; set; }
+        public List<TrainerAssignedSessionViewModel> Sessions { get; set; } = new();
+        public int MemberCount => Sessions
+            .Where(session => session.ClientId > 0 && !string.IsNullOrWhiteSpace(session.MemberName))
+            .Select(session => session.ClientId)
+            .Distinct()
+            .Count();
+    }
+
+    public class TrainerAssignedSessionViewModel
+    {
+        public int ClientId { get; set; }
+        public string MemberName { get; set; } = string.Empty;
+        public string TimeSlot { get; set; } = string.Empty;
+        public string GymGoal { get; set; } = string.Empty;
     }
 }

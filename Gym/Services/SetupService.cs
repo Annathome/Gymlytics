@@ -1,5 +1,6 @@
 ﻿using Gym.Models;
 using Microsoft.Data.SqlClient;
+using System.Data;
 
 namespace Gym.Services
 {
@@ -8,50 +9,151 @@ namespace Gym.Services
         private readonly string _connectionString;
         private readonly HashingService _hashingService;
 
-        public SetupService(IConfiguration configuration, HashingService hashingService)
+        public SetupService(
+            IConfiguration configuration,
+            HashingService hashingService)
         {
-            _connectionString = configuration.GetConnectionString("DefaultConnection")
-                ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+            _connectionString =
+                configuration.GetConnectionString("DefaultConnection")
+                ?? throw new InvalidOperationException(
+                    "Connection string 'DefaultConnection' not found.");
+
             _hashingService = hashingService;
         }
 
         public async Task<bool> IsSetupCompletedAsync()
         {
-            using var connection = new SqlConnection(_connectionString);
+            await using var connection =
+                new SqlConnection(_connectionString);
+
             await connection.OpenAsync();
 
-            string query = @"
-            SELECT CASE 
-            WHEN EXISTS (SELECT 1 FROM Staff WHERE Role IN ('Admin', 'MainAdmin'))
-             OR EXISTS (SELECT 1 FROM SystemSettings WHERE SettingKey = 'IsSetupCompleted' AND SettingValue = 'true')
-            THEN CAST(1 AS BIT)
-            ELSE CAST(0 AS BIT)
-            END;";
+            const string sql = """
+                SELECT CASE
+                    WHEN EXISTS
+                    (
+                        SELECT 1
+                        FROM dbo.Staff
+                        WHERE Role IN ('Admin', 'MainAdmin')
+                    )
+                    OR EXISTS
+                    (
+                        SELECT 1
+                        FROM dbo.SystemSettings
+                        WHERE SettingKey = 'IsSetupCompleted'
+                          AND SettingValue = 'true'
+                    )
+                    THEN CAST(1 AS bit)
+                    ELSE CAST(0 AS bit)
+                END;
+                """;
 
-            using var command = new SqlCommand(query, connection);
+            await using var command =
+                new SqlCommand(sql, connection);
+
             object? result = await command.ExecuteScalarAsync();
-            return result != null && (bool)result;
+
+            return result is true;
         }
 
-        public async Task<(bool Success, string? ErrorMessage)> RegisterAdminAsync(AdminViewModel model, string passwordHash)
+        public async Task<(bool Success, string? ErrorMessage)>
+            RegisterAdminAsync(
+                AdminViewModel model,
+                string passwordHash)
         {
             try
             {
-                using var connection = new SqlConnection(_connectionString);
+                await using var connection =
+                    new SqlConnection(_connectionString);
+
                 await connection.OpenAsync();
 
-                using var command = new SqlCommand("dbo.usp_RegisterMainAdmin", connection)
-                {
-                    CommandType = System.Data.CommandType.StoredProcedure
-                };
+                // Keep setup self-contained. The deployed database may have been
+                // created by EF or an older script and therefore may not contain
+                // dbo.usp_RegisterMainAdmin.
+                const string sql = """
+                    SET XACT_ABORT ON;
+                    SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+                    BEGIN TRANSACTION;
 
-                command.Parameters.AddWithValue("@FullName", model.FullName);
-                command.Parameters.AddWithValue("@Username", model.Username);
-                command.Parameters.AddWithValue("@PasswordHash", passwordHash);
-                command.Parameters.AddWithValue("@PhoneNumber", model.PhoneNumber);
-                command.Parameters.AddWithValue("@Email", model.Email);
+                    IF EXISTS
+                    (
+                        SELECT 1
+                        FROM dbo.Staff WITH (UPDLOCK, HOLDLOCK)
+                        WHERE Role IN ('Admin', 'MainAdmin')
+                    )
+                    OR EXISTS
+                    (
+                        SELECT 1
+                        FROM dbo.SystemSettings WITH (UPDLOCK, HOLDLOCK)
+                        WHERE SettingKey = 'IsSetupCompleted'
+                          AND SettingValue = 'true'
+                    )
+                        THROW 50001,
+                            'System Setup Completed: Main Admin account has already been registered.',
+                            1;
+
+                    IF EXISTS
+                    (
+                        SELECT 1
+                        FROM dbo.Staff WITH (UPDLOCK, HOLDLOCK)
+                        WHERE Username = @Username OR Email = @Email
+                    )
+                        THROW 50002,
+                            'Username or Email address is already in use.',
+                            1;
+
+                    INSERT INTO dbo.Staff
+                    (
+                        FullName,
+                        Username,
+                        PasswordHash,
+                        PhoneNumber,
+                        Email,
+                        Role,
+                        Status,
+                        CreatedAt
+                    )
+                    VALUES
+                    (
+                        @FullName,
+                        @Username,
+                        @PasswordHash,
+                        @PhoneNumber,
+                        @Email,
+                        'MainAdmin',
+                        'Active',
+                        GETDATE()
+                    );
+
+                    UPDATE dbo.SystemSettings
+                    SET SettingValue = 'true'
+                    WHERE SettingKey = 'IsSetupCompleted';
+
+                    IF @@ROWCOUNT = 0
+                    BEGIN
+                        INSERT INTO dbo.SystemSettings (SettingKey, SettingValue)
+                        VALUES ('IsSetupCompleted', 'true');
+                    END
+
+                    COMMIT TRANSACTION;
+                    """;
+
+                await using var command = new SqlCommand(sql, connection);
+
+                command.Parameters.Add("@FullName", SqlDbType.NVarChar, 100)
+                    .Value = model.FullName;
+                command.Parameters.Add("@Username", SqlDbType.NVarChar, 50)
+                    .Value = model.Username;
+                command.Parameters.Add("@PasswordHash", SqlDbType.NVarChar, 255)
+                    .Value = passwordHash;
+                command.Parameters.Add("@PhoneNumber", SqlDbType.NVarChar, 20)
+                    .Value = model.PhoneNumber;
+                command.Parameters.Add("@Email", SqlDbType.NVarChar, 100)
+                    .Value = model.Email;
 
                 await command.ExecuteNonQueryAsync();
+
                 return (true, null);
             }
             catch (SqlException ex)
@@ -64,89 +166,200 @@ namespace Gym.Services
             }
         }
 
-        public async Task<(bool Success, string? ErrorMessage, int NewStaffId)> CreatePendingStaffAsync(StaffViewModel model)
+        public async Task<(
+            bool Success,
+            string? ErrorMessage,
+            int NewStaffId)> CreatePendingStaffAsync(
+                StaffViewModel model)
         {
             try
             {
-                using var connection = new SqlConnection(_connectionString);
+                await using var connection =
+                    new SqlConnection(_connectionString);
+
                 await connection.OpenAsync();
 
-                string checkQuery = "SELECT COUNT(*) FROM Staff WHERE Email = @Email";
-                using (var checkCmd = new SqlCommand(checkQuery, connection))
+                const string checkSql = """
+                    SELECT COUNT(*)
+                    FROM dbo.Staff
+                    WHERE Email = @Email;
+                    """;
+
+                await using (var checkCommand =
+                    new SqlCommand(checkSql, connection))
                 {
-                    checkCmd.Parameters.AddWithValue("@Email", model.Email);
-                    if (Convert.ToInt64(await checkCmd.ExecuteScalarAsync()) > 0)
+                    checkCommand.Parameters.AddWithValue(
+                        "@Email",
+                        model.Email);
+
+                    long existingCount = Convert.ToInt64(
+                        await checkCommand.ExecuteScalarAsync());
+
+                    if (existingCount > 0)
                     {
-                        return (false, "An account with this email address already exists.", 0);
+                        return (
+                            false,
+                            "An account with this email address already exists.",
+                            0);
                     }
                 }
 
-                string role = model.Role is "Trainer" or "Staff" ? model.Role : "Staff";
+                string role =
+                    model.Role is "Trainer" or "Staff"
+                        ? model.Role
+                        : "Staff";
 
-                string insertQuery = @"
-                    INSERT INTO Staff (FullName, Email, PhoneNumber, Birthday, Sex, Address, Role, Status, CreatedAt) 
+                const string insertSql = """
+                    INSERT INTO dbo.Staff
+                    (
+                        FullName,
+                        Email,
+                        PhoneNumber,
+                        Birthday,
+                        Sex,
+                        Address,
+                        Role,
+                        Status,
+                        CreatedAt
+                    )
                     OUTPUT INSERTED.Id
-                    VALUES (@FullName, @Email, @PhoneNumber, @Birthday, @Sex, @Address, @Role, 'Pending', GETDATE())";
+                    VALUES
+                    (
+                        @FullName,
+                        @Email,
+                        @PhoneNumber,
+                        @Birthday,
+                        @Sex,
+                        @Address,
+                        @Role,
+                        'Pending',
+                        GETDATE()
+                    );
+                    """;
 
-                using var insertCmd = new SqlCommand(insertQuery, connection);
-                insertCmd.Parameters.AddWithValue("@FullName", model.FullName ?? (object)DBNull.Value);
-                insertCmd.Parameters.AddWithValue("@Email", model.Email);
-                insertCmd.Parameters.AddWithValue("@PhoneNumber", model.PhoneNumber ?? (object)DBNull.Value);
-                insertCmd.Parameters.AddWithValue("@Birthday", model.Birthday == default ? DBNull.Value : model.Birthday);
-                insertCmd.Parameters.AddWithValue("@Sex", model.Sex ?? (object)DBNull.Value);
-                insertCmd.Parameters.AddWithValue("@Address", model.Address ?? (object)DBNull.Value);
-                insertCmd.Parameters.AddWithValue("@Role", role);
+                await using var insertCommand =
+                    new SqlCommand(insertSql, connection);
 
-                object? idResult = await insertCmd.ExecuteScalarAsync();
-                int newId = Convert.ToInt32(idResult);
+                insertCommand.Parameters.AddWithValue(
+                    "@FullName",
+                    DbValue(model.FullName));
 
-                return (true, null, newId);
+                insertCommand.Parameters.AddWithValue(
+                    "@Email",
+                    model.Email);
+
+                insertCommand.Parameters.AddWithValue(
+                    "@PhoneNumber",
+                    DbValue(model.PhoneNumber));
+
+                insertCommand.Parameters.AddWithValue(
+                    "@Birthday",
+                    model.Birthday == default
+                        ? DBNull.Value
+                        : model.Birthday);
+
+                insertCommand.Parameters.AddWithValue(
+                    "@Sex",
+                    DbValue(model.Sex));
+
+                insertCommand.Parameters.AddWithValue(
+                    "@Address",
+                    DbValue(model.Address));
+
+                insertCommand.Parameters.AddWithValue(
+                    "@Role",
+                    role);
+
+                object? result =
+                    await insertCommand.ExecuteScalarAsync();
+
+                int newStaffId = Convert.ToInt32(result);
+
+                return (true, null, newStaffId);
             }
             catch (Exception ex)
             {
-                return (false, $"Database error: {ex.Message}", 0);
+                return (
+                    false,
+                    $"Database error: {ex.Message}",
+                    0);
             }
         }
 
-        public async Task<(bool Success, string? ErrorMessage)> ActivateStaffWithCredentialsAsync(int staffId, string username, string passwordHash)
+        public async Task<(bool Success, string? ErrorMessage)>
+            ActivateStaffWithCredentialsAsync(
+                int staffId,
+                string username,
+                string passwordHash)
         {
             try
             {
-                using var connection = new SqlConnection(_connectionString);
+                await using var connection =
+                    new SqlConnection(_connectionString);
+
                 await connection.OpenAsync();
 
-                string checkUsernameQuery = "SELECT COUNT(*) FROM Staff WHERE Username = @Username AND Id <> @StaffId";
-                using (var checkCmd = new SqlCommand(checkUsernameQuery, connection))
-                {
-                    checkCmd.Parameters.AddWithValue("@Username", username);
-                    checkCmd.Parameters.AddWithValue("@StaffId", staffId);
+                const string checkSql = """
+                    SELECT COUNT(*)
+                    FROM dbo.Staff
+                    WHERE Username = @Username
+                      AND Id <> @StaffId;
+                    """;
 
-                    int exists = Convert.ToInt32(await checkCmd.ExecuteScalarAsync());
-                    if (exists > 0)
+                await using (var checkCommand =
+                    new SqlCommand(checkSql, connection))
+                {
+                    checkCommand.Parameters.AddWithValue(
+                        "@Username",
+                        username);
+
+                    checkCommand.Parameters.AddWithValue(
+                        "@StaffId",
+                        staffId);
+
+                    int count = Convert.ToInt32(
+                        await checkCommand.ExecuteScalarAsync());
+
+                    if (count > 0)
                     {
-                        return (false, "Username is already taken. Please choose a different one.");
+                        return (
+                            false,
+                            "Username is already taken. Please choose a different one.");
                     }
                 }
 
-                string updateQuery = @"
-                    UPDATE Staff 
-                    SET Username = @Username, 
-                        PasswordHash = @PasswordHash, 
-                        Status = 'Active' 
-                    WHERE Id = @StaffId AND Status = 'Pending'";
+                const string updateSql = """
+                    UPDATE dbo.Staff
+                    SET Username = @Username,
+                        PasswordHash = @PasswordHash,
+                        Status = 'Active'
+                    WHERE Id = @StaffId
+                      AND Status = 'Pending';
+                    """;
 
-                using (var updateCmd = new SqlCommand(updateQuery, connection))
+                await using var updateCommand =
+                    new SqlCommand(updateSql, connection);
+
+                updateCommand.Parameters.AddWithValue(
+                    "@Username",
+                    username);
+
+                updateCommand.Parameters.AddWithValue(
+                    "@PasswordHash",
+                    passwordHash);
+
+                updateCommand.Parameters.AddWithValue(
+                    "@StaffId",
+                    staffId);
+
+                int rowsAffected =
+                    await updateCommand.ExecuteNonQueryAsync();
+
+                if (rowsAffected == 0)
                 {
-                    updateCmd.Parameters.AddWithValue("@Username", username);
-                    updateCmd.Parameters.AddWithValue("@PasswordHash", passwordHash);
-                    updateCmd.Parameters.AddWithValue("@StaffId", staffId);
-
-                    int rowsAffected = await updateCmd.ExecuteNonQueryAsync();
-
-                    if (rowsAffected == 0)
-                    {
-                        return (false, "Account setup failed. The registration link may be invalid, expired, or already completed.");
-                    }
+                    return (
+                        false,
+                        "Account setup failed. The registration link may be invalid, expired, or already completed.");
                 }
 
                 return (true, null);
@@ -157,136 +370,227 @@ namespace Gym.Services
             }
         }
 
-        public async Task<(bool Success, string? ErrorMessage)> ActivateStaffAsync(int staffId)
+        public async Task<(bool Success, string? ErrorMessage)>
+            ActivateStaffAsync(int staffId)
         {
-            using var connection = new SqlConnection(_connectionString);
+            await using var connection =
+                new SqlConnection(_connectionString);
+
             await connection.OpenAsync();
 
-            string query = "UPDATE Staff SET Status = 'Active' WHERE Id = @Id AND Status = 'Pending'";
-            using var command = new SqlCommand(query, connection);
+            const string sql = """
+                UPDATE dbo.Staff
+                SET Status = 'Active'
+                WHERE Id = @Id
+                  AND Status = 'Pending';
+                """;
+
+            await using var command =
+                new SqlCommand(sql, connection);
+
             command.Parameters.AddWithValue("@Id", staffId);
 
             int rows = await command.ExecuteNonQueryAsync();
+
             return rows > 0
                 ? (true, null)
-                : (false, "This confirmation link is invalid or has already been used.");
+                : (
+                    false,
+                    "This confirmation link is invalid or has already been used.");
         }
 
         public async Task DeletePendingStaffAsync(int staffId)
         {
-            using var connection = new SqlConnection(_connectionString);
+            await using var connection =
+                new SqlConnection(_connectionString);
+
             await connection.OpenAsync();
 
-            string query = "DELETE FROM Staff WHERE Id = @Id AND Status = 'Pending'";
-            using var command = new SqlCommand(query, connection);
+            const string sql = """
+                DELETE FROM dbo.Staff
+                WHERE Id = @Id
+                  AND Status = 'Pending';
+                """;
+
+            await using var command =
+                new SqlCommand(sql, connection);
+
             command.Parameters.AddWithValue("@Id", staffId);
+
             await command.ExecuteNonQueryAsync();
         }
 
-        public async Task<List<UserRoleViewModel>> GetAllUsersAsync()
+        public async Task<List<UserRoleViewModel>>
+            GetAllUsersAsync()
         {
             var users = new List<UserRoleViewModel>();
 
-            using var connection = new SqlConnection(_connectionString);
+            await using var connection =
+                new SqlConnection(_connectionString);
+
             await connection.OpenAsync();
 
-            string query = @"
-                SELECT Id, FullName, Username, Email, Role, Status, LastLoginAt
-                FROM Staff
-                ORDER BY 
-                    CASE Status WHEN 'Pending' THEN 0 WHEN 'Active' THEN 1 ELSE 2 END,
-                    FullName";
+            const string sql = """
+                SELECT
+                    staff.Id,
+                    staff.FullName,
+                    staff.Username,
+                    staff.Email,
+                    staff.PhoneNumber,
+                    staff.Role,
+                    staff.Status,
+                    staff.LastLoginAt,
+                    attendance.AttendanceStatus AS TodayAttendanceStatus,
+                    attendance.CheckedInAt AS TodayCheckedInAt
+                FROM dbo.Staff staff
+                LEFT JOIN dbo.StaffAttendanceLogs attendance
+                    ON attendance.StaffId = staff.Id
+                   AND attendance.AttendanceDate = CAST(GETDATE() AS DATE)
+                ORDER BY
+                    CASE staff.Status
+                        WHEN 'Pending' THEN 0
+                        WHEN 'Active' THEN 1
+                        ELSE 2
+                    END,
+                    staff.FullName;
+                """;
 
-            using var command = new SqlCommand(query, connection);
-            using var reader = await command.ExecuteReaderAsync();
+            await using var command =
+                new SqlCommand(sql, connection);
+
+            await using var reader =
+                await command.ExecuteReaderAsync();
 
             while (await reader.ReadAsync())
             {
-                users.Add(new UserRoleViewModel
-                {
-                    Id = Convert.ToInt32(reader["Id"]),
-                    FullName = reader["FullName"]?.ToString() ?? string.Empty,
-                    Username = reader["Username"]?.ToString() ?? string.Empty,
-                    Email = reader["Email"]?.ToString() ?? string.Empty,
-                    Role = reader["Role"]?.ToString() ?? string.Empty,
-                    Status = reader["Status"]?.ToString() ?? "Active",
-                    LastLoginAt = reader["LastLoginAt"] is DBNull ? null : Convert.ToDateTime(reader["LastLoginAt"])
-                });
+                users.Add(MapUser(reader));
             }
 
             return users;
         }
 
-        public async Task<(List<UserRoleViewModel> Users, int TotalCount)> GetAllUsersAsync(int page, int pageSize)
+        public async Task<(
+            List<UserRoleViewModel> Users,
+            int TotalCount)> GetAllUsersAsync(
+                int page,
+                int pageSize)
         {
             page = Math.Max(page, 1);
-            var users = new List<UserRoleViewModel>();
-            int totalCount;
+            pageSize = Math.Max(pageSize, 1);
 
-            using var connection = new SqlConnection(_connectionString);
+            var users = new List<UserRoleViewModel>();
+
+            await using var connection =
+                new SqlConnection(_connectionString);
+
             await connection.OpenAsync();
 
-            string query = @"
-        SELECT COUNT(*) FROM Staff;
+            const string sql = """
+                SELECT COUNT(*)
+                FROM dbo.Staff;
 
-        SELECT Id, FullName, Username, Email, Role, Status, LastLoginAt
-        FROM Staff
-        ORDER BY 
-            CASE Status WHEN 'Pending' THEN 0 WHEN 'Active' THEN 1 ELSE 2 END,
-            FullName
-        OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY;";
+                SELECT
+                    staff.Id,
+                    staff.FullName,
+                    staff.Username,
+                    staff.Email,
+                    staff.PhoneNumber,
+                    staff.Role,
+                    staff.Status,
+                    staff.LastLoginAt,
+                    attendance.AttendanceStatus AS TodayAttendanceStatus,
+                    attendance.CheckedInAt AS TodayCheckedInAt
+                FROM dbo.Staff staff
+                LEFT JOIN dbo.StaffAttendanceLogs attendance
+                    ON attendance.StaffId = staff.Id
+                   AND attendance.AttendanceDate = CAST(GETDATE() AS DATE)
+                ORDER BY
+                    CASE staff.Status
+                        WHEN 'Pending' THEN 0
+                        WHEN 'Active' THEN 1
+                        ELSE 2
+                    END,
+                    staff.FullName
+                OFFSET @Offset ROWS
+                FETCH NEXT @PageSize ROWS ONLY;
+                """;
 
-            using var command = new SqlCommand(query, connection);
-            command.Parameters.AddWithValue("@Offset", (page - 1) * pageSize);
-            command.Parameters.AddWithValue("@PageSize", pageSize);
+            await using var command =
+                new SqlCommand(sql, connection);
 
-            using var reader = await command.ExecuteReaderAsync();
+            command.Parameters.AddWithValue(
+                "@Offset",
+                (page - 1) * pageSize);
 
-            await reader.ReadAsync();
-            totalCount = Convert.ToInt32(reader[0]);
+            command.Parameters.AddWithValue(
+                "@PageSize",
+                pageSize);
+
+            await using var reader =
+                await command.ExecuteReaderAsync();
+
+            int totalCount = 0;
+
+            if (await reader.ReadAsync())
+            {
+                totalCount = Convert.ToInt32(reader[0]);
+            }
 
             await reader.NextResultAsync();
+
             while (await reader.ReadAsync())
             {
-                users.Add(new UserRoleViewModel
-                {
-                    Id = Convert.ToInt32(reader["Id"]),
-                    FullName = reader["FullName"]?.ToString() ?? string.Empty,
-                    Username = reader["Username"]?.ToString() ?? string.Empty,
-                    Email = reader["Email"]?.ToString() ?? string.Empty,
-                    Role = reader["Role"]?.ToString() ?? string.Empty,
-                    Status = reader["Status"]?.ToString() ?? "Active",
-                    LastLoginAt = reader["LastLoginAt"] is DBNull ? null : Convert.ToDateTime(reader["LastLoginAt"])
-                });
+                users.Add(MapUser(reader));
             }
 
             return (users, totalCount);
         }
 
-        public async Task<List<ActivityLogEntry>> GetActivityLogAsync(int staffId, int take = 25)
+        public async Task<List<ActivityLogEntry>>
+            GetActivityLogAsync(
+                int staffId,
+                int take = 25)
         {
             var log = new List<ActivityLogEntry>();
 
-            using var connection = new SqlConnection(_connectionString);
+            await using var connection =
+                new SqlConnection(_connectionString);
+
             await connection.OpenAsync();
 
-            string query = @"
-                SELECT TOP (@Take) ActionType, OccurredAt
-                FROM StaffActivityLog
+            const string sql = """
+                SELECT TOP (@Take)
+                    ActionType,
+                    OccurredAt
+                FROM dbo.StaffActivityLog
                 WHERE StaffId = @StaffId
-                ORDER BY OccurredAt DESC";
+                ORDER BY OccurredAt DESC;
+                """;
 
-            using var command = new SqlCommand(query, connection);
-            command.Parameters.AddWithValue("@Take", take);
-            command.Parameters.AddWithValue("@StaffId", staffId);
+            await using var command =
+                new SqlCommand(sql, connection);
 
-            using var reader = await command.ExecuteReaderAsync();
+            command.Parameters.AddWithValue(
+                "@Take",
+                Math.Max(take, 1));
+
+            command.Parameters.AddWithValue(
+                "@StaffId",
+                staffId);
+
+            await using var reader =
+                await command.ExecuteReaderAsync();
+
             while (await reader.ReadAsync())
             {
                 log.Add(new ActivityLogEntry
                 {
-                    ActionType = reader["ActionType"]?.ToString() ?? string.Empty,
-                    OccurredAt = Convert.ToDateTime(reader["OccurredAt"])
+                    ActionType =
+                        reader["ActionType"]?.ToString()
+                        ?? string.Empty,
+
+                    OccurredAt =
+                        Convert.ToDateTime(reader["OccurredAt"])
                 });
             }
 
@@ -295,121 +599,496 @@ namespace Gym.Services
 
         public async Task RecordLoginAsync(int staffId)
         {
-            using var connection = new SqlConnection(_connectionString);
+            await using var connection =
+                new SqlConnection(_connectionString);
+
             await connection.OpenAsync();
 
-            string query = @"
-                UPDATE Staff SET LastLoginAt = GETDATE() WHERE Id = @Id;
-                INSERT INTO StaffActivityLog (StaffId, ActionType, OccurredAt) VALUES (@Id, 'Login', GETDATE());";
+            const string sql = """
+                UPDATE dbo.Staff
+                SET LastLoginAt = GETDATE()
+                WHERE Id = @Id;
 
-            using var command = new SqlCommand(query, connection);
+                INSERT INTO dbo.StaffActivityLog
+                    (StaffId, ActionType, OccurredAt)
+                VALUES
+                    (@Id, 'Login', GETDATE());
+
+                IF EXISTS (SELECT 1 FROM dbo.Staff WHERE Id = @Id AND Role IN ('Staff', 'Trainer'))
+                   AND NOT EXISTS
+                   (
+                       SELECT 1 FROM dbo.StaffAttendanceLogs
+                       WHERE StaffId = @Id AND AttendanceDate = CAST(GETDATE() AS DATE)
+                   )
+                BEGIN
+                    INSERT INTO dbo.StaffAttendanceLogs
+                        (StaffId, AttendanceDate, AttendanceStatus, CheckedInAt)
+                    VALUES
+                        (@Id, CAST(GETDATE() AS DATE), 'Present', GETDATE());
+                END;
+                """;
+
+            await using var command =
+                new SqlCommand(sql, connection);
+
             command.Parameters.AddWithValue("@Id", staffId);
+
             await command.ExecuteNonQueryAsync();
+        }
+
+        public async Task<(bool Success, string? ErrorMessage)> MarkStaffAbsentAsync(
+            int staffId,
+            int markedByStaffId)
+        {
+            await using var connection = new SqlConnection(_connectionString);
+            await connection.OpenAsync();
+
+            const string sql = """
+                IF NOT EXISTS
+                (
+                    SELECT 1 FROM dbo.Staff
+                    WHERE Id = @StaffId AND Role IN ('Staff', 'Trainer') AND Status = 'Active'
+                )
+                BEGIN
+                    SELECT CAST(0 AS BIT);
+                    RETURN;
+                END;
+
+                UPDATE dbo.StaffAttendanceLogs
+                SET AttendanceStatus = 'Absent',
+                    CheckedInAt = NULL,
+                    MarkedAbsentAt = GETDATE(),
+                    MarkedAbsentByStaffId = @MarkedByStaffId
+                WHERE StaffId = @StaffId
+                  AND AttendanceDate = CAST(GETDATE() AS DATE);
+
+                IF @@ROWCOUNT = 0
+                BEGIN
+                    INSERT INTO dbo.StaffAttendanceLogs
+                        (StaffId, AttendanceDate, AttendanceStatus, MarkedAbsentAt, MarkedAbsentByStaffId)
+                    VALUES
+                        (@StaffId, CAST(GETDATE() AS DATE), 'Absent', GETDATE(), @MarkedByStaffId);
+                END;
+
+                INSERT INTO dbo.StaffActivityLog (StaffId, ActionType, OccurredAt)
+                VALUES (@StaffId, 'Absent', GETDATE());
+
+                SELECT CAST(1 AS BIT);
+                """;
+
+            await using var command = new SqlCommand(sql, connection);
+            command.Parameters.AddWithValue("@StaffId", staffId);
+            command.Parameters.AddWithValue("@MarkedByStaffId", markedByStaffId);
+            var success = Convert.ToBoolean(await command.ExecuteScalarAsync());
+            return success
+                ? (true, null)
+                : (false, "Only active Staff or Trainer accounts can be marked absent.");
+        }
+
+        public async Task<(List<UserAttendanceItem> Items, int TotalCount)> GetUserAttendanceAsync(
+            int page,
+            int pageSize)
+        {
+            page = Math.Max(1, page);
+            pageSize = Math.Max(1, pageSize);
+            var items = new List<UserAttendanceItem>();
+
+            await using var connection = new SqlConnection(_connectionString);
+            await connection.OpenAsync();
+
+            const string sql = """
+                SELECT COUNT(*) FROM dbo.StaffAttendanceLogs;
+
+                SELECT attendance.StaffId,
+                       staff.FullName,
+                       staff.Role,
+                       attendance.AttendanceDate,
+                       attendance.AttendanceStatus,
+                       attendance.CheckedInAt,
+                       attendance.MarkedAbsentAt
+                FROM dbo.StaffAttendanceLogs attendance
+                INNER JOIN dbo.Staff staff ON staff.Id = attendance.StaffId
+                ORDER BY attendance.AttendanceDate DESC,
+                         COALESCE(attendance.CheckedInAt, attendance.MarkedAbsentAt) DESC,
+                         staff.FullName
+                OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY;
+                """;
+
+            await using var command = new SqlCommand(sql, connection);
+            command.Parameters.AddWithValue("@Offset", (page - 1) * pageSize);
+            command.Parameters.AddWithValue("@PageSize", pageSize);
+            await using var reader = await command.ExecuteReaderAsync();
+            await reader.ReadAsync();
+            var totalCount = reader.GetInt32(0);
+            await reader.NextResultAsync();
+
+            while (await reader.ReadAsync())
+            {
+                items.Add(new UserAttendanceItem
+                {
+                    StaffId = Convert.ToInt32(reader["StaffId"]),
+                    FullName = reader["FullName"]?.ToString() ?? string.Empty,
+                    Role = reader["Role"]?.ToString() ?? string.Empty,
+                    AttendanceDate = Convert.ToDateTime(reader["AttendanceDate"]),
+                    AttendanceStatus = reader["AttendanceStatus"]?.ToString() ?? string.Empty,
+                    CheckedInAt = reader["CheckedInAt"] is DBNull ? null : Convert.ToDateTime(reader["CheckedInAt"]),
+                    MarkedAbsentAt = reader["MarkedAbsentAt"] is DBNull ? null : Convert.ToDateTime(reader["MarkedAbsentAt"])
+                });
+            }
+
+            return (items, totalCount);
         }
 
         public async Task RecordLogoutAsync(int staffId)
         {
-            using var connection = new SqlConnection(_connectionString);
+            await using var connection =
+                new SqlConnection(_connectionString);
+
             await connection.OpenAsync();
 
-            string query = "INSERT INTO StaffActivityLog (StaffId, ActionType, OccurredAt) VALUES (@Id, 'Logout', GETDATE())";
-            using var command = new SqlCommand(query, connection);
+            const string sql = """
+                INSERT INTO dbo.StaffActivityLog
+                    (StaffId, ActionType, OccurredAt)
+                VALUES
+                    (@Id, 'Logout', GETDATE());
+                """;
+
+            await using var command =
+                new SqlCommand(sql, connection);
+
             command.Parameters.AddWithValue("@Id", staffId);
+
             await command.ExecuteNonQueryAsync();
         }
 
-        public async Task<(bool Success, string? ErrorMessage)> SuspendUserAsync(int staffId)
+        public async Task<(bool Success, string? ErrorMessage)>
+            SuspendUserAsync(int staffId)
         {
-            using var connection = new SqlConnection(_connectionString);
+            await using var connection =
+                new SqlConnection(_connectionString);
+
             await connection.OpenAsync();
 
-            string query = @"
-                UPDATE Staff SET Status = 'Suspended' 
-                WHERE Id = @Id AND Status = 'Active' AND Role NOT IN ('MainAdmin')";
+            const string sql = """
+                UPDATE dbo.Staff
+                SET Status = 'Suspended'
+                WHERE Id = @Id
+                  AND Status = 'Active'
+                  AND Role <> 'MainAdmin';
+                """;
 
-            using var command = new SqlCommand(query, connection);
+            await using var command =
+                new SqlCommand(sql, connection);
+
             command.Parameters.AddWithValue("@Id", staffId);
+
             int rows = await command.ExecuteNonQueryAsync();
 
             return rows > 0
                 ? (true, null)
-                : (false, "That account can't be suspended (already suspended, pending, or a protected admin account).");
+                : (
+                    false,
+                    "That account cannot be suspended.");
         }
 
-        public async Task<(bool Success, string? ErrorMessage)> ReactivateUserAsync(int staffId)
+        public async Task<(bool Success, string? ErrorMessage)>
+            ReactivateUserAsync(int staffId)
         {
-            using var connection = new SqlConnection(_connectionString);
+            await using var connection =
+                new SqlConnection(_connectionString);
+
             await connection.OpenAsync();
 
-            string query = "UPDATE Staff SET Status = 'Active' WHERE Id = @Id AND Status = 'Suspended'";
-            using var command = new SqlCommand(query, connection);
+            const string sql = """
+                UPDATE dbo.Staff
+                SET Status = 'Active'
+                WHERE Id = @Id
+                  AND Status = 'Suspended';
+                """;
+
+            await using var command =
+                new SqlCommand(sql, connection);
+
             command.Parameters.AddWithValue("@Id", staffId);
+
             int rows = await command.ExecuteNonQueryAsync();
 
             return rows > 0
                 ? (true, null)
-                : (false, "That account isn't currently suspended.");
+                : (
+                    false,
+                    "That account is not currently suspended.");
         }
 
-        public async Task<(bool Success, string? ErrorMessage)> DeleteUserAsync(int staffId)
+        public async Task<(bool Success, string? ErrorMessage)>
+            DeleteUserAsync(int staffId)
         {
-            using var connection = new SqlConnection(_connectionString);
+            await using var connection =
+                new SqlConnection(_connectionString);
+
             await connection.OpenAsync();
 
-            string query = "DELETE FROM Staff WHERE Id = @Id AND Role NOT IN ('MainAdmin')";
-            using var command = new SqlCommand(query, connection);
+            const string sql = """
+                DELETE FROM dbo.Staff
+                WHERE Id = @Id
+                  AND Role <> 'MainAdmin';
+                """;
+
+            await using var command =
+                new SqlCommand(sql, connection);
+
             command.Parameters.AddWithValue("@Id", staffId);
+
             int rows = await command.ExecuteNonQueryAsync();
 
             return rows > 0
                 ? (true, null)
-                : (false, "That account can't be deleted (not found, or a protected admin account).");
+                : (
+                    false,
+                    "That account cannot be deleted.");
         }
 
-        public async Task<(bool IsValid, string? Role, int UserId, string? Username, string? Email, string? Phone, string? ErrorMessage)> ValidateUserAsync(string loginIdentifier, string password)
+        public async Task<(
+            bool IsValid,
+            string? Role,
+            int UserId,
+            string? Username,
+            string? FullName,
+            string? Email,
+            string? Phone,
+            string? ErrorMessage)> ValidateUserAsync(
+                string loginIdentifier,
+                string password)
         {
-            using var connection = new SqlConnection(_connectionString);
+            await using var connection =
+                new SqlConnection(_connectionString);
+
             await connection.OpenAsync();
 
-            string query = @"
-                SELECT TOP 1 Id AS StaffID, Username, Email, PhoneNumber, PasswordHash, Role, Status 
-                FROM Staff 
-                WHERE Email = @Identifier OR Username = @Identifier";
+            const string sql = """
+                SELECT TOP (1)
+                    Id AS StaffId,
+                    Username,
+                    FullName,
+                    Email,
+                    PhoneNumber,
+                    PasswordHash,
+                    Role,
+                    Status
+                FROM dbo.Staff
+                WHERE Email = @Identifier
+                   OR Username = @Identifier;
+                """;
 
-            using var command = new SqlCommand(query, connection);
-            command.Parameters.AddWithValue("@Identifier", loginIdentifier);
+            await using var command =
+                new SqlCommand(sql, connection);
 
-            using var reader = await command.ExecuteReaderAsync();
-            if (await reader.ReadAsync())
+            command.Parameters.AddWithValue(
+                "@Identifier",
+                loginIdentifier);
+
+            await using var reader =
+                await command.ExecuteReaderAsync();
+
+            if (!await reader.ReadAsync())
             {
-                int userId = Convert.ToInt32(reader["StaffID"]);
-                string? username = reader["Username"]?.ToString();
-                string? email = reader["Email"]?.ToString();
-                string? phone = reader["PhoneNumber"]?.ToString();
-                string? storedHash = reader["PasswordHash"]?.ToString();
-                string? role = reader["Role"]?.ToString();
-                string? status = reader["Status"]?.ToString();
-
-                if (!string.IsNullOrEmpty(storedHash) && _hashingService.VerifyPassword(password, storedHash))
-                {
-                    if (status == "Pending")
-                    {
-                        return (false, null, 0, null, null, null, "Your account is pending email confirmation. Check your inbox for the confirmation link.");
-                    }
-                    if (status == "Suspended")
-                    {
-                        return (false, null, 0, null, null, null, "Your account has been suspended. Contact an administrator.");
-                    }
-
-                    string normalizedRole = (role == "MainAdmin" || role == "Admin")
-                        ? "Admin"
-                        : (role ?? "Staff");
-
-                    return (true, normalizedRole, userId, username, email, phone, null);
-                }
+                return InvalidCredentials();
             }
 
-            return (false, null, 0, null, null, null, "Invalid login credentials.");
+            int userId =
+                Convert.ToInt32(reader["StaffId"]);
+
+            string? username =
+                reader["Username"]?.ToString();
+
+            string? fullName =
+                reader["FullName"]?.ToString();
+
+            string? email =
+                reader["Email"]?.ToString();
+
+            string? phone =
+                reader["PhoneNumber"]?.ToString();
+
+            string? storedHash =
+                reader["PasswordHash"]?.ToString();
+
+            string? role =
+                reader["Role"]?.ToString();
+
+            string? status =
+                reader["Status"]?.ToString();
+
+            if (string.IsNullOrWhiteSpace(storedHash) ||
+                !_hashingService.VerifyPassword(
+                    password,
+                    storedHash))
+            {
+                return InvalidCredentials();
+            }
+
+            if (status == "Pending")
+            {
+                return (
+                    false,
+                    null,
+                    0,
+                    null,
+                    null,
+                    null,
+                    null,
+                    "Your account is pending email confirmation.");
+            }
+
+            if (status == "Suspended")
+            {
+                return (
+                    false,
+                    null,
+                    0,
+                    null,
+                    null,
+                    null,
+                    null,
+                    "Your account has been suspended.");
+            }
+
+            string normalizedRole =
+                role is "MainAdmin" or "Admin"
+                    ? "Admin"
+                    : role ?? "Staff";
+
+            return (
+                true,
+                normalizedRole,
+                userId,
+                username,
+                fullName,
+                email,
+                phone,
+                null);
+        }
+
+        public async Task<bool> UpdatePasswordHashAsync(
+            int staffId,
+            string passwordHash)
+        {
+            await using var connection = new SqlConnection(_connectionString);
+            await connection.OpenAsync();
+
+            const string sql = """
+                UPDATE dbo.Staff
+                SET PasswordHash = @PasswordHash
+                WHERE Id = @StaffId
+                  AND Status = 'Active';
+                """;
+
+            await using var command = new SqlCommand(sql, connection);
+            command.Parameters.Add("@PasswordHash", SqlDbType.NVarChar, 255)
+                .Value = passwordHash;
+            command.Parameters.Add("@StaffId", SqlDbType.Int)
+                .Value = staffId;
+
+            return await command.ExecuteNonQueryAsync() == 1;
+        }
+
+        public async Task<List<RegisteredTrainerInfo>> GetActiveRegisteredTrainersAsync()
+        {
+            var trainers = new List<RegisteredTrainerInfo>();
+            await using var connection = new SqlConnection(_connectionString);
+            await connection.OpenAsync();
+
+            const string sql = """
+                SELECT Id, FullName, Email, PhoneNumber
+                FROM dbo.Staff
+                WHERE Role = 'Trainer'
+                  AND Status = 'Active'
+                ORDER BY FullName;
+                """;
+
+            await using var command = new SqlCommand(sql, connection);
+            await using var reader = await command.ExecuteReaderAsync();
+            while (await reader.ReadAsync())
+            {
+                trainers.Add(new RegisteredTrainerInfo
+                {
+                    StaffId = Convert.ToInt32(reader["Id"]),
+                    FullName = reader["FullName"]?.ToString() ?? string.Empty,
+                    Email = reader["Email"]?.ToString() ?? string.Empty,
+                    PhoneNumber = reader["PhoneNumber"]?.ToString() ?? string.Empty
+                });
+            }
+
+            return trainers;
+        }
+
+        private static UserRoleViewModel MapUser(
+            SqlDataReader reader)
+        {
+            return new UserRoleViewModel
+            {
+                Id = Convert.ToInt32(reader["Id"]),
+                FullName =
+                    reader["FullName"]?.ToString()
+                    ?? string.Empty,
+                Username =
+                    reader["Username"]?.ToString()
+                    ?? string.Empty,
+                Email =
+                    reader["Email"]?.ToString()
+                    ?? string.Empty,
+                PhoneNumber =
+                    reader["PhoneNumber"]?.ToString()
+                    ?? string.Empty,
+                Role =
+                    reader["Role"]?.ToString()
+                    ?? string.Empty,
+                Status =
+                    reader["Status"]?.ToString()
+                    ?? "Active",
+                LastLoginAt =
+                    reader["LastLoginAt"] is DBNull
+                        ? null
+                        : Convert.ToDateTime(
+                            reader["LastLoginAt"]),
+                TodayAttendanceStatus =
+                    reader["TodayAttendanceStatus"] is DBNull
+                        ? null
+                        : reader["TodayAttendanceStatus"].ToString(),
+                TodayCheckedInAt =
+                    reader["TodayCheckedInAt"] is DBNull
+                        ? null
+                        : Convert.ToDateTime(reader["TodayCheckedInAt"])
+            };
+        }
+
+        private static object DbValue(string? value)
+        {
+            return string.IsNullOrWhiteSpace(value)
+                ? DBNull.Value
+                : value;
+        }
+
+        private static (
+            bool IsValid,
+            string? Role,
+            int UserId,
+            string? Username,
+            string? FullName,
+            string? Email,
+            string? Phone,
+            string? ErrorMessage) InvalidCredentials()
+        {
+            return (
+                false,
+                null,
+                0,
+                null,
+                null,
+                null,
+                null,
+                "Invalid login credentials.");
         }
     }
+
 }

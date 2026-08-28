@@ -1,0 +1,551 @@
+@model Gym.Models.FrontDeskEquipmentViewModel
+@{
+    Layout = "~/Views/Shared/_FrontDeskLayout.cshtml";
+    ViewData["Title"] = "Equipment Inventory";
+}
+
+<style>
+    body > .container {
+        max-width: none;
+        margin: 0;
+        padding: 0 28px
+    }
+
+    .eq-page {
+        width: min(1160px, calc(100vw - 370px));
+        margin: 24px auto;
+        font: 15px Arial, sans-serif;
+        color: #102630
+    }
+
+    .eq-head {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 24px
+    }
+
+        .eq-head h1 {
+            margin: 0 auto 0 0;
+            font-size: 25px
+        }
+
+    .eq-search {
+        display: flex;
+        gap: 8px
+    }
+
+        .eq-search input {
+            width: 280px;
+            height: 40px;
+            padding: 0 13px;
+            border: 1px solid #c8d4cd;
+            border-radius: 5px;
+            font-size: 14px
+        }
+
+        .eq-search button {
+            width: 82px;
+            border: 0;
+            border-radius: 5px;
+            background: #084b0b;
+            color: #fff;
+            font-weight: 700
+        }
+
+    .eq-add {
+        height: 40px;
+        padding: 0 16px;
+        border: 0;
+        border-radius: 5px;
+        background: #176b28;
+        color: #fff;
+        font-weight: 700;
+        cursor: pointer
+    }
+
+    .eq-stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 18px;
+        margin-bottom: 24px
+    }
+
+    .eq-stat {
+        padding: 18px;
+        border-left: 4px solid #08752a;
+        border-radius: 7px;
+        background: #fff;
+        box-shadow: 0 5px 15px rgba(30, 54, 42, .09)
+    }
+
+        .eq-stat.maintenance {
+            border-color: #68736b
+        }
+
+        .eq-stat.out {
+            border-color: #d11f27
+        }
+
+        .eq-stat span {
+            font-size: 13px;
+            color: #56635b;
+            font-weight: 700
+        }
+
+        .eq-stat strong {
+            display: block;
+            margin-top: 14px;
+            font-size: 30px
+        }
+
+    .eq-card {
+        overflow: hidden;
+        background: #fff;
+        border: 1px solid #dbe4df;
+        border-radius: 8px
+    }
+
+        .eq-card h2 {
+            margin: 0;
+            padding: 17px 18px;
+            font-size: 20px
+        }
+
+    .eq-table {
+        width: 100%;
+        border-collapse: collapse
+    }
+
+        .eq-table th {
+            padding: 13px 18px;
+            background: #394c55;
+            color: #fff;
+            text-align: left;
+            font-size: 12px;
+            letter-spacing: .6px
+        }
+
+        .eq-table td {
+            padding: 15px 18px;
+            border-top: 1px solid #e6ebe8
+        }
+
+    .eq-name strong {
+        display: block
+    }
+
+    .eq-name small {
+        color: #6b766f
+    }
+
+    .condition {
+        display: inline-block;
+        padding: 5px 10px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 700
+    }
+
+    .good {
+        background: #caf3ce;
+        color: #176b2c
+    }
+
+    .fair {
+        background: #e4e9df;
+        color: #4e5d4f
+    }
+
+    .needs-maintenance {
+        background: #fff0c9;
+        color: #a25c00
+    }
+
+    .out-of-order {
+        background: #f8d5d5;
+        color: #a71920
+    }
+
+    .eq-foot {
+        min-height: 70px;
+        display: flex;
+        align-items: center;
+        padding: 14px 18px;
+        background: #e8f6fc
+    }
+
+    .eq-pager {
+        margin-left: auto;
+        display: flex;
+        gap: 8px
+    }
+
+        .eq-pager a {
+            width: 50px;
+            height: 38px;
+            display: grid;
+            place-items: center;
+            border: 1px solid #d5e1e5;
+            border-radius: 6px;
+            background: #f7fbfc;
+            color: #879397;
+            text-decoration: none
+        }
+
+            .eq-pager a.disabled {
+                pointer-events: none;
+                opacity: .5
+            }
+
+    .eq-notice {
+        padding: 11px 14px;
+        margin-bottom: 14px;
+        border-radius: 6px
+    }
+
+    .eq-success {
+        background: #eaf8ec;
+        color: #176328
+    }
+
+    .eq-error {
+        background: #fff0f0;
+        color: #a02020
+    }
+
+    .eq-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 2000;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        background: rgba(18, 39, 43, .58)
+    }
+
+    .eq-modal {
+        width: min(650px, 100%);
+        overflow: hidden;
+        border-radius: 8px;
+        background: #fff;
+        box-shadow: 0 18px 50px rgba(0, 0, 0, .25)
+    }
+
+    .eq-modal-head {
+        display: flex;
+        align-items: center;
+        padding: 18px 24px;
+        background: #176324;
+        color: #fff
+    }
+
+        .eq-modal-head h2 {
+            margin: 0;
+            font-size: 22px
+        }
+
+    .eq-close {
+        margin-left: auto;
+        border: 0;
+        background: transparent;
+        color: #fff;
+        font-size: 28px;
+        cursor: pointer
+    }
+
+    .eq-form {
+        padding: 24px
+    }
+
+    .eq-field {
+        margin-bottom: 17px
+    }
+
+        .eq-field label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 13px;
+            font-weight: 700
+        }
+
+        .eq-field input,
+        .eq-field select {
+            width: 100%;
+            height: 44px;
+            padding: 0 12px;
+            border: 1px solid #c8d3cd;
+            border-radius: 5px;
+            font-size: 15px
+        }
+
+    .eq-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px
+    }
+
+    .condition-label {
+        font-size: 13px;
+        font-weight: 700
+    }
+
+    .conditions {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+        margin-top: 8px
+    }
+
+    .condition-option input {
+        position: absolute;
+        opacity: 0
+    }
+
+    .condition-option span {
+        height: 88px;
+        display: grid;
+        place-items: center;
+        padding: 8px;
+        border: 1px solid #c9d3cd;
+        border-radius: 5px;
+        text-align: center;
+        font-size: 13px;
+        font-weight: 700
+    }
+
+    .condition-option input:checked + span {
+        border: 2px solid #18712c;
+        background: #eaf6ee;
+        color: #176b2c
+    }
+
+    .eq-modal-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin: 22px -24px -24px;
+        padding: 16px 24px;
+        border-top: 1px solid #d9e1dc
+    }
+
+    .eq-cancel,
+    .eq-save {
+        height: 40px;
+        padding: 0 20px;
+        border-radius: 5px;
+        font-weight: 700
+    }
+
+    .eq-cancel {
+        border: 1px solid #176b28;
+        background: #fff;
+        color: #176b28
+    }
+
+    .eq-save {
+        border: 0;
+        background: #176b28;
+        color: #fff
+    }
+
+    @@media(max-width:800px) {
+        .eq-page {
+            width: calc(100vw - 40px)
+        }
+
+        .eq-head {
+            align-items: stretch;
+            flex-direction: column
+        }
+
+        .eq-search input {
+            width: 100%
+        }
+
+        .eq-search {
+            display: grid;
+            grid-template-columns: 1fr 82px
+        }
+
+        .eq-stats {
+            grid-template-columns: 1fr
+        }
+
+        .eq-card {
+            overflow-x: auto
+        }
+
+        .eq-table {
+            min-width: 700px
+        }
+
+        .eq-row,
+        .conditions {
+            grid-template-columns: 1fr 1fr
+        }
+    }
+</style>
+
+<main class="eq-page">
+    <header class="eq-head">
+        <h1>Equipment Inventory</h1>
+        <form class="eq-search" method="get" asp-action="Equipment">
+            <input name="searchTerm" value="@Model.SearchTerm" placeholder="Search equipment..." />
+            <button type="submit">Search</button>
+        </form>
+        <button class="eq-add" type="button" onclick="openEquipmentModal()">＋ Report Equipment Issue</button>
+    </header>
+
+    @if (TempData["SuccessMessage"] is string success)
+    {
+        <div class="eq-notice eq-success">@success</div>
+    }
+    @if (TempData["ErrorMessage"] is string error)
+    {
+        <div class="eq-notice eq-error">@error</div>
+    }
+
+    <section class="eq-stats">
+        <div class="eq-stat">
+            <span>TOTAL ASSETS</span>
+            <strong>@Model.TotalAssets</strong>
+        </div>
+        <div class="eq-stat maintenance">
+            <span>IN MAINTENANCE</span>
+            <strong>@Model.InMaintenance</strong>
+        </div>
+        <div class="eq-stat out">
+            <span>OUT OF ORDER</span>
+            <strong>@Model.OutOfOrder</strong>
+        </div>
+    </section>
+
+    <section class="eq-card">
+        <h2>Equipment List</h2>
+        <table class="eq-table">
+            <thead>
+                <tr>
+                    <th>ASSET NAME</th>
+                    <th>CATEGORY</th>
+                    <th>QUANTITY</th>
+                    <th>CONDITION</th>
+                    <th>EVIDENCE</th>
+                    <th>LAST MAINTENANCE</th>
+                    <th>ADDED DATE</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Items.Count == 0)
+                {
+                    <tr>
+                        <td colspan="7" style="text-align:center;color:#748078">No equipment found.</td>
+                    </tr>
+                }
+                @foreach (var item in Model.Items)
+                {
+                    var conditionClass = item.Status.ToLowerInvariant().Replace(' ', '-');
+                    <tr>
+                        <td class="eq-name">
+                            <strong>@item.EquipmentName</strong>
+                            <small>ID: EQ-@item.EquipmentId.ToString("D4")</small>
+                        </td>
+                        <td>@item.Category</td>
+                        <td>@item.Quantity</td>
+                        <td><span class="condition @conditionClass">@item.Status</span></td>
+                        <td>
+                            @if (!string.IsNullOrWhiteSpace(item.EvidencePhotoPath))
+                            {
+                                <a href="@item.EvidencePhotoPath" target="_blank" rel="noopener">View photo</a>
+                            }
+                            else
+                            {
+                                <span>—</span>
+                            }
+                        </td>
+                        <td>@(item.LastMaintenanceDate?.ToString("MMM d, yyyy") ?? "—")</td>
+                        <td>@item.AddedDate.ToString("MMM d, yyyy")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <footer class="eq-foot">
+            <span>Showing @Model.Items.Count of @Model.TotalCount assets</span>
+            <nav class="eq-pager">
+                <a asp-action="Equipment" asp-route-searchTerm="@Model.SearchTerm" asp-route-page="@(Model.Page - 1)" class="@(Model.Page <= 1 ? "disabled" : "")">&lt;</a>
+                <a asp-action="Equipment" asp-route-searchTerm="@Model.SearchTerm" asp-route-page="@(Model.Page + 1)" class="@(Model.Page >= Model.TotalPages ? "disabled" : "")">&gt;</a>
+            </nav>
+        </footer>
+    </section>
+</main>
+
+<div class="eq-overlay" id="equipmentModal">
+    <div class="eq-modal">
+        <header class="eq-modal-head">
+            <h2>Report Equipment Issue</h2>
+            <button class="eq-close" type="button" onclick="closeEquipmentModal()">×</button>
+        </header>
+        <form class="eq-form" asp-action="AddEquipment" method="post" enctype="multipart/form-data">
+            @Html.AntiForgeryToken()
+            <div class="eq-field">
+                <label>Equipment Name *</label>
+                <select name="EquipmentName" required>
+                    <option value="">Select equipment...</option>
+                    @foreach (var option in Model.EquipmentNames)
+                    {
+                        <option value="@option.Name">@option.Name</option>
+                    }
+                </select>
+                @if (Model.EquipmentNames.Count == 0)
+                {
+                    <small>No equipment names are available. Ask an administrator to add one.</small>
+                }
+            </div>
+            <div class="eq-field">
+                <label>Quantity affected *</label>
+                <input name="Quantity" type="number" min="1" value="1" required />
+            </div>
+            <div class="condition-label">Current Condition *</div>
+            <div class="conditions">
+                @foreach (var condition in new[] { "Good", "Fair", "Needs Maintenance", "Out of Order" })
+                {
+                    <label class="condition-option">
+                        <input type="radio" name="Condition" value="@condition" checked="@(condition == "Good")" />
+                        <span>@condition</span>
+                    </label>
+                }
+            </div>
+            <div class="eq-field">
+                <label>Evidence photo <span id="evidenceRequiredText">(required for equipment issues)</span></label>
+                <input id="evidencePhoto" name="EvidencePhoto" type="file" accept="image/jpeg,image/png,image/webp" />
+                <small>JPG, PNG, or WebP; maximum 5 MB.</small>
+            </div>
+            <div class="eq-modal-actions">
+                <button class="eq-cancel" type="button" onclick="closeEquipmentModal()">Cancel</button>
+                <button class="eq-save" type="submit" @(Model.EquipmentNames.Count == 0 ? "disabled" : null)>Submit Report</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openEquipmentModal() {
+        document.getElementById('equipmentModal').style.display = 'flex'
+    }
+
+    function closeEquipmentModal() {
+        document.getElementById('equipmentModal').style.display = 'none'
+    }
+
+    function updateEvidenceRequirement() {
+        const condition = document.querySelector('input[name="Condition"]:checked')?.value;
+        document.getElementById('evidencePhoto').required = condition !== "Good"
+    }
+    document.querySelectorAll('input[name="Condition"]').forEach(input =>
+        input.addEventListener('change', updateEvidenceRequirement));
+    updateEvidenceRequirement();
+    document.getElementById('equipmentModal').addEventListener('click', function(e) {
+        if (e.target === this) closeEquipmentModal()
+    });
+</script>

@@ -1,0 +1,35 @@
+@model Gym.Models.AdminTrainerManagementViewModel
+@{
+    ViewData["Title"] = "Trainer Management";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var days = new[] { DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday, DayOfWeek.Friday, DayOfWeek.Saturday, DayOfWeek.Sunday };
+}
+<style>
+    body>.container{max-width:none!important;width:100%!important;padding:0!important}.atm{min-height:100vh;background:#101311;color:#f4f6f4;padding:25px 32px;font-family:Arial,sans-serif}.atm-top{display:flex;gap:9px;padding-bottom:16px;border-bottom:1px solid #303530}.atm-top input{width:min(560px,70vw);height:36px;background:#1b1e1c;border:1px solid #3a403b;color:#fff;padding:0 12px;outline:none}.atm-top button{width:auto;background:#b7ff1b;color:#101510;border:0;padding:0 18px;font-size:10px;font-weight:800}.atm h1{font-size:25px;margin:22px 0 4px}.atm-sub{color:#b7ff1b;font-size:10px}.atm-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:25px 0}.atm-stat{padding:17px;background:#1d201e;border:1px solid #343a35;border-radius:4px}.atm-label{font-size:9px;color:#adb5af;text-transform:uppercase;letter-spacing:.07em}.atm-value{font-size:29px;font-weight:800;margin-top:10px}.atm-value strong{color:#b7ff1b}.atm-note{font-size:10px;color:#b7beb8;margin-left:7px}.atm-grid-shell{height:570px;overflow:auto;border:1px solid #343a35;background:#1b1e1c;scrollbar-color:#566057 #181b19}.atm-grid{width:100%;min-width:1050px;border-collapse:separate;border-spacing:0}.atm-grid th,.atm-grid td{min-width:135px;padding:9px;border-right:1px solid #2d322e;border-bottom:1px solid #2d322e;vertical-align:top}.atm-grid th{position:sticky;top:0;z-index:3;background:#343735;color:#d6dcd7;font-size:9px;text-transform:uppercase}.atm-grid th:first-child,.atm-time{position:sticky;left:0;z-index:4;min-width:86px;width:86px;background:#242825!important}.atm-time{color:#d9dfda;font-size:10px;font-weight:700}.atm-slot{min-height:48px}.atm-open{color:#7e8980;font-size:9px;font-style:italic}.atm-trainer{display:block;margin-bottom:5px;padding:7px;background:#213b2b;border:1px solid #326044;color:#dfffe7;font-size:10px}.atm-trainer strong{display:block;color:#61ff92;margin-bottom:3px}.atm-cap{font-size:8px;color:#b9c5bc}.atm-legend{position:sticky;left:0;padding:12px;color:#aeb7b0;font-size:9px;background:#171a18;border-top:1px solid #343a35}.atm-empty{padding:12px;color:#818b83}.atm-top input:focus{border-color:#3a403b;box-shadow:none}@@media(max-width:800px){.atm{padding:20px}.atm-stats{grid-template-columns:1fr}.atm-grid-shell{height:520px}}
+</style>
+<section class="atm">
+    <form class="atm-top" onsubmit="filterTrainerGrid(event)"><input id="trainerGridSearch" placeholder="Search trainer..."/><button type="submit">SEARCH</button></form>
+    <h1>Trainer Management</h1><div class="atm-sub">Capacity enforced per time slot · zero conflicts</div>
+    <div class="atm-stats">
+        <div class="atm-stat"><div class="atm-label">Available trainers</div><div class="atm-value"><strong>@Model.AvailableNow</strong><span class="atm-note">Active now</span></div></div>
+        <div class="atm-stat"><div class="atm-label">Total sessions today</div><div class="atm-value">@Model.SessionsToday</div></div>
+        <div class="atm-stat"><div class="atm-label">Active bookings</div><div class="atm-value">@Model.ActiveBookings<span class="atm-note">Capacity @Model.TotalCapacity</span></div></div>
+    </div>
+    <div class="atm-grid-shell">
+        <table class="atm-grid"><thead><tr><th>Time</th>@foreach(var day in days){<th>@day.ToString()[..3]</th>}</tr></thead><tbody>
+        @for(var hour=7;hour<22;hour++){
+            var slot = new TimeSpan(hour,0,0);
+            <tr><td class="atm-time">@DateTime.Today.Add(slot).ToString("h tt") – @DateTime.Today.AddHours(hour+1).ToString("h tt")</td>
+            @foreach(var day in days){
+                var available = Model.Trainers.Where(trainer => trainer.IsAvailable(day, slot)).ToList();
+                <td class="atm-slot">@if(available.Count==0){<span class="atm-open">Open</span>}else{@foreach(var trainer in available){<span class="atm-trainer" data-trainer-name="@trainer.TrainerName.ToLowerInvariant()"><strong>@trainer.TrainerName</strong><span class="atm-cap">@trainer.AssignedMembers/@trainer.WeeklyMemberLimit assigned · @trainer.RemainingSlots left</span></span>}}</td>
+            }</tr>
+        }
+        </tbody></table>
+        @if(Model.Trainers.Count==0){<div class="atm-empty">No active trainers found.</div>}
+        <div class="atm-legend">Green = trainer available · Open = no trainer availability saved for this hour</div>
+    </div>
+</section>
+<script>
+function filterTrainerGrid(event){event.preventDefault();var term=document.getElementById('trainerGridSearch').value.trim().toLowerCase();document.querySelectorAll('.atm-trainer').forEach(function(item){item.style.display=!term||item.dataset.trainerName.includes(term)?'block':'none'});}
+</script>

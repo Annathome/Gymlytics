@@ -103,7 +103,7 @@ namespace Gym.Controllers
                 return View(model);
             }
 
-            var (isValid, userRole, userId, username, email, phone, errorMessage) =
+            var (isValid, userRole, userId, username, fullName, email, phone, errorMessage) =
                 await _setupService.ValidateUserAsync(model.Username, model.Password);
 
             if (!isValid)
@@ -115,7 +115,11 @@ namespace Gym.Controllers
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
-                new Claim(ClaimTypes.Name, username ?? model.Username),
+                new Claim(ClaimTypes.Name,
+                    string.IsNullOrWhiteSpace(fullName)
+                        ? username ?? model.Username
+                        : fullName),
+                new Claim("Username", username ?? model.Username),
                 new Claim(ClaimTypes.Role, userRole ?? "Staff"),
                 new Claim(ClaimTypes.Email, email ?? string.Empty),
                 new Claim(ClaimTypes.MobilePhone, phone ?? string.Empty)
@@ -265,6 +269,61 @@ namespace Gym.Controllers
             return View();
         }
 
+        [HttpGet]
+        [Authorize]
+        public IActionResult ChangePassword()
+        {
+            return View(new ChangePasswordViewModel
+            {
+                CurrentUsername = User.FindFirst("Username")?.Value ?? string.Empty
+            });
+        }
+
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var (isValid, _, validatedUserId, _, _, _, _, validationError) =
+                await _setupService.ValidateUserAsync(
+                    model.CurrentUsername.Trim(),
+                    model.CurrentPassword);
+
+            var currentUserIdText = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!isValid || !int.TryParse(currentUserIdText, out var currentUserId) ||
+                validatedUserId != currentUserId)
+            {
+                ModelState.AddModelError(string.Empty,
+                    validationError ?? "The current username or password is incorrect.");
+                return View(model);
+            }
+
+            if (_hashingService.VerifyPassword(model.NewPassword,
+                    _hashingService.HashPassword(model.CurrentPassword)))
+            {
+                ModelState.AddModelError(nameof(model.NewPassword),
+                    "The new password must be different from the current password.");
+                return View(model);
+            }
+
+            var newPasswordHash = _hashingService.HashPassword(model.NewPassword);
+            if (!await _setupService.UpdatePasswordHashAsync(currentUserId, newPasswordHash))
+            {
+                ModelState.AddModelError(string.Empty, "The password could not be updated.");
+                return View(model);
+            }
+
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            TempData["SuccessMessage"] =
+                "Password updated successfully. Sign in using your new password.";
+            return RedirectToAction(nameof(Login));
+        }
+
         // POST: /Account/Logout
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -289,7 +348,7 @@ namespace Gym.Controllers
             {
                 "Admin" or "MainAdmin" => RedirectToAction("ADashboard", "Admin"),
                 "Trainer" => RedirectToAction("Schedule", "Trainer"),
-                "Staff" => RedirectToAction("Member", "FrontDesk"),
+                "Staff" => RedirectToAction("FDashboard", "FrontDesk"),
                 _ => RedirectToAction("Index", "MainHomepage")
             };
         }

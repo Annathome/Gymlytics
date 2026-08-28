@@ -1,0 +1,120 @@
+@model Gym.Models.AdminPaymentsViewModel
+@using Gym.Models
+@{
+    ViewData["Title"] = "Admin Payments";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<style>
+    body>.container{max-width:none!important;width:100%!important;padding:0!important}.ap-wrap{min-height:100vh;background:#101311;color:#f4f6f4;padding:25px 32px;font-family:Arial,sans-serif}.ap-toolbar{display:flex;align-items:center;gap:10px;padding-bottom:18px;border-bottom:1px solid #303430}.ap-search{display:flex;gap:10px;flex:1;max-width:804px}.ap-search input{flex:1;height:45px;padding:0 15px;background:#1b1e1c;border:1px solid #8d958f;color:#fff;outline:0}.ap-search input:focus{outline:0;box-shadow:none;border-color:#8d958f}.ap-search button{width:92px;height:45px;border:0;background:#b7ff1b;color:#101510;font-size:10px;font-weight:800}.ap-export{position:relative;margin-left:auto}.ap-export summary{list-style:none;cursor:pointer;border:1px solid #7fae1b;color:#b7ff1b;padding:12px 16px;font-size:10px;font-weight:800}.ap-export summary::-webkit-details-marker{display:none}.ap-export-menu{position:absolute;right:0;top:45px;z-index:100;width:160px;padding:5px;background:#171b18;border:1px solid #3c433d}.ap-export-menu a,.ap-export-menu button{display:block;width:100%;padding:9px 10px;border:0;background:transparent;color:#dce3dd;text-align:left;text-decoration:none;font:11px Arial}.ap-export-menu a:hover,.ap-export-menu button:hover{background:#293029;color:#b7ff1b}.ap-heading{display:flex;justify-content:space-between;align-items:end;margin:22px 0}.ap-heading h1{margin:0 0 5px;font-size:25px}.ap-heading p{margin:0;color:#b7ff1b;font-size:10px}.ap-heading-actions{display:flex;gap:10px;align-items:center}.ap-edit-plans{height:38px;padding:0 15px;border:1px solid #8bc518;background:transparent;color:#b7ff1b;font-size:10px;font-weight:800;text-transform:uppercase}.ap-filter select{height:38px;padding:0 13px;background:#292d2a;border:1px solid #3a403b;color:#fff;font-size:11px}.ap-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}.ap-stat{padding:17px;background:#1d201e;border:1px solid #343a35;border-radius:4px}.ap-label{color:#aeb6b0;font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}.ap-value{margin-top:10px;font-size:27px;font-weight:800}.ap-value.paid,.ap-value.renewal{color:#b7ff1b}.ap-stat-note{margin-top:5px;color:#aeb6b0;font-size:9px}.ap-value.overdue{color:#ff9a9a}.ap-card{overflow:hidden;border:1px solid #303630;background:#1b1e1c}.ap-card h2{margin:0;padding:14px;background:#343735;font-size:13px}.ap-table-wrap{overflow-x:auto}.ap-table{width:100%;min-width:760px;border-collapse:collapse}.ap-table th,.ap-table td{padding:13px;text-align:left;border-bottom:1px solid #313632}.ap-table th{color:#cbd1cc;font-size:9px;letter-spacing:.08em;text-transform:uppercase}.ap-table td{font-size:12px}.ap-member{font-weight:700}.ap-code{color:#b7ff1b}.ap-badge{padding:4px 8px;background:#293226;color:#b7ff1b;font-size:9px;font-weight:800;text-transform:uppercase}.ap-badge.overdue,.ap-badge.unpaid{background:#432525;color:#ff8e8e}.ap-badge.pending{background:#42361e;color:#ffd47a}.ap-empty{text-align:center!important;color:#929b94;padding:35px!important}.ap-pager{display:flex;justify-content:space-between;align-items:center;padding:17px 13px}.ap-page-info{color:#aeb6b0;font-size:10px}.ap-page-buttons{display:flex;gap:10px}.ap-page{display:grid;place-items:center;min-width:78px;height:32px;border-radius:3px;background:#b7ff1b;color:#101510;text-decoration:none;font-size:9px;font-weight:800;text-transform:uppercase}.ap-page.disabled{opacity:.35;pointer-events:none}.ap-alert{padding:11px 14px;margin:0 0 15px;border:1px solid #48613b;background:#1b2819;color:#b7ff1b}.ap-alert.error{border-color:#713c3c;background:#2d1b1b;color:#ff9a9a}.ap-modal{display:none;position:fixed;inset:0;z-index:2500;background:rgba(0,0,0,.72);align-items:center;justify-content:center;padding:20px}.ap-modal.open{display:flex}.ap-dialog{width:min(520px,100%);background:#1b1e1c;border:1px solid #3c443d;padding:24px}.ap-dialog h2{margin:0 0 5px}.ap-dialog>p{color:#aeb6b0;font-size:12px;margin:0 0 20px}.ap-plan-row{display:grid;grid-template-columns:1fr 190px;align-items:center;gap:15px;margin:12px 0}.ap-plan-row label{font-weight:700}.ap-plan-row input{height:42px;background:#101311;border:1px solid #697169;color:#fff;padding:0 12px}.ap-modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:22px}.ap-modal-actions button{padding:10px 16px;border:1px solid #586058;background:#292d2a;color:#fff}.ap-modal-actions button[type=submit]{background:#b7ff1b;border-color:#b7ff1b;color:#101510;font-weight:800}@@media(max-width:1000px){.ap-stats{grid-template-columns:repeat(2,1fr)}}@@media(max-width:800px){.ap-wrap{padding:18px}.ap-stats{grid-template-columns:1fr}.ap-heading{align-items:flex-start;gap:12px;flex-direction:column}.ap-plan-row{grid-template-columns:1fr}}@@media print{@@page{size:landscape;margin:12mm}.nav-header,.admin-logout,.ap-toolbar,.ap-filter,.ap-stats,.ap-pager,.ap-edit-plans,.ap-modal{display:none!important}body>.container,body>.container main{width:100%!important;max-width:none!important;margin:0!important;padding:0!important}.ap-wrap{min-height:0;padding:0;background:#fff!important;color:#111!important}.ap-heading{margin:0 0 16px}.ap-heading p{color:#444}.ap-card,.ap-table{background:#fff!important;color:#111!important}.ap-card h2,.ap-table th{background:#eee!important;color:#111!important}.ap-table td,.ap-table th{border-color:#aaa!important}.ap-code,.ap-member{color:#111!important}.ap-badge{color:#111!important;background:#eee!important;border:1px solid #aaa}}
+    @@media print {
+        @@page { size: landscape; margin: 10mm; }
+        html, body, body > .container, body > .container main { width:100%!important; max-width:none!important; overflow:visible!important; }
+        .ap-wrap, .ap-card, .ap-table-wrap { width:100%!important; overflow:visible!important; }
+        .ap-table { width:100%!important; min-width:0!important; table-layout:fixed!important; }
+        .ap-table th, .ap-table td { padding:8px 6px!important; font-size:9px!important; white-space:normal!important; overflow-wrap:anywhere; }
+        .ap-table th:nth-child(1) { width:15%; }
+        .ap-table th:nth-child(2) { width:21%; }
+        .ap-table th:nth-child(3) { width:12%; }
+        .ap-table th:nth-child(4) { width:10%; }
+        .ap-table th:nth-child(5) { width:12%; }
+        .ap-table th:nth-child(6) { width:16%; }
+        .ap-table th:nth-child(7) { width:14%; }
+        .ap-badge { display:inline-block; }
+    }
+</style>
+
+<section class="ap-wrap">
+    @if (TempData["SuccessMessage"] is string successMessage) { <div class="ap-alert">@successMessage</div> }
+    @if (TempData["ErrorMessage"] is string errorMessage) { <div class="ap-alert error">@errorMessage</div> }
+    <div class="ap-toolbar">
+        <form class="ap-search" method="get" asp-controller="Admin" asp-action="Payments">
+            <input name="searchTerm" value="@Model.SearchTerm" placeholder="Search member or transaction code..." />
+            <button type="submit">SEARCH</button>
+        </form>
+        <details class="ap-export">
+            <summary>↧ EXPORT</summary>
+            <div class="ap-export-menu">
+                <button type="button" onclick="printPaymentReport()">PDF / Print</button>
+                <a asp-action="ExportPayments" asp-route-format="doc" asp-route-searchTerm="@Model.SearchTerm" asp-route-status="@Model.SelectedStatus">Word document</a>
+                <a asp-action="ExportPayments" asp-route-format="csv" asp-route-searchTerm="@Model.SearchTerm" asp-route-status="@Model.SelectedStatus">CSV / Excel</a>
+                <a asp-action="ExportPayments" asp-route-format="txt" asp-route-searchTerm="@Model.SearchTerm" asp-route-status="@Model.SelectedStatus">Text file</a>
+            </div>
+        </details>
+    </div>
+
+    <div class="ap-heading">
+        <div><h1>Payments</h1><p>Membership fees and session payments</p></div>
+        <div class="ap-heading-actions"><button class="ap-edit-plans" type="button" onclick="openPlanEditor()">Manage membership plans</button><form class="ap-filter" method="get" asp-controller="Admin" asp-action="Payments"><input type="hidden" name="searchTerm" value="@Model.SearchTerm" /><select name="status" onchange="this.form.submit()"><option value="">All Statuses</option>@foreach (var item in Enum.GetValues<PaymentStatus>()){<option value="@item" selected="@(Model.SelectedStatus == item)">@item</option>}</select></form></div>
+    </div>
+
+    <div class="ap-stats">
+        <div class="ap-stat"><div class="ap-label">Collected this month</div><div class="ap-value paid">₱@Model.CollectedThisMonth.ToString("N2")</div></div>
+        <div class="ap-stat"><div class="ap-label">Pending</div><div class="ap-value">₱@Model.PendingAmount.ToString("N2")</div></div>
+        <div class="ap-stat"><div class="ap-label">Overdue accounts</div><div class="ap-value overdue">@Model.OverdueAccounts</div></div>
+        <div class="ap-stat"><div class="ap-label">Upcoming renewals</div><div class="ap-value renewal">@Model.UpcomingRenewals</div><div class="ap-stat-note">Memberships ending in the next 7 days</div></div>
+    </div>
+
+    <div class="ap-card">
+        <h2>Recent Transactions</h2>
+        <div class="ap-table-wrap"><table class="ap-table"><thead><tr><th>Member</th><th>Code</th><th>Type</th><th>Method</th><th>Amount</th><th>Date</th><th>Status</th></tr></thead><tbody>
+        @if (Model.Payments.Count == 0)
+        {
+            <tr><td colspan="7" class="ap-empty">No payment transactions found.</td></tr>
+        }
+        @foreach (var payment in Model.Payments)
+        {
+            var statusClass = payment.Status.ToString().ToLowerInvariant();
+            <tr><td class="ap-member">@payment.Name</td><td class="ap-code">@payment.TransactionCode</td><td>@payment.Type</td><td>@payment.Method</td><td>₱@payment.Amount.ToString("N2")</td><td>@payment.Date.ToString("MMM d, yyyy")</td><td><span class="ap-badge @statusClass">@payment.Status</span></td></tr>
+        }
+        </tbody></table></div>
+        <div class="ap-pager"><span class="ap-page-info">Page @Model.Page of @Model.TotalPages · @Model.TotalCount transaction(s)</span><div class="ap-page-buttons"><a class="ap-page @(Model.Page <= 1 ? "disabled" : "")" asp-action="Payments" asp-route-searchTerm="@Model.SearchTerm" asp-route-status="@Model.SelectedStatus" asp-route-page="@(Model.Page - 1)">Previous</a><a class="ap-page @(Model.Page >= Model.TotalPages ? "disabled" : "")" asp-action="Payments" asp-route-searchTerm="@Model.SearchTerm" asp-route-status="@Model.SelectedStatus" asp-route-page="@(Model.Page + 1)">Next</a></div></div>
+    </div>
+</section>
+
+<div class="ap-modal" id="planEditor" role="dialog" aria-modal="true" aria-labelledby="planEditorTitle">
+    <div class="ap-dialog" style="max-height:90vh;overflow:auto">
+        <h2 id="planEditorTitle">Manage membership plans</h2>
+        <p>Add a plan or edit its name, price, and membership duration.</p>
+        <form asp-controller="Admin" asp-action="SaveMembershipPlan" method="post" style="border:1px solid #3c443d;padding:14px;margin-bottom:18px">
+            @Html.AntiForgeryToken()
+            <strong>Add new plan</strong>
+            <div class="ap-plan-row"><label>Plan name</label><input name="name" maxlength="100" required /></div>
+            <div class="ap-plan-row"><label>Price</label><input name="price" type="number" min="0.01" max="10000000" step="0.01" required /></div>
+            <div class="ap-plan-row"><label>Duration (months)</label><input name="durationMonths" type="number" min="1" max="120" required /></div>
+            <div class="ap-modal-actions"><button type="submit">Add plan</button></div>
+        </form>
+        @foreach (var plan in Model.PlanSettings.Where(item => item.IsActive))
+        {
+            <div style="border-top:1px solid #3c443d;padding:14px 0">
+                <form asp-controller="Admin" asp-action="SaveMembershipPlan" method="post">
+                    @Html.AntiForgeryToken()<input type="hidden" name="planId" value="@((int)plan.Plan)" />
+                    <div class="ap-plan-row"><label>Plan name</label><input name="name" maxlength="100" value="@plan.Name" required /></div>
+                    <div class="ap-plan-row"><label>Price</label><input name="price" type="number" min="0.01" max="10000000" step="0.01" value="@plan.Price.ToString(System.Globalization.CultureInfo.InvariantCulture)" required /></div>
+                    <div class="ap-plan-row"><label>Duration (months)</label><input name="durationMonths" type="number" min="1" max="120" value="@plan.DurationMonths" required /></div>
+                    <div class="ap-modal-actions"><button type="submit">Save changes</button></div>
+                </form>
+                <form asp-controller="Admin" asp-action="DeleteMembershipPlan" method="post" onsubmit="return confirm('Delete this membership plan from new registrations?')">
+                    @Html.AntiForgeryToken()<input type="hidden" name="planId" value="@((int)plan.Plan)" />
+                    <div class="ap-modal-actions" style="margin-top:6px"><button type="submit" style="color:#ff9a9a;border-color:#713c3c">Delete plan</button></div>
+                </form>
+            </div>
+        }
+        <div class="ap-modal-actions"><button type="button" onclick="closePlanEditor()">Close</button></div>
+    </div>
+</div>
+
+<script>
+    function printPaymentReport() {
+        const menu = document.querySelector('.ap-export');
+        if (menu) menu.open = false;
+        window.location.href = '@Html.Raw(Url.Action("Payments", new { searchTerm = Model.SearchTerm, status = Model.SelectedStatus, printAll = true }))';
+    }
+    @if (ViewBag.AutoPrint is true)
+    {
+        <text>window.addEventListener('load', function () { window.print(); });</text>
+    }
+    function openPlanEditor(){document.getElementById('planEditor').classList.add('open')}
+    function closePlanEditor(){document.getElementById('planEditor').classList.remove('open')}
+    document.getElementById('planEditor').addEventListener('click',function(event){if(event.target===this)closePlanEditor()});
+</script>

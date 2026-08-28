@@ -2,34 +2,49 @@
 
 @{
     ViewData["Title"] = "Add Member";
-    Layout =null;
+    Layout = null;
 
     var addMember = Model.AddMemberViewModel;
+    var planPrices = MembershipPlanPricing.GetActivePlans()
+        .ToDictionary(item => ((int)item.Plan).ToString(), item => item.Price);
 }
 
 <style>
+    @@import url('https://fonts.googleapis.com/css2?family=Inria+Serif:wght@300;400;700&display=swap');
+
+    * {
+        font-family: "Inria Serif", serif;
+        background: #0000 !important;
+    }
+
     .add-member-container {
-        width: 85vw;
-        margin: 24px 0;
+        width: 100%;
+        margin: 0;
         padding: 0 32px;
         box-sizing: border-box;
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        font-family: "Inria Serif", serif;
         color: #1a1a1a;
-        font-size: 14px; /* Increased base font size */
+        /* background: #ffff !important;
+        background: inherit !important; */
     }
+
+        /* .add-member-container
+        {
+            background: #0000;
+        } */
 
     .add-member-header {
         margin-bottom: 20px;
     }
 
         .add-member-header h1 {
-            font-size: 28px; /* Larger main title */
+            font-size: 30px; 
             font-weight: 700;
             margin: 0;
         }
 
     .add-member-subtitle {
-        font-size: 14px; /* Larger subtitle */
+        font-size: 15px; 
         color: #666;
         margin-top: 4px;
     }
@@ -47,8 +62,7 @@
     }
 
     .section-title {
-        font-size: 12px; /* Larger section titles */
-        font-weight: 700;
+        font-size: 15px;
         color: #555;
         letter-spacing: 0.5px;
         margin-bottom: 12px;
@@ -212,7 +226,7 @@
     }
 </style>
 
-<div class="add-member-container">
+<div class="add-member-container ">
 
     <!-- HEADER -->
     <div class="add-member-header">
@@ -336,6 +350,17 @@
                     <span asp-validation-for="AddMemberViewModel.StartDate" class="validation-message"></span>
                 </div>
             </div>
+            <div class="form-row">
+                <div class="form-group full">
+                    <label asp-for="AddMemberViewModel.PaymentAmount" class="form-label">Amount paid</label>
+                    <input asp-for="AddMemberViewModel.PaymentAmount" type="number" min="0.01" step="0.01"
+                           class="form-control" placeholder="0.00" />
+                    <span asp-validation-for="AddMemberViewModel.PaymentAmount" class="validation-message"></span>
+                    <div id="planPaymentSummary" style="margin-top:7px;color:#555;">
+                        Select a membership plan to see its price.
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- ==========================================
@@ -346,9 +371,9 @@
                 Trainer assignment
             </div>
 
-            <!-- TRAINER -->
+            <!-- TRAINER AND GYM GOAL -->
             <div class="form-row">
-                <div class="form-group full">
+                <div class="form-group">
                     <label asp-for="AddMemberViewModel.SelectedTrainerId" class="form-label">
                         Assign trainer
                     </label>
@@ -357,6 +382,18 @@
                             class="form-select">
                         <option value="">No trainer (self-guided)</option>
                     </select>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="AddMemberViewModel.SelectedGymGoal" class="form-label">
+                        Gym goal
+                    </label>
+                    <select asp-for="AddMemberViewModel.SelectedGymGoal"
+                            asp-items="addMember.GymGoalOptions"
+                            class="form-select">
+                        <option value="">Select gym goal</option>
+                    </select>
+                    <span asp-validation-for="AddMemberViewModel.SelectedGymGoal" class="validation-message"></span>
                 </div>
             </div>
 
@@ -393,58 +430,12 @@
         </div>
 
         <!-- ==========================================
-             FOLLOW-UP
-        =========================================== -->
-        <div class="form-section">
-            <div class="section-title">
-                Follow-up
-            </div>
-
-            <div class="form-row">
-                <!-- CALL DATE -->
-                <div class="form-group">
-                    <label asp-for="AddMemberViewModel.CallDate" class="form-label">
-                        Client call date
-                    </label>
-                    <input asp-for="AddMemberViewModel.CallDate"
-                           type="date"
-                           class="form-control" />
-                </div>
-
-                <!-- PURPOSE -->
-                <div class="form-group">
-                    <label asp-for="AddMemberViewModel.CallPurpose" class="form-label">
-                        Call purpose
-                    </label>
-                    <select asp-for="AddMemberViewModel.CallPurpose"
-                            asp-items="addMember.PurposeOptions"
-                            class="form-select">
-                    </select>
-                </div>
-            </div>
-
-            <!-- NOTES -->
-            <div class="form-row">
-                <div class="form-group full">
-                    <label asp-for="AddMemberViewModel.Notes" class="form-label">
-                        Notes
-                    </label>
-                    <textarea asp-for="AddMemberViewModel.Notes"
-                              class="form-control"
-                              placeholder="Any goals, health notes, or preferences to pass to the trainer..."></textarea>
-                </div>
-            </div>
-        </div>
-
-        <!-- ==========================================
              BUTTONS
         =========================================== -->
         <div class="form-actions">
-            <a asp-action="Member"
-               asp-controller="FrontDesk"
-               class="btn-cancel">
+            <button type="button" class="btn-cancel" onclick="cancelRegistration()">
                 Cancel
-            </a>
+            </button>
 
             <!--
                 FIXED: removed asp-action="Member" / asp-controller="FrontDesk"
@@ -469,10 +460,14 @@
     document.addEventListener("DOMContentLoaded", function () {
         const dayButtons = document.querySelectorAll(".day-button");
         const selectedDaysContainer = document.getElementById("selectedDaysContainer");
+        const planSelect = document.getElementById("AddMemberViewModel_SelectedPlanId");
+        const paymentInput = document.getElementById("AddMemberViewModel_PaymentAmount");
+        const paymentSummary = document.getElementById("planPaymentSummary");
+        const planPrices = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(planPrices));
 
         const existingDays = @Html.Raw(
-                                                System.Text.Json.JsonSerializer.Serialize(addMember.SelectedDays)
-                                );
+                                                                                                System.Text.Json.JsonSerializer.Serialize(addMember.SelectedDays)
+                                                                );
 
         function updateSelectedDays() {
             selectedDaysContainer.innerHTML = "";
@@ -502,7 +497,28 @@
                 updateSelectedDays();
             });
         });
+
+        function updatePlanPayment() {
+            const price = planPrices[planSelect.value];
+            if (price === undefined) {
+                paymentSummary.textContent = "Select a membership plan to see its price.";
+                paymentInput.removeAttribute("max");
+                return;
+            }
+            paymentInput.max = price;
+            paymentSummary.textContent = `Plan price: ₱${Number(price).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}. Membership becomes active when the full balance is paid.`;
+        }
+        planSelect.addEventListener("change", updatePlanPayment);
+        updatePlanPayment();
     });
+
+    function cancelRegistration() {
+        if (window.parent !== window && typeof window.parent.closeAddMemberModal === "function") {
+            window.parent.closeAddMemberModal();
+            return;
+        }
+        window.location.href = '@Url.Action("Member", "FrontDesk")';
+    }
 </script>
 
 @section Scripts {

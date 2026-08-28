@@ -17,6 +17,6 @@ namespace Gym.Services
         Task<List<Payment>> GetPaymentsAsync(PaymentStatus? status = null);
         Task<bool> UpdateEquipmentStatusAsync(int equipmentId, string status);
         Task<decimal> GetTotalRevenueAsync(DateTime startDate, DateTime endDate);
-        
+
     }
 }

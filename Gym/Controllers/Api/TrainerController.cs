@@ -173,11 +173,4 @@ namespace Gym.Controllers.Api
         #endregion
     }
 
-    /// <summary>
-    /// DTO for updating session status via API body
-    /// </summary>
-    public class UpdateSessionStatusRequest
-    {
-        public SessionStatus Status { get; set; }
-    }
 }

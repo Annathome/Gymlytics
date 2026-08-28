@@ -9,6 +9,7 @@ namespace Gym.Services
     {
         // Accept optional target date to align with TrainerController line 36
         Task<TrainerDashboardViewModel> GetTrainerDashboardAsync(int trainerId, DateTime? date = null);
+        Task<TrainerDashboardViewModel> GetTrainerAssignedScheduleAsync(int trainerId, DateTime? date = null);
 
         Task<List<Session>> GetTrainerSessionsAsync(int trainerId, DateTime date);
         Task<List<Session>> GetWeeklySessionsAsync(int trainerId);

@@ -1,0 +1,68 @@
+@model IReadOnlyList<Gym.Models.FrontDeskEmailNotification>
+
+@{
+    Layout = "~/Views/Shared/_FrontDeskLayout.cshtml";
+    ViewData["Title"] = "Email Notifications";
+}
+
+<style>
+    .email-notifications {
+        width: min(1180px, calc(100vw - 380px));
+        margin: 24px auto;
+        transform: translateX(10px);
+        color: #102630;
+        font: 15px Arial, Helvetica, sans-serif;
+    }
+    .email-notifications h1 { margin: 0 0 6px; font-size: 25px; }
+    .email-notifications .subtitle { margin: 0 0 22px; color: #68756e; }
+    .email-log { overflow: hidden; border: 1px solid #d8e3dd; border-radius: 9px; background: #fff; }
+    .email-log-header, .email-log-row {
+        display: grid;
+        grid-template-columns: 120px minmax(190px, .8fr) minmax(320px, 1.8fr) 170px;
+        gap: 20px;
+        align-items: center;
+        padding: 16px 20px;
+    }
+    .email-log-header { background: #394f59; color: #fff; font-weight: 700; font-size: 13px; }
+    .email-log-row { border-top: 1px solid #e5ebe7; }
+    .email-status { width: fit-content; padding: 5px 12px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+    .email-status.sent { background: #dcf5df; color: #08752a; }
+    .email-status.failed { background: #fde2e2; color: #a71919; }
+    .email-title { font-weight: 700; }
+    .email-message { color: #536159; line-height: 1.45; overflow-wrap: anywhere; }
+    .email-date { color: #68756e; font-size: 13px; }
+    .email-empty { padding: 54px 20px; color: #68756e; text-align: center; }
+    @@media (max-width: 900px) {
+        .email-notifications { width: calc(100vw - 48px); transform: none; }
+        .email-log { overflow-x: auto; }
+        .email-log-header, .email-log-row { min-width: 850px; }
+    }
+</style>
+
+<main class="email-notifications">
+    <h1>Email Notifications</h1>
+    <p class="subtitle">Delivery activity for emails sent by the Front Desk.</p>
+
+    <section class="email-log">
+        <div class="email-log-header">
+            <span>STATUS</span><span>EMAIL TYPE</span><span>RECIPIENT / DETAILS</span><span>DATE &amp; TIME</span>
+        </div>
+        @if (Model.Count == 0)
+        {
+            <div class="email-empty">No member or walk-in email activity has been recorded yet.</div>
+        }
+        else
+        {
+            @foreach (var item in Model)
+            {
+                var sent = item.Status.Equals("Sent", StringComparison.OrdinalIgnoreCase);
+                <article class="email-log-row">
+                    <span class="email-status @(sent ? "sent" : "failed")">@(sent ? "SENT" : "FAILED")</span>
+                    <span class="email-title">@item.EmailType</span>
+                    <span class="email-message">@item.Message</span>
+                    <time class="email-date">@item.CreatedDate.ToString("MMM d, yyyy · h:mm tt")</time>
+                </article>
+            }
+        }
+    </section>
+</main>

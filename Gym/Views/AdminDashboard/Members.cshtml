@@ -1,0 +1,758 @@
+@model List<Gym.Models.Client>
+@using Gym.Models
+@{
+    ViewData["Title"] = "Members";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var trainers = ViewBag.TrainerNames as Dictionary<int, string> ?? new();
+    var currentPage = (int)(ViewBag.Page ?? 1);
+    var totalPages = (int)(ViewBag.TotalPages ?? 1);
+    var selectedStatus = ViewBag.Status as MemberStatus?;
+    var selectedPlan = ViewBag.Plan as MembershipPlanType?;
+    var paidAmounts = ViewBag.PaidAmounts as Dictionary<int, decimal> ?? new();
+    var dailyReminderMemberIds = ViewBag.DailyReminderMemberIds as HashSet<int> ?? new();
+}
+
+<style>
+    body{
+        background: #0D0F0D;
+        padding: 0 !important;
+  
+    }
+
+    .container {
+        
+        color: #f4f6f4;
+        font-family: Arial, sans-serif;
+        background: #0D0F0D;
+    }
+
+    .am-toolbar {
+        display:flex;
+        position: relative;
+        gap: 10px;
+        align-items: center;
+        border-bottom: 1px solid #303430;
+        justify-content: space-between;
+    }
+
+        .am-toolbar h1{
+            font-size: 20px;
+            font-weight: 600;
+
+        }
+
+        .am-toolbar p {
+            font-size: 15px;
+            
+        }
+
+    .mtop-tool {
+        flex-direction: row;
+        gap: 20px;
+        display:flex;
+    }
+
+    .am-search {
+        display: flex;
+        flex: 1;
+        gap: 10px;
+        max-width: 804px;
+    }
+
+        .am-search input {
+            flex: 1;
+            height: 45px;
+            background: #1b1e1c;
+            border: 1px solid #8d958f;
+            color: #fff;
+            padding: 0 15px;
+            font-size: 13px;
+            outline: none !important;
+            box-shadow: none !important;
+        }
+
+            .am-search input:focus,
+            .am-search input:focus-visible {
+                outline: none !important;
+                box-shadow: none !important;
+                border-color: #8d958f !important;
+            }
+
+        .am-search button {
+            width: 92px;
+            height: 45px;
+            background: #b7ff1b;
+            color: #101510;
+            border: 0;
+            padding: 0 18px;
+            font-size: 10px;
+            font-weight: 800;
+        }
+
+    .am-add {
+        background: #b7ff1b;
+        color: #101510;
+        border: 0;
+        padding: 11px 18px;
+        font-size: 12px;
+        font-weight: 800;
+        text-decoration: none;
+        width: auto;
+    }
+
+    .am-export {
+        position: relative;
+        margin-left: auto;
+    }
+
+        .am-export summary {
+            list-style: none;
+            cursor: pointer;
+            border: 1px solid #7fae1b;
+            background: #171b18;
+            color: #b7ff1b;
+            padding: 15px 20px;
+            font-size: 11px;
+            font-weight: 800;
+        }
+
+            .am-export summary::-webkit-details-marker {
+                display: none;
+            }
+
+            .am-export[open] summary,
+            .am-export summary:hover {
+                background: #242b25;
+            }
+
+    .am-export-menu {
+        position: absolute;
+        right: 0;
+        top: 43px;
+        width: 165px;
+        padding: 5px;
+        background: #171b18;
+        border: 1px solid #3c433d;
+        z-index: 200;
+    }
+
+        .am-export-menu a,
+        .am-export-menu button {
+            display: block;
+            width: 100% !important;
+            padding: 9px 10px !important;
+            border: 0 !important;
+            background: transparent !important;
+            color: #dce3dd !important;
+            text-align: left;
+            font: 11px Arial;
+            text-decoration: none;
+        }
+
+            .am-export-menu a:hover,
+            .am-export-menu button:hover {
+                background: #293029 !important;
+                color: #b7ff1b !important;
+            }
+
+    .am-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: end;
+        margin: 22px 0;
+    }
+
+        .am-head h1 {
+            font-size: 15px;
+            margin: 0 0 5px;
+            font-weight: 600;
+        }
+
+        .am-head p {
+            font-size: 11px;
+            margin: 0;
+            color: #adb5af;
+        }
+
+    .am-filters {
+        display: flex;
+        gap: 10px;
+    }
+
+        .am-filters select {
+            background: #292d2a;
+            color: #fff;
+            border: 1px solid #373c38;
+            padding: 10px 13px;
+            font-size: 12px;
+        }
+
+    .am-card {
+        border: 1px solid #2c322d;
+        background: #1a1d1b;
+    }
+
+    .am-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+        .am-table th {
+            background: #343735;
+            color: #ccd2cd;
+            font-size: 10px;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+        }
+
+        .am-table th,
+        .am-table td {
+            padding: 14px 13px;
+            text-align: left;
+            border-bottom: 1px solid #313632;
+        }
+
+        .am-table td {
+            font-size: 13px;
+        }
+
+    .am-member {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .am-avatar {
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        background: #27372b;
+        color: #b7ff1b;
+        font-size: 11px;
+        font-weight: 800;
+    }
+
+    .am-name {
+        font-weight: 700;
+    }
+
+    .am-id {
+        font-size: 9px;
+        color: #a5ada7;
+        margin-top: 3px;
+    }
+
+    .am-schedule {
+        line-height: 1.45;
+    }
+
+    .am-badge {
+        display: inline-block;
+        padding: 5px 9px;
+        font-size: 9px;
+        font-weight: 800;
+        text-transform: uppercase;
+        background: #293226;
+        color: #b7ff1b;
+    }
+
+        .am-badge.expired,
+        .am-badge.terminated {
+            background: #432525;
+            color: #ff8e8e;
+        }
+
+        .am-badge.inactive,
+        .am-badge.canceled {
+            background: #353735;
+            color: #c4cac5;
+        }
+
+    .am-action {
+        text-align: center;
+    }
+
+    .am-dots {
+        display: inline-grid;
+        place-items: center;
+        width: 30px;
+        height: 30px;
+        color: #d5dbd6;
+        border: 1px solid #3b423c;
+        text-decoration: none;
+    }
+
+    .am-empty {
+        text-align: center !important;
+        color: #939c95;
+        padding: 35px !important;
+    }
+
+    .am-pager {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 18px 14px;
+        background: #101311;
+    }
+
+    .am-page-info {
+        font-size: 11px;
+        color: #aeb6b0;
+    }
+
+    .am-page-actions {
+        display: flex;
+        gap: 10px;
+    }
+
+    .am-page {
+        min-width: 82px;
+        height: 32px;
+        display: grid;
+        place-items: center;
+        background: #b7ff1b;
+        color: #101510;
+        text-decoration: none;
+        font-size: 10px;
+        font-weight: 800;
+        border-radius: 4px;
+        text-transform: uppercase;
+    }
+
+        .am-page.disabled {
+            opacity: .35;
+            pointer-events: none;
+        }
+
+    .am-action {
+        position: relative;
+    }
+
+    .am-actions {
+        position: relative;
+        display: inline-block;
+    }
+
+        .am-actions summary {
+            list-style: none;
+            cursor: pointer;
+            display: grid;
+            place-items: center;
+            width: 30px;
+            height: 30px;
+            color: #d5dbd6;
+            border: 1px solid #3b423c;
+        }
+
+            .am-actions summary::-webkit-details-marker {
+                display: none;
+            }
+
+    .am-actions-menu {
+        position: absolute;
+        right: 0;
+        top: 35px;
+        z-index: 100;
+        min-width: 170px;
+        padding: 5px;
+        background: #202421;
+        border: 1px solid #414841;
+    }
+
+    .am-menu-button {
+        display: block;
+        width: 100%;
+        padding: 9px 12px;
+        border: 0;
+        background: transparent;
+        color: #edf1ed;
+        text-align: left;
+        font-size: 11px;
+    }
+
+        .am-menu-button:hover {
+            background: #303630;
+            color: #b7ff1b;
+        }
+
+    .am-delete {
+        color: #ff8e8e;
+    }
+
+        .am-delete:hover {
+            background: #342525;
+        }
+
+    .admin-member-modal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        background: rgba(0, 0, 0, .72);
+    }
+
+        .admin-member-modal.open {
+            display: flex;
+        }
+
+    .admin-member-dialog {
+        width: min(440px, 95vw);
+        padding: 23px;
+        background: #202421;
+        border: 1px solid #414841;
+        color: #fff;
+    }
+
+        .admin-member-dialog h3 {
+            margin: 0 0 9px;
+            font-size: 19px;
+        }
+
+        .admin-member-dialog p {
+            color: #b9c1bb;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .admin-member-dialog label {
+            display: block;
+            margin: 15px 0 6px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .admin-member-dialog input {
+            width: 100%;
+            height: 42px;
+            padding: 0 12px;
+            background: #171a18;
+            border: 1px solid #505750;
+            color: #fff;
+        }
+
+    .admin-modal-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 9px;
+        margin-top: 20px;
+    }
+
+        .admin-modal-actions button {
+            height: 38px;
+            padding: 0 16px;
+            border: 1px solid #555d56;
+            background: #292e2a;
+            color: #fff;
+        }
+
+            .admin-modal-actions button[type=submit] {
+                border: 0;
+                background: #b7ff1b;
+                color: #101510;
+                font-weight: 800;
+            }
+
+    @@media(max-width:900px) {
+        .am-wrap {
+            padding: 20px;
+        }
+
+        .am-head {
+            align-items: flex-start;
+            gap: 14px;
+            flex-direction: column;
+        }
+
+        .am-table-wrap {
+            overflow-x: auto
+        }
+
+        .am-table {
+            min-width: 900px;
+        }
+    }
+
+    @@media print {
+        @@page {
+            size: landscape;
+            margin: 12mm;
+        }
+
+        html,
+        body {
+            display: block !important;
+            width: 100% !important;
+            min-height: 0 !important;
+            margin: 0 !important;
+            background: #fff !important;
+        }
+
+        .nav-header,
+        .admin-logout,
+        .am-toolbar,
+        .am-filters,
+        .am-pager,
+        .am-action,
+        .am-table th:last-child,
+        .am-table td:last-child {
+            display: none !important;
+        }
+
+        .am-head {
+            margin: 0 0 18px !important;
+            color: #111 !important;
+        }
+
+            .am-head h1 {
+                color: #111 !important;
+                font-size: 24px !important;
+            }
+
+            .am-head p {
+                color: #555 !important;
+            }
+
+        .am-card {
+            border: 1px solid #999 !important;
+            background: #fff !important;
+            overflow: visible !important;
+        }
+
+        .am-table {
+            min-width: 0 !important;
+            color: #111 !important;
+        }
+
+            .am-table th {
+                background: #eee !important;
+                color: #111 !important;
+                border-color: #aaa !important;
+            }
+
+            .am-table td {
+                color: #111 !important;
+                border-color: #bbb !important;
+            }
+
+        .am-name,
+        .am-id,
+        .am-schedule {
+            color: #111 !important;
+        }
+
+        .am-avatar {
+            color: #111 !important;
+            background: #eee !important;
+        }
+
+        .am-badge {
+            color: #111 !important;
+            background: #eee !important;
+            border: 1px solid #aaa !important;
+        }
+    }
+</style>
+
+<section class="container">
+        <div class="am-top">
+            <div class="am-toolbar">
+                <div>
+                    <h1>Members</h1>
+                    <p>@ViewBag.ActiveCount ACTIVE · @ViewBag.ExpiringCount EXPIRING MEMBERSHIP</p>
+                </div>
+                <div class="mtop-tool">
+                    <a class="am-add" asp-controller="FrontDesk" asp-action="AddMember">＋ ADD MEMBER</a>
+                    <details class="am-export">
+                        <summary>↧ EXPORT</summary>
+                        <div class="am-export-menu" id="memberExportMenu">
+                            <button type="button" onclick="exportMemberReport('pdf')">PDF / Print</button>
+                            <a asp-action="ExportMembers" asp-route-format="doc" asp-route-searchTerm="@ViewBag.SearchTerm" asp-route-status="@selectedStatus" asp-route-plan="@selectedPlan">Word document</a>
+                            <a asp-action="ExportMembers" asp-route-format="csv" asp-route-searchTerm="@ViewBag.SearchTerm" asp-route-status="@selectedStatus" asp-route-plan="@selectedPlan">CSV / Excel</a>
+                            <a asp-action="ExportMembers" asp-route-format="txt" asp-route-searchTerm="@ViewBag.SearchTerm" asp-route-status="@selectedStatus" asp-route-plan="@selectedPlan">Text file</a>
+                        </div>
+                    </details>
+                </div>
+            </div>
+
+            <div class="am-head">
+                <form class="am-search" method="get" asp-action="Members">
+                    <input name="searchTerm" value="@ViewBag.SearchTerm" placeholder="Search members, IDs, or emails..." />
+                    <button type="submit">SEARCH</button>
+                </form>
+                <form class="am-filters" method="get" asp-action="Members">
+                    <input type="hidden" name="searchTerm" value="@ViewBag.SearchTerm" />
+                    <select name="status" onchange="this.form.submit()">
+                        <option value="">All Statuses</option>
+                        @foreach (var item in Enum.GetValues<MemberStatus>())
+                        {
+                            <option value="@item" selected="@(selectedStatus == item)">@item</option>
+                        }
+                    </select>
+                    <select name="plan" onchange="this.form.submit()">
+                        <option value="">All Plans</option>
+                        @foreach (var item in MembershipPlanPricing.GetActivePlans())
+                        {
+                            <option value="@((int)item.Plan)" selected="@(selectedPlan == item.Plan)">@item.Name</option>
+                        }
+                    </select>
+                </form>
+            </div>
+
+            <section class="am-card am-table-wrap">
+                <table class="am-table">
+                    <thead>
+                        <tr>
+                            <th>Member</th>
+                            <th>Plan</th>
+                            <th>Trainer</th>
+                            <th>Schedule</th>
+                            <th>Joined</th>
+                            <th>Expires</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Count == 0)
+                        {
+                            <tr>
+                                <td colspan="8" class="am-empty">No members found.</td>
+                            </tr>
+                        }
+                        @foreach (var member in Model)
+                        {
+                            var fullName = $"{member.FirstName} {member.LastName}";
+                            var initials = $"{member.FirstName.FirstOrDefault()}{member.LastName.FirstOrDefault()}";
+                            var trainer = member.AssignedTrainerId.HasValue && trainers.TryGetValue(member.AssignedTrainerId.Value, out var trainerName) ? trainerName : "—";
+                            var days = string.Join(", ", (member.PreferredDays ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).Select(day => day.Length > 3 ? day[..3] : day));
+                            var schedule = string.IsNullOrWhiteSpace(days) ? "—" : $"{days} · {member.PreferredTimeSlot ?? "Time not set"}";
+                            var badgeClass = member.Status is MemberStatus.Expired or MemberStatus.Terminated ? "expired" : member.Status is MemberStatus.Inactive or MemberStatus.Canceled ? "inactive" : "";
+                            paidAmounts.TryGetValue(member.UserId, out var paidAmount);
+                            var planPrice = MembershipPlanPricing.GetPrice(member.MembershipPlan);
+                            var remaining = Math.Max(0m, planPrice - paidAmount);
+                            <tr>
+                                <td>
+                                    <div class="am-member">
+                                        <span class="am-avatar">@initials</span>
+                                        <div>
+                                            <div class="am-name">@fullName</div>
+                                            <div class="am-id">ID: @member.MembershipNumber</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>@MembershipPlanPricing.GetName(member.MembershipPlan)</td>
+                                <td>@trainer</td>
+                                <td class="am-schedule">@schedule</td>
+                                <td>@member.MembershipStartDate.ToString("MMM dd, yyyy")</td>
+                                <td>@(member.MembershipEndDate?.ToString("MMM dd, yyyy") ?? "—")</td>
+                                <td><span class="am-badge @badgeClass">@member.Status</span></td>
+                                <td class="am-action">
+                                    <details class="am-actions">
+                                        <summary title="Member actions">•••</summary>
+                                        <div class="am-actions-menu">
+                                            <button class="am-menu-button" type="button" onclick="openAdminPayment(@member.UserId,'@fullName',@remaining.ToString(System.Globalization.CultureInfo.InvariantCulture))">Add payment</button>
+                                            <form asp-controller="Admin" asp-action="SendDailyMemberReminder" method="post">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="id" value="@member.UserId" />
+                                                @if (dailyReminderMemberIds.Contains(member.UserId))
+                                                {
+                                                    <button class="am-menu-button" type="button" disabled>✓ Daily reminder sent</button>
+                                                }
+                                                else
+                                                {
+                                                    <button class="am-menu-button" type="submit">Send daily reminder</button>
+                                                }
+                                            </form>
+                                            <form asp-controller="Admin" asp-action="RenewMember" method="post" onsubmit="return confirm('Renew @fullName membership?');">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="id" value="@member.UserId" />
+                                                <button class="am-menu-button" type="submit">Renew membership</button>
+                                            </form>
+                                            <form asp-controller="Admin" asp-action="MarkMemberInactive" method="post" onsubmit="return confirm('Mark @fullName inactive?');">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="id" value="@member.UserId" />
+                                                <button class="am-menu-button" type="submit">Mark inactive</button>
+                                            </form>
+                                            <form asp-controller="Admin" asp-action="CancelMember" method="post" onsubmit="return confirm('Cancel @fullName membership? Only attended gym dates will count as consumed days.');">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="id" value="@member.UserId" />
+                                                <button class="am-menu-button" type="submit">Cancel membership</button>
+                                            </form>
+                                            <form asp-controller="Admin" asp-action="TerminateMember" method="post" onsubmit="return confirm('Terminate @fullName membership?');">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="id" value="@member.UserId" />
+                                                <button class="am-menu-button" type="submit">Terminate</button>
+                                            </form>
+                                            <form asp-controller="Admin" asp-action="DeleteMember" method="post" onsubmit="return confirm('Permanently delete @fullName? This cannot be undone.');">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="id" value="@member.UserId" />
+                                                <button class="am-menu-button am-delete" type="submit">Delete</button>
+                                            </form>
+                                        </div>
+                                    </details>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+                <div class="am-pager">
+                    <span class="am-page-info">Page @currentPage of @totalPages · @ViewBag.TotalCount member(s)</span>
+                    <div class="am-page-actions">
+                        <a class="am-page @(currentPage <= 1 ? "disabled" : "")" asp-action="Members" asp-route-searchTerm="@ViewBag.SearchTerm" asp-route-status="@selectedStatus" asp-route-plan="@selectedPlan" asp-route-page="@(currentPage - 1)">Previous</a>
+                        <a class="am-page @(currentPage >= totalPages ? "disabled" : "")" asp-action="Members" asp-route-searchTerm="@ViewBag.SearchTerm" asp-route-status="@selectedStatus" asp-route-plan="@selectedPlan" asp-route-page="@(currentPage + 1)">Next</a>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </section>
+    <div id="adminPaymentModal" class="admin-member-modal">
+        <div class="admin-member-dialog">
+            <h3>Record member payment</h3>
+            <p id="adminPaymentMember"></p>
+            <p>Cash only · Remaining balance: <strong id="adminPaymentBalance"></strong></p>
+            <form asp-controller="Admin" asp-action="RecordMemberPayment" method="post">
+                @Html.AntiForgeryToken()
+                <input id="adminPaymentId" type="hidden" name="id" />
+                <label for="adminPaymentAmount">Amount (₱)</label>
+                <input id="adminPaymentAmount" name="amount" type="number" min="0.01" step="0.01" required />
+                <div class="admin-modal-actions">
+                    <button type="button" onclick="closeAdminPayment()">Cancel</button>
+                    <button type="submit">Record payment</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+            function exportMemberReport(format) {
+                const details = document.querySelector('.am-export');
+                if (details) details.open = false;
+                if (format === 'pdf') window.print();
+            }
+
+            function openAdminPayment(id, name, balance) {
+                const modal = document.getElementById('adminPaymentModal');
+                document.getElementById('adminPaymentId').value = id;
+                document.getElementById('adminPaymentMember').textContent = name;
+                document.getElementById('adminPaymentBalance').textContent = '₱' + Number(balance).toLocaleString('en-PH', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                });
+                const amount = document.getElementById('adminPaymentAmount');
+                amount.value = '';
+                amount.max = balance;
+                modal.classList.add('open');
+                amount.focus();
+            }
+
+            function closeAdminPayment() {
+                document.getElementById('adminPaymentModal').classList.remove('open');
+            }
+    </script>
+

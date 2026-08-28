@@ -47,6 +47,7 @@ builder.Services.AddScoped<IRepository<SessionAttendee>, Repository<SessionAtten
 builder.Services.AddScoped<GmailValidationService>();
 builder.Services.AddScoped<HashingService>();
 builder.Services.AddScoped<SetupService>();
+builder.Services.AddSingleton<DatabaseSchemaService>();
 builder.Services.AddSingleton<PendingRegistrationService>();
 builder.Services.AddScoped<JwtTokenService>();
 
@@ -54,6 +55,11 @@ builder.Services.AddScoped<JwtTokenService>();
 builder.Services.AddScoped<ITrainerService, TrainerService>();
 builder.Services.AddScoped<IAdminService, AdminService>();
 builder.Services.AddScoped<IMemberService, MemberService>();
+builder.Services.AddScoped<DailyMemberReminderSender>();
+builder.Services.AddScoped<EquipmentEvidenceService>();
+builder.Services.AddHostedService<MembershipExpirationReminderService>();
+builder.Services.AddHostedService<WeeklyAttendanceEmailService>();
+builder.Services.AddHostedService<DailyMemberReminderService>();
 
 // ==========================================
 // 3. Configure Dual Authentication (Cookies for Web + JWT for API)
@@ -99,6 +105,23 @@ builder.Services.AddSession(options =>
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
+
+// Apply the external, repeatable schema before any request or hosted service
+// accesses the database. SQL remains in Database/GymSchema.sql.
+await app.Services.GetRequiredService<DatabaseSchemaService>().ApplyAsync();
+if (args.Contains("--schema-only", StringComparer.OrdinalIgnoreCase))
+{
+    return;
+}
+
+// Load the administrator-managed prices before requests calculate balances.
+using (var pricingScope = app.Services.CreateScope())
+{
+    var pricingContext = pricingScope.ServiceProvider.GetRequiredService<GymDbContext>();
+    var planSettings = await pricingContext.MembershipPlanSettings.AsNoTracking().ToListAsync();
+    foreach (var setting in planSettings)
+        MembershipPlanPricing.Configure(setting.Plan, setting.Name, setting.Price, setting.DurationMonths, setting.IsActive);
+}
 
 app.UseForwardedHeaders();
 

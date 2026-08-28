@@ -19,7 +19,7 @@
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
-        margin-bottom: 24px;
+        margin-bottom: 16px;
     }
 
     .header-title h1 {
@@ -67,6 +67,16 @@
         font-weight: 500;
         margin-bottom: 16px;
     }
+
+    .error-banner {
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        color: #b91c1c;
+    }
+
+        .error-banner button {
+            color: #b91c1c;
+        }
 
         .success-banner button {
             background: none;
@@ -196,6 +206,25 @@
         font-weight: 600;
     }
 
+    .member-name-btn {
+        border: none !important;
+        outline: none !important;
+        box-shadow: none !important;
+        appearance: none;
+        background: none;
+        color: #2563eb;
+        font: inherit;
+        font-weight: 600;
+        padding: 0;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+        .member-name-btn:hover { text-decoration: none; color: #1d4ed8; }
+        .member-name-btn:focus, .member-name-btn:focus-visible { border: none !important; outline: none !important; box-shadow: none !important; }
+
     .avatar-circle {
         width: 32px;
         height: 32px;
@@ -242,10 +271,29 @@
         color: #52525b;
     }
 
+    .badge-canceled {
+        background-color: #f3e8ff;
+        color: #7e22ce;
+    }
+
+    .badge-terminated {
+        background-color: #fecaca;
+        color: #7f1d1d;
+    }
+
     /* ACTION MENU */
     .action-cell {
         position: relative;
-        text-align: right;
+        text-align: center;
+    }
+
+    .action-heading {
+        text-align: center !important;
+        width: 76px;
+    }
+
+    .schedule-cell {
+        white-space: nowrap;
     }
 
     .action-btn {
@@ -268,11 +316,11 @@
         position: absolute;
         right: 16px;
         top: calc(100% - 4px);
-        background: #fff;
+        background: #fffef8;
         border: 1px solid #e4e4e7;
         border-radius: 8px;
         box-shadow: 0 4px 12px rgba(16, 24, 40, 0.1);
-        min-width: 140px;
+        min-width: 170px;
         z-index: 20;
         overflow: hidden;
     }
@@ -313,9 +361,12 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-top: 12px;
-        font-size: 13px;
-        color: #71717a;
+        margin-top: 0;
+        min-height: 76px;
+        padding: 16px 20px;
+        background: #e8f6fc;
+        font-size: 15px;
+        color: #111;
     }
 
     .pagination-arrows {
@@ -324,14 +375,18 @@
     }
 
         .pagination-arrows a {
-            border: 1px solid #e4e4e7;
-            padding: 4px 12px;
+            width: 55px;
+            height: 43px;
+            display: grid;
+            place-items: center;
+            border: 1px solid #d5e1e5;
+            padding: 0;
             border-radius: 6px;
-            background: #fff;
-            color: #71717a;
+            background: #f7fbfc;
+            color: #879397;
             text-decoration: none;
-            font-size: 14px;
-            font-weight: 600;
+            font-size: 13px;
+            font-weight: 400;
         }
 
             .pagination-arrows a:hover:not(.disabled) {
@@ -365,7 +420,7 @@
         border-radius: 12px;
         width: 400px;
         box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-        font-family: inherit;
+        font-family: "Inria Serif", serif;
     }
 
         .modal-card h3 {
@@ -387,10 +442,22 @@
         gap: 12px;
     }
 
+    .member-detail-card { width: min(620px, calc(100vw - 32px)); max-height: 90vh; overflow-y: auto; }
+    .member-detail-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 20px; margin-bottom: 20px; }
+    .detail-label { display: block; color: #71717a; font-size: 12px; margin-bottom: 3px; }
+    .detail-value { color: #18181b; font-size: 14px; overflow-wrap: anywhere; }
+    .member-edit-fields { border-top: 1px solid #e4e4e7; padding-top: 18px; }
+    .member-edit-fields label { display: block; font-size: 13px; font-weight: 600; margin: 0 0 6px; }
+    .member-edit-fields select, .member-edit-fields input { width: 100%; box-sizing: border-box; border: 1px solid #d4d4d8; border-radius: 7px; padding: 9px 10px; margin-bottom: 14px; background: white; }
+    .edit-days { display: flex; flex-wrap: wrap; gap: 8px 14px; margin-bottom: 14px; }
+    .edit-days label { display: inline-flex; align-items: center; gap: 5px; font-weight: 400; margin: 0; }
+    .edit-days input { width: auto; margin: 0; }
+    .btn-save-details { background: rgb(8,61,2); border: 1px solid rgb(8,61,2); color: #d8c38a; padding: 8px 16px; border-radius: 8px; font-family: "Inria Serif",serif; font-weight: 700; cursor: pointer; }
+
     .btn-cancel {
-        background-color: #f4f4f5;
-        border: 1px solid #e4e4e7;
-        color: #3f3f46;
+        background-color: #eef7ec;
+        border: 1px solid #8aac80;
+        color: rgb(8,61,2);
         padding: 8px 16px;
         font-size: 14px;
         font-weight: 600;
@@ -399,13 +466,13 @@
     }
 
         .btn-cancel:hover {
-            background-color: #e4e4e7;
+            background-color: #dcefd8;
         }
 
     .btn-confirm-delete {
-        background-color: #b91c1c;
-        border: 1px solid #b91c1c;
-        color: #fff;
+        background-color: rgb(8,61,2);
+        border: 1px solid rgb(8,61,2);
+        color: #d8c38a;
         padding: 8px 16px;
         font-size: 14px;
         font-weight: 600;
@@ -413,58 +480,84 @@
         cursor: pointer;
     }
 
-        .btn-confirm-delete:hover {
-            background-color: #991b1b;
+    .btn-confirm-delete:hover {
+            background-color: rgb(5,45,1);
         }
+
+    /* Compact dark Front Desk member directory */
+    body > .container { max-width:none!important; width:100%!important; padding:0!important; }
+    .page-container { width:100%; min-height:100vh; margin:0; padding:22px 28px 60px; background:#101311; color:#f4f6f4; font-family:Arial,sans-serif; }
+    .top-member-bar { display:flex; align-items:center; gap:10px; padding-bottom:17px; border-bottom:1px solid #303530; }
+    .top-member-search { display:flex; flex:1; gap:10px; max-width:804px; }
+    .top-member-search .search-box { flex:1; max-width:none; height:45px; border:1px solid #8d958f; outline:0; box-shadow:none; border-radius:0; background:#1b1e1c; color:#929a94; }
+    .top-member-search .search-box svg { display:none; }
+    .top-member-search .search-box input { border:0; outline:0; box-shadow:none; background:transparent; color:#fff; font-size:13px; padding:0 15px; }
+    .top-member-search .search-box input:focus { outline:0; box-shadow:none; }
+    .top-member-search .search-box input::placeholder { color:#838b85; }
+    .top-member-search .search-btn { width:92px; min-width:92px; height:45px; padding:0 18px; border:0; border-radius:0; background:#b7ff1b; color:#101510; font-size:10px; font-weight:800; text-transform:uppercase; justify-content:center; box-shadow:none; }
+    .page-container .btn-add { width:auto; min-width:92px; height:45px; padding:0 18px; border:0; border-radius:0; background:#b7ff1b; color:#101510; font-size:10px; font-weight:800; text-transform:uppercase; justify-content:center; box-shadow:none; }
+    .page-container .header-row { align-items:flex-end; margin:22px 0 18px; }
+    .page-container .header-title h1 { color:#fff; font-size:24px; }
+    .page-container .header-subtitle { color:#b8ff28; font-size:10px; text-transform:uppercase; letter-spacing:.04em; }
+    .member-filter-form .dropdown-filters { display:flex; gap:10px; }
+    .member-filter-form .filter-select { min-width:145px; height:38px; border:1px solid #3a403b; border-radius:2px; background:#292d2a; color:#fff; font-size:11px; }
+    .page-container .table-card { border:1px solid #303630; border-radius:2px; background:#1c1f1d; overflow:visible; }
+    .page-container .members-table { color:#f3f5f3; font-size:12px; }
+    .page-container .members-table th { padding:12px 13px; background:#343735; border-color:#3a3f3b; color:#cbd1cc; font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; }
+    .page-container .members-table td { padding:13px; border-color:#343934; }
+    .page-container .member-name-btn { color:#fff; font-size:12px; }
+    .page-container .member-name-btn:hover { color:#b7ff1b; }
+    .page-container .avatar-circle { background:#29352c!important; color:#b7ff1b!important; }
+    .page-container .status-badge { border-radius:2px; padding:4px 8px; font-size:9px; text-transform:uppercase; }
+    .page-container .badge-active { background:#293226; color:#b7ff1b; }
+    .page-container .action-btn { border:1px solid #394039; color:#d8ddd9; border-radius:2px; }
+    .page-container .action-btn:hover { background:#2d322e; color:#b7ff1b; }
+    .page-container .action-menu { background:#202421; border-color:#414841; color:#fff; }
+    .page-container .menu-item { color:#edf1ed; }
+    .page-container .menu-item:hover { background:#303630; }
+    .page-container .pagination-bar { margin-top:0; padding:18px 12px; color:#aeb6b0; background:#101311; font-size:10px; }
+    .page-container .pagination-arrows a { min-width:82px; height:32px; border:0; border-radius:4px; background:#b7ff1b; color:#101510; font-size:0; font-weight:800; }
+    .page-container .pagination-arrows a:first-child::after { content:"Previous"; font-size:10px; text-transform:uppercase; }
+    .page-container .pagination-arrows a:last-child::after { content:"Next"; font-size:10px; text-transform:uppercase; }
+    .page-container .pagination-arrows a.disabled { opacity:.35; }
+    @@media(max-width:900px){ .page-container{padding:18px}.top-member-bar,.header-row{gap:12px}.table-card{overflow-x:auto!important}.members-table{min-width:950px}.header-row{align-items:flex-start!important}.member-filter-form .dropdown-filters{flex-wrap:wrap} }
+    .registration-modal { position:fixed; inset:0; z-index:2500; display:none; align-items:center; justify-content:center; padding:24px; background:rgba(0,0,0,.68); }
+    .registration-modal.open { display:flex; }
+    .registration-shell { position:relative; width:min(1000px,96vw); height:min(900px,92vh); overflow:hidden; border-radius:8px; background:#fff; box-shadow:0 24px 70px rgba(0,0,0,.4); }
+    .registration-frame { width:100%; height:100%; border:0; background:#fff; }
+    .registration-close { position:absolute; top:12px; right:16px; z-index:2; width:36px; height:36px; border:0; border-radius:4px; background:#111; color:#fff; font-size:23px; cursor:pointer; }
+    .member-renewal-card { display:flex; align-items:center; gap:14px; min-width:210px; padding:12px 16px; border:1px solid #343a35; border-radius:4px; background:#1d201e; }
+    .member-renewal-count { color:#b7ff1b; font-size:27px; font-weight:800; line-height:1; }
+    .member-renewal-label { display:block; color:#f4f6f4; font-size:10px; font-weight:800; text-transform:uppercase; }
+    .member-renewal-period { display:block; margin-top:4px; color:#aeb6b0; font-size:9px; }
 </style>
 
 <div class="page-container">
-
-    @if (TempData["SuccessMessage"] != null)
-    {
-        <div class="success-banner" id="successBanner">
-            <span>@TempData["SuccessMessage"]</span>
-            <button type="button" onclick="document.getElementById('successBanner').remove()">&times;</button>
-        </div>
-    }
-
-    <!-- HEADER -->
-    <div class="header-row">
-        <div class="header-title">
-            <h1>Members</h1>
-            <div class="header-subtitle">
-                @Model.ListViewModel.ActiveCount active · @Model.ListViewModel.PendingPaymentCount pending payment
+    <div class="top-member-bar">
+        <form class="top-member-search" method="get" asp-action="Member" asp-controller="FrontDesk">
+            <div class="search-box">
+                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                <input type="text" name="searchTerm" value="@Model.ListViewModel.SearchTerm" placeholder="Search members..." />
             </div>
-        </div>
-
-        <a asp-action="AddMember" asp-controller="FrontDesk" class="btn-add">
+            <button type="submit" class="search-btn">Search</button>
+        </form>
+        <button type="button" class="btn-add" onclick="openAddMemberModal()">
             <span>+</span> Add member
-        </a>
+        </button>
     </div>
 
-    <!-- FILTERS -->
-    <form method="get" asp-action="Member" asp-controller="FrontDesk" id="memberFilterForm">
+    <div class="header-row">
+        <div class="header-title"><h1>Members</h1><div class="header-subtitle">@Model.ListViewModel.ActiveCount active member(s)</div></div>
+        <div class="member-renewal-card" aria-label="Upcoming membership renewals">
+            <span class="member-renewal-count">@Model.ListViewModel.IncomingRenewalCount</span>
+            <span><span class="member-renewal-label">Upcoming renewals</span><span class="member-renewal-period">Next 7 days</span></span>
+        </div>
+        <form method="get" asp-action="Member" asp-controller="FrontDesk" id="memberFilterForm" class="member-filter-form">
         <input type="hidden" name="page" value="1" />
-
-        <div class="filter-bar">
-            <!-- SEARCH BAR -->
-            <div class="search-box">
-                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                </svg>
-                <input type="text"
-                       id="searchTermInput"
-                       name="searchTerm"
-                       value="@Model.ListViewModel.SearchTerm"
-                       placeholder="Search by name or ID..." />
-            </div>
-
-            <button type="submit" class="search-btn">Search</button>
-
-            <!-- DROPDOWNS -->
+            <input type="hidden" name="searchTerm" value="@Model.ListViewModel.SearchTerm" />
             <div class="dropdown-filters">
                 <!-- STATUS -->
-                <select name="selectedStatus" class="filter-select">
+                <select name="selectedStatus" class="filter-select" onchange="this.form.submit()">
                     <option value="">All statuses</option>
                     @foreach (var status in Enum.GetValues<MemberStatus>())
                     {
@@ -480,37 +573,37 @@
                 </select>
 
                 <!-- PLAN -->
-                <select name="selectedPlan" class="filter-select">
+                <select name="selectedPlan" class="filter-select" onchange="this.form.submit()">
                     <option value="">All plans</option>
-                    @foreach (var plan in Enum.GetValues<MembershipPlanType>())
+                    @foreach (var planItem in MembershipPlanPricing.GetActivePlans())
                     {
-                        if (Model.ListViewModel.SelectedPlan == plan)
+                        if (Model.ListViewModel.SelectedPlan == planItem.Plan)
                         {
-                            <option value="@((int)plan)" selected>@plan</option>
+                            <option value="@((int)planItem.Plan)" selected>@planItem.Name</option>
                         }
                         else
                         {
-                            <option value="@((int)plan)">@plan</option>
+                            <option value="@((int)planItem.Plan)">@planItem.Name</option>
                         }
                     }
                 </select>
             </div>
-        </div>
-    </form>
+        </form>
+    </div>
 
     <!-- DATA TABLE -->
     <div class="table-card">
         <table class="members-table">
             <thead>
                 <tr>
-                    <th>ID</th>
                     <th>Member</th>
                     <th>Plan</th>
+                    <th>Trainer</th>
                     <th>Schedule</th>
                     <th>Joined</th>
                     <th>Expires</th>
                     <th>Status</th>
-                    <th></th>
+                    <th class="action-heading">Action</th>
                 </tr>
             </thead>
             <tbody>
@@ -538,34 +631,70 @@
                             Gym.Models.MemberStatus.ExpiringSoon => "badge-expiringsoon",
                             Gym.Models.MemberStatus.Expired => "badge-expired",
                             Gym.Models.MemberStatus.Inactive => "badge-inactive",
+                            Gym.Models.MemberStatus.Canceled => "badge-canceled",
+                            Gym.Models.MemberStatus.Terminated => "badge-terminated",
+                            Gym.Models.MemberStatus.PendingPayment => "badge-overdue",
                             _ => "badge-active"
                         };
 
                         string statusText = member.Status switch
                         {
                             Gym.Models.MemberStatus.ExpiringSoon => "Expiring soon",
+                            Gym.Models.MemberStatus.PendingPayment => "Renewable membership",
                             _ => member.Status.ToString()
                         };
 
-                        <tr>
-                            <!-- ID -->
-                            <td>@member.Id</td>
+                        var compactDays = string.Join(", ",
+                            (member.PreferredDays ?? string.Empty)
+                                .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                                .Select(day => day.ToLowerInvariant() switch
+                                {
+                                    "monday" or "mon" => "Mon",
+                                    "tuesday" or "tue" => "Tue",
+                                    "wednesday" or "wed" => "Wed",
+                                    "thursday" or "thu" => "Thu",
+                                    "friday" or "fri" => "Fri",
+                                    "saturday" or "sat" => "Sat",
+                                    "sunday" or "sun" => "Sun",
+                                    _ => day
+                                }));
+                        var compactSchedule = !string.IsNullOrWhiteSpace(compactDays)
+                            ? $"{compactDays} · {member.PreferredTimeSlot ?? "Time not set"}"
+                            : member.Schedule ?? "—";
 
+                        <tr>
                             <!-- MEMBER -->
                             <td>
                                 <div class="member-cell">
-                                    <div class="avatar-circle" style="background-color: @color.Bg; color: @color.Text;">
-                                        @member.Initials
-                                    </div>
-                                    <span>@member.FullName</span>
+                                    <button type="button" class="member-name-btn"
+                                            data-id="@member.Id" data-name="@member.FullName"
+                                            data-email="@member.Email" data-phone="@member.PhoneNumber"
+                                            data-membership="@member.MembershipNumber" data-plan="@member.Plan"
+                                            data-status="@statusText" data-joined="@member.JoinedDate.ToString("MMM d, yyyy")"
+                                            data-expires="@member.ExpirationDate.ToString("MMM d, yyyy")"
+                                            data-goal="@(member.GymGoal?.ToString() ?? "Not set")"
+                                            data-trainer-id="@member.AssignedTrainerId"
+                                            data-follow-up-date="@(member.FollowUpDate?.ToString("yyyy-MM-dd") ?? "")"
+                                            data-follow-up-purpose="@(member.FollowUpPurpose ?? "")"
+                                            data-preferred-days="@(member.PreferredDays ?? "")"
+                                            data-preferred-time="@(member.PreferredTimeSlot ?? "")"
+                                            onclick="openMemberDetails(this)">
+                                        <span class="avatar-circle" style="background-color: @color.Bg; color: @color.Text;">
+                                            @member.Initials
+                                        </span>
+                                        <span>@member.FullName</span>
+                                    </button>
                                 </div>
                             </td>
 
                             <!-- PLAN -->
-                            <td>@member.Plan</td>
+                            <td>@MembershipPlanPricing.GetName(member.Plan)</td>
+
+                            <!-- TRAINER -->
+                            <td>@(member.TrainerName ?? "—")</td>
 
                             <!-- SCHEDULE -->
-                            <td>@(member.Schedule ?? "—")</td>
+                            <td class="schedule-cell" title="@(member.Schedule ?? compactSchedule)">@compactSchedule</td>
 
                             <!-- JOINED -->
                             <td>@member.JoinedDate.ToString("MMM d, yyyy")</td>
@@ -589,22 +718,30 @@
                                 </span>
                             </td>
 
-                            <!-- ACTION -->
                             <td class="action-cell">
-                                <button type="button" class="action-btn" onclick="toggleActionMenu(event, this)">&#8226;&#8226;&#8226;</button>
-
-                                <div class="action-menu">
-                                    <!-- Reactivate Option -->
-                                    <form asp-action="ReactivateMember" asp-controller="FrontDesk" method="post">
-                                        @Html.AntiForgeryToken()
-                                        <input type="hidden" name="id" value="@member.Id" />
-                                        <button type="submit" class="menu-item">Reactivate</button>
-                                    </form>
-
-                                    <!-- Delete Option (Triggers Custom Modal) -->
-                                    <button type="button" class="menu-item menu-item-danger" onclick="openDeleteModal(@member.Id, '@member.FullName')">Delete</button>
+                                <button type="button" class="action-btn" aria-label="Actions for @member.FullName"
+                                        onclick="toggleActionMenu(event, this)">•••</button>
+                                <div class="action-menu" onclick="event.stopPropagation()">
+                                    @if (member.Status != Gym.Models.MemberStatus.Canceled &&
+                                         member.Status != Gym.Models.MemberStatus.Terminated)
+                                    {
+                                        <button type="button" class="menu-item"
+                                                data-member-id="@member.Id"
+                                                data-member-name="@member.FullName"
+                                                onclick="openCancelMembershipModal(this)">
+                                            Cancel membership
+                                        </button>
+                                    }
+                                    @if (member.Status != Gym.Models.MemberStatus.Terminated)
+                                    {
+                                        <button type="button" class="menu-item menu-item-danger"
+                                                onclick="openTerminateModal(@member.Id, '@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(member.FullName))')">
+                                            Terminate
+                                        </button>
+                                    }
                                 </div>
                             </td>
+
                         </tr>
                     }
                 }
@@ -645,23 +782,249 @@
     </div>
 </div>
 
-<!-- CUSTOM DELETE CONFIRMATION MODAL -->
-<div id="deleteModal" class="modal-overlay" style="display: none;">
-    <div class="modal-card">
-        <h3>Confirm Deletion</h3>
-        <p id="deleteModalMessage">Are you sure you want to remove this member?</p>
+<div id="addMemberModal" class="registration-modal" role="dialog" aria-modal="true" aria-label="Register member">
+    <div class="registration-shell">
+        <button type="button" class="registration-close" aria-label="Close registration" onclick="closeAddMemberModal()">&times;</button>
+        <iframe id="addMemberFrame" class="registration-frame" title="Member registration form"></iframe>
+    </div>
+</div>
+
+@if (TempData["SuccessMessage"] is string successMessage)
+{
+    <div id="processResultModal" class="modal-overlay" style="display:flex;">
+        <div class="modal-card" role="alertdialog" aria-modal="true">
+            <h3 style="color:#166534;">Process successful</h3>
+            <p>@successMessage</p>
+            <div class="modal-buttons"><button type="button" class="btn-save-details" onclick="closeProcessResultModal()">OK</button></div>
+        </div>
+    </div>
+}
+else if (TempData["ErrorMessage"] is string errorMessage)
+{
+    <div id="processResultModal" class="modal-overlay" style="display:flex;">
+        <div class="modal-card" role="alertdialog" aria-modal="true">
+            <h3 style="color:#b91c1c;">Action unsuccessful</h3>
+            <p>@errorMessage</p>
+            <div class="modal-buttons"><button type="button" class="btn-confirm-delete" onclick="closeProcessResultModal()">Close</button></div>
+        </div>
+    </div>
+}
+
+<!-- MEMBER DETAILS AND EDITABLE ASSIGNMENT/FOLLOW-UP -->
+<div id="memberDetailsModal" class="modal-overlay" style="display: none;">
+    <div class="modal-card member-detail-card">
+        <h3 id="detailName">Member details</h3>
+        <div class="member-detail-grid">
+            <div><span class="detail-label">Membership ID</span><span class="detail-value" id="detailMembership"></span></div>
+            <div><span class="detail-label">Status</span><span class="detail-value" id="detailStatus"></span></div>
+            <div><span class="detail-label">Email</span><span class="detail-value" id="detailEmail"></span></div>
+            <div><span class="detail-label">Phone</span><span class="detail-value" id="detailPhone"></span></div>
+            <div><span class="detail-label">Plan</span><span class="detail-value" id="detailPlan"></span></div>
+            <div><span class="detail-label">Gym goal</span><span class="detail-value" id="detailGoal"></span></div>
+            <div><span class="detail-label">Joined</span><span class="detail-value" id="detailJoined"></span></div>
+            <div><span class="detail-label">Expires</span><span class="detail-value" id="detailExpires"></span></div>
+        </div>
+        <form asp-action="UpdateMemberDetails" asp-controller="FrontDesk" method="post" class="member-edit-fields">
+            @Html.AntiForgeryToken()
+            <input type="hidden" id="detailMemberId" name="id" />
+            <label for="detailTrainer">Trainer assignment</label>
+            <select id="detailTrainer" name="assignedTrainerId">
+                <option value="">No trainer (self-guided)</option>
+                @foreach (var trainer in Model.ListViewModel.TrainerOptions)
+                {
+                    <option value="@trainer.Value">@trainer.Text</option>
+                }
+            </select>
+            <label>Training days</label>
+            <div class="edit-days" id="detailDays">
+                @foreach (var day in new[] { "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" })
+                {
+                    <label><input type="checkbox" name="preferredDays" value="@day" /> @day[..3]</label>
+                }
+            </div>
+            <label for="detailPreferredTime">Preferred training time</label>
+            <select id="detailPreferredTime" name="preferredTimeSlot">
+                <option value="">Select time slot</option>
+                @foreach (var time in new[]
+                {
+                    "7:00 AM - 8:00 AM", "8:00 AM - 9:00 AM", "9:00 AM - 10:00 AM",
+                    "10:00 AM - 11:00 AM", "11:00 AM - 12:00 PM", "12:00 PM - 1:00 PM",
+                    "1:00 PM - 2:00 PM", "2:00 PM - 3:00 PM", "3:00 PM - 4:00 PM",
+                    "8:00 PM - 9:00 PM"
+                })
+                {
+                    <option value="@time">@time</option>
+                }
+            </select>
+            <label for="detailFollowUpDate">Follow-up date</label>
+            <input id="detailFollowUpDate" name="followUpDate" type="date" />
+            <label for="detailFollowUpPurpose">Follow-up purpose</label>
+            <select id="detailFollowUpPurpose" name="followUpPurpose">
+                <option value="Welcome & orientation">Welcome &amp; orientation</option>
+                <option value="Fitness Assessment">Fitness Assessment</option>
+                <option value="Payment Follow-up">Payment Follow-up</option>
+            </select>
+            <small style="display:block;margin-top:8px;color:#66736b;line-height:1.4;">
+                Saving a follow-up date and purpose sends a generated letter to the member's email. The member can reply directly to the gym.
+            </small>
+            <div class="modal-buttons">
+                <button type="button" class="btn-cancel" onclick="closeMemberDetails()">Cancel</button>
+                <button type="submit" class="btn-save-details">Save &amp; send follow-up</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- CASH PAYMENT MODAL -->
+<div id="paymentModal" class="modal-overlay" style="display: none;">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="paymentModalTitle">
+        <h3 id="paymentModalTitle">Record member payment</h3>
+        <p style="margin-bottom:14px;color:#68736d;">Review the client information and record the cash received.</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px 16px;padding:14px;margin-bottom:18px;background:#f2f8f4;border:1px solid #dce8df;border-radius:7px;">
+            <div><small style="display:block;color:#6c7871;">Client</small><strong id="paymentMemberName"></strong></div>
+            <div><small style="display:block;color:#6c7871;">Membership ID</small><strong id="paymentMemberNumber"></strong></div>
+            <div><small style="display:block;color:#6c7871;">Email</small><strong id="paymentMemberEmail" style="overflow-wrap:anywhere;"></strong></div>
+            <div><small style="display:block;color:#6c7871;">Plan</small><strong id="paymentMemberPlan"></strong></div>
+            <div><small style="display:block;color:#6c7871;">Plan price</small><strong id="paymentPlanPrice"></strong></div>
+            <div><small style="display:block;color:#6c7871;">Total paid</small><strong id="paymentTotalPaid"></strong></div>
+            <div><small style="display:block;color:#6c7871;">Remaining balance</small><strong id="paymentRemainingBalance" style="color:#b45309;"></strong></div>
+        </div>
+        <form asp-action="RecordMemberPayment" asp-controller="FrontDesk" method="post" onsubmit="lockPaymentSubmit(this)">
+            @Html.AntiForgeryToken()
+            <input type="hidden" id="paymentMemberId" name="id" />
+            <label for="paymentMethod" style="display:block;margin-bottom:6px;font-weight:700;">Payment method</label>
+            <input id="paymentMethod" type="text" value="Cash" readonly
+                   style="width:100%;height:44px;padding:0 12px;border:1px solid #d1dad5;border-radius:6px;background:#f5f8f6;margin-bottom:14px;" />
+            <label for="paymentAmount" style="display:block;margin-bottom:6px;font-weight:700;">Amount (₱)</label>
+            <input id="paymentAmount" name="amount" type="number" min="0.01" step="0.01" required placeholder="0.00"
+                   style="width:100%;height:44px;padding:0 12px;border:1px solid #d1dad5;border-radius:6px;margin-bottom:18px;" />
+            <div class="modal-buttons">
+                <button type="button" class="btn-cancel" onclick="closePaymentModal()">Cancel</button>
+                <button type="submit" class="btn-save-details">Record payment</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- FLOATING MEMBERSHIP CANCELLATION RESTRICTION -->
+<div id="cancelMembershipModal" class="modal-overlay" style="display: none;">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="cancelMembershipTitle">
+        <h3 id="cancelMembershipTitle">Cancel membership?</h3>
+        <p id="cancelMembershipMessage"></p>
+        <p style="margin-top:-12px; color:#b45309; background:#fffbeb; border:1px solid #fde68a; border-radius:8px; padding:10px 12px;">
+            Only distinct gym dates with confirmed attendance will be counted as consumed days. Scheduled or missed sessions are excluded.
+        </p>
         <div class="modal-buttons">
-            <button type="button" class="btn-cancel" onclick="closeDeleteModal()">Cancel</button>
-            <form id="deleteForm" asp-action="DeleteMember" asp-controller="FrontDesk" method="post" style="display:inline;">
+            <button type="button" class="btn-cancel" onclick="closeCancelMembershipModal()">Cancel</button>
+            <form asp-action="CancelMembership" asp-controller="FrontDesk" method="post" style="display:inline;">
                 @Html.AntiForgeryToken()
-                <input type="hidden" id="deleteMemberId" name="id" />
-                <button type="submit" class="btn-confirm-delete">Delete</button>
+                <input type="hidden" id="cancelMembershipId" name="id" />
+                <button type="submit" class="btn-confirm-delete">OK</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- CUSTOM TERMINATE CONFIRMATION MODAL -->
+<div id="terminateModal" class="modal-overlay" style="display: none;">
+    <div class="modal-card">
+        <h3>Confirm Termination</h3>
+        <p id="terminateModalMessage">Are you sure you want to terminate this member's membership?</p>
+        <div class="modal-buttons">
+            <button type="button" class="btn-cancel" onclick="closeTerminateModal()">Cancel</button>
+            <form id="terminateForm" asp-action="TerminateMembership" asp-controller="FrontDesk" method="post" style="display:inline;">
+                @Html.AntiForgeryToken()
+                <input type="hidden" id="terminateMemberId" name="id" />
+                <button type="submit" class="btn-confirm-delete">OK</button>
             </form>
         </div>
     </div>
 </div>
 
 <script>
+    if (window.self !== window.top) {
+        window.top.location.href = window.location.href;
+    }
+
+    function openAddMemberModal() {
+        const modal = document.getElementById('addMemberModal');
+        const frame = document.getElementById('addMemberFrame');
+        if (!frame.src) frame.src = '@Url.Action("AddMember", "FrontDesk")';
+        modal.classList.add('open');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeAddMemberModal() {
+        document.getElementById('addMemberModal').classList.remove('open');
+        document.body.style.overflow = '';
+    }
+
+    function closeProcessResultModal() {
+        const modal = document.getElementById('processResultModal');
+        if (modal) modal.style.display = 'none';
+    }
+
+    function openMemberDetails(button) {
+        const data = button.dataset;
+        document.getElementById('detailMemberId').value = data.id;
+        document.getElementById('detailName').textContent = data.name;
+        document.getElementById('detailMembership').textContent = data.membership;
+        document.getElementById('detailStatus').textContent = data.status;
+        document.getElementById('detailEmail').textContent = data.email;
+        document.getElementById('detailPhone').textContent = data.phone;
+        document.getElementById('detailPlan').textContent = data.plan;
+        document.getElementById('detailGoal').textContent = data.goal.replace(/([a-z])([A-Z])/g, '$1 $2');
+        document.getElementById('detailJoined').textContent = data.joined;
+        document.getElementById('detailExpires').textContent = data.expires;
+        document.getElementById('detailTrainer').value = data.trainerId || '';
+        document.getElementById('detailFollowUpDate').value = data.followUpDate || '';
+        document.getElementById('detailFollowUpPurpose').value = data.followUpPurpose || 'Welcome & orientation';
+        const selectedDays = (data.preferredDays || '').split(',').map(day => day.trim());
+        document.querySelectorAll('#detailDays input[type="checkbox"]').forEach(function (checkbox) {
+            checkbox.checked = selectedDays.includes(checkbox.value);
+        });
+        document.getElementById('detailPreferredTime').value = data.preferredTime || '';
+        document.getElementById('memberDetailsModal').style.display = 'flex';
+    }
+
+    function closeMemberDetails() {
+        document.getElementById('memberDetailsModal').style.display = 'none';
+    }
+
+    function openPaymentModal(button) {
+        document.getElementById('paymentMemberId').value = button.dataset.memberId;
+        document.getElementById('paymentMemberName').textContent = button.dataset.memberName;
+        document.getElementById('paymentMemberEmail').textContent = button.dataset.memberEmail || 'No email';
+        document.getElementById('paymentMemberNumber').textContent = button.dataset.memberNumber || 'Not assigned';
+        document.getElementById('paymentMemberPlan').textContent = button.dataset.memberPlan || 'Not assigned';
+        const planPrice = Number(button.dataset.planPrice || 0);
+        const totalPaid = Number(button.dataset.paidAmount || 0);
+        const remainingBalance = Number(button.dataset.remainingBalance || 0);
+        const peso = value => '₱' + value.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        document.getElementById('paymentPlanPrice').textContent = peso(planPrice);
+        document.getElementById('paymentTotalPaid').textContent = peso(totalPaid);
+        document.getElementById('paymentRemainingBalance').textContent = peso(remainingBalance);
+        document.getElementById('paymentAmount').value = '';
+        document.getElementById('paymentAmount').max = remainingBalance.toFixed(2);
+        document.getElementById('paymentAmount').placeholder = remainingBalance > 0 ? 'Up to ' + peso(remainingBalance) : 'Fully paid';
+        document.getElementById('paymentAmount').disabled = remainingBalance <= 0;
+        document.querySelector('#paymentModal button[type="submit"]').disabled = remainingBalance <= 0;
+        document.getElementById('paymentModal').style.display = 'flex';
+        document.getElementById('paymentAmount').focus();
+    }
+
+    function closePaymentModal() {
+        document.getElementById('paymentModal').style.display = 'none';
+    }
+
+    function lockPaymentSubmit(form) {
+        const button = form.querySelector('button[type="submit"]');
+        if (button.disabled) return false;
+        button.disabled = true;
+        button.textContent = 'Processing...';
+        return true;
+    }
+
     function closeAllActionMenus(except) {
         document.querySelectorAll('.action-menu.open').forEach(function (menu) {
             if (menu !== except) menu.classList.remove('open');
@@ -694,13 +1057,27 @@
         }
     });
 
-    function openDeleteModal(memberId, memberName) {
-        document.getElementById('deleteMemberId').value = memberId;
-        document.getElementById('deleteModalMessage').innerText = `Remove ${memberName} from the active roster?`;
-        document.getElementById('deleteModal').style.display = 'flex';
+    function openTerminateModal(memberId, memberName) {
+        document.getElementById('terminateMemberId').value = memberId;
+        document.getElementById('terminateModalMessage').innerText = `Terminate ${memberName}'s membership? They can be reactivated later if needed.`;
+        document.getElementById('terminateModal').style.display = 'flex';
     }
 
-    function closeDeleteModal() {
-        document.getElementById('deleteModal').style.display = 'none';
+    function openCancelMembershipModal(button) {
+        const memberId = button.dataset.memberId;
+        const memberName = button.dataset.memberName;
+        document.getElementById('cancelMembershipId').value = memberId;
+        document.getElementById('cancelMembershipMessage').textContent =
+            `You are about to cancel ${memberName}'s membership. The member will lose active membership access.`;
+        document.getElementById('cancelMembershipModal').style.display = 'flex';
     }
+
+    function closeCancelMembershipModal() {
+        document.getElementById('cancelMembershipModal').style.display = 'none';
+    }
+
+    function closeTerminateModal() {
+        document.getElementById('terminateModal').style.display = 'none';
+    }
+
 </script>

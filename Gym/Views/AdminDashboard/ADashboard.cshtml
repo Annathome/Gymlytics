@@ -1,24 +1,1292 @@
-﻿@{
+@model Gym.Models.DashboardStatistics
+@{
     ViewData["Title"] = "Admin Dashboard";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var trainers = Model?.Trainers ?? new List<Gym.Models.AdminTrainerListItem>();
+    var memberRevenue = Model?.TodayMemberRevenue ?? 0m;
+    var walkInRevenue = Model?.TodayWalkInRevenue ?? 0m;
+    var totalRevenue = memberRevenue + walkInRevenue;
+    var memberRevenuePercent = totalRevenue > 0 ? (int)Math.Round(memberRevenue / totalRevenue * 100) : 0;
+    var walkInRevenuePercent = totalRevenue > 0 ? 100 - memberRevenuePercent : 0;
+    var todayMembers = Model?.TodayMemberAttendance ?? 0;
+    var todayWalkIns = Model?.TodayWalkIns ?? 0;
+    var attendanceMax = Math.Max(1, Math.Max(todayMembers, todayWalkIns));
+    var memberAttendancePercent = todayMembers * 100 / attendanceMax;
+    var walkInAttendancePercent = todayWalkIns * 100 / attendanceMax;
+    var equipmentItems = Model?.EquipmentStatus ?? new List<Gym.Models.AdminEquipmentStatusItem>();
 }
+<style>
+    @@import url('https://fonts.googleapis.com/css2?family=Inria+Serif:wght@300;400;700&display=swap');
+    body{
+        padding: 0;
+        margin: 0;
+        box-sizing: border-box;
+        background: #0D0F0D;
+        font-family: "Inria Serif",serif;
+    }
+    .ad-wrap {
+        margin: 0 auto;
+        position:relative;
+        display:grid;
+        max-width: 1440px;
+        width: 100%;
+        color: #f4f7f4;
+    }
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>HOMEPAGE</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Inria+Serif:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap" rel="stylesheet">
+    .ad-head {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 30px;
+    }
+
+        .ad-head h1 {
+            font-size: 30px;
+            margin: 0 0 5px;
+            font-weight: 700;
+            font-family: "Inria Serif",serif;
+        }
+
+        .ad-head p {
+            margin: 0;
+            color: #aeb7b0;
+            font-size: 15px;
+        }
+
+    .ad-head-tools{
+        display:flex;
+        flex-direction: row;
+        gap: 30px;
+    }
+
+    .ad-system {
+        font-size: 10px;
+        color: #baff21;
+        border: 1px solid #3c4b32;
+        border-radius: 20px;
+        padding: 7px 12px;
+    }
+
+    .ad-stats {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        margin-bottom: 22px;
+    }
+
+    .ad-stat,
+    .ad-panel {
+        background: #132318;
+        border: 2px solid #225D31;
+        border-radius: 5px;
+      
+    }
+
+    .ad-stat {
+        padding: 18px;
+
+    }
+
+    .ad-label {
+        color: #fff;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: .08em
+    }
+
+    .ad-value {
+        font-size: 30px;
+        color: #b9ff20;
+        font-weight: 800;
+        margin: 9px 0 4px;
+    }
+
+    .ad-desc {
+        font-size: 10px;
+        color: #9ba49d;
+    }
+
+    .ad-grid {
+        display: grid;
+        grid-template-columns: 1.35fr 1fr;
+        gap: 18px
+    }
+
+    .ad-performance {
+        display: grid;
+        grid-template-columns: 1.4fr 1fr;
+        gap: 18px;
+        margin-bottom: 18px
+    }
+
+        .ad-performance .ad-panel {
+            padding: 20px
+        }
+
+    .ad-perf-head {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 18px;
+    }
+
+        .ad-perf-head h2 {
+            font-size: 20px;
+            margin: 0;
+            color: #fff ;
+        }
+
+        .ad-perf-head small {
+            color: #9ba49d;
+        }
+
+    .ad-revenue-body {
+        display: flex;
+        align-items: center;
+        gap: 28px
+    }
+
+    .ad-donut {
+        width: 142px;
+        height: 142px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        background: conic-gradient(#b9ff20 0 var(--member), #9ba49d var(--member) 100%);
+        flex: none
+    }
+
+        .ad-donut:before {
+            content: "";
+            width: 94px;
+            height: 94px;
+            border-radius: 50%;
+            background: #171b18;
+        }
+
+    .ad-donut-value {
+        position: absolute;
+        text-align: center;
+        font-size: 20px;
+        font-weight: 800;
+    }
+
+        .ad-donut-value small {
+            display: block;
+            color: #9ba49d;
+            font-size: 10px;
+            margin-top: 3px;
+        }
+
+    .ad-breakdown {
+        flex: 1
+    }
+
+    .ad-break-row {
+        display: flex;
+        justify-content: space-between;
+        border-bottom: 1px solid #303531;
+        padding: 11px 0;
+        font-size: 15px;
+    }
+
+    .ad-dot {
+        color: #b9ff20
+    }
+
+        .ad-dot.walk {
+            color: #9ba49d;
+        }
+
+    .ad-bar-row {
+        margin: 17px 0;
+    }
+
+    .ad-bar-label {
+        display: flex;
+        justify-content: space-between;
+        font-size: 12px;
+        margin-bottom: 7px
+    }
+
+    .ad-bar-track {
+        height: 7px;
+        background: #343936;
+        border-radius: 6px;
+        overflow: hidden
+    }
+
+    .ad-bar {
+        height: 100%;
+        background: #b9ff20;
+        border-radius: 6px
+    }
+
+        .ad-bar.walk {
+            background: #a9aeaa;
+        }
+
+    .ad-panel-title {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px 18px;
+        border-bottom: 1px solid #2b312c;
+        font-size: 17px;
+        font-weight: 700
+    }
+
+    .ad-table {
+        width: 100%;
+        border-collapse: collapse
+    }
+
+        .ad-table th,
+        .ad-table td {
+            padding: 13px 18px;
+            text-align: left;
+            border-bottom: 1px solid #292e2a;
+            font-size: 13px
+        }
+
+        .ad-table th {
+            color: #9ba49d;
+            font-size: 10px;
+            letter-spacing: .08em
+        }
+
+    .ad-active {
+        color: #b9ff20;
+        font-size: 11px
+    }
+
+    .ad-message {
+        border: 1px solid #8ac500;
+        background: transparent;
+        color: #b9ff20;
+        padding: 7px 12px;
+        font-size: 11px;
+        cursor: pointer
+    }
+
+        .ad-message:hover {
+            background: #b9ff20;
+            color: #9ba49d;
+        }
+
+    .ad-empty {
+        padding: 28px;
+        color: #9ba49d;
+        text-align: center
+    }
+
+    .ad-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, .72);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 3000;
+    }
+
+    .ad-modal {
+        width: min(480px, calc(100vw - 30px));
+        background: #171b18;
+        border: 1px solid #394139;
+        padding: 24px;
+        color: #9ba49d;
+    }
+
+        .ad-modal h3 {
+            margin: 0 0 5px
+        }
+
+        .ad-modal p {
+            color: #9ba49d;
+            font-size: 13px
+        }
+
+    .ad-field {
+        display: block;
+        margin: 14px 0;
+        font-size: 12px;
+        color: #9ba49d;
+    }
+
+        .ad-field input,
+        .ad-field textarea {
+            display: block;
+            width: 100%;
+            margin-top: 6px;
+            padding: 10px;
+            background: #0d110e;
+            border: 1px solid #3a423b;
+            color: #fff;
+        }
+
+    .ad-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 9px
+    }
+
+    .ad-cancel,
+    .ad-send {
+        padding: 9px 15px;
+        border: 1px solid #657067;
+        background: transparent;
+        color: #fff
+    }
+
+    .ad-send {
+        border-color: #8ac500;
+        color: #b9ff20
+    }
+
+    .ad-notice {
+        padding: 12px 16px;
+        margin-bottom: 16px;
+        background: #18351e;
+        border: 1px solid #397c45
+    }
+
+        .ad-notice.error {
+            background: #3a1818;
+            border-color: #8a3939
+        }
+
+    @@media(max-width:850px) {
+        .ad-stats {
+            grid-template-columns: repeat(2, 1fr)
+        }
+
+        .ad-grid,
+        .ad-performance {
+            grid-template-columns: 1fr
+        }
+    }
+
+    @@media(max-width:520px) {
+        .ad-wrap {
+            padding: 20px
+        }
+
+        .ad-stats {
+            grid-template-columns: 1fr
+        }
+
+        .ad-revenue-body {
+            flex-direction: column;
+            align-items: flex-start
+        }
+
+        .ad-breakdown {
+            width: 100%
+        }
+    }
+
+    .ad-donut {
+        position: relative
+    }
+
+    .ad-operations {
+        display: grid;
+        grid-template-columns: minmax(240px, .55fr) 1.45fr;
+        gap: 18px;
+        margin-bottom: 18px
+    }
+
+    .ad-action-card {
+        padding: 20px;
+        display: flex;
+        flex-direction: column
+    }
+
+        .ad-action-card h2 {
+            font-size: 17px;
+            margin: 0 0 14px
+        }
+
+        .ad-action-card p {
+            font-size: 12px;
+            line-height: 1.5;
+            color: #b6beb8;
+            flex: 1
+        }
+
+    .ad-process {
+        display: block;
+        text-align: center;
+        text-decoration: none;
+        border: 1px solid #8ac500;
+        color: #b9ff20;
+        padding: 9px 12px;
+        font-size: 11px;
+        margin-top: 16px
+    }
+
+        .ad-process:hover {
+            background: #b9ff20;
+            color: #101510
+        }
+
+    .ad-equipment-list {
+        padding: 0 18px
+    }
+
+    .ad-equipment-row {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        align-items: center;
+        gap: 14px;
+        padding: 12px 0;
+        border-bottom: 1px solid #2a302b;
+    }
+
+    .ad-equipment-main {
+        display: flex;
+        align-items: center;
+        gap: 10px
+    }
+
+        .ad-equipment-main:before {
+            content: "";
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #b9ff20
+        }
+
+    .ad-equipment-row.issue .ad-equipment-main:before {
+        background: #ff8e8e
+    }
+
+    .ad-equipment-name {
+        font-size: 13px;
+        font-weight: 700
+    }
+
+    .ad-equipment-category {
+        display: block;
+        color: #8d978f;
+        font-size: 10px;
+        margin-top: 2px
+    }
+
+    .ad-condition {
+        font-size: 9px;
+        letter-spacing: .05em;
+        padding: 5px 8px;
+        background: #283313;
+        color: #b9ff20
+    }
+
+        .ad-condition.issue {
+            background: #382326;
+            color: #ff9d9d
+        }
+
+    @@media(max-width:850px) {
+        .ad-operations {
+            grid-template-columns: 1fr
+        }
+    }
+
+    .ad-head-tools {
+        display: flex;
+        align-items: center;
+        gap: 10px
+    }
+        .ad-print {
+            background: #b9ff20;
+            border: 1px solid #b9ff20;
+            color: #101510;
+            padding: 9px 14px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer
+        }
+
+    .ad-bell {
+        position: relative;
+        display: grid;
+        width: 40px;
+        height: 38px;
+        color: #b9ff20;
+        text-decoration: none;
+       
+    }  
+      /* .ad-head-bell i{
+          font-size: 1.3rem;
+      } */
+   
 
 
+    .ad-bell-count {
+        position: absolute;
+        right: -5px;
+        top: -6px;
+        background: #d92d20;
+        color: #fff;
+        border-radius: 20px;
+        min-width: 17px;
+        height: 17px;
+        padding: 0 4px;
+        display: grid;
+        place-items: center;
+        font-size: 9px
+    }
 
+    .ad-no-results {
+        display: none;
+        padding: 13px 18px;
+        color: #a4aea6;
+        font-size: 12px
+    }
 
+    @@media(max-width:850px) {
+        .ad-head {
+            align-items: flex-start;
+            gap: 16px
+        }
 
-</head>
+        .ad-head-tools {
+            flex-wrap: wrap;
+            justify-content: flex-end
+        }
+
+        
+    }
+
+    @@media(max-width:600px) {
+        .ad-head {
+            flex-direction: column
+        }
+
+        .ad-head-tools {
+            width: 100%;
+            justify-content: flex-start
+        }
+
+    }
+
+    @@media print {
+
+        header,
+        .ad-head-tools,
+        .ad-message,
+        .ad-process,
+        .ad-overlay {
+            display: none !important
+        }
+
+        .ad-wrap {
+            padding: 16px !important;
+            background: #fff !important;
+            color: #000 !important
+        }
+
+        .ad-panel,
+        .ad-stat {
+            background: #fff !important;
+            color: #000 !important;
+            border-color: #bbb !important
+        }
+
+        .ad-value,
+        .ad-active,
+        .ad-panel-title a {
+            color: #155724 !important
+        }
+    }
+
+    .ad-topbar {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        margin-bottom: 26px
+    }
+
+        .ad-topbar .ad-head-tools {
+            width: 100%;
+            justify-content: flex-end
+        }
+
+        .ad-topbar .ad-print {
+            white-space: nowrap
+        }
+
+    @@media(max-width:600px) {
+        .ad-topbar {
+            justify-content: flex-start
+        }
+
+            .ad-topbar .ad-head-tools {
+                justify-content: flex-start
+            }
+
+    }
+
+    @@media print {
+        .ad-topbar {
+            display: none !important
+        }
+    }
+
+    .ad-export {
+        display: flex;
+        align-items: stretch;
+        gap: 8px;
+
+    }
+
+        .ad-export select {
+            background: #171b18;
+            border: 1px solid #394139;
+            color: #fff;
+            padding: 8px 10px;
+            font-size: 11px
+        }
+
+        .ad-export button {
+            background: #fff;
+            border: 1px solid #fff;
+            color: #101510;
+            padding: 9px 14px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            white-space: nowrap;
+
+        }
+
+    @@media(max-width:600px) {
+        .ad-export {
+            width: 100%
+        }
+
+            .ad-export select {
+                flex: 1
+            }
+    }
+
+    @@media print {
+        .ad-export {
+            display: none !important
+        }
+    }
+      .ad-bell 
+      {
+        margin-left: 22px !important;
+        background: transparent !important;
+        border: 0 !important;
+        box-shadow: none !important;
+        color: #b9ff20 !important;
+     }
+
+        .ad-bell:hover,
+        .ad-bell:focus {
+            background: transparent !important;
+            border: 0 !important;
+            outline: 0 !important
+        }
+
+    .ad-export {
+        border: 1px solid #394139;
+        background: #171b18;
+        gap: 0;
+    }
+
+        .ad-export select {
+            border: 0;
+            border-right: 1px solid #394139
+        }
+
+        .ad-export button {
+            border: 0
+        }
+
+    .ad-topbar {
+        background: #242524;
+        margin: -34px -42px 22px;
+        padding: 6px 14px;
+        min-height: 42px
+    }
+
+        .ad-topbar .ad-head-tools {
+            justify-content: flex-start;
+            flex-wrap: nowrap
+        }
+
+        .ad-bell {
+            margin-left: auto !important;
+            width: 34px;
+            height: 30px;
+            font-size: 1.3rem;
+        }
+
+    .ad-head {
+        margin-bottom: 18px
+    }
+
+        .ad-head h1 {
+            font-size: 27px
+        }
+
+        .ad-head p {
+            font-size: 11px
+        }
+
+    .ad-export {
+        height: 32px
+    }
+
+        .ad-export select {
+            max-width: 125px;
+            padding: 5px 8px;
+            font-size: 10px
+        }
+
+        .ad-export button {
+            padding: 6px 12px;
+            font-size: 10px;
+            text-transform: uppercase
+        }
+
+    @@media(max-width:600px) {
+     
+ .ad-head {
+            align-items: flex-start
+        }
+
+        .ad-export {
+            width: auto
+        }
+
+            .ad-export select {
+                max-width: 110px
+            }
+    }
+
+    .ad-export {
+        position: relative;
+        height: auto;
+        border: 0;
+        background: transparent
+    }
+
+        .ad-export > button {
+            height: 30px;
+            background: #2b2c2b;
+            border: 2px solid #b9ff20;
+            color: #b9ff20;
+            padding: 6px 13px;
+            font-size: 9px
+        }
+
+            .ad-export > button:hover {
+                background: #b9ff20;
+                color: #293029;
+            }
+
+    .ad-export-menu {
+        display: none;
+        position: absolute;
+        right: 0;
+        top: 36px;
+        width: 160px;
+        padding: 5px;
+        background: #171b18;
+        border: 1px solid #3c433d;
+        z-index: 100
+    }
+
+        .ad-export-menu.open {
+            display: block
+        }
+
+        .ad-export-menu button {
+            display: block;
+            width: 100%;
+            text-align: left;
+            background: transparent;
+            color: #dce3dd;
+            border: 0;
+            padding: 8px 10px;
+            font-size: 10px;
+            text-transform: none
+        }
+
+            .ad-export-menu button:hover {
+                background: #293029;
+                color: #b9ff20;
+            }
+
+    .ad-topbar .ad-bell i {
+        font-size: 15px;
+        color: #b9ff20;
+    }
+
+    .ad-topbar .ad-bell:hover i {
+        color: #fff;
+    }
+
+    .ad-export > button {
+        height: 36px;
+        min-width: 112px;
+        padding: 7px 17px;
+        font-size: 11px
+    }
+
+    .ad-export-menu {
+        top: 41px;
+        width: 180px
+    }
+</style>
 <body>
+    <div class="ad-wrap">
+        <div class="ad-head">
+            <div>
+                <h1>Admin Overview</h1>
+                <p>Live facility status and performance metrics.</p>
+            </div>
+            <div class="ad-head-tools">
+                <div class="ad-head-bell">
+                    <a class="ad-bell" asp-controller="FrontDesk" asp-action="Notifications" title="Email notifications" aria-label="Email notifications">
+                        <i class="bi bi-bell"></i>
+                        @if ((Model?.PendingWeeklyAttendanceReminders ?? 0) > 0)
+                        {
+                            <span class="ad-bell-count">@Model!.PendingWeeklyAttendanceReminders</span>
+                        }
+                    </a>
+                </div>
+                <div class="ad-export">
+                    <button type="button" onclick="toggleExportMenu(event)">&#8681;&nbsp; Export</button>
+                    <div class="ad-export-menu" id="exportMenu">
+                        <button type="button" onclick="exportDashboardReport('pdf')">PDF / Print</button>
+                        <button type="button" onclick="exportDashboardReport('doc')">Word document</button>
+                        <button type="button" onclick="exportDashboardReport('csv')">CSV / Excel</button>
+                        <button type="button" onclick="exportDashboardReport('txt')">Text file</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        @if (TempData["SuccessMessage"] is string success)
+        {
+            <div class="ad-notice">@success</div>
+        }
+        @if (TempData["ErrorMessage"] is string error)
+        {
+            <div class="ad-notice error">@error</div>
+        }
+
+        <section class="ad-stats">
+            <div class="ad-stat">
+                <div class="ad-label">Active members</div>
+                <div class="ad-value">@(Model?.ActiveMembers ?? 0)</div>
+                <div class="ad-desc">Currently active memberships</div>
+            </div>
+            <div class="ad-stat">
+                <div class="ad-label">Expiring soon</div>
+                <div class="ad-value">@(Model?.ExpiringMembershipsCount ?? 0)</div>
+                <div class="ad-desc">Memberships within 7 days</div>
+            </div>
+            <div class="ad-stat">
+                <div class="ad-label">Maintenance</div>
+                <div class="ad-value">@(Model?.EquipmentIssues ?? 0)</div>
+                <div class="ad-desc">Equipment requiring attention</div>
+            </div>
+            <div class="ad-stat">
+                <div class="ad-label">Available trainers</div>
+                <div class="ad-value">@trainers.Count</div>
+                <div class="ad-desc">Active registered trainers</div>
+            </div>
+        </section>
+
+        <section class="ad-performance">
+            <div class="ad-panel">
+                <div class="ad-perf-head">
+                    <div>
+                        <h2>Revenue Today</h2>
+                        <small>Members vs walk-ins</small>
+                    </div>
+                    <strong style="color:#b9ff20">₱@totalRevenue.ToString("N2")</strong>
+                </div>
+                <div class="ad-revenue-body">
+                    <div class="ad-donut" style="--member:@(memberRevenuePercent)%">
+                        <div class="ad-donut-value">₱@totalRevenue.ToString("N0")<small>TOTAL</small></div>
+                    </div>
+                    <div class="ad-breakdown">
+                        <div class="ad-break-row">
+                            <span><span class="ad-dot">●</span> MEMBERS</span>
+                            <strong>₱@memberRevenue.ToString("N2") (@memberRevenuePercent%)</strong>
+                        </div>
+                        <div class="ad-break-row">
+                            <span><span class="ad-dot walk">●</span> WALK-INS</span>
+                            <strong>₱@walkInRevenue.ToString("N2") (@walkInRevenuePercent%)</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="ad-panel">
+                <div class="ad-perf-head">
+                    <div>
+                        <h2>Attendance Today</h2>
+                        <small>Current volume</small>
+                    </div>
+                    <strong style="color:#b9ff20">@(todayMembers + todayWalkIns) visits</strong>
+                </div>
+                <div class="ad-bar-row">
+                    <div class="ad-bar-label">
+                        <span>MEMBERS</span>
+                        <strong>@todayMembers</strong>
+                    </div>
+                    <div class="ad-bar-track">
+                        <div class="ad-bar" style="width:@memberAttendancePercent%"></div>
+                    </div>
+                </div>
+                <div class="ad-bar-row">
+                    <div class="ad-bar-label">
+                        <span>WALK-INS</span>
+                        <strong>@todayWalkIns</strong>
+                    </div>
+                    <div class="ad-bar-track">
+                        <div class="ad-bar walk" style="width:@walkInAttendancePercent%"></div>
+                    </div>
+                </div>
+                <div class="ad-desc" style="margin-top:25px">Live check-in totals for @DateTime.Today.ToString("MMMM d, yyyy")</div>
+            </div>
+        </section>
+
+        <section class="ad-operations">
+            <div class="ad-panel ad-action-card">
+                <h2><span style="color:#b9ff20">⚑</span> Action Required</h2>
+                <p>Weekly member attendance reminders are pending. You have <strong style="color:#fff">@(Model?.PendingWeeklyAttendanceReminders ?? 0) active member(s)</strong> to verify or follow up with.</p>
+                <a class="ad-process" asp-controller="FrontDesk" asp-action="Notifications">PROCESS REMINDERS</a>
+            </div>
+            <div class="ad-panel">
+                <div class="ad-panel-title"><span>Equipment Status</span></div>
+                <div class="ad-equipment-list">
+                    @if (equipmentItems.Count > 0)
+                    {
+                        foreach (var equipment in equipmentItems)
+                        {
+                            var isIssue = !equipment.Status.Equals("Available", StringComparison.OrdinalIgnoreCase) && !equipment.Status.Equals("Good", StringComparison.OrdinalIgnoreCase);
+                            <div class="ad-equipment-row @(isIssue ? "issue" : "")" data-dashboard-search="@equipment.Name @equipment.Category @equipment.Status">
+                                <div class="ad-equipment-main">
+                                    <div>
+                                        <span class="ad-equipment-name">@equipment.Name</span>
+                                        <span class="ad-equipment-category">@equipment.Category</span>
+                                    </div>
+                                </div>
+                                <span class="ad-condition @(isIssue ? "issue" : "")">@equipment.Status.ToUpperInvariant()</span>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="ad-empty">No equipment records found.</div>
+                    }
+                </div>
+            </div>
+        </section>
+
+        <section class="ad-grid">
+            <div class="ad-panel">
+                <div class="ad-panel-title">
+                    <span>Expiring Memberships</span>
+                    <a asp-controller="Admin" asp-action="Members" style="color:#b9ff20;font-size:12px;text-decoration:none">View all</a>
+                </div>
+                <table class="ad-table">
+                    <thead>
+                        <tr>
+                            <th>MEMBER</th>
+                            <th>EXPIRATION</th>
+                            <th>DAYS</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model?.ExpiringMemberships?.Any() == true)
+                        {
+                            foreach (var item in Model.ExpiringMemberships)
+                            {
+                                <tr data-dashboard-search="@item.ClientName @item.ExpirationDate.ToString("MMM d, yyyy")">
+                                    <td>@item.ClientName</td>
+                                    <td>@item.ExpirationDate.ToString("MMM d, yyyy")</td>
+                                    <td>@item.DaysRemaining</td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="3" class="ad-empty">No memberships expiring soon.</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="ad-panel">
+                <div class="ad-panel-title">
+                    <span>Trainer List</span>
+                    <span>@trainers.Count active</span>
+                </div>
+                <table class="ad-table">
+                    <thead>
+                        <tr>
+                            <th>TRAINER NAME</th>
+                            <th>STATUS</th>
+                            <th>ACTION</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (trainers.Count > 0)
+                        {
+                            foreach (var trainer in trainers)
+                            {
+                                <tr data-dashboard-search="@trainer.FullName @trainer.Email active trainer">
+                                    <td>
+                                        <strong>@trainer.FullName</strong><br />
+                                        <small style="color:#879088">@trainer.Email</small>
+                                    </td>
+                                    <td><span class="ad-active">● Active</span></td>
+                                    <td><button type="button" class="ad-message" data-id="@trainer.Id" data-name="@trainer.FullName" onclick="openTrainerMessage(this)">MESSAGE</button></td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="3" class="ad-empty">No active trainers found.</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    <div id="trainerMessageModal" class="ad-overlay" style="display:none">
+        <div class="ad-modal">
+            <h3>Message trainer</h3>
+            <p id="trainerMessageName"></p>
+            <form asp-controller="Admin" asp-action="SendTrainerMessage" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" id="trainerMessageId" name="id" />
+                <label class="ad-field">
+                    Subject
+                    <input name="subject" maxlength="150" required />
+                </label>
+                <label class="ad-field">
+                    Email message
+                    <textarea name="message" rows="6" maxlength="2000" required></textarea>
+                </label>
+                <div class="ad-actions">
+                    <button type="button" class="ad-cancel" onclick="closeTrainerMessage()">Cancel</button>
+                    <button type="submit" class="ad-send">Send email</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script>
+            function openTrainerMessage(b) {
+                document.getElementById('trainerMessageId').value = b.dataset.id;
+                document.getElementById('trainerMessageName').textContent = b.dataset.name;
+                document.getElementById('trainerMessageModal').style.display = 'flex'
+            }
+
+            function closeTrainerMessage() {
+                document.getElementById('trainerMessageModal').style.display = 'none'
+            }
+
+            function dashboardReportData() {
+                return {
+                    generatedAt: new Date().toISOString(),
+                    activeMembers: @(Model?.ActiveMembers ?? 0),
+                    expiringSoon: @(Model?.ExpiringMembershipsCount ?? 0),
+                    equipmentIssues: @(Model?.EquipmentIssues ?? 0),
+                    activeTrainers: @trainers.Count,
+                    today: {
+                        memberRevenue: @memberRevenue.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                        walkInRevenue: @walkInRevenue.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                        memberAttendance: @todayMembers,
+                        walkIns: @todayWalkIns
+                                        },
+                    equipment: Array.from(document.querySelectorAll('.ad-equipment-row')).map(function(row) {
+                        return row.innerText.trim().replace(/\s+/g, ' ')
+                    }),
+                    expiringMemberships: Array.from(document.querySelectorAll(
+                        '.ad-grid .ad-panel:first-child tbody tr[data-dashboard-search]')).map(function(row) {
+                            return row.innerText.trim().replace(/\s+/g, ' ')
+                        }),
+                    trainers: Array.from(document.querySelectorAll('.ad-grid .ad-panel:last-child tbody tr[data-dashboard-search]'))
+                        .map(function(row) {
+                            return row.innerText.trim().replace(/\s+/g, ' ')
+                        })
+                };
+            }
+            async function saveReportBlob(blob, extension, description) {
+                var filename = 'YOKOKS-Admin-Report-' + new Date().toISOString().slice(0, 10) + '.' + extension;
+                if (window.showSaveFilePicker) {
+                    try {
+                        var handle = await window.showSaveFilePicker({
+                            suggestedName: filename,
+                            types: [{
+                                description: description,
+                                accept: {
+                                    [blob.type || 'application/octet-stream']: ['.' + extension]
+                                }
+                            }]
+                        });
+                        var writable = await handle.createWritable();
+                        await writable.write(blob);
+                        await writable.close();
+                        return;
+                    } catch (error) {
+                        if (error && error.name === 'AbortError') return;
+                    }
+                }
+                var url = URL.createObjectURL(blob);
+                var link = document.createElement('a');
+                link.href = url;
+                link.download = filename;
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                setTimeout(function() {
+                    URL.revokeObjectURL(url)
+                }, 1000);
+            }
+
+            function downloadReport(content, type, extension, description) {
+                return saveReportBlob(new Blob([content], {
+                    type: type
+                }), extension, description || 'YOKOKS report');
+            }
+
+            function reportText(data) {
+                return 'YOKOKS ADMIN REPORT\nGenerated: ' + data.generatedAt + '\n\nActive members: ' + data.activeMembers +
+                    '\nExpiring soon: ' + data.expiringSoon + '\nEquipment issues: ' + data.equipmentIssues +
+                    '\nActive trainers: ' + data.activeTrainers + '\nMember revenue today: PHP ' + data.today.memberRevenue +
+                    '\nWalk-in revenue today: PHP ' + data.today.walkInRevenue + '\nMember attendance today: ' + data.today
+                        .memberAttendance + '\nWalk-ins today: ' + data.today.walkIns + '\n\nEQUIPMENT\n' + data.equipment.join('\n') +
+                    '\n\nEXPIRING MEMBERSHIPS\n' + data.expiringMemberships.join('\n') + '\n\nTRAINERS\n' + data.trainers.join(
+                        '\n');
+            }
+
+            function exportDashboardImage(format) {
+                var source = document.querySelector('.ad-wrap');
+                var clone = source.cloneNode(true);
+                clone.querySelectorAll('.ad-topbar,.ad-export,.ad-message,.ad-overlay').forEach(function(el) {
+                    el.remove()
+                });
+                var styles = Array.from(document.querySelectorAll('style')).map(function(style) {
+                    return style.textContent
+                }).join('\n');
+                var width = source.scrollWidth,
+                    height = source.scrollHeight;
+                var open = '\x3C',
+                    close = '\x3E';
+                var html = open + 'svg xmlns="http://www.w3.org/2000/svg" width="' + width + '" height="' + height + '"' + close +
+                    open + 'foreignObject width="100%" height="100%"' + close + open + 'div xmlns="http://www.w3.org/1999/xhtml"' +
+                    close + open + 'style' + close + styles + open + '/style' + close + clone.outerHTML + open + '/div' + close +
+                    open + '/foreignObject' + close + open + '/svg' + close;
+                var image = new Image();
+                var url = URL.createObjectURL(new Blob([html], {
+                    type: 'image/svg+xml;charset=utf-8'
+                }));
+                image.onload = function() {
+                    var canvas = document.createElement('canvas');
+                    canvas.width = width;
+                    canvas.height = height;
+                    var context = canvas.getContext('2d');
+                    context.fillStyle = '#0d110e';
+                    context.fillRect(0, 0, width, height);
+                    context.drawImage(image, 0, 0);
+                    URL.revokeObjectURL(url);
+                    var mime = format === 'png' ? 'image/png' : 'image/jpeg';
+                    canvas.toBlob(function(blob) {
+                        if (blob) saveReportBlob(blob, format, format.toUpperCase() + ' image')
+                    }, mime, format === 'jpeg' ? 0.92 : 1)
+                };
+                image.onerror = function() {
+                    URL.revokeObjectURL(url);
+                    alert('The image report could not be generated. Please choose PDF instead.')
+                };
+                image.src = url;
+            }
+
+            function toggleExportMenu(event) {
+                event.stopPropagation();
+                document.getElementById('exportMenu').classList.toggle('open')
+            }
+            document.addEventListener('click', function(event) {
+                var menu = document.getElementById('exportMenu');
+                if (menu && !event.target.closest('.ad-export')) menu.classList.remove('open')
+            });
+
+            function exportDashboardReport(format) {
+                document.getElementById('exportMenu').classList.remove('open');
+                if (format === 'pdf') {
+                    window.print();
+                    return;
+                }
+                if (format === 'png' || format === 'jpeg') {
+                    exportDashboardImage(format);
+                    return;
+                }
+                var data = dashboardReportData();
+                if (format === 'json') {
+                    downloadReport(JSON.stringify(data, null, 2), 'application/json', 'json', 'JSON report');
+                    return;
+                }
+                if (format === 'doc') {
+                    var lt = '\x3C',
+                        gt = '\x3E';
+                    var escaped = reportText(data).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                    var body = lt + 'html' + gt + lt + 'head' + gt + lt + 'meta charset="utf-8"' + gt + lt + 'title' + gt +
+                        'YOKOKS Admin Report' + lt + '/title' + gt + lt + '/head' + gt + lt + 'body' + gt + lt +
+                        'pre style="font:14px Arial;white-space:pre-wrap"' + gt + escaped + lt + '/pre' + gt + lt + '/body' + gt +
+                        lt + '/html' + gt;
+                    downloadReport(body, 'application/msword', 'doc', 'Word report');
+                    return;
+                }
+                if (format === 'csv') {
+                    var rows = [
+                        ['Metric', 'Value'],
+                        ['Generated', data.generatedAt],
+                        ['Active members', data.activeMembers],
+                        ['Expiring soon', data.expiringSoon],
+                        ['Equipment issues', data.equipmentIssues],
+                        ['Active trainers', data.activeTrainers],
+                        ['Member revenue today', data.today.memberRevenue],
+                        ['Walk-in revenue today', data.today.walkInRevenue],
+                        ['Member attendance today', data.today.memberAttendance],
+                        ['Walk-ins today', data.today.walkIns],
+                        [],
+                        ['Equipment'], ...data.equipment.map(function(x) {
+                            return [x]
+                        }), [],
+                        ['Expiring memberships'], ...data.expiringMemberships.map(function(x) {
+                            return [x]
+                        }), [],
+                        ['Trainers'], ...data.trainers.map(function(x) {
+                            return [x]
+                        })
+                    ];
+                    var csv = rows.map(function(row) {
+                        return row.map(function(value) {
+                            return '"' + String(value ?? '').replace(/"/g, '""') + '"'
+                        }).join(',')
+                    }).join('\r\n');
+                    downloadReport(csv, 'text/csv;charset=utf-8', 'csv', 'CSV report');
+                    return;
+                }
+                downloadReport(reportText(data), 'text/plain;charset=utf-8', 'txt', 'Text report');
+            }
+    </script>
+
+</div>
 
 </body>
-
-</html>

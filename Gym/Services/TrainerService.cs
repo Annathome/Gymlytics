@@ -17,9 +17,70 @@ namespace Gym.Services
             _context = context;
         }
 
+        public async Task<TrainerDashboardViewModel> GetTrainerAssignedScheduleAsync(int trainerId, DateTime? date = null)
+        {
+            var targetDate = (date ?? DateTime.Today).Date;
+            var weekStart = targetDate.AddDays(-(((int)targetDate.DayOfWeek + 6) % 7));
+            var trainer = await _context.Trainers.AsNoTracking()
+                .FirstOrDefaultAsync(item => item.UserId == trainerId);
+            var assignedMembers = await _context.Clients.AsNoTracking()
+                .Where(client => client.AssignedTrainerId == trainerId && client.IsActiveMember && client.IsActive)
+                .OrderBy(client => client.FirstName)
+                .ThenBy(client => client.LastName)
+                .ToListAsync();
+
+            var assignedWeek = Enumerable.Range(0, 7).Select(offset =>
+            {
+                var dayDate = weekStart.AddDays(offset);
+                var fullDay = dayDate.ToString("dddd");
+                var shortDay = dayDate.ToString("ddd");
+                var sessions = assignedMembers.Where(client =>
+                    (client.PreferredDays ?? string.Empty)
+                        .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                        .Any(day => day.Equals(fullDay, StringComparison.OrdinalIgnoreCase) ||
+                                    day.Equals(shortDay, StringComparison.OrdinalIgnoreCase)))
+                    .Select(client => new TrainerAssignedSessionViewModel
+                    {
+                        ClientId = client.UserId,
+                        MemberName = $"{client.FirstName} {client.LastName}".Trim(),
+                        TimeSlot = string.IsNullOrWhiteSpace(client.PreferredTimeSlot) ? "Time not set" : client.PreferredTimeSlot,
+                        GymGoal = client.GymGoal?.ToString() switch
+                        {
+                            "MuscleGain" => "Muscle Gain",
+                            "WeightLoss" => "Weight Loss",
+                            "Cardio" => "Cardio",
+                            _ => "Goal not set"
+                        }
+                    }).OrderBy(session => session.TimeSlot).ThenBy(session => session.MemberName).ToList();
+                return new TrainerDayScheduleViewModel { Date = dayDate, Sessions = sessions };
+            }).ToList();
+
+            var weeklySchedule = assignedWeek.ToDictionary(
+                day => day.Date.ToString("ddd"),
+                day => day.MemberCount);
+            var selectedDayCount = assignedWeek
+                .FirstOrDefault(day => day.Date == targetDate)?.MemberCount ?? 0;
+
+            return new TrainerDashboardViewModel
+            {
+                TrainerId = trainerId,
+                TrainerName = trainer == null ? "Trainer" : $"{trainer.FirstName} {trainer.LastName}".Trim(),
+                SelectedDate = targetDate,
+                WeekStart = weekStart,
+                TotalClients = assignedMembers.Count,
+                TodaysSessionCount = selectedDayCount,
+                WeeklyMemberCount = assignedWeek.SelectMany(day => day.Sessions)
+                    .Select(session => session.ClientId).Distinct().Count(),
+                AssignedWeek = assignedWeek,
+                WeeklySchedule = weeklySchedule
+            };
+        }
+
         public async Task<TrainerDashboardViewModel> GetTrainerDashboardAsync(int trainerId, DateTime? date = null)
         {
             DateTime targetDate = date ?? DateTime.Today;
+            var daysFromMonday = ((int)targetDate.DayOfWeek + 6) % 7;
+            var weekStart = targetDate.Date.AddDays(-daysFromMonday);
 
             // Use context DbSet directly if mapped, fallback to Set<Trainer>() safely
             var trainer = await _context.Set<Trainer>()
@@ -32,8 +93,54 @@ namespace Gym.Services
                 TrainerName = trainer != null ? $"{trainer.FirstName} {trainer.LastName}".Trim() : "Unknown Trainer",
                 Specialization = trainer?.Specialization ?? string.Empty,
                 ProfileImageUrl = trainer?.ProfileImageUrl ?? string.Empty,
-                AverageRating = trainer?.AverageRating ?? 0m
+                AverageRating = trainer?.AverageRating ?? 0m,
+                SelectedDate = targetDate.Date,
+                WeekStart = weekStart
             };
+
+            var assignedMembers = await _context.Clients
+                .AsNoTracking()
+                .Where(client => client.AssignedTrainerId == trainerId &&
+                    client.IsActiveMember && client.IsActive)
+                .OrderBy(client => client.FirstName)
+                .ThenBy(client => client.LastName)
+                .ToListAsync();
+
+            var assignedWeek = Enumerable.Range(0, 7)
+                .Select(offset =>
+                {
+                    var dayDate = weekStart.AddDays(offset);
+                    var dayName = dayDate.DayOfWeek.ToString();
+                    var shortDayName = dayDate.ToString("ddd");
+                    var sessions = assignedMembers
+                        .Where(client => (client.PreferredDays ?? string.Empty)
+                            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                            .Any(day => day.Equals(dayName, StringComparison.OrdinalIgnoreCase) ||
+                                        day.Equals(shortDayName, StringComparison.OrdinalIgnoreCase)))
+                        .Select(client => new TrainerAssignedSessionViewModel
+                        {
+                            ClientId = client.UserId,
+                            MemberName = $"{client.FirstName} {client.LastName}".Trim(),
+                            TimeSlot = string.IsNullOrWhiteSpace(client.PreferredTimeSlot) ? "Time not set" : client.PreferredTimeSlot,
+                            GymGoal = client.GymGoal?.ToString() switch
+                            {
+                                "MuscleGain" => "Muscle Gain",
+                                "WeightLoss" => "Weight Loss",
+                                "Cardio" => "Cardio",
+                                _ => "Goal not set"
+                            }
+                        })
+                        .OrderBy(session => session.TimeSlot)
+                        .ThenBy(session => session.MemberName)
+                        .ToList();
+
+                    return new TrainerDayScheduleViewModel { Date = dayDate, Sessions = sessions };
+                })
+                .ToList();
+
+            viewModel.AssignedWeek = assignedWeek;
+            viewModel.WeeklyMemberCount = assignedWeek.SelectMany(day => day.Sessions)
+                .Select(session => session.ClientId).Distinct().Count();
 
             var allSessions = await _context.Sessions
                 .Include(s => s.Attendees)
@@ -111,8 +218,8 @@ namespace Gym.Services
                 weeklySchedule[dayName] = count;
             }
 
-            viewModel.TotalClients = trainer?.TotalClients > 0 ? trainer.TotalClients : activeClients.Count;
-            viewModel.TodaysSessionCount = todaysSessionsList.Count;
+            viewModel.TotalClients = assignedMembers.Count;
+            viewModel.TodaysSessionCount = assignedWeek.First(day => day.Date == targetDate.Date).Sessions.Count;
             viewModel.UpcomingSessionCount = upcomingSessionsList.Count;
             viewModel.UnreadNotificationsCount = notifications.Count(n => !n.IsRead);
 

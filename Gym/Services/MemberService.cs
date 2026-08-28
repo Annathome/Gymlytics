@@ -1,6 +1,7 @@
 ﻿using Gym.Data;
 using Gym.Models;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
 namespace Gym.Services
@@ -8,16 +9,17 @@ namespace Gym.Services
     public class MemberService : IMemberService
     {
         private readonly GymDbContext _context;
+        private readonly SetupService _setupService;
 
-        public MemberService(GymDbContext context)
+        public MemberService(GymDbContext context, SetupService setupService)
         {
             _context = context;
+            _setupService = setupService;
         }
 
-
-        // ============================================
-        // MEMBER LIST (paged + keyword search)
-        // ============================================
+        // =====================================================
+        // MEMBER LIST
+        // =====================================================
 
         public async Task<MemberListViewModel> GetMemberListAsync(
             string? searchTerm,
@@ -26,218 +28,183 @@ namespace Gym.Services
             int page = 1,
             int pageSize = 10)
         {
-            if (page < 1) page = 1;
-            if (pageSize < 1) pageSize = 10;
+            await SyncRegisteredTrainersAsync();
+            page = Math.Max(page, 1);
+            pageSize = Math.Max(pageSize, 1);
+
+            searchTerm = searchTerm?.Trim();
 
             var query = _context.Clients
                 .AsNoTracking()
-                .Where(c => c.Role == UserRole.Client)
+                .Where(client => client.Role == UserRole.Client)
                 .AsQueryable();
 
-            // 👉 Exclude soft-deleted (inactive members) from the table list
-            query = query.Where(c => c.IsActiveMember);
-
-
-            // ========================================
-            // SEARCH (keyword across name, email, phone, membership #, id)
-            // ========================================
+            // Do not exclude inactive clients here. They must remain visible
+            // so they can be reactivated or permanently deleted.
 
             if (!string.IsNullOrWhiteSpace(searchTerm))
             {
-                searchTerm = searchTerm.Trim();
-
-                query = query.Where(c =>
-                    c.FirstName.Contains(searchTerm) ||
-                    c.LastName.Contains(searchTerm) ||
-                    (c.FirstName + " " + c.LastName)
+                query = query.Where(client =>
+                    client.FirstName.Contains(searchTerm) ||
+                    client.LastName.Contains(searchTerm) ||
+                    (client.FirstName + " " + client.LastName)
                         .Contains(searchTerm) ||
-                    c.Email.Contains(searchTerm) ||
-                    c.PhoneNumber.Contains(searchTerm) ||
-                    c.MembershipNumber.Contains(searchTerm) ||
-                    c.UserId.ToString().Contains(searchTerm));
+                    client.Email.Contains(searchTerm) ||
+                    client.PhoneNumber.Contains(searchTerm) ||
+                    client.MembershipNumber.Contains(searchTerm) ||
+                    client.UserId.ToString().Contains(searchTerm));
             }
-
-
-            // ========================================
-            // PLAN FILTER
-            // ========================================
 
             if (selectedPlan.HasValue)
             {
-                query = query.Where(c =>
-                    c.MembershipPlan == selectedPlan.Value);
+                query = query.Where(client =>
+                    client.MembershipPlan == selectedPlan.Value);
             }
 
-
-            // ========================================
-            // GET CLIENTS
-            // ========================================
-
             var clients = await query
-                .OrderBy(c => c.LastName)
-                .ThenBy(c => c.FirstName)
+                .OrderBy(client => client.LastName)
+                .ThenBy(client => client.FirstName)
                 .ToListAsync();
-
-
-            // ========================================
-            // TRAINER LOOKUP (for schedule display)
-            // ========================================
 
             var trainerNames = await _context.Trainers
                 .AsNoTracking()
+                .Where(trainer => trainer.IsActive)
                 .ToDictionaryAsync(
-                    t => t.UserId,
-                    t => t.FirstName + " " + t.LastName);
+                    trainer => trainer.UserId,
+                    trainer => $"{trainer.FirstName} {trainer.LastName}");
+            var trainerOptions = await BuildTrainerOptionsAsync();
 
-
-            // ========================================
-            // CREATE VIEW MODEL ITEMS
-            // ========================================
+            var paidTotals = await _context.Payments
+                .AsNoTracking()
+                .Where(payment => payment.Status == PaymentStatus.Paid)
+                .GroupBy(payment => payment.ClientId)
+                .Select(group => new { ClientId = group.Key, Total = group.Sum(payment => payment.Amount) })
+                .ToDictionaryAsync(item => item.ClientId, item => item.Total);
+            var dailyReminderPrefix = $"DailyMemberReminder:%:{DateTime.Today:yyyyMMdd}";
+            var dailyReminderKeys = await _context.FrontDeskEmailNotifications.AsNoTracking()
+                .Where(item => item.Status == "Sent" && EF.Functions.Like(item.DeliveryKey, dailyReminderPrefix))
+                .Select(item => item.DeliveryKey).ToListAsync();
+            var dailyReminderMemberIds = dailyReminderKeys.Select(key => key.Split(':'))
+                .Where(parts => parts.Length == 3 && int.TryParse(parts[1], out _))
+                .Select(parts => int.Parse(parts[1])).ToHashSet();
 
             var members = clients
-                .Select(c =>
+                .Select(client =>
                 {
-                    MemberStatus status;
+                    var expirationDate =
+                        client.MembershipEndDate ??
+                        CalculateExpirationDate(
+                            client.MembershipStartDate,
+                            client.MembershipPlan);
 
+                    var displayStatus = DetermineMemberStatus(
+                        client,
+                        expirationDate);
 
-                    // Expiration date
-                    DateTime expirationDate =
-                        c.MembershipEndDate
-                        ?? CalculateExpirationDate(
-                            c.MembershipStartDate,
-                            c.MembershipPlan);
+                    string? trainerName = null;
 
-
-                    // Determine status
-                    if (!c.IsActiveMember)
+                    if (client.AssignedTrainerId.HasValue)
                     {
-                        status = MemberStatus.Inactive;
-                    }
-                    else if (expirationDate.Date < DateTime.Today)
-                    {
-                        status = MemberStatus.Expired;
-                    }
-                    else if (expirationDate.Date <= DateTime.Today.AddDays(7))
-                    {
-                        status = MemberStatus.ExpiringSoon;
-                    }
-                    else
-                    {
-                        status = MemberStatus.Active;
+                        trainerNames.TryGetValue(
+                            client.AssignedTrainerId.Value,
+                            out trainerName);
                     }
 
-
-                    // Trainer / schedule display
-                    string? trainerName =
-                        c.AssignedTrainerId.HasValue
-                        && trainerNames.TryGetValue(
-                            c.AssignedTrainerId.Value,
-                            out var name)
-                            ? name
-                            : null;
-
-                    string? schedule =
-                        !string.IsNullOrWhiteSpace(c.PreferredDays)
-                            ? $"{c.PreferredDays} · {c.PreferredTimeSlot}"
-                            : null;
-
+                    var schedule = BuildSchedule(
+                        client.PreferredDays,
+                        client.PreferredTimeSlot);
+                    var planPrice = MembershipPlanPricing.GetPrice(client.MembershipPlan);
+                    paidTotals.TryGetValue(client.UserId, out var paidAmount);
+                    var remainingBalance = Math.Max(0m, planPrice - paidAmount);
 
                     return new MemberListItemViewModel
                     {
-                        Id = c.UserId,
-
-                        MembershipNumber =
-                            c.MembershipNumber,
-
+                        Id = client.UserId,
+                        MembershipNumber = client.MembershipNumber,
                         FullName =
-                            c.FirstName + " " + c.LastName,
-
-                        Plan = c.MembershipPlan,
-
-                        JoinedDate =
-                            c.MembershipStartDate,
-
-                        ExpirationDate =
-                            expirationDate,
-
-                        Status = status,
-
+                            $"{client.FirstName} {client.LastName}".Trim(),
+                        Email = client.Email,
+                        PhoneNumber = client.PhoneNumber,
+                        Plan = client.MembershipPlan,
+                        PlanPrice = planPrice,
+                        PaidAmount = paidAmount,
+                        RemainingBalance = remainingBalance,
+                        JoinedDate = client.MembershipStartDate,
+                        ExpirationDate = expirationDate,
+                        Status = displayStatus,
                         TrainerName = trainerName,
-
+                        AssignedTrainerId = client.AssignedTrainerId,
+                        GymGoal = client.GymGoal,
+                        FollowUpDate = client.FollowUpDate,
+                        FollowUpPurpose = client.FollowUpPurpose,
+                        PreferredDays = client.PreferredDays,
+                        PreferredTimeSlot = client.PreferredTimeSlot,
                         Schedule = schedule
+                        ,DailyReminderSent = dailyReminderMemberIds.Contains(client.UserId)
                     };
                 })
                 .ToList();
 
-
-            // ========================================
-            // STATUS FILTER
-            // ========================================
-
             if (selectedStatus.HasValue)
             {
                 members = members
-                    .Where(m => m.Status == selectedStatus.Value)
+                    .Where(member =>
+                        member.Status == selectedStatus.Value)
                     .ToList();
             }
 
-
-            // ========================================
-            // PAGING
-            // ========================================
-
             var totalCount = members.Count;
+
+            var totalPages = totalCount == 0
+                ? 1
+                : (int)Math.Ceiling(
+                    totalCount / (double)pageSize);
+
+            if (page > totalPages)
+            {
+                page = totalPages;
+            }
 
             var pageItems = members
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToList();
 
+            // Counts are based on all clients, not only the current
+            // search/filter results.
+            var allClients = await _context.Clients
+                .AsNoTracking()
+                .Where(client => client.Role == UserRole.Client)
+                .ToListAsync();
 
-            // ========================================
-            // COUNTS
-            // ========================================
-
-            var activeCount = clients.Count(c =>
+            var activeCount = allClients.Count(client =>
             {
-                if (!c.IsActiveMember)
-                    return false;
+                var expirationDate =
+                    client.MembershipEndDate ??
+                    CalculateExpirationDate(
+                        client.MembershipStartDate,
+                        client.MembershipPlan);
 
-                DateTime expirationDate =
-                    c.MembershipEndDate
-                    ?? CalculateExpirationDate(
-                        c.MembershipStartDate,
-                        c.MembershipPlan);
-
-                return expirationDate.Date >= DateTime.Today;
+                return DetermineMemberStatus(
+                    client,
+                    expirationDate) == MemberStatus.Active;
             });
 
-
-            var pendingPaymentCount =
-                await _context.Payments
-                    .CountAsync(p =>
-                        p.Status == PaymentStatus.Pending);
-
-
-            // ========================================
-            // RETURN MODEL
-            // ========================================
+            var incomingRenewalCount = allClients.Count(client =>
+            {
+                var expirationDate = client.MembershipEndDate ??
+                    CalculateExpirationDate(client.MembershipStartDate, client.MembershipPlan);
+                return DetermineMemberStatus(client, expirationDate) == MemberStatus.ExpiringSoon;
+            });
 
             return new MemberListViewModel
             {
                 ActiveCount = activeCount,
-
-                PendingPaymentCount =
-                    pendingPaymentCount,
-
-                SearchTerm =
-                    searchTerm ?? string.Empty,
-
-                SelectedStatus =
-                    selectedStatus,
-
-                SelectedPlan =
-                    selectedPlan,
+                IncomingRenewalCount = incomingRenewalCount,
+                SearchTerm = searchTerm ?? string.Empty,
+                SelectedStatus = selectedStatus,
+                SelectedPlan = selectedPlan,
+                TrainerOptions = trainerOptions,
 
                 Paged = new PagedResult<MemberListItemViewModel>
                 {
@@ -249,225 +216,772 @@ namespace Gym.Services
             };
         }
 
-
-        // ============================================
-        // CALCULATE EXPIRATION
-        // ============================================
-
-        private DateTime CalculateExpirationDate(
-            DateTime startDate,
-            MembershipPlanType plan)
-        {
-            return plan switch
-            {
-                MembershipPlanType.Monthly =>
-                    startDate.AddMonths(1),
-
-                MembershipPlanType.Quarterly =>
-                    startDate.AddMonths(3),
-
-                MembershipPlanType.Annual =>
-                    startDate.AddYears(1),
-
-                _ =>
-                    startDate
-            };
-        }
-
-
-        // ============================================
-        // BUILD ADD MEMBER MODEL
-        // ============================================
+        // =====================================================
+        // BUILD ADD-MEMBER FORM
+        // =====================================================
 
         public async Task<AddMemberViewModel>
             BuildAddMemberViewModelAsync(
                 AddMemberViewModel? existing = null)
         {
-            var model =
-                existing ?? new AddMemberViewModel();
+            await SyncRegisteredTrainersAsync();
+            var model = existing ?? new AddMemberViewModel();
 
+            model.TrainerOptions = await BuildTrainerOptionsAsync(model.SelectedTrainerId);
 
-            // ========================================
-            // TRAINERS
-            // ========================================
-
-            var trainers = await _context.Trainers
-                .AsNoTracking()
-                .Select(t => new SelectListItem
-                {
-                    Value =
-                        t.UserId.ToString(),
-
-                    Text =
-                        t.FirstName + " " + t.LastName
-                })
-                .ToListAsync();
-
-
-            trainers.Insert(
+            model.TrainerOptions.Insert(
                 0,
                 new SelectListItem
                 {
-                    Value = "",
-                    Text =
-                        "No trainer (self-guided)"
+                    Value = string.Empty,
+                    Text = "No trainer (self-guided)",
+                    Selected = !model.SelectedTrainerId.HasValue
                 });
 
-            trainers.Insert(
-                1,
-                new SelectListItem
+            model.GymGoalOptions = new List<SelectListItem>
+            {
+                new()
                 {
-                    Value = "1",
-                    Text =
-                        "Rodolfo"
-                });
-
-
-            model.TrainerOptions =
-                trainers;
-
-
-            // ========================================
-            // PLANS
-            // ========================================
-
-            model.PlanOptions =
-                Enum.GetValues<MembershipPlanType>()
-                .Select(p => new SelectListItem
+                    Value = ((int)GymGoal.MuscleGain).ToString(),
+                    Text = "Muscle Gain",
+                    Selected = model.SelectedGymGoal == GymGoal.MuscleGain
+                },
+                new()
                 {
-                    Value =
-                        ((int)p).ToString(),
+                    Value = ((int)GymGoal.WeightLoss).ToString(),
+                    Text = "Weight Loss",
+                    Selected = model.SelectedGymGoal == GymGoal.WeightLoss
+                },
+                new()
+                {
+                    Value = ((int)GymGoal.Cardio).ToString(),
+                    Text = "Cardio",
+                    Selected = model.SelectedGymGoal == GymGoal.Cardio
+                }
+            };
 
-                    Text = p switch
-                    {
-                        MembershipPlanType.Monthly =>
-                            "Monthly — ₱1,200",
-
-                        MembershipPlanType.Quarterly =>
-                            "Quarterly — ₱3,200",
-
-                        MembershipPlanType.Annual =>
-                            "Annual — ₱11,000",
-
-                        _ =>
-                            p.ToString()
-                    }
+            model.PlanOptions = MembershipPlanPricing.GetActivePlans()
+                .Select(item => new SelectListItem
+                {
+                    Value = ((int)item.Plan).ToString(),
+                    Text = $"{item.Name} — ₱{item.Price:N2}",
+                    Selected = model.SelectedPlanId == item.Plan
                 })
                 .ToList();
 
+            model.TimeSlotOptions = new List<SelectListItem>
+            {
+                CreateOption(
+                    "7:00 AM - 8:00 AM",
+                    "7:00 AM – 8:00 AM",
+                    model.SelectedTimeSlot),
 
-            // ========================================
-            // TIME SLOTS
-            // ========================================
+                CreateOption(
+                    "8:00 AM - 9:00 AM",
+                    "8:00 AM – 9:00 AM",
+                    model.SelectedTimeSlot),
 
-            model.TimeSlotOptions =
-                new List<SelectListItem>
-                {
-                    new SelectListItem { Value = "7:00 AM - 8:00 AM",  Text = "7:00 – 8:00 AM" },
-                    new SelectListItem { Value = "8:00 AM - 9:00 AM",  Text = "8:00 – 9:00 AM" },
-                    new SelectListItem { Value = "9:00 AM - 10:00 AM", Text = "9:00 – 10:00 AM" },
-                    new SelectListItem { Value = "10:00 AM - 11:00 AM", Text = "10:00 – 11:00 AM" },
-                    new SelectListItem { Value = "11:00 AM - 12:00 AM", Text = "11:00 – 12:00 PM" },
-                    new SelectListItem { Value = "12:00 PM - 1:00 PM", Text = "12:00 PM – 1:00 PM" },
-                    new SelectListItem { Value = "1:00 PM - 2:00 PM", Text = "1:00 PM – 2:00 PM" },
-                    new SelectListItem { Value = "2:00 PM - 3:00 PM", Text = "2:00 PM – 3:00 PM" },
-                    new SelectListItem { Value = "3:00 PM - 4:00 PM", Text = "3:00 PM – 4:00 PM" },
-                    new SelectListItem { Value = "8:00 PM - 9:00 PM", Text = "8:00 PM – 9:00 PM" },
-                };
+                CreateOption(
+                    "9:00 AM - 10:00 AM",
+                    "9:00 AM – 10:00 AM",
+                    model.SelectedTimeSlot),
 
+                CreateOption(
+                    "10:00 AM - 11:00 AM",
+                    "10:00 AM – 11:00 AM",
+                    model.SelectedTimeSlot),
 
-            // ========================================
-            // CALL PURPOSE
-            // ========================================
+                CreateOption(
+                    "11:00 AM - 12:00 PM",
+                    "11:00 AM – 12:00 PM",
+                    model.SelectedTimeSlot),
 
-            model.PurposeOptions =
-                new List<SelectListItem>
-                {
-                    new SelectListItem { Value = "Welcome & orientation", Text = "Welcome & orientation" },
-                    new SelectListItem { Value = "Fitness Assessment", Text = "Fitness Assessment" },
-                    new SelectListItem { Value = "Payment Follow-up", Text = "Payment Follow-up" }
-                };
+                CreateOption(
+                    "12:00 PM - 1:00 PM",
+                    "12:00 PM – 1:00 PM",
+                    model.SelectedTimeSlot),
 
+                CreateOption(
+                    "1:00 PM - 2:00 PM",
+                    "1:00 PM – 2:00 PM",
+                    model.SelectedTimeSlot),
+
+                CreateOption(
+                    "2:00 PM - 3:00 PM",
+                    "2:00 PM – 3:00 PM",
+                    model.SelectedTimeSlot),
+
+                CreateOption(
+                    "3:00 PM - 4:00 PM",
+                    "3:00 PM – 4:00 PM",
+                    model.SelectedTimeSlot),
+
+                CreateOption(
+                    "8:00 PM - 9:00 PM",
+                    "8:00 PM – 9:00 PM",
+                    model.SelectedTimeSlot)
+            };
 
             return model;
         }
 
-
-        // ============================================
-        // CREATE CLIENT
-        // ============================================
-
-        public async Task CreateClientAsync(AddMemberViewModel form)
+        private async Task SyncRegisteredTrainersAsync()
         {
+            var registeredTrainers = await _setupService
+                .GetActiveRegisteredTrainersAsync();
+
+            if (registeredTrainers.Count == 0)
+            {
+                return;
+            }
+
+            var registeredEmails = registeredTrainers
+                .Select(trainer => trainer.Email.Trim())
+                .Where(email => !string.IsNullOrWhiteSpace(email))
+                .ToList();
+            var existingEmails = await _context.Users
+                .AsNoTracking()
+                .Where(user => registeredEmails.Contains(user.Email))
+                .Select(user => user.Email)
+                .ToListAsync();
+            var existingEmailSet = existingEmails
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var registered in registeredTrainers)
+            {
+                var email = registered.Email.Trim();
+                if (string.IsNullOrWhiteSpace(email) || existingEmailSet.Contains(email))
+                {
+                    continue;
+                }
+
+                var nameParts = registered.FullName
+                    .Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                var firstName = nameParts.Length > 1
+                    ? string.Join(" ", nameParts[..^1])
+                    : registered.FullName.Trim();
+                var lastName = nameParts.Length > 1
+                    ? nameParts[^1]
+                    : "Trainer";
+
+                _context.Trainers.Add(new Trainer
+                {
+                    FirstName = firstName,
+                    LastName = lastName,
+                    Email = email,
+                    PhoneNumber = registered.PhoneNumber.Trim(),
+                    Role = UserRole.Trainer,
+                    IsActive = true,
+                    CreatedDate = DateTime.Now
+                });
+                existingEmailSet.Add(email);
+            }
+
+            if (_context.ChangeTracker.HasChanges())
+            {
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        // =====================================================
+        // CREATE MEMBER
+        // =====================================================
+
+        public async Task CreateClientAsync(
+            AddMemberViewModel form)
+        {
+            if (!form.SelectedPlanId.HasValue)
+            {
+                throw new InvalidOperationException(
+                    "Membership plan is required.");
+            }
+
+            var normalizedEmail = form.Email.Trim();
+
+            var emailAlreadyExists = await _context.Users
+                .AnyAsync(user =>
+                    user.Email == normalizedEmail);
+
+            if (emailAlreadyExists)
+            {
+                throw new InvalidOperationException(
+                    "This Gmail address is already registered. Please use a different account.");
+            }
+
+            if (form.SelectedTrainerId.HasValue)
+            {
+                var trainerExists = await _context.Trainers
+                    .AnyAsync(trainer =>
+                        trainer.UserId ==
+                            form.SelectedTrainerId.Value &&
+                        trainer.IsActive);
+
+                if (!trainerExists)
+                {
+                    throw new InvalidOperationException(
+                        "The selected trainer does not exist or is inactive.");
+                }
+
+                var availability = await _context.TrainerAvailabilities.AsNoTracking()
+                    .FirstOrDefaultAsync(item => item.TrainerId == form.SelectedTrainerId.Value);
+                if (availability != null)
+                {
+                    var assignedCount = await _context.Clients.AsNoTracking()
+                        .CountAsync(client => client.AssignedTrainerId == form.SelectedTrainerId.Value &&
+                            client.IsActive && client.IsActiveMember);
+                    if (assignedCount >= availability.WeeklyMemberLimit)
+                    {
+                        throw new InvalidOperationException(
+                            "The selected trainer has reached their weekly member capacity.");
+                    }
+                }
+            }
+            if (!MembershipPlanPricing.IsActive(form.SelectedPlanId.Value))
+            {
+                throw new InvalidOperationException("The selected membership plan is no longer available.");
+            }
+
             var (firstName, lastName) = form.GetSplitName();
 
-            if (!form.SelectedPlanId.HasValue)
-                throw new InvalidOperationException("Membership plan is required.");
-
             var plan = form.SelectedPlanId.Value;
-            var expirationDate = CalculateExpirationDate(form.StartDate, plan);
+            var planPrice = MembershipPlanPricing.GetPrice(plan);
+            var paymentAmount = form.PaymentAmount ?? 0m;
+            if (paymentAmount <= 0m)
+            {
+                throw new InvalidOperationException("A cash payment is required to register the member.");
+            }
+            if (paymentAmount > planPrice)
+            {
+                throw new InvalidOperationException($"Payment cannot exceed the plan price of ₱{planPrice:N2}.");
+            }
+            var membershipPaidInFull = paymentAmount >= planPrice;
 
-            var newClient = new Client
+            var expirationDate = CalculateExpirationDate(
+                form.StartDate,
+                plan);
+
+            var client = new Client
             {
                 FirstName = firstName,
                 LastName = lastName,
-                Email = form.Email,
-                PhoneNumber = form.ContactNumber,
+                Email = normalizedEmail,
+                PhoneNumber = form.ContactNumber.Trim(),
                 Role = UserRole.Client,
                 IsActive = true,
                 CreatedDate = DateTime.Now,
-                MembershipNumber = $"MEM-{Guid.NewGuid().ToString()[..8].ToUpper()}",
-                MembershipStartDate = form.StartDate,
-                MembershipEndDate = expirationDate,
-                MembershipPlan = plan,
-                IsActiveMember = true,
 
-                AssignedTrainerId = form.SelectedTrainerId,
-                PreferredDays = form.SelectedDays is { Count: > 0 }
-                    ? string.Join(",", form.SelectedDays) : null,
-                PreferredTimeSlot = form.SelectedTimeSlot,
-                Notes = form.Notes
+                MembershipNumber =
+                    await GenerateMembershipNumberAsync(),
+
+                MembershipPlan = plan,
+                MembershipStartDate = form.StartDate.Date,
+                MembershipEndDate = expirationDate,
+                Status = membershipPaidInFull ? MemberStatus.Active : MemberStatus.PendingPayment,
+                IsActiveMember = membershipPaidInFull,
+
+                AssignedTrainerId =
+                    form.SelectedTrainerId,
+
+                GymGoal = form.SelectedGymGoal,
+
+                PreferredDays =
+                    form.SelectedDays is { Count: > 0 }
+                        ? string.Join(
+                            ",",
+                            form.SelectedDays
+                                .Where(day =>
+                                    !string.IsNullOrWhiteSpace(day))
+                                .Select(day => day.Trim())
+                                .Distinct())
+                        : null,
+
+                PreferredTimeSlot =
+                    NullIfWhiteSpace(form.SelectedTimeSlot)
             };
 
-            _context.Clients.Add(newClient);
-            await _context.SaveChangesAsync();
+            _context.Clients.Add(client);
+            var paidAt = DateTime.Now;
+            client.Payments.Add(new Payment
+            {
+                Amount = paymentAmount,
+                Status = PaymentStatus.Paid,
+                TransactionCode = $"TXN-{paidAt:yyyyMMdd}-{Guid.NewGuid().ToString("N")[..6].ToUpperInvariant()}",
+                PaymentDate = paidAt,
+                DueDate = paidAt,
+                Notes = "Initial cash membership payment recorded during registration."
+            });
+            if (membershipPaidInFull && client.AssignedTrainerId.HasValue)
+            {
+                _context.Notifications.Add(new Notification
+                {
+                    UserId = client.AssignedTrainerId.Value,
+                    Title = "New member assigned",
+                    Message = $"{client.FirstName} {client.LastName} has been assigned to you. Training schedule: {client.PreferredDays ?? "Days not set"} · {client.PreferredTimeSlot ?? "Time not set"}.",
+                    NotificationType = "NewMemberAssigned",
+                    CreatedDate = DateTime.Now
+                });
+            }
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex)
+                when (ex.InnerException is SqlException
+                {
+                    Number: 2601 or 2627
+                })
+            {
+                throw new InvalidOperationException(
+                    "This Gmail address is already registered.", ex);
+            }
         }
 
+        // =====================================================
+        // MARK INACTIVE
+        // =====================================================
 
-        // ============================================
-        // DELETE (SOFT)
-        // ============================================
         public async Task DeleteClientAsync(int id)
         {
-            var client = await _context.Clients
-                .FirstOrDefaultAsync(c => c.UserId == id && c.Role == UserRole.Client);
+            var client = await FindClientAsync(id);
 
             if (client == null)
+            {
                 return;
+            }
 
+            client.Status = MemberStatus.Inactive;
             client.IsActiveMember = false;
             client.IsActive = false;
 
             await _context.SaveChangesAsync();
         }
 
-
-        // ============================================
+        // =====================================================
         // REACTIVATE
-        // ============================================
+        // =====================================================
+
         public async Task ReactivateClientAsync(int id)
         {
-            var client = await _context.Clients
-                .FirstOrDefaultAsync(c => c.UserId == id && c.Role == UserRole.Client);
+            var client = await FindClientAsync(id);
 
             if (client == null)
+            {
                 return;
+            }
 
+            client.Status = MemberStatus.Active;
             client.IsActiveMember = true;
             client.IsActive = true;
+
+            // If the old membership has expired, give the member a
+            // new period beginning today using the existing plan.
+            if (!client.MembershipEndDate.HasValue ||
+                client.MembershipEndDate.Value.Date <
+                    DateTime.Today)
+            {
+                client.MembershipStartDate = DateTime.Today;
+
+                client.MembershipEndDate =
+                    CalculateExpirationDate(
+                        DateTime.Today,
+                        client.MembershipPlan);
+            }
 
             await _context.SaveChangesAsync();
         }
 
+        // =====================================================
+        // RENEW MEMBERSHIP
+        // =====================================================
+
+        public async Task<DateTime?> RenewMembershipAsync(int id)
+        {
+            var client = await FindClientAsync(id);
+
+            if (client == null ||
+                client.Status == MemberStatus.Terminated)
+            {
+                return null;
+            }
+
+            // Preserve any remaining paid time. Expired memberships begin a
+            // fresh period today; active memberships extend from their end.
+            var renewalStart = client.MembershipEndDate.HasValue &&
+                               client.MembershipEndDate.Value.Date > DateTime.Today
+                ? client.MembershipEndDate.Value.Date
+                : DateTime.Today;
+
+            client.MembershipEndDate = CalculateExpirationDate(
+                renewalStart,
+                client.MembershipPlan);
+            client.Status = MemberStatus.Active;
+            client.IsActiveMember = true;
+            client.IsActive = true;
+
+            await _context.SaveChangesAsync();
+
+            return client.MembershipEndDate;
+        }
+
+        public async Task<bool> UpdateAssignmentAndFollowUpAsync(
+            int id,
+            int? assignedTrainerId,
+            DateTime? followUpDate,
+            string? followUpPurpose,
+            IEnumerable<string>? preferredDays,
+            string? preferredTimeSlot)
+        {
+            var client = await FindClientAsync(id);
+
+            if (client == null)
+            {
+                return false;
+            }
+
+            if (assignedTrainerId.HasValue)
+            {
+                var trainerExists = await _context.Trainers.AnyAsync(trainer =>
+                    trainer.UserId == assignedTrainerId.Value &&
+                    trainer.IsActive);
+
+                if (!trainerExists)
+                {
+                    return false;
+                }
+
+                var availability = await _context.TrainerAvailabilities.AsNoTracking()
+                    .FirstOrDefaultAsync(item => item.TrainerId == assignedTrainerId.Value);
+                if (availability != null)
+                {
+                    var assignedCount = await _context.Clients.AsNoTracking()
+                        .CountAsync(item => item.AssignedTrainerId == assignedTrainerId.Value &&
+                            item.UserId != id && item.IsActive && item.IsActiveMember);
+                    if (assignedCount >= availability.WeeklyMemberLimit)
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            var previousTrainerId = client.AssignedTrainerId;
+            client.AssignedTrainerId = assignedTrainerId;
+            client.FollowUpDate = followUpDate?.Date;
+            client.FollowUpPurpose = NullIfWhiteSpace(followUpPurpose);
+            client.PreferredDays = preferredDays == null
+                ? null
+                : string.Join(",", preferredDays
+                    .Where(day => !string.IsNullOrWhiteSpace(day))
+                    .Select(day => day.Trim())
+                    .Distinct(StringComparer.OrdinalIgnoreCase));
+            client.PreferredTimeSlot = NullIfWhiteSpace(preferredTimeSlot);
+
+            if (assignedTrainerId.HasValue && assignedTrainerId != previousTrainerId)
+            {
+                _context.Notifications.Add(new Notification
+                {
+                    UserId = assignedTrainerId.Value,
+                    Title = "New member assigned",
+                    Message = $"{client.FirstName} {client.LastName} has been assigned to you. Training schedule: {client.PreferredDays ?? "Days not set"} · {client.PreferredTimeSlot ?? "Time not set"}.",
+                    NotificationType = "NewMemberAssigned",
+                    CreatedDate = DateTime.Now
+                });
+            }
+
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        // =====================================================
+        // CANCEL MEMBERSHIP
+        // =====================================================
+
+        public async Task<int?> CancelMembershipAsync(int id)
+        {
+            var client = await FindClientAsync(id);
+
+            if (client == null)
+            {
+                return null;
+            }
+
+            // A consumed gym day is a distinct calendar date with at least
+            // one attendance record marked as attended. Multiple sessions on
+            // the same day still count as one consumed day.
+            var consumedDays = await _context.SessionAttendees
+                .AsNoTracking()
+                .Where(attendance =>
+                    attendance.ClientId == id &&
+                    attendance.IsAttended &&
+                    attendance.Session.StartTime.Date >=
+                        client.MembershipStartDate.Date &&
+                    (!client.MembershipEndDate.HasValue ||
+                     attendance.Session.StartTime.Date <=
+                        client.MembershipEndDate.Value.Date))
+                .Select(attendance => attendance.Session.StartTime.Date)
+                .Distinct()
+                .CountAsync();
+
+            client.Status = MemberStatus.Canceled;
+            client.IsActiveMember = false;
+
+            // Keep the user account active because cancellation is
+            // different from account termination.
+            client.IsActive = true;
+
+            await _context.SaveChangesAsync();
+
+            return consumedDays;
+        }
+
+        // =====================================================
+        // TERMINATE MEMBERSHIP
+        // =====================================================
+
+        public async Task TerminateMembershipAsync(int id)
+        {
+            var client = await FindClientAsync(id);
+
+            if (client == null)
+            {
+                return;
+            }
+
+            client.Status = MemberStatus.Terminated;
+            client.IsActiveMember = false;
+            client.IsActive = false;
+
+            await _context.SaveChangesAsync();
+        }
+
+        // =====================================================
+        // PERMANENT DELETE
+        // =====================================================
+
+        public async Task HardDeleteClientAsync(int id)
+        {
+            var client = await FindClientAsync(id);
+
+            if (client == null)
+            {
+                return;
+            }
+
+            // Remove dependent records that reference the client.
+            // This prevents SQL foreign-key constraint errors.
+            var payments = await _context.Payments
+                .Where(payment => payment.ClientId == id)
+                .ToListAsync();
+
+            var programRecords = await _context.ClientPrograms
+                .Where(program => program.ClientId == id)
+                .ToListAsync();
+
+            var attendanceRecords = await _context.SessionAttendees
+                .Where(attendee => attendee.ClientId == id)
+                .ToListAsync();
+
+            var attendanceLogs = await _context.MemberAttendanceLogs
+                .Where(log => log.ClientId == id)
+                .ToListAsync();
+
+            var notifications = await _context.Notifications
+                .Where(notification => notification.UserId == id)
+                .ToListAsync();
+
+            await using var transaction =
+                await _context.Database.BeginTransactionAsync();
+
+            try
+            {
+                _context.Payments.RemoveRange(payments);
+                _context.ClientPrograms.RemoveRange(programRecords);
+                _context.SessionAttendees.RemoveRange(
+                    attendanceRecords);
+                _context.MemberAttendanceLogs.RemoveRange(attendanceLogs);
+                _context.Notifications.RemoveRange(notifications);
+                _context.Clients.Remove(client);
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+        }
+
+        // =====================================================
+        // PRIVATE HELPERS
+        // =====================================================
+
+        private Task<Client?> FindClientAsync(int id)
+        {
+            return _context.Clients.FirstOrDefaultAsync(
+                client =>
+                    client.UserId == id &&
+                    client.Role == UserRole.Client);
+        }
+
+        private async Task<List<SelectListItem>> BuildTrainerOptionsAsync(int? selectedTrainerId = null)
+        {
+            var trainers = await _context.Trainers.AsNoTracking()
+                .Where(trainer => trainer.IsActive)
+                .OrderBy(trainer => trainer.FirstName)
+                .ThenBy(trainer => trainer.LastName)
+                .ToListAsync();
+            var trainerIds = trainers.Select(trainer => trainer.UserId).ToList();
+            var availability = await _context.TrainerAvailabilities.AsNoTracking()
+                .Where(item => trainerIds.Contains(item.TrainerId))
+                .ToDictionaryAsync(item => item.TrainerId);
+            var assignedCounts = await _context.Clients.AsNoTracking()
+                .Where(client => client.AssignedTrainerId.HasValue &&
+                    trainerIds.Contains(client.AssignedTrainerId.Value) && client.IsActive && client.IsActiveMember)
+                .GroupBy(client => client.AssignedTrainerId!.Value)
+                .Select(group => new { TrainerId = group.Key, Count = group.Count() })
+                .ToDictionaryAsync(item => item.TrainerId, item => item.Count);
+
+            return trainers.Select(trainer =>
+            {
+                assignedCounts.TryGetValue(trainer.UserId, out var assigned);
+                availability.TryGetValue(trainer.UserId, out var schedule);
+                var scheduleText = schedule == null
+                    ? "Availability not set"
+                    : $"{string.Join(", ", schedule.AvailableDays.Split(',').Select(day => day[..Math.Min(3, day.Length)]))} · " +
+                      $"{DateTime.Today.Add(schedule.StartTime):h:mm tt}–{DateTime.Today.Add(schedule.EndTime):h:mm tt} · " +
+                      $"{assigned}/{schedule.WeeklyMemberLimit} members";
+                var full = schedule != null && assigned >= schedule.WeeklyMemberLimit && selectedTrainerId != trainer.UserId;
+                return new SelectListItem
+                {
+                    Value = trainer.UserId.ToString(),
+                    Text = $"{trainer.FirstName} {trainer.LastName} — {scheduleText}{(full ? " (Full)" : string.Empty)}",
+                    Selected = selectedTrainerId == trainer.UserId,
+                    Disabled = full
+                };
+            }).ToList();
+        }
+
+        private static DateTime CalculateExpirationDate(
+            DateTime startDate,
+            MembershipPlanType plan)
+        {
+            return startDate.AddMonths(MembershipPlanPricing.GetDurationMonths(plan));
+        }
+
+        private static MemberStatus DetermineMemberStatus(
+            Client client,
+            DateTime expirationDate)
+        {
+            // Preserve explicit administrative statuses.
+            if (client.Status == MemberStatus.Terminated)
+            {
+                return MemberStatus.Terminated;
+            }
+
+            if (client.Status == MemberStatus.Canceled)
+            {
+                return MemberStatus.Canceled;
+            }
+
+            if (client.Status == MemberStatus.PendingPayment)
+            {
+                return MemberStatus.PendingPayment;
+            }
+
+            if (!client.IsActiveMember ||
+                client.Status == MemberStatus.Inactive)
+            {
+                return MemberStatus.Inactive;
+            }
+
+            if (client.Status == MemberStatus.Overdue)
+            {
+                return MemberStatus.Overdue;
+            }
+
+            if (expirationDate.Date < DateTime.Today)
+            {
+                return MemberStatus.Expired;
+            }
+
+            if (expirationDate.Date <=
+                DateTime.Today.AddDays(7))
+            {
+                return MemberStatus.ExpiringSoon;
+            }
+
+            return MemberStatus.Active;
+        }
+
+        private static string? BuildSchedule(
+            string? preferredDays,
+            string? preferredTimeSlot)
+        {
+            var hasDays =
+                !string.IsNullOrWhiteSpace(preferredDays);
+
+            var hasTime =
+                !string.IsNullOrWhiteSpace(preferredTimeSlot);
+
+            if (hasDays && hasTime)
+            {
+                return $"{preferredDays} • {preferredTimeSlot}";
+            }
+
+            if (hasDays)
+            {
+                return preferredDays;
+            }
+
+            if (hasTime)
+            {
+                return preferredTimeSlot;
+            }
+
+            return null;
+        }
+
+        private async Task<string>
+            GenerateMembershipNumberAsync()
+        {
+            string membershipNumber;
+
+            do
+            {
+                membershipNumber =
+                    $"MEM-{Guid.NewGuid():N}"[..12]
+                        .ToUpperInvariant();
+            }
+            while (await _context.Clients.AnyAsync(
+                client =>
+                    client.MembershipNumber ==
+                        membershipNumber));
+
+            return membershipNumber;
+        }
+
+        private static SelectListItem CreateOption(
+            string value,
+            string text,
+            string? selectedValue)
+        {
+            return new SelectListItem
+            {
+                Value = value,
+                Text = text,
+                Selected = string.Equals(
+                    value,
+                    selectedValue,
+                    StringComparison.OrdinalIgnoreCase)
+            };
+        }
+
+        private static string? NullIfWhiteSpace(
+            string? value)
+        {
+            return string.IsNullOrWhiteSpace(value)
+                ? null
+                : value.Trim();
+        }
     }
 }

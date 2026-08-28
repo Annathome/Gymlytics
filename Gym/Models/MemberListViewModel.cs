@@ -23,6 +23,10 @@ namespace Gym.Models
 
         public string FullName { get; set; } = string.Empty;
 
+        public string Email { get; set; } = string.Empty;
+
+        public string PhoneNumber { get; set; } = string.Empty;
+
         public string Initials
         {
             get
@@ -48,6 +52,12 @@ namespace Gym.Models
 
         public MembershipPlanType Plan { get; set; }
 
+        public decimal PlanPrice { get; set; }
+
+        public decimal PaidAmount { get; set; }
+
+        public decimal RemainingBalance { get; set; }
+
         public DateTime JoinedDate { get; set; }
 
         public DateTime ExpirationDate { get; set; }
@@ -56,7 +66,21 @@ namespace Gym.Models
 
         public string? TrainerName { get; set; }
 
+        public int? AssignedTrainerId { get; set; }
+
+        public GymGoal? GymGoal { get; set; }
+
+        public DateTime? FollowUpDate { get; set; }
+
+        public string? FollowUpPurpose { get; set; }
+
+        public string? PreferredDays { get; set; }
+
+        public string? PreferredTimeSlot { get; set; }
+
         public string? Schedule { get; set; }
+
+        public bool DailyReminderSent { get; set; }
     }
 
 
@@ -64,7 +88,7 @@ namespace Gym.Models
     {
         public int ActiveCount { get; set; }
 
-        public int PendingPaymentCount { get; set; }
+        public int IncomingRenewalCount { get; set; }
 
 
         // Search and filters
@@ -74,6 +98,8 @@ namespace Gym.Models
         public MemberStatus? SelectedStatus { get; set; }
 
         public MembershipPlanType? SelectedPlan { get; set; }
+
+        public List<SelectListItem> TrainerOptions { get; set; } = new();
 
 
         // Members
@@ -138,9 +164,18 @@ namespace Gym.Models
         [Display(Name = "Start date")]
         public DateTime StartDate { get; set; } = DateTime.Today;
 
+        [Required(ErrorMessage = "Payment amount is required.")]
+        [Range(typeof(decimal), "0.01", "999999999", ErrorMessage = "Payment amount must be greater than zero.")]
+        [Display(Name = "Cash payment")]
+        public decimal? PaymentAmount { get; set; }
+
 
         [Display(Name = "Assign trainer")]
         public int? SelectedTrainerId { get; set; }
+
+        [Required(ErrorMessage = "Please select a gym goal.")]
+        [Display(Name = "Gym goal")]
+        public GymGoal? SelectedGymGoal { get; set; }
 
 
         [Display(Name = "Training days")]
@@ -151,26 +186,15 @@ namespace Gym.Models
         public string? SelectedTimeSlot { get; set; }
 
 
-        [DataType(DataType.Date)]
-        [Display(Name = "Client call date")]
-        public DateTime? CallDate { get; set; }
-
-
-        [Display(Name = "Call purpose")]
-        public string CallPurpose { get; set; }
-            = "Welcome & orientation";
-
-
-        [Display(Name = "Notes")]
-        public string? Notes { get; set; }
-
-
         // Dropdown options
 
         public List<SelectListItem> PlanOptions { get; set; }
             = new();
 
         public List<SelectListItem> TrainerOptions { get; set; }
+            = new();
+
+        public List<SelectListItem> GymGoalOptions { get; set; }
             = new();
 
         public List<SelectListItem> TimeSlotOptions { get; set; }
@@ -202,11 +226,5 @@ namespace Gym.Models
             };
         }
 
-        public class MembersPageViewModel
-        {
-            public MemberListViewModel ListViewModel { get; set; } = new();
-            public AddMemberViewModel AddMemberViewModel { get; set; } = new();
-            public bool OpenDrawer { get; set; } = false;
-        }
     }
 }

@@ -1,0 +1,800 @@
+
+@model Gym.Models.FrontDeskDashboardViewModel
+
+@{
+    Layout = "~/Views/Shared/_FrontDeskLayout.cshtml";
+    ViewData["Title"] = "Front Desk Dashboard";
+}
+
+<style>
+    body > .container {
+        max-width: none;
+        margin: 0;
+        padding-left: 24px;
+        padding-right: 24px;
+    }
+
+    /* ========================================
+           Dashboard
+           ======================================== */
+
+    .fd-dashboard {
+        width: min(1180px, calc(100vw - 380px));
+        margin: 22px auto;
+        transform: translateX(10px);
+        color: #102630;
+        font: 15px Arial, Helvetica, sans-serif;
+    }
+
+        .fd-dashboard > section + section {
+            margin-top: 28px;
+        }
+
+    .fd-title {
+        margin: 0 0 18px;
+        font-size: 22px;
+        font-weight: 700;
+    }
+
+    .fd-panel {
+        background: #fff;
+        border: 1px solid #dce5e1;
+        border-radius: 8px;
+        box-shadow: none;
+    }
+
+    /* Weekly summary */
+    .fd-summary-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 28px;
+    }
+
+    .fd-summary-card {
+        min-height: 126px;
+        padding: 20px;
+        border: 1px solid #d3e1d7;
+        border-left: 4px solid #08752a;
+        border-radius: 7px;
+        background: #f8fbf8;
+        box-sizing: border-box;
+    }
+
+    .fd-summary-label {
+        margin: 0 0 14px;
+        color: #405047;
+        font-size: 15px;
+    }
+
+    .fd-summary-value {
+        margin: 0;
+        color: #08752a;
+        font-size: 34px;
+        font-weight: 700;
+        line-height: 1;
+    }
+
+    .fd-summary-description {
+        margin: 9px 0 0;
+        color: #718078;
+        font-size: 12px;
+    }
+
+    /* ========================================
+           Chart
+           ======================================== */
+
+    .fd-insights-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1.45fr) minmax(360px, .85fr);
+        gap: 22px;
+        margin-top: 28px;
+        align-items: stretch;
+    }
+
+    .fd-chart {
+        padding: 24px;
+    }
+
+    .fd-chart-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 22px;
+    }
+
+        .fd-chart-head h2 {
+            margin: 0;
+            font-size: 20px;
+        }
+
+    .fd-legend {
+        display: flex;
+        gap: 24px;
+        color: #56635b;
+    }
+
+    .fd-key::before {
+        content: "";
+        display: inline-block;
+        width: 18px;
+        height: 3px;
+        margin-right: 6px;
+        vertical-align: middle;
+        background: #08752a;
+    }
+
+    .fd-key.walkins::before {
+        height: 0;
+        background: none;
+        border-top: 3px dashed #d98218;
+    }
+
+    .fd-chart-wrap {
+        position: relative;
+        width: 100%;
+        height: 250px;
+    }
+
+    .fd-chart canvas {
+        width: 100%;
+        height: 100%;
+    }
+
+    .fd-availability { overflow:hidden; }
+    .fd-availability h2 { margin:0; padding:20px; border-bottom:1px solid #dce5e1; font-size:19px; }
+    .fd-availability-wrap { max-height:336px; overflow:auto; }
+    .fd-availability-table { width:100%; border-collapse:collapse; font-size:13px; }
+    .fd-availability-table th { padding:11px 13px; background:#edf6f1; color:#46564d; text-align:left; font-size:11px; }
+    .fd-availability-table td { padding:13px; border-top:1px solid #e7ede9; vertical-align:top; }
+    .fd-trainer-name { display:block; margin-bottom:4px; font-weight:700; }
+    .fd-trainer-days { color:#68766e; font-size:11px; line-height:1.35; }
+    .fd-slot-count { display:inline-block; min-width:27px; padding:5px 8px; border-radius:999px; background:#dcf5df; color:#08752a; text-align:center; font-weight:800; }
+    .fd-slot-count.full { background:#fde7df; color:#a93a20; }
+    .fd-not-set { color:#8a958f; font-style:italic; }
+
+    /* ========================================
+           Schedule
+           ======================================== */
+
+    .fd-schedule {
+        margin-top: 18px;
+        overflow: hidden;
+    }
+
+    .fd-schedule-head {
+        min-height: 54px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 18px;
+        background: #394c55;
+        color: #fff;
+    }
+
+        .fd-schedule-head h2 {
+            margin: 0;
+            font-size: 20px;
+        }
+
+    .fd-table-wrap {
+        overflow-x: auto;
+    }
+
+    .fd-table {
+        width: 100%;
+        min-width: 780px;
+        border-collapse: collapse;
+    }
+
+        .fd-table th {
+            padding: 14px 22px;
+            background: #edf6f2;
+            color: #3e4941;
+            text-align: left;
+            font-size: 15px;
+        }
+
+        .fd-table td {
+            padding: 14px 22px;
+            border-top: 1px solid #edf0ee;
+            font-size: 15px;
+        }
+
+    /* ========================================
+           Status Badges
+           ======================================== */
+
+    .fd-badge {
+        display: inline-block;
+        padding: 5px 10px;
+        border-radius: 999px;
+        font-size: 15px;
+        font-weight: 600;
+    }
+
+        .fd-badge.scheduled {
+            color: #946700;
+            background: #fff8e6;
+            border: 1px solid #efd27a;
+        }
+
+        .fd-badge.confirmed {
+            color: #176b2c;
+            background: #e8f7e8;
+            border: 1px solid #b8dab9;
+        }
+
+        .fd-badge.completed {
+            color: #285d78;
+            background: #eaf5fa;
+            border: 1px solid #bdd9e7;
+        }
+
+        .fd-badge.cancelled {
+            color: #9b2828;
+            background: #faeaea;
+            border: 1px solid #e7baba;
+        }
+
+    /* ========================================
+           Table Actions
+           ======================================== */
+
+    .fd-action {
+        padding: 7px 12px;
+        border: 1px solid #cad8dd;
+        border-radius: 6px;
+        background: #fff;
+        font-size: 15px;
+        cursor: pointer;
+    }
+
+    .fd-reminder-form { margin: 0; }
+    .fd-action.remind { border-color: #08752a; background: #08752a; color: #fff; cursor: pointer; font-weight: 700; }
+    .fd-action.remind:hover { background: #065f22; }
+    .fd-action.reminded { border-color: #69786f; background: #dce6df; color: #355143; cursor: default; }
+    .fd-notice { margin: 0 0 14px; padding: 11px 14px; border-radius: 7px; }
+    .fd-notice.success { background: #e8f7e8; color: #176b2c; }
+    .fd-notice.error { background: #faeaea; color: #9b2828; }
+    .fd-toast { position: fixed; top: 24px; right: 24px; z-index: 9000; min-width: 260px; padding: 15px 18px; border-left: 5px solid #0ec52d; border-radius: 8px; background: #fff; color: #176b2c; box-shadow: 0 12px 30px rgba(0,0,0,.2); animation: fdToastIn .25s ease-out; }
+    @@keyframes fdToastIn { from { opacity: 0; transform: translateY(-12px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* ========================================
+           Table Footer / Pagination
+           ======================================== */
+
+    .fd-table-foot {
+        min-height: 76px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 16px 20px;
+        border-top: 1px solid #edf0ee;
+        background: #e8f6fc;
+        color: #111;
+        font-size: 15px;
+    }
+
+    .fd-pager {
+        margin-left: auto;
+        display: flex;
+        flex-direction: row;
+        gap: 8px;
+    }
+
+        .fd-pager button {
+            width: 55px;
+            height: 43px;
+            display: inline-block;
+            padding: 0;
+            border: 1px solid #d5e1e5;
+            border-radius: 6px;
+            background: #f7fbfc;
+            color: #879397;
+            font-size: 13px;
+            font-weight: 400;
+            cursor: pointer;
+        }
+
+            .fd-pager button:disabled {
+                opacity: 0.5;
+                cursor: default;
+            }
+
+    /* ========================================
+           Responsive
+           ======================================== */
+
+    @@media (max-width: 1100px) {
+        .fd-dashboard {
+            width: calc(100vw - 370px);
+            margin-left: auto;
+            margin-right: auto;
+            transform: translateX(6px);
+        }
+
+        .fd-check-row {
+            grid-template-columns: 1fr;
+        }
+
+        .fd-primary {
+            height: 58px;
+        }
+
+        .fd-insights-grid { grid-template-columns:1fr; }
+    }
+
+    @@media (max-width: 760px) {
+        .fd-dashboard {
+            width: calc(100vw - 48px);
+            margin: 20px auto;
+            transform: none;
+        }
+
+        .fd-summary-grid {
+            grid-template-columns: 1fr;
+            gap: 14px;
+        }
+
+        .fd-chart {
+            padding: 20px;
+        }
+
+        .fd-chart-head {
+            align-items: flex-start;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .fd-legend {
+            gap: 16px;
+        }
+
+        .fd-table-foot {
+            min-width: 780px;
+        }
+    }
+</style>
+
+<main class="fd-dashboard">
+
+    <h1 class="fd-title">
+        Front Desk Dashboard
+    </h1>
+
+    <!-- Weekly Summary -->
+    <section class="fd-summary-grid" aria-label="Weekly front desk summary">
+        <article class="fd-summary-card">
+            <p class="fd-summary-label">Expiring Soon</p>
+            <p class="fd-summary-value">@Model.ExpiringSoonMemberships</p>
+            <p class="fd-summary-description">Membership(s) expiring within 7 days</p>
+        </article>
+        <article class="fd-summary-card">
+            <p class="fd-summary-label">Walk-ins</p>
+            <p class="fd-summary-value">@Model.WeeklyWalkIns</p>
+            <p class="fd-summary-description">Visitor(s) registered in the last 7 days</p>
+        </article>
+        <article class="fd-summary-card">
+            <p class="fd-summary-label">Equipment Maintenance</p>
+            <p class="fd-summary-value">@Model.EquipmentNeedingMaintenance</p>
+            <p class="fd-summary-description">Equipment item(s) needing maintenance</p>
+        </article>
+    </section>
+
+    <section class="fd-insights-grid" aria-label="Weekly traffic and trainer availability">
+      <!-- Weekly Traffic Chart -->
+      <section class="fd-panel fd-chart">
+
+        <div class="fd-chart-head">
+
+            <h2>
+                Weekly Gym Traffic
+            </h2>
+
+            <div class="fd-legend">
+
+                <span class="fd-key">
+                    Member check-ins
+                </span>
+
+                <span class="fd-key walkins">
+                    Walk-ins
+                </span>
+
+            </div>
+
+        </div>
+
+        <div class="fd-chart-wrap">
+            <canvas id="weeklyTrafficChart"
+                    aria-label="Weekly comparison of walk-ins and member check-ins">
+            </canvas>
+        </div>
+
+      </section>
+
+      <section class="fd-panel fd-availability">
+        <h2>Trainer Availability</h2>
+        <div class="fd-availability-wrap">
+          <table class="fd-availability-table">
+            <thead><tr><th>TRAINER / HOURS</th><th>ASSIGNED</th><th>REMAINING</th></tr></thead>
+            <tbody>
+              @if (Model.TrainerAvailability.Count == 0)
+              {
+                <tr><td colspan="3" class="fd-not-set">No active trainers found.</td></tr>
+              }
+              @foreach (var trainer in Model.TrainerAvailability)
+              {
+                <tr>
+                  <td>
+                    <span class="fd-trainer-name">@trainer.TrainerName</span>
+                    @if (trainer.StartTime.HasValue && trainer.EndTime.HasValue)
+                    {
+                      <span class="fd-trainer-days">@trainer.AvailableDays.Replace(",", ", ")<br />@DateTime.Today.Add(trainer.StartTime.Value).ToString("h:mm tt")–@DateTime.Today.Add(trainer.EndTime.Value).ToString("h:mm tt")</span>
+                    }
+                    else { <span class="fd-not-set">Schedule not set</span> }
+                  </td>
+                  <td>@trainer.AssignedMembers / @(trainer.WeeklyMemberLimit?.ToString() ?? "—")</td>
+                  <td>
+                    @if (trainer.RemainingSlots.HasValue)
+                    {
+                      <span class="fd-slot-count @(trainer.RemainingSlots == 0 ? "full" : "")">@trainer.RemainingSlots</span>
+                    }
+                    else { <span class="fd-not-set">—</span> }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </section>
+
+    <!-- Today's Schedule -->
+    @if (TempData["SuccessMessage"] is string reminderSuccess)
+    {
+        <div class="fd-toast" id="reminderToast"><strong>Reminded</strong><div>@reminderSuccess</div></div>
+    }
+    @if (TempData["ErrorMessage"] is string reminderError)
+    {
+        <div class="fd-notice error">@reminderError</div>
+    }
+    <section class="fd-panel fd-schedule"
+             id="schedule">
+
+        <div class="fd-schedule-head">
+            <h2>
+                Today's Schedule
+            </h2>
+        </div>
+
+        <div class="fd-table-wrap">
+
+            <table class="fd-table">
+
+                <thead>
+                    <tr>
+                        <th>TRAINER</th>
+                        <th>MEMBER</th>
+                        <th>DATE</th>
+                        <th>TIME</th>
+                        <th>STATUS</th>
+                        <th></th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    @if (Model.Schedule.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="6"
+                                style="text-align: center; color: #718078;">
+                                No upcoming sessions found.
+                            </td>
+                        </tr>
+                    }
+
+                    @foreach (var item in Model.Schedule)
+                    {
+                        var statusClass = item.DisplayStatus.ToLowerInvariant();
+                        var sessionPassed = item.StartTime <= DateTime.Now;
+
+                        <tr>
+
+                            <td>
+                                @item.TrainerName
+                            </td>
+
+                            <td>
+                                @item.MemberName
+                            </td>
+
+                            <td>
+                                @item.Date.ToString("yyyy-MM-dd")
+                            </td>
+
+                            <td>
+                                @item.StartTime.ToString("h:mm tt")
+                                -
+                                @item.EndTime.ToString("h:mm tt")
+                            </td>
+
+                            <td>
+                                <span class="fd-badge @statusClass">
+                                    @item.DisplayStatus
+                                </span>
+                            </td>
+
+                            <td>
+                                <form class="fd-reminder-form" asp-action="SendSessionReminder" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="clientId" value="@item.ClientId" />
+                                    <input type="hidden" name="date" value="@item.Date.ToString("yyyy-MM-dd")" />
+                                    <button class="fd-action @((item.IsReminded || sessionPassed) ? "reminded" : "remind")"
+                                            type="submit" disabled="@(item.IsReminded || sessionPassed)"
+                                            title="@(sessionPassed ? "This training session has already started or passed." : null)">
+                                        @(sessionPassed ? "Time passed" : item.IsReminded ? "Reminded" : "Remind")
+                                    </button>
+                                </form>
+                            </td>
+
+                        </tr>
+                    }
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        <div class="fd-table-foot">
+
+            <span>
+                Showing @Model.Schedule.Count of @Model.Schedule.Count
+                (page 1 of 1)
+            </span>
+
+            <div class="fd-pager">
+
+                <button type="button"
+                        disabled>
+                    &lt;
+                </button>
+
+                <button type="button"
+                        disabled>
+                    &gt;
+                </button>
+
+            </div>
+
+        </div>
+
+    </section>
+
+</main>
+
+<script>
+    (() => {
+        const points = @Html.Raw(
+                        System.Text.Json.JsonSerializer.Serialize(Model.WeeklyTraffic)
+                        );
+
+        const canvas = document.getElementById("weeklyTrafficChart");
+        const ctx = canvas.getContext("2d");
+
+        function draw() {
+            const ratio = window.devicePixelRatio || 1;
+
+            const width = canvas.clientWidth;
+            const height = canvas.clientHeight;
+
+            canvas.width = width * ratio;
+            canvas.height = height * ratio;
+
+            ctx.setTransform(
+                ratio,
+                0,
+                0,
+                ratio,
+                0,
+                0
+            );
+
+            ctx.clearRect(
+                0,
+                0,
+                width,
+                height
+            );
+
+            const pad = {
+                l: 38,
+                r: 18,
+                t: 14,
+                b: 30
+            };
+
+            const chartWidth =
+                width - pad.l - pad.r;
+
+            const chartHeight =
+                height - pad.t - pad.b;
+
+            const highest = Math.max(
+                0,
+                ...points.map(p =>
+                    Math.max(
+                        p.MemberAttendance,
+                        p.WalkIns
+                    )
+                )
+            );
+
+            const max = Math.max(
+                10,
+                Math.ceil(highest / 5) * 5
+            );
+
+            const tickCount = max / 5;
+
+            ctx.font = "12px Arial";
+            ctx.strokeStyle = "#e2e8e4";
+            ctx.fillStyle = "#66736b";
+            ctx.lineWidth = 1;
+
+            /* Horizontal grid lines */
+            for (let i = 0; i <= tickCount; i++) {
+                const y =
+                    pad.t +
+                    (chartHeight * i / tickCount);
+
+                const value =
+                    max - (i * 5);
+
+                ctx.beginPath();
+
+                ctx.moveTo(
+                    pad.l,
+                    y
+                );
+
+                ctx.lineTo(
+                    width - pad.r,
+                    y
+                );
+
+                ctx.stroke();
+
+                ctx.fillText(
+                    value,
+                    8,
+                    y + 4
+                );
+            }
+
+            const x = i =>
+                pad.l +
+                (
+                    points.length === 1
+                        ? chartWidth / 2
+                        : chartWidth * i / (points.length - 1)
+                );
+
+            const y = value =>
+                pad.t +
+                chartHeight -
+                (value / max) * chartHeight;
+
+            /* Day labels */
+            points.forEach((point, i) => {
+                ctx.fillText(
+                    point.Day,
+                    x(i) - 10,
+                    height - 8
+                );
+            });
+
+            function line(
+                key,
+                color,
+                dashed,
+                squareMarker
+            ) {
+                ctx.save();
+
+                ctx.strokeStyle = color;
+                ctx.fillStyle = color;
+                ctx.lineWidth = 3;
+
+                ctx.setLineDash(
+                    dashed
+                        ? [8, 6]
+                        : []
+                );
+
+                ctx.beginPath();
+
+                points.forEach((point, i) => {
+                    const px = x(i);
+                    const py = y(point[key]);
+
+                    if (i) {
+                        ctx.lineTo(px, py);
+                    } else {
+                        ctx.moveTo(px, py);
+                    }
+                });
+
+                ctx.stroke();
+
+                ctx.setLineDash([]);
+
+                ctx.font = "bold 11px Arial";
+                ctx.textAlign = "center";
+
+                points.forEach((point, i) => {
+                    const px = x(i);
+                    const py = y(point[key]);
+
+                    ctx.beginPath();
+
+                    if (squareMarker) {
+                        ctx.rect(
+                            px - 4,
+                            py - 4,
+                            8,
+                            8
+                        );
+                    } else {
+                        ctx.arc(
+                            px,
+                            py,
+                            4.5,
+                            0,
+                            Math.PI * 2
+                        );
+                    }
+
+                    ctx.fill();
+
+                    ctx.fillText(
+                        point[key],
+                        px,
+                        Math.max(11, py - 10)
+                    );
+                });
+
+                ctx.restore();
+            }
+
+            line(
+                "MemberAttendance",
+                "#08752a",
+                false,
+                false
+            );
+
+            line(
+                "WalkIns",
+                "#d98218",
+                true,
+                true
+            );
+        }
+
+        draw();
+
+        window.addEventListener(
+            "resize",
+            draw
+        );
+    })();
+</script>
+<script>
+    const reminderToast = document.getElementById('reminderToast');
+    if (reminderToast) window.setTimeout(() => reminderToast.remove(), 3500);
+</script>
+```

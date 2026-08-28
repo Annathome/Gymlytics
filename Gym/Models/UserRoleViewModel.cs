@@ -8,9 +8,12 @@ namespace Gym.Models
         public string FullName { get; set; } = string.Empty;
         public string Username { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
+        public string PhoneNumber { get; set; } = string.Empty;
         public string Role { get; set; } = string.Empty;
         public string Status { get; set; } = "Active";
         public DateTime? LastLoginAt { get; set; }
+        public string? TodayAttendanceStatus { get; set; }
+        public DateTime? TodayCheckedInAt { get; set; }
 
         // ---- Computed Display Helpers ----
 
@@ -84,5 +87,27 @@ namespace Gym.Models
         }
 
         public bool IsMainAdmin => Role == "MainAdmin";
+        public bool TracksStaffAttendance => Role is "Staff" or "Trainer";
+        public string TodayAttendanceDisplay => !TracksStaffAttendance
+            ? "Not tracked"
+            : TodayAttendanceStatus switch
+            {
+                "Present" when TodayCheckedInAt.HasValue => $"Checked in {TodayCheckedInAt:hh:mm tt}",
+                "Absent" => "Absent",
+                _ => "No login today"
+            };
+    }
+
+    public class AdminResetUserPasswordViewModel
+    {
+        public int Id { get; set; }
+
+        [System.ComponentModel.DataAnnotations.Required]
+        [System.ComponentModel.DataAnnotations.StringLength(100, MinimumLength = 8)]
+        public string NewPassword { get; set; } = string.Empty;
+
+        [System.ComponentModel.DataAnnotations.Required]
+        [System.ComponentModel.DataAnnotations.Compare(nameof(NewPassword), ErrorMessage = "The passwords do not match.")]
+        public string ConfirmPassword { get; set; } = string.Empty;
     }
 }

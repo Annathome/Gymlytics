@@ -1,0 +1,88 @@
+:root {
+    --yokoks-green: rgb(14, 197, 45);
+    --yokoks-deep-green: rgb(8, 75, 2);
+    --yokoks-black: #111;
+    --yokoks-surface: #fff;
+    --yokoks-page: rgb(217, 217, 217);
+    --yokoks-border: #cbd4cc;
+    --yokoks-muted: #5e675f;
+    --yokoks-radius: 12px;
+    --yokoks-font: "Inria Serif", serif;
+}
+
+html, body, button, input, select, textarea {
+    font-family: var(--yokoks-font);
+}
+
+body {
+    color: var(--yokoks-black);
+}
+
+main:not(.trainer-schedule),
+.page-content,
+.dashboard-content,
+.fdashboard,
+.member-page,
+.walkin-page,
+.payment-page,
+.equipment-page,
+.attendance-page {
+    font-family: var(--yokoks-font);
+}
+
+button,
+.btn,
+[class*="btn-"] {
+    font-family: var(--yokoks-font);
+}
+
+button:focus-visible,
+.btn:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+    outline: 3px solid rgba(14, 197, 45, .28);
+    outline-offset: 2px;
+}
+
+input:not([type="checkbox"]):not([type="radio"]),
+select,
+textarea {
+    border-color: var(--yokoks-border);
+}
+
+input:not([type="checkbox"]):not([type="radio"]):focus,
+select:focus,
+textarea:focus {
+    border-color: var(--yokoks-green);
+    box-shadow: 0 0 0 3px rgba(14, 197, 45, .12);
+}
+
+table thead,
+.table-header {
+    font-family: var(--yokoks-font);
+}
+
+.modal-content,
+.dialog-card,
+.form-card,
+.content-card,
+.summary-card,
+.stat-card {
+    border-radius: var(--yokoks-radius);
+}
+
+.nav-header,
+.navbar,
+.admin-logout {
+    font-family: var(--yokoks-font);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        scroll-behavior: auto !important;
+        transition-duration: .01ms !important;
+        animation-duration: .01ms !important;
+    }
+}

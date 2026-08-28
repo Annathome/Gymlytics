@@ -3,24 +3,20 @@
     ViewData["Title"] = "User Activity";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
     var user = ViewBag.User as Gym.Models.UserRoleViewModel;
-
-    // Automatically retrieves the userId parameter directly from the current request URL
-    var userId = Context.Request.Query["userId"].ToString();
+    // Retrieves the "id" route/query parameter for building pagination links
+    var userId = Context.Request.Query["id"].ToString();
 }
-
 <div class="container py-0 my-0" style="min-width: 50%;">
     <!-- Navigation Link -->
-    <a asp-controller="AdminDashboard" asp-action="UserRole" class="text-decoration-none text-secondary d-inline-flex align-items-center gap-2 mb-3 fw-bold">
+    <a asp-controller="Admin" asp-action="UserRoles" class="text-decoration-none text-secondary d-inline-flex align-items-center gap-2 mb-3 fw-bold">
         <i class="bi bi-arrow-left fs-5"></i>
         <span class="fs-6">Back to User roles</span>
     </a>
-
     <!-- Header Section -->
     <div class="mb-4">
         <h1 class="h4 fw-bold mb-1">@(user?.DisplayName ?? "User") Activity</h1>
         <p class="text-muted mb-0 fs-6">@(user?.Email)</p>
     </div>
-
     <!-- Activity Log Card -->
     <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-3">
         @if (Model?.Items == null || !Model.Items.Any())
@@ -51,23 +47,22 @@
             </ul>
         }
     </div>
-
     <!-- Pagination -->
     @if (Model?.Items != null && Model.Items.Any())
     {
         <div class="d-flex justify-content-between align-items-center text-muted small mt-3">
             <span>Page @Model.Page of @Model.TotalPages &middot; @Model.TotalCount records</span>
             <div class="d-flex gap-2">
-                <a asp-controller="AdminDashboard"
+                <a asp-controller="Admin"
                    asp-action="UserActivity"
-                   asp-route-userId="@userId"
+                   asp-route-id="@userId"
                    asp-route-page="@(Model.Page - 1)"
                    class="btn btn-outline-secondary btn-sm rounded-3 @(Model.HasPrevious ? "" : "disabled")">
                     Previous
                 </a>
-                <a asp-controller="AdminDashboard"
+                <a asp-controller="Admin"
                    asp-action="UserActivity"
-                   asp-route-userId="@userId"
+                   asp-route-id="@userId"
                    asp-route-page="@(Model.Page + 1)"
                    class="btn btn-outline-secondary btn-sm rounded-3 @(Model.HasNext ? "" : "disabled")">
                     Next

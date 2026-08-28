@@ -63,6 +63,54 @@
             white-space: nowrap;
             text-decoration: none;
             transition: background 0.15s ease;
+            cursor: pointer;
+        }
+
+        .registry-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 7000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            background: rgba(0, 0, 0, .72);
+        }
+
+        .registry-overlay.open { display: flex; }
+
+        .registry-dialog {
+            position: relative;
+            width: min(900px, 96vw);
+            height: min(860px, 92vh);
+            overflow: hidden;
+            border: 1px solid #d1d5db;
+            border-radius: 10px;
+            background: #fff;
+            box-shadow: 0 24px 70px rgba(0, 0, 0, .35);
+        }
+
+        .registry-frame {
+            width: 100%;
+            height: 100%;
+            border: 0;
+            background: #fff;
+        }
+
+        .registry-close {
+            position: absolute;
+            top: 12px;
+            right: 14px;
+            z-index: 2;
+            width: 38px;
+            height: 38px;
+            border: 0;
+            border-radius: 5px;
+            background: #111;
+            color: #fff;
+            font-size: 23px;
+            line-height: 1;
+            cursor: pointer;
         }
 
             .btn-invite:hover {
@@ -347,6 +395,29 @@
             pointer-events: none;
             opacity: 0.4;
         }
+
+        .user-name-button { appearance:none; border:0 !important; outline:0 !important; box-shadow:none !important; background:transparent; padding:0; color:#1a1a1a; font:inherit; cursor:pointer; text-align:left; display:flex; align-items:center; gap:12px; }
+        .user-name-button:hover,.user-name-button:focus { color:rgb(8,61,2); border:0; outline:0; box-shadow:none; }
+        .user-name-text { display:flex; flex-direction:column; }
+        .details-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px 16px; margin:18px 0; }
+        .details-field { min-width:0; }
+        .details-field.full { grid-column:1/-1; }
+        .details-field label { display:block; color:#6b7280; font-size:.78rem; margin-bottom:4px; }
+        .details-value,.password-input { width:100%; min-height:40px; border:1px solid #d1d5db; border-radius:7px; padding:9px 10px; background:#f9fafb; color:#1f2937; }
+        .password-input { background:#fff; }
+        .password-note { color:#6b7280; font-size:.78rem; margin-top:5px; }
+        @@media (max-width:600px) { .details-grid { grid-template-columns:1fr; } .details-field.full { grid-column:auto; } }
+
+        .floating-overlay { position:fixed; inset:0; background:rgba(0,0,0,.5); display:flex; align-items:center; justify-content:center; z-index:2000; }
+        .floating-card { width:min(460px,calc(100vw - 32px)); background:#fffef8; border-radius:14px; padding:24px; box-shadow:0 20px 50px rgba(0,0,0,.2); font-family:"Inria Serif",serif; }
+        .floating-card h3 { margin:0 0 8px; font-size:1.2rem; font-weight:700; }
+        .floating-card p { color:#4b5563; margin:0 0 20px; }
+        .floating-warning { color:#b45309; background:#fffbeb; border:1px solid #fde68a; border-radius:8px; padding:10px 12px; margin-bottom:20px; font-size:.88rem; }
+        .floating-actions { display:flex; justify-content:flex-end; gap:10px; }
+        .floating-cancel,.floating-confirm { border-radius:8px; padding:9px 15px; font-family:"Inria Serif",serif; font-weight:700; cursor:pointer; }
+        .floating-cancel { background:#eef7ec; border:1px solid #8aac80; color:rgb(8,61,2); }
+        .floating-confirm { background:rgb(8,61,2); border:1px solid rgb(8,61,2); color:#d8c38a; }
+        .floating-success { background:rgb(8,61,2); border-color:rgb(8,61,2); }
     </style>
 </head>
 <body>
@@ -356,61 +427,15 @@
                 <h1>User roles</h1>
                 <p>Login authentication and access control</p>
             </div>
-            <a asp-controller="Account" asp-action="RegisterStaff" class="btn-invite">
-                + Invite user
-            </a>
+            <div style="display:flex;gap:10px;align-items:center;">
+                <a asp-controller="Admin" asp-action="UserAttendance" class="btn-invite">
+                    <i class="bi bi-clock-history"></i> Attendance history
+                </a>
+                <button type="button" class="btn-invite" onclick="openStaffRegistry()">
+                    + Invite user
+                </button>
+            </div>
         </div>
-
-        @if (TempData["SuccessMessage"] != null)
-        {
-            <div class="alert-banner alert-success">@TempData["SuccessMessage"]</div>
-        }
-        @if (TempData["ErrorMessage"] != null)
-        {
-            <div class="alert-banner alert-error">@TempData["ErrorMessage"]</div>
-        }
-
-        <!-- Inline Suspend Confirmation Banner -->
-        @if (ViewBag.ConfirmSuspendId != null)
-        {
-            var targetUser = Model?.Items.FirstOrDefault(u => u.Id == (int)ViewBag.ConfirmSuspendId);
-            if (targetUser != null)
-            {
-                <div class="alert-warning-banner">
-                    <div>
-                        <strong>Suspend @targetUser.DisplayName?</strong> They will no longer be able to log in.
-                    </div>
-                    <div class="alert-warning-actions">
-                        <form asp-controller="Admin" asp-action="SuspendUser" asp-route-id="@targetUser.Id" method="post" class="d-inline">
-                            @Html.AntiForgeryToken()
-                            <button type="submit" class="btn-confirm-danger">Yes, Suspend</button>
-                        </form>
-                        <a asp-action="UserRoles" class="btn-confirm-cancel">Cancel</a>
-                    </div>
-                </div>
-            }
-        }
-
-        <!-- Inline Delete Confirmation Banner -->
-        @if (ViewBag.ConfirmDeleteId != null)
-        {
-            var targetUser = Model?.Items.FirstOrDefault(u => u.Id == (int)ViewBag.ConfirmDeleteId);
-            if (targetUser != null)
-            {
-                <div class="alert-warning-banner">
-                    <div>
-                        <strong>Delete @targetUser.DisplayName permanently?</strong> This action cannot be undone.
-                    </div>
-                    <div class="alert-warning-actions">
-                        <form asp-controller="Admin" asp-action="DeleteUser" asp-route-id="@targetUser.Id" method="post" class="d-inline">
-                            @Html.AntiForgeryToken()
-                            <button type="submit" class="btn-confirm-danger">Yes, Delete</button>
-                        </form>
-                        <a asp-action="UserRoles" class="btn-confirm-cancel">Cancel</a>
-                    </div>
-                </div>
-            }
-        }
 
         <div class="card">
             <table>
@@ -420,6 +445,7 @@
                         <th>Role</th>
                         <th>Status</th>
                         <th>Access</th>
+                        <th>Today's attendance</th>
                         <th>Last login</th>
                         <th></th>
                     </tr>
@@ -427,7 +453,7 @@
                 <tbody>
                     @if (Model == null || Model.Items.Count == 0)
                     {
-                        <tr><td colspan="6" class="text-center text-muted py-4">No users found.</td></tr>
+                        <tr><td colspan="7" class="text-center text-muted py-4">No users found.</td></tr>
                     }
                     else
                     {
@@ -436,11 +462,21 @@
                             <tr>
                                 <td>
                                     <div class="user-cell">
-                                        <div class="avatar">@user.Initials</div>
-                                        <div>
-                                            <div>@user.DisplayName</div>
-                                            <div style="font-size:0.78rem;color:#9ca3af;">@user.Email</div>
-                                        </div>
+                                        <button type="button" class="user-name-button"
+                                                    data-id="@user.Id"
+                                                    data-name="@user.DisplayName"
+                                                    data-username="@user.Username"
+                                                    data-email="@user.Email"
+                                                    data-phone="@user.PhoneNumber"
+                                                    data-role="@user.RoleLabel"
+                                                    data-status="@user.Status"
+                                                    onclick="openUserDetails(this)">
+                                            <span class="avatar">@user.Initials</span>
+                                            <span class="user-name-text">
+                                                <span>@user.DisplayName</span>
+                                                <span style="font-size:0.78rem;color:#9ca3af;">@user.Email</span>
+                                            </span>
+                                        </button>
                                     </div>
                                 </td>
                                 <td>
@@ -450,6 +486,7 @@
                                     <span class="badge-status @user.StatusBadgeClass">@user.Status</span>
                                 </td>
                                 <td class="access-text">@user.Access</td>
+                                <td class="last-login">@user.TodayAttendanceDisplay</td>
                                 <td class="last-login">@user.LastLoginDisplay</td>
                                 <td class="actions-cell">
                                     <button type="button" class="menu-dots-btn" onclick="toggleMenu('@user.Id')">&#8942;</button>
@@ -458,23 +495,41 @@
                                             View activity
                                         </a>
 
+                                        @if (user.TracksStaffAttendance && user.Status == "Active" && user.TodayAttendanceStatus != "Absent")
+                                        {
+                                            <button type="button" class="action-menu-item danger"
+                                                    data-name="@user.DisplayName"
+                                                    data-action-name="Mark absent"
+                                                    data-message="Mark this staff member absent for today. Any later login using this account will not change the absent status."
+                                                    data-url="@Url.Action("MarkStaffAbsent", "Admin", new { id = user.Id, page = Model.Page })"
+                                                    onclick="openUserActionModal(this)">Mark absent</button>
+                                        }
+
                                         @if (user.Status == "Active")
                                         {
-                                            <a class="action-menu-item" asp-action="UserRoles" asp-route-confirmSuspendId="@user.Id">
-                                                Suspend account
-                                            </a>
+                                            <button type="button" class="action-menu-item"
+                                                    data-name="@user.DisplayName"
+                                                    data-action-name="Suspend account"
+                                                    data-message="This user will no longer be able to log in until reactivated."
+                                                    data-url="@Url.Action("SuspendUser", "Admin", new { id = user.Id })"
+                                                    onclick="openUserActionModal(this)">Suspend account</button>
                                         }
                                         @if (user.Status == "Suspended")
                                         {
-                                            <form asp-controller="AdminDashboard" asp-action="ReactivateUser" asp-route-id="@user.Id" method="post">
-                                                @Html.AntiForgeryToken()
-                                                <button type="submit" class="action-menu-item">Reactivate account</button>
-                                            </form>
+                                            <button type="button" class="action-menu-item"
+                                                    data-name="@user.DisplayName"
+                                                    data-action-name="Reactivate account"
+                                                    data-message="This user will regain access to their account."
+                                                    data-url="@Url.Action("ReactivateUser", "Admin", new { id = user.Id })"
+                                                    onclick="openUserActionModal(this)">Reactivate account</button>
                                         }
 
-                                        <a class="action-menu-item danger" asp-action="UserRoles" asp-route-confirmDeleteId="@user.Id">
-                                            Delete account
-                                        </a>
+                                        <button type="button" class="action-menu-item danger"
+                                                data-name="@user.DisplayName"
+                                                data-action-name="Delete account"
+                                                data-message="This action permanently removes the account and cannot be undone."
+                                                data-url="@Url.Action("DeleteUser", "Admin", new { id = user.Id })"
+                                                onclick="openUserActionModal(this)">Delete account</button>
                                     </div>
                                 </td>
                             </tr>
@@ -512,8 +567,125 @@
         </div>
     </div>
 
+    <div id="userActionModal" class="floating-overlay" style="display:none;">
+        <div class="floating-card" role="dialog" aria-modal="true">
+            <h3 id="userActionTitle">Confirm action</h3>
+            <p id="userActionUser"></p>
+            <div class="floating-warning" id="userActionMessage"></div>
+            <div class="floating-actions">
+                <button type="button" class="floating-cancel" onclick="closeUserActionModal()">Cancel</button>
+                <form id="userActionForm" method="post">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="floating-confirm" id="userActionConfirm">OK</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="userDetailsModal" class="floating-overlay" style="display:none;">
+        <div class="floating-card" role="dialog" aria-modal="true" aria-labelledby="userDetailsTitle">
+            <h3 id="userDetailsTitle">User information</h3>
+            <form asp-controller="Admin" asp-action="ResetUserPassword" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="Id" id="detailsUserId" />
+                <input type="hidden" name="page" value="@Model.Page" />
+                <div class="details-grid">
+                    <div class="details-field full"><label>Full name</label><div class="details-value" id="detailsName"></div></div>
+                    <div class="details-field"><label>Username</label><div class="details-value" id="detailsUsername"></div></div>
+                    <div class="details-field"><label>Role</label><div class="details-value" id="detailsRole"></div></div>
+                    <div class="details-field full"><label>Email</label><div class="details-value" id="detailsEmail"></div></div>
+                    <div class="details-field"><label>Contact</label><div class="details-value" id="detailsPhone"></div></div>
+                    <div class="details-field"><label>Status</label><div class="details-value" id="detailsStatus"></div></div>
+                    <div class="details-field"><label for="newPassword">New password</label><input class="password-input" id="newPassword" name="NewPassword" type="password" minlength="8" required autocomplete="new-password" /></div>
+                    <div class="details-field"><label for="confirmPassword">Confirm password</label><input class="password-input" id="confirmPassword" name="ConfirmPassword" type="password" minlength="8" required autocomplete="new-password" /></div>
+                    <div class="details-field full password-note">Leave the account details unchanged; submitting this form replaces only the login password.</div>
+                </div>
+                <div class="floating-actions">
+                    <button type="button" class="floating-cancel" onclick="closeUserDetails()">Cancel</button>
+                    <button type="submit" class="floating-confirm">Update password</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] is string successMessage)
+    {
+        <div id="userResultModal" class="floating-overlay">
+            <div class="floating-card" role="alertdialog" aria-modal="true">
+                <h3 style="color:#166534;">Process successful</h3>
+                <p>@successMessage</p>
+                <div class="floating-actions"><button type="button" class="floating-confirm floating-success" onclick="closeUserResultModal()">OK</button></div>
+            </div>
+        </div>
+    }
+    else if (TempData["ErrorMessage"] is string errorMessage)
+    {
+        <div id="userResultModal" class="floating-overlay">
+            <div class="floating-card" role="alertdialog" aria-modal="true">
+                <h3 style="color:#b91c1c;">Action unsuccessful</h3>
+                <p>@errorMessage</p>
+                <div class="floating-actions"><button type="button" class="floating-confirm" onclick="closeUserResultModal()">Close</button></div>
+            </div>
+        </div>
+    }
+
+    <div class="registry-overlay" id="staffRegistryModal" role="dialog" aria-modal="true" aria-label="Register new user">
+        <div class="registry-dialog">
+            <button type="button" class="registry-close" onclick="closeStaffRegistry()" aria-label="Close registration">×</button>
+            <iframe class="registry-frame" id="staffRegistryFrame" title="Staff registration form" data-src="@Url.Action("RegisterStaff", "Account")"></iframe>
+        </div>
+    </div>
+
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        function openStaffRegistry() {
+            const modal = document.getElementById('staffRegistryModal');
+            const frame = document.getElementById('staffRegistryFrame');
+            if (!frame.getAttribute('src')) frame.src = frame.dataset.src;
+            modal.classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeStaffRegistry() {
+            document.getElementById('staffRegistryModal').classList.remove('open');
+            document.body.style.overflow = '';
+        }
+
+        function openUserActionModal(button) {
+            document.getElementById('userActionTitle').textContent = button.dataset.actionName + '?';
+            document.getElementById('userActionUser').textContent = button.dataset.name;
+            document.getElementById('userActionMessage').textContent = button.dataset.message;
+            document.getElementById('userActionForm').action = button.dataset.url;
+            document.getElementById('userActionConfirm').textContent = 'OK';
+            document.getElementById('userActionModal').style.display = 'flex';
+        }
+
+        function openUserDetails(button) {
+            document.getElementById('detailsUserId').value = button.dataset.id;
+            document.getElementById('detailsName').textContent = button.dataset.name || '—';
+            document.getElementById('detailsUsername').textContent = button.dataset.username || '—';
+            document.getElementById('detailsEmail').textContent = button.dataset.email || '—';
+            document.getElementById('detailsPhone').textContent = button.dataset.phone || '—';
+            document.getElementById('detailsRole').textContent = button.dataset.role || '—';
+            document.getElementById('detailsStatus').textContent = button.dataset.status || '—';
+            document.getElementById('newPassword').value = '';
+            document.getElementById('confirmPassword').value = '';
+            document.getElementById('userDetailsModal').style.display = 'flex';
+        }
+
+        function closeUserDetails() {
+            document.getElementById('userDetailsModal').style.display = 'none';
+        }
+
+        function closeUserActionModal() {
+            document.getElementById('userActionModal').style.display = 'none';
+        }
+
+        function closeUserResultModal() {
+            const modal = document.getElementById('userResultModal');
+            if (modal) modal.style.display = 'none';
+        }
+
         function toggleMenu(id) {
             var menu = document.getElementById('menu-' + id);
             var wasOpen = menu.classList.contains('open');
@@ -525,6 +697,14 @@
             if (!e.target.closest('.actions-cell')) {
                 document.querySelectorAll('.action-menu.open').forEach(function (m) { m.classList.remove('open'); });
             }
+        });
+
+        document.getElementById('staffRegistryModal').addEventListener('click', function (e) {
+            if (e.target === this) closeStaffRegistry();
+        });
+
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') closeStaffRegistry();
         });
     </script>
 </body>

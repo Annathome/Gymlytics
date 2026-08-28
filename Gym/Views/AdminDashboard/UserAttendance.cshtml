@@ -1,0 +1,48 @@
+@model Gym.Models.PagedResult<Gym.Models.UserAttendanceItem>
+@{
+    ViewData["Title"] = "User Attendance History";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<style>
+    .ua-page{max-width:1200px;margin:0 auto;padding:24px;color:#1f2937}.ua-head{display:flex;justify-content:space-between;align-items:end;margin-bottom:20px}.ua-head h1{font-size:30px;margin:0}.ua-head p{margin:5px 0 0;color:#6b7280}.ua-back{color:#14532d;text-decoration:none;font-weight:700}.ua-card{background:#fff;border:1px solid #e5e7eb;border-radius:10px;overflow:hidden}.ua-table{width:100%;border-collapse:collapse}.ua-table th,.ua-table td{padding:15px 18px;text-align:left;border-bottom:1px solid #e5e7eb}.ua-table th{background:#f3f4f6;font-size:13px;text-transform:uppercase;color:#6b7280}.ua-name{font-weight:700}.ua-role{color:#6b7280;font-size:13px}.ua-badge{display:inline-block;border-radius:999px;padding:5px 11px;font-size:12px;font-weight:700}.ua-present{background:#dcfce7;color:#15803d}.ua-absent{background:#fee2e2;color:#b91c1c}.ua-empty{text-align:center!important;color:#6b7280;padding:36px!important}.ua-foot{display:flex;justify-content:space-between;align-items:center;padding:15px 18px}.ua-pages{display:flex;gap:8px}.ua-page-btn{border:1px solid #d1d5db;border-radius:6px;padding:8px 14px;color:#111827;text-decoration:none}.ua-page-btn.disabled{pointer-events:none;opacity:.4}
+</style>
+
+<main class="ua-page">
+    <header class="ua-head">
+        <div><h1>User Attendance History</h1><p>Daily login and absence records for Staff and Trainers.</p></div>
+        <a class="ua-back" asp-controller="Admin" asp-action="UserRoles">Back to User Roles</a>
+    </header>
+    <section class="ua-card">
+        <table class="ua-table">
+            <thead><tr><th>User</th><th>Role</th><th>Date</th><th>Status</th><th>Check-in</th><th>Absent recorded</th></tr></thead>
+            <tbody>
+            @if (Model.Items.Count == 0)
+            {
+                <tr><td colspan="6" class="ua-empty">No user attendance records yet.</td></tr>
+            }
+            else
+            {
+                @foreach (var item in Model.Items)
+                {
+                    <tr>
+                        <td><span class="ua-name">@item.FullName</span></td>
+                        <td><span class="ua-role">@item.Role</span></td>
+                        <td>@item.AttendanceDate.ToString("MMM d, yyyy")</td>
+                        <td><span class="ua-badge @(item.AttendanceStatus == "Absent" ? "ua-absent" : "ua-present")">@item.AttendanceStatus</span></td>
+                        <td>@(item.CheckedInAt?.ToString("hh:mm tt") ?? "—")</td>
+                        <td>@(item.MarkedAbsentAt?.ToString("hh:mm tt") ?? "—")</td>
+                    </tr>
+                }
+            }
+            </tbody>
+        </table>
+        <footer class="ua-foot">
+            <span>Page @Model.Page of @Model.TotalPages · @Model.TotalCount record(s)</span>
+            <nav class="ua-pages">
+                <a class="ua-page-btn @(!Model.HasPrevious ? "disabled" : "")" asp-action="UserAttendance" asp-route-page="@(Model.Page - 1)">Previous</a>
+                <a class="ua-page-btn @(!Model.HasNext ? "disabled" : "")" asp-action="UserAttendance" asp-route-page="@(Model.Page + 1)">Next</a>
+            </nav>
+        </footer>
+    </section>
+</main>

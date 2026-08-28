@@ -1,0 +1,77 @@
+@model Gym.Models.FrontDeskEquipmentViewModel
+@{
+    Layout = "~/Views/Shared/_TrainerLayout.cshtml";
+    ViewData["Title"] = "Equipment";
+}
+
+<style>
+    .trainer-equipment { width: min(1100px, calc(100vw - 340px)); margin: 30px auto; color: #102630; font-size: 15px; }
+    .te-header { display: flex; align-items: center; gap: 16px; margin-bottom: 22px; }
+    .te-header h1 { margin: 0 auto 0 0; font-size: 28px; }
+    .te-search { display: flex; gap: 8px; }
+    .te-search input { width: 280px; height: 40px; padding: 0 13px; border: 1px solid #c8d4cd; border-radius: 6px; }
+    .te-search button { height: 40px; padding: 0 18px; border: 0; border-radius: 6px; background: #084b02; color: #fff; font-weight: 700; }
+    .te-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-bottom: 22px; }
+    .te-stat { padding: 18px; border-left: 4px solid #0ec52d; border-radius: 8px; background: #fff; box-shadow: 0 5px 15px rgba(30,54,42,.09); }
+    .te-stat.maintenance { border-color: #d78a00; }
+    .te-stat.out { border-color: #c62828; }
+    .te-stat span { color: #59645e; font-size: 13px; font-weight: 700; }
+    .te-stat strong { display: block; margin-top: 12px; font-size: 30px; }
+    .te-card { overflow: hidden; border: 1px solid #dbe4df; border-radius: 9px; background: #fff; }
+    .te-card h2 { margin: 0; padding: 17px 18px; font-size: 21px; }
+    .te-table { width: 100%; border-collapse: collapse; }
+    .te-table th { padding: 13px 18px; background: #394c55; color: #fff; text-align: left; font-size: 12px; }
+    .te-table td { padding: 15px 18px; border-top: 1px solid #e6ebe8; }
+    .te-name strong, .te-name small { display: block; }
+    .te-name small { color: #6b766f; }
+    .te-condition { display: inline-block; padding: 5px 10px; border-radius: 999px; background: #e8efe9; font-size: 11px; font-weight: 700; }
+    .te-condition.good { background: #caf3ce; color: #176b2c; }
+    .te-condition.needs-maintenance { background: #fff0c9; color: #9b5a00; }
+    .te-condition.out-of-order { background: #f8d5d5; color: #a71920; }
+    .te-footer { display: flex; align-items: center; min-height: 66px; padding: 14px 18px; background: #e8f6fc; }
+    .te-pager { display: flex; gap: 8px; margin-left: auto; }
+    .te-pager a { width: 46px; height: 36px; display: grid; place-items: center; border: 1px solid #d5e1e5; border-radius: 6px; color: #52625a; text-decoration: none; }
+    .te-pager a.disabled { pointer-events: none; opacity: .45; }
+    @@media (max-width: 800px) { .trainer-equipment { width: calc(100vw - 38px); } .te-header { align-items: stretch; flex-direction: column; } .te-search input { width: 100%; } .te-stats { grid-template-columns: 1fr; } .te-card { overflow-x: auto; } .te-table { min-width: 720px; } }
+</style>
+
+<main class="trainer-equipment">
+    <header class="te-header">
+        <h1>Equipment</h1>
+        <form class="te-search" method="get" asp-action="Equipment">
+            <input name="searchTerm" value="@Model.SearchTerm" placeholder="Search equipment..." />
+            <button type="submit">Search</button>
+        </form>
+    </header>
+    <section class="te-stats">
+        <div class="te-stat"><span>TOTAL ASSETS</span><strong>@Model.TotalAssets</strong></div>
+        <div class="te-stat maintenance"><span>IN MAINTENANCE</span><strong>@Model.InMaintenance</strong></div>
+        <div class="te-stat out"><span>OUT OF ORDER</span><strong>@Model.OutOfOrder</strong></div>
+    </section>
+    <section class="te-card">
+        <h2>Equipment List</h2>
+        <table class="te-table">
+            <thead><tr><th>ASSET NAME</th><th>CATEGORY</th><th>QUANTITY</th><th>CONDITION</th><th>LAST MAINTENANCE</th></tr></thead>
+            <tbody>
+                @if (Model.Items.Count == 0) { <tr><td colspan="5" style="text-align:center">No equipment found.</td></tr> }
+                @foreach (var item in Model.Items)
+                {
+                    var conditionClass = item.Status.ToLowerInvariant().Replace(' ', '-');
+                    <tr>
+                        <td class="te-name"><strong>@item.EquipmentName</strong><small>ID: EQ-@item.EquipmentId.ToString("D4")</small></td>
+                        <td>@item.Category</td><td>@item.Quantity</td>
+                        <td><span class="te-condition @conditionClass">@item.Status</span></td>
+                        <td>@(item.LastMaintenanceDate?.ToString("MMM d, yyyy") ?? "—")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <footer class="te-footer">
+            <span>Showing @Model.Items.Count of @Model.TotalCount assets</span>
+            <nav class="te-pager">
+                <a asp-action="Equipment" asp-route-searchTerm="@Model.SearchTerm" asp-route-page="@(Model.Page - 1)" class="@(Model.Page <= 1 ? "disabled" : "")">&lt;</a>
+                <a asp-action="Equipment" asp-route-searchTerm="@Model.SearchTerm" asp-route-page="@(Model.Page + 1)" class="@(Model.Page >= Model.TotalPages ? "disabled" : "")">&gt;</a>
+            </nav>
+        </footer>
+    </section>
+</main>
