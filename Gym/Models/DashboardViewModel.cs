@@ -16,6 +16,7 @@ namespace Gym.Models
         public int TodayMemberAttendance { get; set; }
         public int TodayWalkIns { get; set; }
         public int PendingWeeklyAttendanceReminders { get; set; }
+        public int UnreadNotificationsCount { get; set; }
         public List<AdminEquipmentStatusItem> EquipmentStatus { get; set; } = new();
 
         public List<WeeklyAttendanceData> WeeklyAttendance { get; set; } = new List<WeeklyAttendanceData>();
@@ -68,6 +69,7 @@ namespace Gym.Models
         public int ExpiringSoonMemberships { get; set; }
         public int WeeklyWalkIns { get; set; }
         public int EquipmentNeedingMaintenance { get; set; }
+        public int UnreadNotificationsCount { get; set; }
         public List<FrontDeskScheduleItem> Schedule { get; set; } = new();
         public List<FrontDeskWeeklyTrafficPoint> WeeklyTraffic { get; set; } = new();
         public List<FrontDeskTrainerAvailabilityItem> TrainerAvailability { get; set; } = new();

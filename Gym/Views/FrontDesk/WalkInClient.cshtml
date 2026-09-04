@@ -1,7 +1,12 @@
 @model List<Gym.Models.WalkInClientListItem>
 
 @{
-    Layout = "~/Views/Shared/_FrontDeskLayout.cshtml";
+    var isAdmin = string.Equals(ViewContext.RouteData.Values["controller"]?.ToString(), "Admin", StringComparison.OrdinalIgnoreCase);
+    var walkInController = isAdmin ? "Admin" : "FrontDesk";
+    var currentPage = ViewBag.Page is int pageNumber ? pageNumber : 1;
+    var totalPages = ViewBag.TotalPages is int pageCount ? pageCount : 1;
+    var totalCount = ViewBag.TotalCount is int itemCount ? itemCount : Model.Count;
+    Layout = isAdmin ? "~/Views/Shared/_AdminLayout.cshtml" : "~/Views/Shared/_FrontDeskLayout.cshtml";
     ViewData["Title"] = "Walk-in Clients";
 }
 
@@ -26,8 +31,8 @@
         margin-bottom: 18px;
     }
 
-        .wi-head h1 {
-            font-size: 24px;
+        .wi-head h2 {
+            font-size: 15px;
             margin: 0 0 5px;
         }
 
@@ -53,6 +58,12 @@
         border-radius: 8px;
         background: #fff;
     }
+
+    .wi-footer { display:flex; align-items:center; justify-content:space-between; min-height:80px; padding:14px 20px; background:#5E5D63; box-sizing:border-box; }
+    .wi-footer > span { color:#aab3ac; font-size:15px; }
+    .wi-pages { display:flex; gap:12px; }
+    .wi-page-button { min-width:102px; height:50px; display:grid; place-items:center; padding:0 18px; border:1px solid #74777a; border-radius:5px; background:transparent; color:#fff; text-decoration:none; font-size:10px; font-weight:700; text-transform:uppercase; box-sizing:border-box; }
+    .wi-page-button.disabled { opacity:.4; pointer-events:none; }
 
     .wi-table {
         width: 100%;
@@ -84,19 +95,22 @@
     .wi-visits { display: block; margin-top: 4px; color: #738078; font-size: 12px; }
     .wi-modal-backdrop { display:none; position:fixed; inset:0; z-index:1200; align-items:center; justify-content:center; padding:20px; background:rgba(7,25,15,.58); }
     .wi-modal-backdrop.show { display:flex; }
-    .wi-modal { width:min(430px,100%); padding:24px; border-radius:10px; background:#fff; box-shadow:0 18px 55px rgba(0,0,0,.25); }
+    .wi-modal { width:min(430px,100%); padding:24px; border:1px solid #737278; border-radius:10px; background:#5e5d63; color:#fff; box-shadow:0 18px 55px rgba(0,0,0,.25); }
     .wi-register-modal { width:min(720px,100%); max-height:calc(100vh - 40px); overflow-y:auto; }
     .wi-form-grid { display:grid; grid-template-columns:1fr 1fr; gap:15px; }
     .wi-form-group { margin-bottom:15px; }
     .wi-form-group.full { grid-column:1 / -1; }
     .wi-form-group label { display:block; margin-bottom:6px; font-size:12px; font-weight:700; text-transform:uppercase; }
-    .wi-form-group input, .wi-form-group select { width:100%; height:44px; padding:0 12px; border:1px solid #cad6d0; border-radius:5px; box-sizing:border-box; }
+    .wi-form-group input, .wi-form-group select { width:100%; height:44px; padding:0 12px; border:1px solid #d7ddd9; border-radius:5px; background:transparent; color:#fff; box-sizing:border-box; }
+    .wi-form-group select option { background:#5e5d63; color:#fff; }
+    .wi-form-group select option:hover,
+    .wi-form-group select option:checked { background:#5e5d63; color:#a8df32; }
     .wi-modal h2 { margin:0 0 7px; font-size:21px; }
-    .wi-modal p { margin:0 0 20px; color:#65726b; }
+    .wi-modal p { margin:0 0 20px; color:#fff; }
     .wi-modal label { display:block; margin-bottom:7px; font-weight:700; }
-    .wi-modal input { width:100%; height:44px; padding:0 12px; border:1px solid #cad6d0; border-radius:6px; box-sizing:border-box; font-size:16px; }
+    .wi-modal input { width:100%; height:44px; padding:0 12px; border:1px solid #d7ddd9; border-radius:6px; background:transparent; color:#fff; box-sizing:border-box; font-size:16px; }
     .wi-modal-actions { display:flex; justify-content:flex-end; gap:10px; margin-top:22px; }
-    .wi-cancel { padding:10px 17px; border:1px solid #aebbb3; border-radius:6px; background:#fff; cursor:pointer; }
+    .wi-cancel { padding:10px 17px; border:1px solid #d7ddd9; border-radius:6px; background:transparent; color:#fff; cursor:pointer; }
 
     .wi-success {
         margin-bottom: 16px;
@@ -184,14 +198,14 @@
 
     <header class="wi-head">
         <div>
-            <h1>Walk-in Client Registration</h1>
+            <h1 style="color:#fff !important;">Walk-in Client Registration</h1>
 
             <p>
                 Quickly register a new visitor and grant temporary facility access.
             </p>
         </div>
 
-        <button type="button" class="wi-add" id="openWalkInRegistration">
+        <button type="button" class="wi-add" id="openWalkInRegistration" style="font-size:15px !important;">
             ＋ Register Walk-in
         </button>
     </header>
@@ -210,21 +224,21 @@
         </div>
     }
 
-    <h2 style="font-size: 18px; margin: 0 0 14px;">
-        Recent Walk-in Registrations
-    </h2>
-
     <form class="wi-search" method="get" asp-action="WalkInClient">
         <input name="searchTerm"
                value="@ViewBag.SearchTerm"
                placeholder="Search by name, contact, email, or visit reason..." />
 
-        <button type="submit">
+        <button type="submit" class="walkin-search-button">
             Search
         </button>
     </form>
 
     <section class="wi-card">
+
+        <h2 style="font-size: 18px; margin: 0 0 14px;">
+            Recent Walk-in Registrations
+        </h2>
         <table class="wi-table">
             <thead>
                 <tr>
@@ -274,7 +288,7 @@
                         </td>
 
                         <td>
-                            <button type="button" class="wi-pay"
+                            <button type="button" class="wi-pay" style="font-size:15px !important;"
                                     data-id="@item.WalkInClientId"
                                     data-name="@item.FirstName @item.LastName"
                                     disabled="@(item.LastVisitAt.Date == DateTime.Today)">
@@ -285,6 +299,17 @@
                 }
             </tbody>
         </table>
+        <footer class="wi-footer">
+            <span>Showing @Model.Count of @totalCount registrations</span>
+            <nav class="wi-pages" aria-label="Walk-in registration pages">
+                <a class="wi-page-button @(currentPage <= 1 ? "disabled" : "")"
+                   asp-controller="@walkInController" asp-action="WalkInClient"
+                   asp-route-searchTerm="@ViewBag.SearchTerm" asp-route-page="@(currentPage - 1)">Previous</a>
+                <a class="wi-page-button @(currentPage >= totalPages ? "disabled" : "")"
+                   asp-controller="@walkInController" asp-action="WalkInClient"
+                   asp-route-searchTerm="@ViewBag.SearchTerm" asp-route-page="@(currentPage + 1)">Next</a>
+            </nav>
+        </footer>
     </section>
 
 </main>
@@ -292,8 +317,8 @@
 <div class="wi-modal-backdrop" id="walkInRegistrationModal" aria-hidden="true">
     <section class="wi-modal wi-register-modal" role="dialog" aria-modal="true" aria-labelledby="walkInRegistrationTitle">
         <h2 id="walkInRegistrationTitle">Register walk-in client</h2>
-        <p>Each client can be registered only once per day. Receipts are emailed automatically when an email address is provided.</p>
-        <form asp-action="WalkInRegister" asp-controller="FrontDesk" method="post" id="walkInRegistrationForm">
+        <p>Each client can be registered only once per day. Receipts are emailed automatically.</p>
+        <form asp-action="WalkInRegister" asp-controller="@walkInController" method="post" id="walkInRegistrationForm">
             @Html.AntiForgeryToken()
             <div class="wi-form-grid">
                 <div class="wi-form-group">
@@ -309,8 +334,8 @@
                     <input id="walkInContact" name="ContactNumber" required />
                 </div>
                 <div class="wi-form-group">
-                    <label for="walkInEmail">Email (optional)</label>
-                    <input id="walkInEmail" name="Email" type="email" />
+                    <label for="walkInEmail">Email *</label>
+                    <input id="walkInEmail" name="Email" type="email" required />
                 </div>
                 <div class="wi-form-group">
                     <label for="walkInReason">Reason for visit *</label>
@@ -335,7 +360,7 @@
     <section class="wi-modal" role="dialog" aria-modal="true" aria-labelledby="walkInPaymentTitle">
         <h2 id="walkInPaymentTitle">Record walk-in payment</h2>
         <p id="walkInPaymentClient"></p>
-        <form asp-action="RecordWalkInPayment" method="post" id="walkInPaymentForm">
+        <form asp-action="RecordWalkInPayment" asp-controller="@walkInController" method="post" id="walkInPaymentForm">
             @Html.AntiForgeryToken()
             <input type="hidden" name="id" id="walkInPaymentId" />
             <label for="walkInPaymentAmount">Cash amount (₱)</label>

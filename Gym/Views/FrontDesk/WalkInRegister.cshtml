@@ -183,8 +183,8 @@
                 <span class="validation" asp-validation-for="ContactNumber"></span>
             </div>
             <div class="group">
-                <label asp-for="Email" id="emailLabel">Email (optional)</label>
-                <input class="control" asp-for="Email" placeholder="jane.doe@example.com" /> 
+                <label asp-for="Email" id="emailLabel">Email <span class="required">*</span></label>
+                <input class="control" asp-for="Email" placeholder="jane.doe@example.com" required /> 
                 <span class="validation" asp-validation-for="Email"> </span>
             </div>
             <div class="group">

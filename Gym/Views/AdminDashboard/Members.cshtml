@@ -20,10 +20,10 @@
     }
 
     .container {
-        
+        margin-top: 0;
         color: #f4f6f4;
         font-family: Arial, sans-serif;
-        background: #0D0F0D;
+        background: transparent;
     }
 
     .am-toolbar {
@@ -90,15 +90,30 @@
         }
 
     .am-add {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        height: 42px;
         background: #b7ff1b;
         color: #101510;
         border: 0;
-        padding: 11px 18px;
+        padding: 0 18px;
         font-size: 12px;
         font-weight: 800;
         text-decoration: none;
+        box-sizing: border-box;
         width: auto;
+        cursor: pointer;
     }
+
+    .admin-registration-modal { position:fixed; inset:0; z-index:7000; display:none; align-items:center; justify-content:center; padding:32px; background:rgba(0,0,0,.76); backdrop-filter:blur(3px); }
+    .admin-registration-modal.open { display:flex; }
+    .admin-registration-shell { position:relative; width:min(920px,92vw); height:min(760px,86vh); overflow:hidden; border:1px solid #000; border-radius:14px; background:#242824; box-shadow:0 28px 80px rgba(0,0,0,.65); }
+    .admin-registration-frame { width:100%; height:100%; border:0; background:#242824; }
+    .admin-registration-close { position:absolute; top:14px; right:18px; z-index:2; width:38px; height:38px; border:1px solid #000; border-radius:50%; background:#171a18; color:#fff; font-size:24px; line-height:1; cursor:pointer; }
+    .admin-registration-close:hover { color:#b7ff1b; }
+
+    @@media(max-width:700px) { .admin-registration-modal{padding:12px}.admin-registration-shell{width:100%;height:94vh;border-radius:10px} }
 
     .am-export {
         position: relative;
@@ -108,12 +123,16 @@
         .am-export summary {
             list-style: none;
             cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             border: 1px solid #7fae1b;
-            background: #171b18;
+            background: transparent;
             color: #b7ff1b;
             padding: 15px 20px;
             font-size: 11px;
             font-weight: 800;
+            text-align: center;
         }
 
             .am-export summary::-webkit-details-marker {
@@ -180,16 +199,19 @@
     }
 
         .am-filters select {
-            background: #292d2a;
-            color: #fff;
-            border: 1px solid #373c38;
+            background: #171a18;
+            color: #aab3ac;
+            border: 1px solid #59635c;
             padding: 10px 13px;
             font-size: 12px;
         }
 
     .am-card {
-        border: 1px solid #2c322d;
-        background: #1a1d1b;
+        border: 0;
+        border-radius: 8px;
+        background: #5E5D63;
+        overflow: hidden;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, .42);
     }
 
     .am-table {
@@ -294,36 +316,48 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 18px 14px;
-        background: #101311;
+        min-height: 80px;
+        padding: 14px 20px;
+        background: #5E5D63;
+        box-sizing: border-box;
+    }
+
+    .am-head .am-search input,
+    .am-head .am-search button,
+    .am-head .am-filters select {
+        height: 56px !important;
+        box-sizing: border-box !important;
     }
 
     .am-page-info {
-        font-size: 11px;
-        color: #aeb6b0;
+        font-size: 15px;
+        color: #aab3ac;
     }
 
     .am-page-actions {
         display: flex;
-        gap: 10px;
+        gap: 12px;
     }
 
     .am-page {
-        min-width: 82px;
-        height: 32px;
+        min-width: 102px;
+        height: 50px;
         display: grid;
         place-items: center;
-        background: #b7ff1b;
-        color: #101510;
+        padding: 0 18px;
+        border: 1px solid #74777a;
+        background: transparent;
+        color: #fff;
         text-decoration: none;
         font-size: 10px;
-        font-weight: 800;
-        border-radius: 4px;
+        font-weight: 700;
+        border-radius: 5px;
         text-transform: uppercase;
+        box-sizing: border-box;
     }
 
         .am-page.disabled {
-            opacity: .35;
+            opacity: .4;
             pointer-events: none;
         }
 
@@ -567,7 +601,7 @@
                     <p>@ViewBag.ActiveCount ACTIVE · @ViewBag.ExpiringCount EXPIRING MEMBERSHIP</p>
                 </div>
                 <div class="mtop-tool">
-                    <a class="am-add" asp-controller="FrontDesk" asp-action="AddMember">＋ ADD MEMBER</a>
+                    <button class="am-add" type="button" onclick="openAdminAddMemberModal()">＋ ADD MEMBER</button>
                     <details class="am-export">
                         <summary>↧ EXPORT</summary>
                         <div class="am-export-menu" id="memberExportMenu">
@@ -583,12 +617,12 @@
             <div class="am-head">
                 <form class="am-search" method="get" asp-action="Members">
                     <input name="searchTerm" value="@ViewBag.SearchTerm" placeholder="Search members, IDs, or emails..." />
-                    <button type="submit">SEARCH</button>
+                    <button type="submit" style="height:56px !important; box-sizing:border-box !important; font-size:15px !important;">SEARCH</button>
                 </form>
                 <form class="am-filters" method="get" asp-action="Members">
                     <input type="hidden" name="searchTerm" value="@ViewBag.SearchTerm" />
                     <select name="status" onchange="this.form.submit()">
-                        <option value="">All Statuses</option>
+                        <option value="">All Status</option>
                         @foreach (var item in Enum.GetValues<MemberStatus>())
                         {
                             <option value="@item" selected="@(selectedStatus == item)">@item</option>
@@ -654,7 +688,7 @@
                                 <td><span class="am-badge @badgeClass">@member.Status</span></td>
                                 <td class="am-action">
                                     <details class="am-actions">
-                                        <summary title="Member actions">•••</summary>
+                                        <summary aria-label="Member actions" title="Member actions">⋮</summary>
                                         <div class="am-actions-menu">
                                             <button class="am-menu-button" type="button" onclick="openAdminPayment(@member.UserId,'@fullName',@remaining.ToString(System.Globalization.CultureInfo.InvariantCulture))">Add payment</button>
                                             <form asp-controller="Admin" asp-action="SendDailyMemberReminder" method="post">
@@ -669,11 +703,13 @@
                                                     <button class="am-menu-button" type="submit">Send daily reminder</button>
                                                 }
                                             </form>
-                                            <form asp-controller="Admin" asp-action="RenewMember" method="post" onsubmit="return confirm('Renew @fullName membership?');">
-                                                @Html.AntiForgeryToken()
-                                                <input type="hidden" name="id" value="@member.UserId" />
-                                                <button class="am-menu-button" type="submit">Renew membership</button>
-                                            </form>
+                                            <button class="am-menu-button" type="button"
+                                                    data-client-id="@member.UserId"
+                                                    data-member-name="@fullName"
+                                                    data-plan-name="@MembershipPlanPricing.GetName(member.MembershipPlan)"
+                                                    data-plan-price="@planPrice.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+                                                    data-expired-date="@(member.MembershipEndDate?.ToString("MMM d, yyyy") ?? "No end date")"
+                                                    onclick="openAdminRenewal(this)">Renew membership</button>
                                             <form asp-controller="Admin" asp-action="MarkMemberInactive" method="post" onsubmit="return confirm('Mark @fullName inactive?');">
                                                 @Html.AntiForgeryToken()
                                                 <input type="hidden" name="id" value="@member.UserId" />
@@ -702,7 +738,7 @@
                     </tbody>
                 </table>
                 <div class="am-pager">
-                    <span class="am-page-info">Page @currentPage of @totalPages · @ViewBag.TotalCount member(s)</span>
+                    <span class="am-page-info">Showing @Model.Count of @ViewBag.TotalCount members</span>
                     <div class="am-page-actions">
                         <a class="am-page @(currentPage <= 1 ? "disabled" : "")" asp-action="Members" asp-route-searchTerm="@ViewBag.SearchTerm" asp-route-status="@selectedStatus" asp-route-plan="@selectedPlan" asp-route-page="@(currentPage - 1)">Previous</a>
                         <a class="am-page @(currentPage >= totalPages ? "disabled" : "")" asp-action="Members" asp-route-searchTerm="@ViewBag.SearchTerm" asp-route-status="@selectedStatus" asp-route-plan="@selectedPlan" asp-route-page="@(currentPage + 1)">Next</a>
@@ -729,7 +765,52 @@
         </div>
     </div>
 
+    <div id="adminAddMemberModal" class="admin-registration-modal" role="dialog" aria-modal="true" aria-label="Register member">
+        <div class="admin-registration-shell">
+            <iframe id="adminAddMemberFrame" class="admin-registration-frame" title="Member registration form"></iframe>
+        </div>
+    </div>
+
+    <div id="adminRenewalModal" class="admin-member-modal">
+        <div class="admin-member-dialog" role="dialog" aria-modal="true" aria-labelledby="adminRenewalTitle">
+            <h3 id="adminRenewalTitle">Renew membership payment</h3>
+            <p>Confirm the full cash renewal payment. A digital receipt will be sent to the member after renewal.</p>
+            <div class="admin-renewal-grid">
+                <div><small>Member</small><strong id="adminRenewalMember"></strong></div>
+                <div><small>Plan</small><strong id="adminRenewalPlan"></strong></div>
+                <div><small>Current plan ends</small><strong id="adminRenewalExpiry"></strong></div>
+                <div><small>Payment required</small><strong id="adminRenewalPrice"></strong></div>
+            </div>
+            <form asp-controller="Admin" asp-action="RenewMember" method="post" onsubmit="return lockAdminRenewal(this)">
+                @Html.AntiForgeryToken()
+                <input id="adminRenewalId" type="hidden" name="id" />
+                <input id="adminRenewalAmount" type="hidden" name="amount" />
+                <div class="admin-modal-actions">
+                    <button type="button" onclick="closeAdminRenewal()">Cancel</button>
+                    <button type="submit">Pay and renew</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
+            if (window.self !== window.top) {
+                window.top.location.href = window.location.href;
+            }
+
+            function openAdminAddMemberModal() {
+                const modal = document.getElementById('adminAddMemberModal');
+                const frame = document.getElementById('adminAddMemberFrame');
+                if (!frame.src) frame.src = '@Url.Action("AddMember", "FrontDesk", new { returnToAdmin = true })';
+                modal.classList.add('open');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeAddMemberModal() {
+                document.getElementById('adminAddMemberModal').classList.remove('open');
+                document.body.style.overflow = '';
+            }
+
             function exportMemberReport(format) {
                 const details = document.querySelector('.am-export');
                 if (details) details.open = false;
@@ -753,6 +834,35 @@
 
             function closeAdminPayment() {
                 document.getElementById('adminPaymentModal').classList.remove('open');
+            }
+
+            function formatRenewalPeso(value) {
+                return '₱' + Number(value).toLocaleString('en-PH', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                });
+            }
+
+            function openAdminRenewal(button) {
+                document.querySelectorAll('.am-actions[open]').forEach(function (menu) { menu.open = false; });
+                document.getElementById('adminRenewalId').value = button.dataset.clientId;
+                document.getElementById('adminRenewalAmount').value = button.dataset.planPrice;
+                document.getElementById('adminRenewalMember').textContent = button.dataset.memberName;
+                document.getElementById('adminRenewalPlan').textContent = button.dataset.planName;
+                document.getElementById('adminRenewalExpiry').textContent = button.dataset.expiredDate;
+                document.getElementById('adminRenewalPrice').textContent = formatRenewalPeso(button.dataset.planPrice);
+                document.getElementById('adminRenewalModal').classList.add('open');
+            }
+
+            function closeAdminRenewal() {
+                document.getElementById('adminRenewalModal').classList.remove('open');
+            }
+
+            function lockAdminRenewal(form) {
+                const submit = form.querySelector('button[type="submit"]');
+                submit.disabled = true;
+                submit.textContent = 'Processing...';
+                return true;
             }
     </script>
 

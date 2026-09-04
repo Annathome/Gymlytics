@@ -40,6 +40,20 @@ namespace Gym.Models
         [RegularExpression(@"^[a-zA-Z\s]+$", ErrorMessage = "Full Name can only contain letters and spaces.")]
         public string FullName { get; set; } = string.Empty;
 
+        [Required(ErrorMessage = "Username is required.")]
+        [StringLength(50, MinimumLength = 3, ErrorMessage = "Username must be between 3 and 50 characters.")]
+        public string Username { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Temporary password is required.")]
+        [DataType(DataType.Password)]
+        [StringLength(100, MinimumLength = 6, ErrorMessage = "Temporary password must be at least 6 characters.")]
+        public string Password { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Confirm the temporary password.")]
+        [DataType(DataType.Password)]
+        [Compare(nameof(Password), ErrorMessage = "Passwords do not match.")]
+        public string ConfirmPassword { get; set; } = string.Empty;
+
         [Required(ErrorMessage = "Phone number is required.")]
         [Phone(ErrorMessage = "Invalid Phone Number")]
         public string PhoneNumber { get; set; } = string.Empty;
@@ -137,6 +151,11 @@ namespace Gym.Models
         [DataType(DataType.Password)]
         [Display(Name = "Current password")]
         public string CurrentPassword { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "New username is required.")]
+        [StringLength(50, MinimumLength = 3, ErrorMessage = "New username must be between 3 and 50 characters.")]
+        [Display(Name = "New username")]
+        public string NewUsername { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "New password is required.")]
         [DataType(DataType.Password)]

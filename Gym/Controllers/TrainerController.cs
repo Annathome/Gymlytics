@@ -178,6 +178,17 @@ namespace Gym.Controllers
             {
                 int trainerId = await GetCurrentTrainerProfileIdAsync();
                 var notifications = await _trainerService.GetTrainerNotificationsAsync(trainerId);
+                var unreadNotifications = await _context.Notifications
+                    .Where(notification => notification.UserId == trainerId && !notification.IsRead)
+                    .ToListAsync();
+                foreach (var notification in unreadNotifications)
+                {
+                    notification.IsRead = true;
+                }
+                if (unreadNotifications.Count > 0)
+                {
+                    await _context.SaveChangesAsync();
+                }
                 return View("Notifications", notifications);
             }
             catch (Exception ex)
@@ -295,6 +306,20 @@ namespace Gym.Controllers
             availability.EndTime = model.EndTime;
             availability.WeeklyMemberLimit = model.WeeklyMemberLimit;
             availability.UpdatedAt = DateTime.Now;
+            var trainerName = await _context.Trainers.AsNoTracking()
+                .Where(trainer => trainer.UserId == trainerId)
+                .Select(trainer => (trainer.FirstName + " " + trainer.LastName).Trim())
+                .FirstOrDefaultAsync() ?? "Trainer";
+            _context.FrontDeskEmailNotifications.Add(new FrontDeskEmailNotification
+            {
+                StaffId = trainerId,
+                Title = "Trainer availability changed",
+                Message = $"{trainerName} updated availability to {availability.AvailableDays}, {availability.StartTime:hh\\:mm}–{availability.EndTime:hh\\:mm}, with a weekly capacity of {availability.WeeklyMemberLimit}.",
+                Status = "Activity",
+                EmailType = "Trainer availability",
+                DeliveryKey = $"TrainerAvailability:{trainerId}:{DateTime.Now:yyyyMMddHHmmss}",
+                CreatedDate = DateTime.Now
+            });
             await _context.SaveChangesAsync();
 
             TempData["SuccessMessage"] = "Your weekly availability was saved and will remain active until you change it.";

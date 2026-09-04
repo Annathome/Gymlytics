@@ -106,13 +106,8 @@ builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
-// Apply the external, repeatable schema before any request or hosted service
-// accesses the database. SQL remains in Database/GymSchema.sql.
-await app.Services.GetRequiredService<DatabaseSchemaService>().ApplyAsync();
-if (args.Contains("--schema-only", StringComparer.OrdinalIgnoreCase))
-{
-    return;
-}
+// The production database schema is managed separately on MonsterASP.NET.
+// Do not create or switch databases during application startup.
 
 // Load the administrator-managed prices before requests calculate balances.
 using (var pricingScope = app.Services.CreateScope())
@@ -131,6 +126,7 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 

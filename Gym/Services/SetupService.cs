@@ -170,7 +170,8 @@ namespace Gym.Services
             bool Success,
             string? ErrorMessage,
             int NewStaffId)> CreatePendingStaffAsync(
-                StaffViewModel model)
+                StaffViewModel model,
+                string passwordHash)
         {
             try
             {
@@ -182,7 +183,7 @@ namespace Gym.Services
                 const string checkSql = """
                     SELECT COUNT(*)
                     FROM dbo.Staff
-                    WHERE Email = @Email;
+                    WHERE Email = @Email OR Username = @Username;
                     """;
 
                 await using (var checkCommand =
@@ -191,6 +192,9 @@ namespace Gym.Services
                     checkCommand.Parameters.AddWithValue(
                         "@Email",
                         model.Email);
+                    checkCommand.Parameters.AddWithValue(
+                        "@Username",
+                        model.Username.Trim());
 
                     long existingCount = Convert.ToInt64(
                         await checkCommand.ExecuteScalarAsync());
@@ -199,7 +203,7 @@ namespace Gym.Services
                     {
                         return (
                             false,
-                            "An account with this email address already exists.",
+                            "An account with this email address or username already exists.",
                             0);
                     }
                 }
@@ -213,6 +217,8 @@ namespace Gym.Services
                     INSERT INTO dbo.Staff
                     (
                         FullName,
+                        Username,
+                        PasswordHash,
                         Email,
                         PhoneNumber,
                         Birthday,
@@ -226,6 +232,8 @@ namespace Gym.Services
                     VALUES
                     (
                         @FullName,
+                        @Username,
+                        @PasswordHash,
                         @Email,
                         @PhoneNumber,
                         @Birthday,
@@ -243,6 +251,12 @@ namespace Gym.Services
                 insertCommand.Parameters.AddWithValue(
                     "@FullName",
                     DbValue(model.FullName));
+
+                insertCommand.Parameters.Add("@Username", SqlDbType.NVarChar, 50)
+                    .Value = model.Username.Trim();
+
+                insertCommand.Parameters.Add("@PasswordHash", SqlDbType.NVarChar, 255)
+                    .Value = passwordHash;
 
                 insertCommand.Parameters.AddWithValue(
                     "@Email",
@@ -990,6 +1004,43 @@ namespace Gym.Services
                 .Value = staffId;
 
             return await command.ExecuteNonQueryAsync() == 1;
+        }
+
+        public async Task<(bool Success, string? ErrorMessage)> UpdateCredentialsAsync(
+            int staffId,
+            string username,
+            string passwordHash)
+        {
+            await using var connection = new SqlConnection(_connectionString);
+            await connection.OpenAsync();
+
+            const string duplicateSql = """
+                SELECT COUNT(*)
+                FROM dbo.Staff
+                WHERE Username = @Username AND Id <> @StaffId;
+                """;
+            await using (var duplicateCommand = new SqlCommand(duplicateSql, connection))
+            {
+                duplicateCommand.Parameters.Add("@Username", SqlDbType.NVarChar, 50).Value = username;
+                duplicateCommand.Parameters.Add("@StaffId", SqlDbType.Int).Value = staffId;
+                if (Convert.ToInt32(await duplicateCommand.ExecuteScalarAsync()) > 0)
+                {
+                    return (false, "Username is already taken. Please choose another username.");
+                }
+            }
+
+            const string updateSql = """
+                UPDATE dbo.Staff
+                SET Username = @Username, PasswordHash = @PasswordHash
+                WHERE Id = @StaffId AND Status = 'Active';
+                """;
+            await using var updateCommand = new SqlCommand(updateSql, connection);
+            updateCommand.Parameters.Add("@Username", SqlDbType.NVarChar, 50).Value = username;
+            updateCommand.Parameters.Add("@PasswordHash", SqlDbType.NVarChar, 255).Value = passwordHash;
+            updateCommand.Parameters.Add("@StaffId", SqlDbType.Int).Value = staffId;
+            return await updateCommand.ExecuteNonQueryAsync() == 1
+                ? (true, null)
+                : (false, "The credentials could not be updated. Confirm that the account is active.");
         }
 
         public async Task<List<RegisteredTrainerInfo>> GetActiveRegisteredTrainersAsync()

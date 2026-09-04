@@ -14,12 +14,17 @@
     body {
         min-height: 100vh;
         width: 100vw;
-        background: rgb(96,94,105);
+        background: #171b18;
         display: flex;
         align-items: center;
         justify-content: center;
-        overflow-x: hidden;
+        overflow: hidden;
         font-family: 'Inria Serif', serif;
+    }
+
+    body > main,
+    body > main > div {
+        background: #171b18;
     }
 
     .login-wrap {
@@ -29,31 +34,23 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: 20px;
-    }
-
-    .bg {
-        width: 100vw;
-        height: 100vh;
-        object-fit: cover;
-        position: fixed;
-        top: 0;
-        left: 0;
-        z-index: 1;
+        padding: 0;
+        background: #171b18;
     }
 
     .login-form {
         position: relative;
         z-index: 2;
         width: 100%;
-        max-width: 650px;
-        max-height: 90vh;
-        background-color: rgba(255, 255, 255, 0.95);
+        max-width: none;
+        min-height: 100vh;
+        max-height: 100vh;
+        background-color: #171b18;
         display: flex;
         flex-direction: column;
         padding: 30px 35px;
-        border-radius: 40px;
-        border: 3px solid rgb(96,94,105);
+        border-radius: 10px;
+        border: 1px solid #59635c;
         box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
         overflow-y: auto;
     }
@@ -89,7 +86,7 @@
         font-size: 18px;
         font-style: italic;
         font-weight: 300;
-        color: rgba(0,0,0,0.6);
+        color: #fff;
         letter-spacing: 1px;
     }
 
@@ -97,7 +94,7 @@
         .role::after {
             content: "";
             flex: 1;
-            border-bottom: 2px dotted rgba(0,0,0,0.4);
+            border-bottom: 2px dotted #7b847d;
             margin: 0 10px;
         }
 
@@ -108,7 +105,7 @@
 
         .reminder h6 {
             font-size: 0.85rem;
-            color: rgba(0,0,0,0.6);
+            color: #fff;
             letter-spacing: 0.5px;
             line-height: 1.4;
         }
@@ -119,8 +116,15 @@
         width: 100%;
     }
 
+    .staff-fields-wrapper {
+        width: 100%;
+        padding: 22px;
+        border-radius: 9px;
+        background: #5e5d63;
+    }
+
     .form-group label {
-        color: rgb(14,197,45);
+        color: #fff;
         font-weight: 600;
         font-size: 0.9rem;
         margin-bottom: 4px;
@@ -129,7 +133,9 @@
 
     .form-group input,
     .form-group select {
-        border: 1px solid rgb(14,197,45);
+        border: 1px solid #a8df32;
+        background: transparent;
+        color: #fff;
         padding: 8px 12px;
         width: 100%;
         border-radius: 8px;
@@ -139,29 +145,29 @@
     }
 
         .form-group input::placeholder {
-            color: rgba(14,197,45, 0.6);
+            color: #c5ccc7;
         }
 
         .form-group input:focus,
         .form-group input:hover,
         .form-group select:focus,
         .form-group select:hover {
-            border-color: rgb(14,197,45);
-            box-shadow: 2px 2px 4px rgba(96,94,105, 0.3);
-            background: #fff;
+            border-color: #a8df32;
+            box-shadow: 0 0 0 4px rgba(168, 223, 50, .22);
+            background: transparent;
         }
 
     /* --- Form Divider & Button Styling --- */
     .btn-submit {
-        width: 100%;
+        min-width: 210px;
         height: 45px;
-        margin-top: 10px;
-        background: rgb(178,233,197);
-        color: #000;
+        margin: 0;
+        background: #a8df32;
+        color: #101510;
         border: none;
         font-size: 1.05rem;
         font-weight: 600;
-        border-radius: 8px;
+        border-radius: 0;
         cursor: pointer;
         transition: background 0.2s ease-in-out, color 0.2s ease-in-out;
         display: flex;
@@ -171,8 +177,9 @@
     }
 
         .btn-submit:hover {
-            background: rgb(14,197,45);
-            color: #fff;
+            background: #171b18;
+            color: #b7ff1b;
+            border: 1px solid #b7ff1b;
         }
 
     .divider {
@@ -201,14 +208,14 @@
         }
 
     .btn-back {
-        width: 100%;
-        height: 40px;
+        min-width: 130px;
+        height: 45px;
         background: transparent;
-        color: rgb(96,94,105);
-        border: 1.5px solid rgb(96,94,105);
+        color: #fff;
+        border: 1px solid #8d958f;
         font-size: 0.95rem;
         font-weight: 600;
-        border-radius: 8px;
+        border-radius: 0;
         cursor: pointer;
         transition: all 0.2s ease-in-out;
         display: flex;
@@ -218,15 +225,54 @@
     }
 
         .btn-back:hover {
-            background: rgb(96,94,105);
-            color: #fff;
+            background: transparent;
+            color: #b7ff1b;
+            border-color: #b7ff1b;
         }
+
+    .staff-form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 18px;
+    }
+
+    .form-group select option {
+        background: #171b18;
+        color: #fff;
+    }
+
+    .form-group select {
+        border: 1px solid #fff;
+        box-shadow: none;
+    }
+
+    .form-group select:hover,
+    .form-group select:focus {
+        border: 1px solid #fff;
+        box-shadow: none;
+    }
+
+    .form-group select option:hover,
+    .form-group select option:checked {
+        background: #171b18;
+        color: #a8df32;
+    }
+
+    .form-group input[type="date"] {
+        color-scheme: dark;
+    }
+
+    .form-group input[type="date"]::-webkit-calendar-picker-indicator {
+        filter: invert(1);
+        opacity: 1;
+    }
 
     /* Mobile Responsive Optimizations */
     @@media (max-width: 576px) {
         .login-form {
             padding: 20px;
-            border-radius: 25px;
+            border-radius: 10px;
         }
 
         .role h3 {
@@ -236,8 +282,6 @@
 </style>
 
 <section class="login-wrap">
-    <img src="~/images/login.png" alt="login background" class="bg" />
-
     <div class="login-form">
         <div class="title">
             <img src="~/images/Yokok.jpg" alt="Gym Logo" />
@@ -250,77 +294,107 @@
 
         <form asp-controller="Account" asp-action="RegisterStaff" method="post">
             @Html.AntiForgeryToken()
-            <div asp-validation-summary="ModelOnly" class="text-danger mb-2 small text-center"></div>
+            <div class="staff-fields-wrapper">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-2 small text-center"></div>
 
-            <!-- Full Name -->
-            <div class="row g-2 mb-2">
-                <div class="col-12 form-group">
-                    <label asp-for="FullName" class="form-label">Full Name</label>
-                    <input asp-for="FullName" class="form-control" placeholder="John Doe" required />
-                    <span asp-validation-for="FullName" class="text-danger small"></span>
+                <!-- Full Name -->
+                <div class="row g-2 mb-2">
+                    <div class="col-12 form-group">
+                        <label asp-for="FullName" class="form-label">Full Name</label>
+                        <input asp-for="FullName" class="form-control" placeholder="John Doe" required />
+                        <span asp-validation-for="FullName" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <!-- Temporary account credentials set by the administrator -->
+                <div class="row g-2 mb-2">
+                    <div class="col-12 form-group">
+                        <label asp-for="Username" class="form-label">Temporary Username</label>
+                        <input asp-for="Username" class="form-control" autocomplete="off" placeholder="Enter temporary username" required />
+                        <span asp-validation-for="Username" class="text-danger small"></span>
+                    </div>
+                </div>
+                <div class="row g-2 mb-2">
+                    <div class="col-md-6 form-group">
+                        <label asp-for="Password" class="form-label">Temporary Password</label>
+                        <input asp-for="Password" class="form-control" autocomplete="new-password" placeholder="At least 6 characters" required />
+                        <span asp-validation-for="Password" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6 form-group">
+                        <label asp-for="ConfirmPassword" class="form-label">Confirm Password</label>
+                        <input asp-for="ConfirmPassword" class="form-control" autocomplete="new-password" placeholder="Repeat temporary password" required />
+                        <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <!-- Email & Phone Number -->
+                <div class="row g-2 mb-2">
+                    <div class="col-md-6 form-group">
+                        <label asp-for="Email" class="form-label">Gmail Address</label>
+                        <input asp-for="Email" type="email" class="form-control" placeholder="example@gmail.com" required />
+                        <span asp-validation-for="Email" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6 form-group">
+                        <label asp-for="PhoneNumber" class="form-label">Phone Number</label>
+                        <input asp-for="PhoneNumber" class="form-control" placeholder="09123456789" required />
+                        <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <!-- Birthday & Sex -->
+                <div class="row g-2 mb-2">
+                    <div class="col-md-6 form-group">
+                        <label asp-for="Birthday" class="form-label">Birthday</label>
+                        <input asp-for="Birthday" type="date" class="form-control" required />
+                        <span asp-validation-for="Birthday" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6 form-group">
+                        <label asp-for="Sex" class="form-label">Sex</label>
+                        <select asp-for="Sex" class="form-select" required>
+                            <option value="">Select Sex</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                        </select>
+                        <span asp-validation-for="Sex" class="text-danger small"></span>
+                    </div>
+                </div>
+
+                <!-- Role & Address -->
+                <div class="row g-2 mb-2">
+                    <div class="col-md-6 form-group">
+                        <label asp-for="Role" class="form-label">Role</label>
+                        <select asp-for="Role" class="form-select" required>
+                            <option value="">Select Role</option>
+                            <option value="Trainer">Trainer</option>
+                            <option value="Staff">Staff / Front Desk</option>
+                        </select>
+                        <span asp-validation-for="Role" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6 form-group">
+                        <label asp-for="Address" class="form-label">Address</label>
+                        <input asp-for="Address" class="form-control" placeholder="Enter Full Address" />
+                        <span asp-validation-for="Address" class="text-danger small"></span>
+                    </div>
                 </div>
             </div>
 
-            <!-- Email & Phone Number -->
-            <div class="row g-2 mb-2">
-                <div class="col-md-6 form-group">
-                    <label asp-for="Email" class="form-label">Gmail Address</label>
-                    <input asp-for="Email" type="email" class="form-control" placeholder="example@gmail.com" required />
-                    <span asp-validation-for="Email" class="text-danger small"></span>
-                </div>
-                <div class="col-md-6 form-group">
-                    <label asp-for="PhoneNumber" class="form-label">Phone Number</label>
-                    <input asp-for="PhoneNumber" class="form-control" placeholder="09123456789" required />
-                    <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
-                </div>
+            <div class="staff-form-actions">
+                <button type="button" class="btn-back" onclick="cancelStaffRegistration()">Cancel</button>
+                <button type="submit" class="btn-submit">✓ &nbsp; Register Staff Member</button>
             </div>
-
-            <!-- Birthday & Sex -->
-            <div class="row g-2 mb-2">
-                <div class="col-md-6 form-group">
-                    <label asp-for="Birthday" class="form-label">Birthday</label>
-                    <input asp-for="Birthday" type="date" class="form-control" required />
-                    <span asp-validation-for="Birthday" class="text-danger small"></span>
-                </div>
-                <div class="col-md-6 form-group">
-                    <label asp-for="Sex" class="form-label">Sex</label>
-                    <select asp-for="Sex" class="form-select" required>
-                        <option value="">Select Sex</option>
-                        <option value="Male">Male</option>
-                        <option value="Female">Female</option>
-                    </select>
-                    <span asp-validation-for="Sex" class="text-danger small"></span>
-                </div>
-            </div>
-
-            <!-- Role & Address -->
-            <div class="row g-2 mb-2">
-                <div class="col-md-6 form-group">
-                    <label asp-for="Role" class="form-label">Role</label>
-                    <select asp-for="Role" class="form-select" required>
-                        <option value="">Select Role</option>
-                        <option value="Trainer">Trainer</option>
-                        <option value="Staff">Staff / Front Desk</option>
-                    </select>
-                    <span asp-validation-for="Role" class="text-danger small"></span>
-                </div>
-                <div class="col-md-6 form-group">
-                    <label asp-for="Address" class="form-label">Address</label>
-                    <input asp-for="Address" class="form-control" placeholder="Enter Full Address" />
-                    <span asp-validation-for="Address" class="text-danger small"></span>
-                </div>
-            </div>
-
-            <!-- Actions -->
-            <button type="submit" class="btn-submit">Register Staff Member</button>
-
-            <div class="divider">OR</div>
-
-            <!-- Update asp-action to point to your desired Controller/Action (e.g. UserRoles) -->
-            <a asp-controller="Account" asp-action="UserRoles" class="btn-back">Back to User Roles</a>
         </form>
     </div>
 </section>
+
+<script>
+    function cancelStaffRegistration() {
+        if (window.parent !== window && typeof window.parent.closeStaffRegistry === 'function') {
+            window.parent.closeStaffRegistry();
+            return;
+        }
+        window.history.back();
+    }
+</script>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

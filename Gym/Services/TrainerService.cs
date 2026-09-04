@@ -60,6 +60,8 @@ namespace Gym.Services
                 day => day.MemberCount);
             var selectedDayCount = assignedWeek
                 .FirstOrDefault(day => day.Date == targetDate)?.MemberCount ?? 0;
+            var unreadNotificationsCount = await _context.Notifications.AsNoTracking()
+                .CountAsync(notification => notification.UserId == trainerId && !notification.IsRead);
 
             return new TrainerDashboardViewModel
             {
@@ -71,6 +73,7 @@ namespace Gym.Services
                 TodaysSessionCount = selectedDayCount,
                 WeeklyMemberCount = assignedWeek.SelectMany(day => day.Sessions)
                     .Select(session => session.ClientId).Distinct().Count(),
+                UnreadNotificationsCount = unreadNotificationsCount,
                 AssignedWeek = assignedWeek,
                 WeeklySchedule = weeklySchedule
             };

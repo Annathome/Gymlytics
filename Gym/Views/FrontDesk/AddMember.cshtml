@@ -1,4 +1,4 @@
-﻿@model Gym.Models.MembersPageViewModel
+@model Gym.Models.MembersPageViewModel
 
 @{
     ViewData["Title"] = "Add Member";
@@ -14,24 +14,31 @@
 
     * {
         font-family: "Inria Serif", serif;
-        background: #0000 !important;
+        box-sizing: border-box;
+    }
+
+    html,
+    body {
+        margin: 0;
+        min-height: 100%;
+        background: #242824;
+        color: #fff;
+    }
+
+    body {
+        padding: 28px;
     }
 
     .add-member-container {
         width: 100%;
         margin: 0;
-        padding: 0 32px;
+        padding: 0;
         box-sizing: border-box;
         font-family: "Inria Serif", serif;
-        color: #1a1a1a;
-        /* background: #ffff !important;
-        background: inherit !important; */
+        color: #fff;
+        background: #242824;
     }
 
-        /* .add-member-container
-        {
-            background: #0000;
-        } */
 
     .add-member-header {
         margin-bottom: 20px;
@@ -45,7 +52,7 @@
 
     .add-member-subtitle {
         font-size: 15px; 
-        color: #666;
+        color: #fff;
         margin-top: 4px;
     }
 
@@ -54,16 +61,16 @@
     }
 
     .form-section {
-        border: 1px solid #dedede;
+        border: 1px solid #000;
         border-radius: 10px;
         padding: 16px;
         margin-bottom: 16px;
-        background: #fff;
+        background: #5e5d63;
     }
 
     .section-title {
         font-size: 15px;
-        color: #555;
+        color: #fff;
         letter-spacing: 0.5px;
         margin-bottom: 12px;
         text-transform: uppercase;
@@ -92,7 +99,7 @@
     .form-label {
         font-size: 12px; /* Larger labels */
         font-weight: 600;
-        color: #333;
+        color: #fff;
         margin-bottom: 6px;
     }
 
@@ -101,10 +108,10 @@
         width: 100%;
         height: 38px; /* Taller input for better click target */
         padding: 6px 12px;
-        border: 1px solid #d9d9d9;
+        border: 1px solid #fff;
         border-radius: 6px;
-        background-color: #fff;
-        color: #222;
+        background-color: #252a26;
+        color: #fff;
         font-size: 13px; /* Larger text inside inputs */
         box-sizing: border-box;
         outline: none;
@@ -112,8 +119,47 @@
 
         .form-control:focus,
         .form-select:focus {
-            border-color: #666;
+            border-color: #b9ff20;
         }
+
+    .form-control::placeholder {
+        color: #fff;
+        opacity: .72;
+    }
+
+    .form-control {
+        background-color: transparent;
+    }
+
+    .form-select option {
+        background: #000;
+        color: #fff;
+    }
+
+    .form-select option:hover,
+    .form-select option:checked {
+        color: #b7ff1b;
+        background: #000;
+    }
+
+    .form-select {
+        background-color: transparent;
+    }
+
+    input[type="date"] {
+        color-scheme: light;
+    }
+
+    input[type="date"]::-webkit-calendar-picker-indicator {
+        filter: brightness(0);
+        opacity: 1;
+        cursor: pointer;
+    }
+
+    .required-mark {
+        color: #fff;
+        font-weight: 800;
+    }
 
     textarea.form-control {
         height: 70px; /* Taller text area */
@@ -129,21 +175,26 @@
     .day-button {
         flex: 1;
         height: 36px; /* Taller day buttons */
-        border: 1px solid #d5d5d5;
+        border: 1px solid #59635c;
         border-radius: 6px;
-        background: #fff;
-        color: #333;
+        background: transparent;
+        color: #fff;
         font-size: 12px; /* Larger text for days */
         font-weight: 500;
         cursor: pointer;
     }
 
-        .day-button.selected {
-            background-color: #dbeafe;
-            border-color: #93c5fd;
-            color: #2563eb;
+    .day-button.selected {
+            background-color: #184d2b;
+            border-color: #6ff59a;
+            color: #6ff59a;
             font-weight: 600;
         }
+
+    .day-button:disabled {
+        cursor: not-allowed;
+        opacity: 1;
+    }
 
     .form-actions {
         display: flex;
@@ -154,11 +205,12 @@
 
     .btn-cancel {
         height: 38px;
-        padding: 0 16px;
-        border: 1px solid #d9d9d9;
-        border-radius: 6px;
-        background: #fff;
-        color: #333;
+        min-width: 130px;
+        padding: 0 24px;
+        border: 1px solid #9ba49d;
+        border-radius: 0;
+        background: transparent;
+        color: #fff;
         font-size: 13px; /* Larger action text */
         text-decoration: none;
         display: inline-flex;
@@ -169,43 +221,52 @@
 
     .btn-register {
         height: 38px;
-        padding: 0 16px;
-        border: 1px solid #bdbdbd;
-        border-radius: 6px;
-        background: #111; /* Slightly bolder register button style */
-        color: #fff;
+        min-width: 210px;
+        padding: 0 28px;
+        border: 1px solid #a8df32;
+        border-radius: 0;
+        background: #a8df32;
+        color: #293029;
         font-size: 13px;
         cursor: pointer;
         display: inline-flex;
         align-items: center;
         gap: 6px;
-        font-weight: 500;
+        font-weight: 800;
+        text-transform: uppercase;
     }
 
         .btn-register:hover {
-            background-color: #333;
+            border-color: #171a18;
+            background-color: #171a18;
+            color: #b7ff1b;
         }
 
     .btn-cancel:hover {
-        background-color: #f8f8f8;
+        background-color: rgba(255, 255, 255, .08);
+        color: #b7ff1b;
     }
 
     .validation-message {
-        color: #dc2626;
+        color: #ffb4b4;
         font-size: 11px; /* Larger validation text */
         margin-top: 4px;
     }
 
     .validation-summary {
-        color: #dc2626;
+        color: #ffb4b4;
         font-size: 12px;
         margin-bottom: 12px;
     }
 
     @@media (max-width: 700px) {
+        body {
+            padding: 20px 16px;
+        }
+
         .add-member-container {
             width: 100%;
-            padding: 0 16px;
+            padding: 0;
         }
 
         .form-row {
@@ -242,6 +303,10 @@
           class="member-form">
 
         @Html.AntiForgeryToken()
+        @if (ViewBag.ReturnToAdmin == true)
+        {
+            <input type="hidden" name="returnToAdmin" value="true" />
+        }
 
         <div asp-validation-summary="ModelOnly"
              class="validation-summary">
@@ -259,7 +324,7 @@
                 <!-- FULL NAME -->
                 <div class="form-group">
                     <label asp-for="AddMemberViewModel.FullName" class="form-label">
-                        Full name
+                        Full name <span class="required-mark" aria-hidden="true">*</span>
                     </label>
                     <input asp-for="AddMemberViewModel.FullName"
                            class="form-control"
@@ -270,7 +335,7 @@
                 <!-- DATE OF BIRTH -->
                 <div class="form-group">
                     <label asp-for="AddMemberViewModel.DateOfBirth" class="form-label">
-                        Date of birth
+                        Date of birth <span class="required-mark" aria-hidden="true">*</span>
                     </label>
                     <input asp-for="AddMemberViewModel.DateOfBirth"
                            type="date"
@@ -283,7 +348,7 @@
                 <!-- CONTACT -->
                 <div class="form-group">
                     <label asp-for="AddMemberViewModel.ContactNumber" class="form-label">
-                        Contact number
+                        Contact number <span class="required-mark" aria-hidden="true">*</span>
                     </label>
                     <input asp-for="AddMemberViewModel.ContactNumber"
                            class="form-control"
@@ -294,7 +359,7 @@
                 <!-- EMAIL -->
                 <div class="form-group">
                     <label asp-for="AddMemberViewModel.Email" class="form-label">
-                        Email
+                        Email <span class="required-mark" aria-hidden="true">*</span>
                     </label>
                     <input asp-for="AddMemberViewModel.Email"
                            type="email"
@@ -312,7 +377,7 @@
                     </label>
                     <input asp-for="AddMemberViewModel.EmergencyContact"
                            class="form-control"
-                           placeholder="Name and number" />
+                           placeholder="Contact number" />
                 </div>
             </div>
         </div>
@@ -329,7 +394,7 @@
                 <!-- PLAN -->
                 <div class="form-group">
                     <label asp-for="AddMemberViewModel.SelectedPlanId" class="form-label">
-                        Plan type
+                        Plan type <span class="required-mark" aria-hidden="true">*</span>
                     </label>
                     <select asp-for="AddMemberViewModel.SelectedPlanId"
                             asp-items="addMember.PlanOptions"
@@ -342,7 +407,7 @@
                 <!-- START DATE -->
                 <div class="form-group">
                     <label asp-for="AddMemberViewModel.StartDate" class="form-label">
-                        Start date
+                        Start date <span class="required-mark" aria-hidden="true">*</span>
                     </label>
                     <input asp-for="AddMemberViewModel.StartDate"
                            type="date"
@@ -352,11 +417,11 @@
             </div>
             <div class="form-row">
                 <div class="form-group full">
-                    <label asp-for="AddMemberViewModel.PaymentAmount" class="form-label">Amount paid</label>
+                    <label asp-for="AddMemberViewModel.PaymentAmount" class="form-label">Amount paid <span class="required-mark" aria-hidden="true">*</span></label>
                     <input asp-for="AddMemberViewModel.PaymentAmount" type="number" min="0.01" step="0.01"
-                           class="form-control" placeholder="0.00" />
+                           class="form-control" placeholder="Select a membership plan first" disabled />
                     <span asp-validation-for="AddMemberViewModel.PaymentAmount" class="validation-message"></span>
-                    <div id="planPaymentSummary" style="margin-top:7px;color:#555;">
+                    <div id="planPaymentSummary" style="margin-top:7px;color:#fff;">
                         Select a membership plan to see its price.
                     </div>
                 </div>
@@ -386,7 +451,7 @@
 
                 <div class="form-group">
                     <label asp-for="AddMemberViewModel.SelectedGymGoal" class="form-label">
-                        Gym goal
+                        Gym goal <span class="required-mark" aria-hidden="true">*</span>
                     </label>
                     <select asp-for="AddMemberViewModel.SelectedGymGoal"
                             asp-items="addMember.GymGoalOptions"
@@ -418,11 +483,11 @@
             <div class="form-row">
                 <div class="form-group full">
                     <label asp-for="AddMemberViewModel.SelectedTimeSlot" class="form-label">
-                        Preferred time slot
+                        Preferred time slot <span class="required-mark" aria-hidden="true">*</span>
                     </label>
                     <select asp-for="AddMemberViewModel.SelectedTimeSlot"
                             asp-items="addMember.TimeSlotOptions"
-                            class="form-select">
+                            class="form-select" required>
                         <option value="">Select time slot</option>
                     </select>
                 </div>
@@ -460,10 +525,14 @@
     document.addEventListener("DOMContentLoaded", function () {
         const dayButtons = document.querySelectorAll(".day-button");
         const selectedDaysContainer = document.getElementById("selectedDaysContainer");
+        const trainerSelect = document.getElementById("AddMemberViewModel_SelectedTrainerId");
         const planSelect = document.getElementById("AddMemberViewModel_SelectedPlanId");
         const paymentInput = document.getElementById("AddMemberViewModel_PaymentAmount");
         const paymentSummary = document.getElementById("planPaymentSummary");
         const planPrices = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(planPrices));
+        const trainerAvailableDays = @Html.Raw(
+            System.Text.Json.JsonSerializer.Serialize(addMember.TrainerAvailableDays)
+        );
 
         const existingDays = @Html.Raw(
                                                                                                 System.Text.Json.JsonSerializer.Serialize(addMember.SelectedDays)
@@ -493,22 +562,81 @@
 
         dayButtons.forEach(function (button) {
             button.addEventListener("click", function () {
+                if (button.disabled) return;
                 button.classList.toggle("selected");
                 updateSelectedDays();
             });
         });
 
+        function applyTrainerAvailability(clearWhenSelfGuided) {
+            const trainerId = trainerSelect.value;
+            const availableDays = trainerAvailableDays[trainerId];
+
+            if (!trainerId || !availableDays) {
+                dayButtons.forEach(function (button) {
+                    button.disabled = false;
+                    if (clearWhenSelfGuided) button.classList.remove("selected");
+                });
+                updateSelectedDays();
+                return;
+            }
+
+            dayButtons.forEach(function (button) {
+                button.classList.toggle("selected", availableDays.includes(button.dataset.day));
+                button.disabled = !availableDays.includes(button.dataset.day);
+            });
+            updateSelectedDays();
+        }
+
+        trainerSelect.addEventListener("change", function () {
+            applyTrainerAvailability(true);
+        });
+
+        if (trainerSelect.value && (!existingDays || existingDays.length === 0)) {
+            applyTrainerAvailability(false);
+        } else if (trainerSelect.value) {
+            const availableDays = trainerAvailableDays[trainerSelect.value] || [];
+            dayButtons.forEach(function (button) {
+                button.disabled = !availableDays.includes(button.dataset.day);
+            });
+        }
+
         function updatePlanPayment() {
             const price = planPrices[planSelect.value];
             if (price === undefined) {
                 paymentSummary.textContent = "Select a membership plan to see its price.";
+                paymentInput.placeholder = "Select a membership plan first";
+                paymentInput.removeAttribute("min");
                 paymentInput.removeAttribute("max");
+                paymentInput.value = "";
+                paymentInput.disabled = true;
+                paymentInput.setCustomValidity("");
                 return;
             }
+            paymentInput.disabled = false;
+            paymentInput.min = price;
             paymentInput.max = price;
-            paymentSummary.textContent = `Plan price: ₱${Number(price).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}. Membership becomes active when the full balance is paid.`;
+            paymentInput.placeholder = `Required full payment: ₱${Number(price).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+            paymentInput.value = Number(price).toFixed(2);
+            paymentInput.setCustomValidity("");
+            paymentSummary.textContent = `Required full payment: ₱${Number(price).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}.`;
+        }
+
+        function validatePlanPayment() {
+            const price = Number(planPrices[planSelect.value]);
+            const payment = Number(paymentInput.value);
+            if (!Number.isFinite(price)) {
+                paymentInput.setCustomValidity("Select a membership plan first.");
+            } else if (!Number.isFinite(payment) || payment < price) {
+                paymentInput.setCustomValidity(`Full payment of ₱${price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} is required.`);
+            } else if (payment > price) {
+                paymentInput.setCustomValidity(`Payment cannot exceed ₱${price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}.`);
+            } else {
+                paymentInput.setCustomValidity("");
+            }
         }
         planSelect.addEventListener("change", updatePlanPayment);
+        paymentInput.addEventListener("input", validatePlanPayment);
         updatePlanPayment();
     });
 

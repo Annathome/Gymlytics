@@ -30,6 +30,11 @@
             font-size: 25px
         }
 
+    .equip-searchbar
+    {
+        margin-top: 40px;
+        margin-bottom: 20px;
+    }
     .eq-search {
         display: flex;
         gap: 8px
@@ -103,13 +108,13 @@
         overflow: hidden;
         background: #fff;
         border: 1px solid #dbe4df;
-        border-radius: 8px
+        border-radius: 8px;
     }
 
         .eq-card h2 {
             margin: 0;
             padding: 17px 18px;
-            font-size: 20px
+            font-size: 15px
         }
 
     .eq-table {
@@ -280,6 +285,23 @@
             font-size: 15px
         }
 
+        .eq-field select {
+            background: transparent !important;
+            color: #fff;
+            color-scheme: dark;
+        }
+
+        .eq-field select option {
+            background: #171b18;
+            color: #fff;
+        }
+
+        .eq-field select option:hover,
+        .eq-field select option:checked {
+            background: #171b18;
+            color: #a8df32;
+        }
+
     .eq-row {
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -390,11 +412,8 @@
 
 <main class="eq-page">
     <header class="eq-head">
-        <h1>Equipment Inventory</h1>
-        <form class="eq-search" method="get" asp-action="Equipment">
-            <input name="searchTerm" value="@Model.SearchTerm" placeholder="Search equipment..." />
-            <button type="submit">Search</button>
-        </form>
+        <h1 style="color:#fff !important;">Equipment Inventory</h1>
+       
         <button class="eq-add" type="button" onclick="openEquipmentModal()">＋ Report Equipment Issue</button>
     </header>
 
@@ -421,6 +440,13 @@
             <strong>@Model.OutOfOrder</strong>
         </div>
     </section>
+
+    <div class="equip-searchbar">
+        <form class="eq-search" method="get" asp-action="Equipment">
+            <input name="searchTerm" value="@Model.SearchTerm" placeholder="Search equipment..." />
+            <button type="submit" class="equipment-search-button">Search</button>
+        </form>
+    </div>
 
     <section class="eq-card">
         <h2>Equipment List</h2>
@@ -473,8 +499,8 @@
         <footer class="eq-foot">
             <span>Showing @Model.Items.Count of @Model.TotalCount assets</span>
             <nav class="eq-pager">
-                <a asp-action="Equipment" asp-route-searchTerm="@Model.SearchTerm" asp-route-page="@(Model.Page - 1)" class="@(Model.Page <= 1 ? "disabled" : "")">&lt;</a>
-                <a asp-action="Equipment" asp-route-searchTerm="@Model.SearchTerm" asp-route-page="@(Model.Page + 1)" class="@(Model.Page >= Model.TotalPages ? "disabled" : "")">&gt;</a>
+                <a asp-action="Equipment" asp-route-searchTerm="@Model.SearchTerm" asp-route-page="@(Model.Page - 1)" class="@(Model.Page <= 1 ? "disabled" : "")">Previous</a>
+                <a asp-action="Equipment" asp-route-searchTerm="@Model.SearchTerm" asp-route-page="@(Model.Page + 1)" class="@(Model.Page >= Model.TotalPages ? "disabled" : "")">Next</a>
             </nav>
         </footer>
     </section>
@@ -484,7 +510,6 @@
     <div class="eq-modal">
         <header class="eq-modal-head">
             <h2>Report Equipment Issue</h2>
-            <button class="eq-close" type="button" onclick="closeEquipmentModal()">×</button>
         </header>
         <form class="eq-form" asp-action="AddEquipment" method="post" enctype="multipart/form-data">
             @Html.AntiForgeryToken()
@@ -508,7 +533,7 @@
             </div>
             <div class="condition-label">Current Condition *</div>
             <div class="conditions">
-                @foreach (var condition in new[] { "Good", "Fair", "Needs Maintenance", "Out of Order" })
+                @foreach (var condition in new[] { "Good", "Needs Maintenance", "Out of Order" })
                 {
                     <label class="condition-option">
                         <input type="radio" name="Condition" value="@condition" checked="@(condition == "Good")" />

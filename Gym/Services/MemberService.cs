@@ -116,6 +116,16 @@ namespace Gym.Services
                     var planPrice = MembershipPlanPricing.GetPrice(client.MembershipPlan);
                     paidTotals.TryGetValue(client.UserId, out var paidAmount);
                     var remainingBalance = Math.Max(0m, planPrice - paidAmount);
+                    var membershipDays = Math.Max(1, (expirationDate.Date - client.MembershipStartDate.Date).Days);
+                    // Refunds are prorated by elapsed calendar days, not gym attendance.
+                    // The start/confirmation date consumes zero days; each following
+                    // calendar day consumes one membership day even if the member is absent.
+                    var consumedTrainingDays = Math.Clamp(
+                        (DateTime.Today - client.MembershipStartDate.Date).Days,
+                        0,
+                        membershipDays);
+                    var dailyRate = planPrice / membershipDays;
+                    var estimatedRefund = Math.Max(0m, paidAmount - (dailyRate * consumedTrainingDays));
 
                     return new MemberListItemViewModel
                     {
@@ -129,6 +139,8 @@ namespace Gym.Services
                         PlanPrice = planPrice,
                         PaidAmount = paidAmount,
                         RemainingBalance = remainingBalance,
+                        ConsumedTrainingDays = consumedTrainingDays,
+                        EstimatedRefund = decimal.Round(estimatedRefund, 2, MidpointRounding.AwayFromZero),
                         JoinedDate = client.MembershipStartDate,
                         ExpirationDate = expirationDate,
                         Status = displayStatus,
@@ -228,6 +240,15 @@ namespace Gym.Services
             var model = existing ?? new AddMemberViewModel();
 
             model.TrainerOptions = await BuildTrainerOptionsAsync(model.SelectedTrainerId);
+
+            var trainerAvailability = await _context.TrainerAvailabilities
+                .AsNoTracking()
+                .ToListAsync();
+            model.TrainerAvailableDays = trainerAvailability.ToDictionary(
+                item => item.TrainerId,
+                item => item.AvailableDays
+                    .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                    .ToList());
 
             model.TrainerOptions.Insert(
                 0,
@@ -454,11 +475,37 @@ namespace Gym.Services
             {
                 throw new InvalidOperationException($"Payment cannot exceed the plan price of ₱{planPrice:N2}.");
             }
-            var membershipPaidInFull = paymentAmount >= planPrice;
+            if (paymentAmount < planPrice)
+            {
+                throw new InvalidOperationException($"Payment must cover the full monthly plan price of ₱{planPrice:N2}.");
+            }
 
             var expirationDate = CalculateExpirationDate(
                 form.StartDate,
                 plan);
+
+            if (form.SelectedTrainerId.HasValue)
+            {
+                var trainerAvailability = await _context.TrainerAvailabilities
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(item => item.TrainerId == form.SelectedTrainerId.Value);
+                if (trainerAvailability == null)
+                {
+                    throw new InvalidOperationException("The selected trainer has not configured training days yet.");
+                }
+
+                var availableDays = trainerAvailability.AvailableDays
+                    .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                    .ToList();
+                form.SelectedDays = form.SelectedDays
+                    .Where(selectedDay => availableDays.Contains(selectedDay, StringComparer.OrdinalIgnoreCase))
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+                if (form.SelectedDays.Count == 0)
+                {
+                    throw new InvalidOperationException("Select at least one of the trainer's available training days.");
+                }
+            }
 
             var client = new Client
             {
@@ -476,8 +523,8 @@ namespace Gym.Services
                 MembershipPlan = plan,
                 MembershipStartDate = form.StartDate.Date,
                 MembershipEndDate = expirationDate,
-                Status = membershipPaidInFull ? MemberStatus.Active : MemberStatus.PendingPayment,
-                IsActiveMember = membershipPaidInFull,
+                Status = MemberStatus.Active,
+                IsActiveMember = true,
 
                 AssignedTrainerId =
                     form.SelectedTrainerId,
@@ -510,7 +557,7 @@ namespace Gym.Services
                 DueDate = paidAt,
                 Notes = "Initial cash membership payment recorded during registration."
             });
-            if (membershipPaidInFull && client.AssignedTrainerId.HasValue)
+            if (client.AssignedTrainerId.HasValue)
             {
                 _context.Notifications.Add(new Notification
                 {
@@ -704,22 +751,16 @@ namespace Gym.Services
                 return null;
             }
 
-            // A consumed gym day is a distinct calendar date with at least
-            // one attendance record marked as attended. Multiple sessions on
-            // the same day still count as one consumed day.
-            var consumedDays = await _context.SessionAttendees
-                .AsNoTracking()
-                .Where(attendance =>
-                    attendance.ClientId == id &&
-                    attendance.IsAttended &&
-                    attendance.Session.StartTime.Date >=
-                        client.MembershipStartDate.Date &&
-                    (!client.MembershipEndDate.HasValue ||
-                     attendance.Session.StartTime.Date <=
-                        client.MembershipEndDate.Value.Date))
-                .Select(attendance => attendance.Session.StartTime.Date)
-                .Distinct()
-                .CountAsync();
+            var membershipEnd = client.MembershipEndDate ??
+                client.MembershipStartDate.AddMonths(
+                    MembershipPlanPricing.GetDurationMonths(client.MembershipPlan));
+            var membershipDays = Math.Max(
+                1,
+                (membershipEnd.Date - client.MembershipStartDate.Date).Days);
+            var consumedDays = Math.Clamp(
+                (DateTime.Today - client.MembershipStartDate.Date).Days,
+                0,
+                membershipDays);
 
             client.Status = MemberStatus.Canceled;
             client.IsActiveMember = false;
@@ -881,11 +922,6 @@ namespace Gym.Services
             if (client.Status == MemberStatus.Canceled)
             {
                 return MemberStatus.Canceled;
-            }
-
-            if (client.Status == MemberStatus.PendingPayment)
-            {
-                return MemberStatus.PendingPayment;
             }
 
             if (!client.IsActiveMember ||

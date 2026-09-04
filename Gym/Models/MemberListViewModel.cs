@@ -58,6 +58,10 @@ namespace Gym.Models
 
         public decimal RemainingBalance { get; set; }
 
+        public int ConsumedTrainingDays { get; set; }
+
+        public decimal EstimatedRefund { get; set; }
+
         public DateTime JoinedDate { get; set; }
 
         public DateTime ExpirationDate { get; set; }
@@ -182,6 +186,7 @@ namespace Gym.Models
         public List<string> SelectedDays { get; set; } = new();
 
 
+        [Required(ErrorMessage = "Please select a preferred time slot.")]
         [Display(Name = "Preferred time slot")]
         public string? SelectedTimeSlot { get; set; }
 
@@ -192,6 +197,9 @@ namespace Gym.Models
             = new();
 
         public List<SelectListItem> TrainerOptions { get; set; }
+            = new();
+
+        public Dictionary<int, List<string>> TrainerAvailableDays { get; set; }
             = new();
 
         public List<SelectListItem> GymGoalOptions { get; set; }

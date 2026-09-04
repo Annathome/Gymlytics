@@ -26,8 +26,16 @@
     }
 
     .pay-head p {
-        margin: 0;
+        margin: 0 0 30px;
         color: #5e6963;
+    }
+
+    .pay-action
+    {
+        display:flex;
+        justify-content: space-between;
+        flex-direction: row;
+        position:relative;
     }
 
     /* Renewal Card */
@@ -100,6 +108,10 @@
         border-radius: 8px;
     }
 
+        .pay-card h2{
+            font-size: 15px;
+
+        }
     /* Toolbar */
     .pay-toolbar {
         display: flex;
@@ -223,10 +235,10 @@
         color: #748078;
     }
 
-    .pay-action { position:relative; text-align:center; }
-    .pay-action details { position:relative; display:inline-block; }
-    .pay-action summary { list-style:none; width:34px; height:34px; display:grid; place-items:center; cursor:pointer; border:1px solid #ccd6d0; border-radius:5px; }
-    .pay-action summary::-webkit-details-marker { display:none; }
+    .pay-row-action { position:relative; text-align:center; }
+    .pay-row-action details { position:relative; display:inline-block; }
+    .pay-row-action summary { list-style:none; width:34px; height:34px; display:grid; place-items:center; cursor:pointer; border:1px solid #ccd6d0; border-radius:5px; }
+    .pay-row-action summary::-webkit-details-marker { display:none; }
     .pay-action-menu { position:absolute; right:0; top:39px; z-index:20; width:170px; padding:5px 0; background:#fff; border:1px solid #d8e0db; border-radius:6px; box-shadow:0 8px 22px rgba(0,0,0,.14); }
     .pay-action-menu button { width:100%; padding:11px 14px; border:0; background:#fff; text-align:left; cursor:pointer; }
     .pay-action-menu button:hover { background:#edf6ef; }
@@ -324,35 +336,26 @@
             Monitor member and walk-in payment transactions.
         </p>
     </header>
-
-    <section class="pay-card">
-
-        <!-- Toolbar -->
-        <div class="pay-toolbar">
-
-            <h2>
-                Recent Transactions
-            </h2>
-
+    <div class="pay-action">
             <form class="pay-search"
-                  method="get"
-                  asp-action="Payment">
+                        method="get"
+                        asp-action="Payment">
 
-                <input name="searchTerm"
-                       value="@Model.SearchTerm"
-                       placeholder="Search transactions..." />
+                    <input name="searchTerm"
+                            value="@Model.SearchTerm"
+                            placeholder="Search transactions..." />
 
-                <input type="hidden"
-                       name="selectedStatus"
-                       value="@Model.SelectedStatus" />
+                    <input type="hidden"
+                            name="selectedStatus"
+                            value="@Model.SelectedStatus" />
 
-                <button type="submit">
-                    Search
-                </button>
+                    <button type="submit" class="pay-search-button">
+                        Search
+                    </button>
 
             </form>
 
-            <form method="get"
+             <form method="get"
                   asp-action="Payment">
 
                 <input type="hidden"
@@ -378,8 +381,13 @@
                 </select>
 
             </form>
+    </div>
 
-        </div>
+    <section class="pay-card">
+
+            <h2>
+                Recent Transactions
+            </h2>
 
         <!-- Payment Table -->
         <table class="pay-table">
@@ -389,7 +397,6 @@
                     <th>TRANSACTION CODE</th>
                     <th>MEMBER NAME</th>
                     <th>DATE</th>
-                    <th>METHOD</th>
                     <th>AMOUNT</th>
                     <th>STATUS</th>
                     <th>ACTION</th>
@@ -401,7 +408,7 @@
                 @if (Model.Payments.Count == 0)
                 {
                     <tr>
-                        <td class="pay-empty" colspan="7">
+                        <td class="pay-empty" colspan="6">
                             No payment transactions found.
                         </td>
                     </tr>
@@ -439,10 +446,6 @@
                             @item.PaymentDate.ToString("MMM d, yyyy")
                         </td>
 
-                        <td class="pay-method">
-                            ▣ Cash
-                        </td>
-
                         <td class="pay-amount">
                             ₱@item.Amount.ToString("N2")
                         </td>
@@ -453,27 +456,10 @@
                             </span>
                         </td>
 
-                        <td class="pay-action">
+                        <td class="pay-row-action">
                             <details>
                                 <summary aria-label="Payment actions">⋮</summary>
                                 <div class="pay-action-menu">
-                                    @if (item.RemainingBalance > 0)
-                                    {
-                                        <button type="button"
-                                                data-client-id="@item.ClientId"
-                                                data-member-name="@item.MemberName"
-                                                data-member-email="@item.MemberEmail"
-                                                data-member-number="@item.MembershipNumber"
-                                                data-plan-name="@MembershipPlanPricing.GetName(item.Plan)"
-                                                data-plan-price="@item.PlanPrice.ToString(System.Globalization.CultureInfo.InvariantCulture)"
-                                                data-total-paid="@item.TotalPaid.ToString(System.Globalization.CultureInfo.InvariantCulture)"
-                                                data-remaining="@item.RemainingBalance.ToString(System.Globalization.CultureInfo.InvariantCulture)"
-                                                onclick="openPaymentAction(this)">Add payment</button>
-                                    }
-                                    else
-                                    {
-                                        <button type="button" disabled>Add payment</button>
-                                    }
                                     @if (item.MemberStatus != MemberStatus.Terminated &&
                                          item.MembershipEndDate.HasValue &&
                                          item.MembershipEndDate.Value.Date < DateTime.Today)
@@ -516,7 +502,7 @@
                    asp-route-selectedStatus="@Model.SelectedStatus"
                    asp-route-page="@(Model.Page - 1)"
                    class="@(Model.Page <= 1 ? "disabled" : "")">
-                    &lt;
+                    Previous
                 </a>
 
                 <a asp-action="Payment"
@@ -524,7 +510,7 @@
                    asp-route-selectedStatus="@Model.SelectedStatus"
                    asp-route-page="@(Model.Page + 1)"
                    class="@(Model.Page >= Model.TotalPages ? "disabled" : "")">
-                    &gt;
+                    Next
                 </a>
 
             </nav>
@@ -535,37 +521,10 @@
 
 </main>
 
-<div id="paymentActionModal" class="pay-modal">
-    <div class="pay-modal-card" role="dialog" aria-modal="true" aria-labelledby="paymentActionTitle">
-        <h3 id="paymentActionTitle">Add member payment</h3>
-        <p>Record an additional cash payment toward the membership balance.</p>
-        <div class="pay-modal-grid">
-            <div><small>Member</small><strong id="actionMemberName"></strong></div>
-            <div><small>Membership ID</small><strong id="actionMemberNumber"></strong></div>
-            <div><small>Email</small><strong id="actionMemberEmail"></strong></div>
-            <div><small>Plan</small><strong id="actionPlanName"></strong></div>
-            <div><small>Plan price</small><strong id="actionPlanPrice"></strong></div>
-            <div><small>Total paid</small><strong id="actionTotalPaid"></strong></div>
-            <div><small>Remaining</small><strong id="actionRemaining"></strong></div>
-        </div>
-        <form asp-action="RecordMemberPayment" asp-controller="FrontDesk" method="post" onsubmit="return lockPaymentAction(this)">
-            @Html.AntiForgeryToken()
-            <input type="hidden" id="actionClientId" name="id" />
-            <label for="actionAmount" style="display:block;margin-bottom:6px;font-weight:700;">Amount paid (₱)</label>
-            <input id="actionAmount" name="amount" type="number" min="0.01" step="0.01" required
-                   style="width:100%;height:44px;padding:0 12px;border:1px solid #cbd6d0;border-radius:5px;box-sizing:border-box;" />
-            <div class="pay-modal-actions">
-                <button type="button" class="pay-modal-cancel" onclick="closePaymentAction()">Cancel</button>
-                <button type="submit" class="pay-modal-save">Record payment</button>
-            </div>
-        </form>
-    </div>
-</div>
-
 <div id="renewalActionModal" class="pay-modal">
     <div class="pay-modal-card" role="dialog" aria-modal="true" aria-labelledby="renewalActionTitle">
-        <h3 id="renewalActionTitle">Continue membership renewal?</h3>
-        <p>The current membership has ended. Confirm the cash payment to start the next membership period.</p>
+        <h3 id="renewalActionTitle">Confirm membership renewal</h3>
+        <p>The current membership has ended. Confirm the full cash payment to start the next membership period. A digital receipt will be emailed after renewal.</p>
         <div class="pay-modal-grid">
             <div><small>Member</small><strong id="renewalMemberName"></strong></div>
             <div><small>Plan</small><strong id="renewalPlanName"></strong></div>
@@ -587,30 +546,6 @@
 <script>
     function peso(value) {
         return '₱' + Number(value).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    }
-    function openPaymentAction(button) {
-        document.getElementById('actionClientId').value = button.dataset.clientId;
-        document.getElementById('actionMemberName').textContent = button.dataset.memberName;
-        document.getElementById('actionMemberNumber').textContent = button.dataset.memberNumber;
-        document.getElementById('actionMemberEmail').textContent = button.dataset.memberEmail || 'No email';
-        document.getElementById('actionPlanName').textContent = button.dataset.planName;
-        document.getElementById('actionPlanPrice').textContent = peso(button.dataset.planPrice);
-        document.getElementById('actionTotalPaid').textContent = peso(button.dataset.totalPaid);
-        document.getElementById('actionRemaining').textContent = peso(button.dataset.remaining);
-        const amount = document.getElementById('actionAmount');
-        amount.value = '';
-        amount.max = button.dataset.remaining;
-        document.getElementById('paymentActionModal').style.display = 'flex';
-        amount.focus();
-    }
-    function closePaymentAction() {
-        document.getElementById('paymentActionModal').style.display = 'none';
-    }
-    function lockPaymentAction(form) {
-        const submit = form.querySelector('button[type="submit"]');
-        submit.disabled = true;
-        submit.textContent = 'Processing...';
-        return true;
     }
     function openRenewalAction(button) {
         document.getElementById('renewalClientId').value = button.dataset.clientId;

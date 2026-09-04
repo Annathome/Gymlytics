@@ -12,7 +12,7 @@
     .tm-search { display: flex; gap: 10px; margin-bottom: 20px; }
     .tm-search input { flex: 1; height: 44px; padding: 0 14px; border: 1px solid #287524; border-radius: 7px; background: #061f0c; color: #fff; }
     .tm-search button { width: 100px; border: 0; border-radius: 7px; background: #18752c; color: #fff; font-weight: 700; }
-    .tm-card { overflow: hidden; border: 1px solid #287524; border-radius: 9px; background: #083013; }
+    .tm-card { overflow: hidden; border: 2px solid #535159; border-radius: 9px; background: #083013; box-shadow: 0 10px 24px rgba(0, 0, 0, .48); }
     .tm-table { width: 100%; border-collapse: collapse; }
     .tm-table th { padding: 14px 16px; background: #102f18; color: #d9e7db; text-align: left; font-size: 12px; letter-spacing: .5px; }
     .tm-table td { padding: 15px 16px; border-top: 1px solid rgba(124,239,114,.15); color: #e8f1e9; }
@@ -22,7 +22,7 @@
     .tm-status { display: inline-block; padding: 5px 10px; border-radius: 999px; background: #d5f5da; color: #176b2c; font-size: 11px; font-weight: 700; }
     .tm-status.cancelled, .tm-status.expired, .tm-status.inactive { background: #f8d5d5; color: #a71920; }
     .tm-empty { padding: 45px 20px !important; text-align: center; color: #b9cbbb !important; }
-    .tm-foot { min-height: 68px; display: flex; align-items: center; padding: 14px 18px; border-top: 1px solid #287524; color: #b9cbbb; }
+    .tm-foot { min-height: 68px; display: flex; align-items: center; padding: 14px 18px; border-top: 1px solid #535159; color: #b9cbbb; }
     .tm-pager { display: flex; gap: 8px; margin-left: auto; }
     .tm-pager a { min-width: 46px; height: 36px; display: grid; place-items: center; border: 1px solid #287524; border-radius: 6px; color: #d9e7db; text-decoration: none; }
     .tm-pager a.disabled { pointer-events: none; opacity: .4; }
@@ -55,8 +55,8 @@
         <footer class="tm-foot">
             <span>Showing @Model.Members.Count of @Model.TotalCount (page @Model.Page of @Model.TotalPages)</span>
             <nav class="tm-pager">
-                <a asp-action="Members" asp-route-searchTerm="@Model.SearchTerm" asp-route-page="@(Model.Page - 1)" class="@(Model.Page <= 1 ? "disabled" : "")">&lt;</a>
-                <a asp-action="Members" asp-route-searchTerm="@Model.SearchTerm" asp-route-page="@(Model.Page + 1)" class="@(Model.Page >= Model.TotalPages ? "disabled" : "")">&gt;</a>
+                <a asp-action="Members" asp-route-searchTerm="@Model.SearchTerm" asp-route-page="@(Model.Page - 1)" class="@(Model.Page <= 1 ? "disabled" : "")">Previous</a>
+                <a asp-action="Members" asp-route-searchTerm="@Model.SearchTerm" asp-route-page="@(Model.Page + 1)" class="@(Model.Page >= Model.TotalPages ? "disabled" : "")">Next</a>
             </nav>
         </footer>
     </section>

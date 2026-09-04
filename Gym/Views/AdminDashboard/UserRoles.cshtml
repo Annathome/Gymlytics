@@ -4,30 +4,17 @@
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>User Roles</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Inria+Serif:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap" rel="stylesheet">
-
-    <style>
+<style>
         * {
             box-sizing: border-box;
         }
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background: #fafafa;
-            margin: 0;
-            color: #1a1a1a;
-        }
-
         .page-wrap {
-            max-width: 1040px;
-            margin: 0 auto;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            max-width: none;
+            width: 100%;
+            color: #9ba49d;
         }
 
         .page-header {
@@ -81,12 +68,12 @@
 
         .registry-dialog {
             position: relative;
-            width: min(900px, 96vw);
-            height: min(860px, 92vh);
+            width: min(680px, 96vw);
+            height: min(560px, 92vh);
             overflow: hidden;
-            border: 1px solid #d1d5db;
-            border-radius: 10px;
-            background: #fff;
+            border: 0;
+            border-radius: 12px;
+            background: #171b18;
             box-shadow: 0 24px 70px rgba(0, 0, 0, .35);
         }
 
@@ -94,7 +81,7 @@
             width: 100%;
             height: 100%;
             border: 0;
-            background: #fff;
+            background: #171b18;
         }
 
         .registry-close {
@@ -200,7 +187,26 @@
             border-collapse: collapse;
         }
 
-        thead th {
+        .card-table th {
+            background: #343735;
+            color: #ccd2cd;
+            font-size: 12px;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+        }
+
+        .card-table th,
+        .card-table td {
+            padding: 14px 13px;
+            text-align: left;
+            border-bottom: 1px solid #313632;
+        }
+
+        .card td {
+            font-size: 13px;
+        }
+
+        /* thead th {
             text-align: left;
             font-size: 0.8rem;
             font-weight: 500;
@@ -218,7 +224,7 @@
 
         tbody tr:last-child td {
             border-bottom: none;
-        }
+        } */
 
         .user-cell {
             display: flex;
@@ -305,10 +311,6 @@
             padding: 4px 8px;
             border-radius: 6px;
         }
-
-            .menu-dots-btn:hover {
-                background: #f3f4f6;
-            }
 
         .action-menu {
             display: none;
@@ -419,18 +421,13 @@
         .floating-confirm { background:rgb(8,61,2); border:1px solid rgb(8,61,2); color:#d8c38a; }
         .floating-success { background:rgb(8,61,2); border-color:rgb(8,61,2); }
     </style>
-</head>
-<body>
-    <div class="page-wrap pt-5">
+    <section class="page-wrap">
         <div class="page-header">
             <div>
                 <h1>User roles</h1>
                 <p>Login authentication and access control</p>
             </div>
             <div style="display:flex;gap:10px;align-items:center;">
-                <a asp-controller="Admin" asp-action="UserAttendance" class="btn-invite">
-                    <i class="bi bi-clock-history"></i> Attendance history
-                </a>
                 <button type="button" class="btn-invite" onclick="openStaffRegistry()">
                     + Invite user
                 </button>
@@ -438,7 +435,7 @@
         </div>
 
         <div class="card">
-            <table>
+            <table class="card-table">
                 <thead>
                     <tr>
                         <th>User</th>
@@ -499,7 +496,9 @@
                                         {
                                             <button type="button" class="action-menu-item danger"
                                                     data-name="@user.DisplayName"
+                                                    data-username="@user.Username"
                                                     data-action-name="Mark absent"
+                                                    data-question="Do you want to mark this user absent"
                                                     data-message="Mark this staff member absent for today. Any later login using this account will not change the absent status."
                                                     data-url="@Url.Action("MarkStaffAbsent", "Admin", new { id = user.Id, page = Model.Page })"
                                                     onclick="openUserActionModal(this)">Mark absent</button>
@@ -509,7 +508,9 @@
                                         {
                                             <button type="button" class="action-menu-item"
                                                     data-name="@user.DisplayName"
+                                                    data-username="@user.Username"
                                                     data-action-name="Suspend account"
+                                                    data-question="Do you want to suspend the account for"
                                                     data-message="This user will no longer be able to log in until reactivated."
                                                     data-url="@Url.Action("SuspendUser", "Admin", new { id = user.Id })"
                                                     onclick="openUserActionModal(this)">Suspend account</button>
@@ -518,7 +519,9 @@
                                         {
                                             <button type="button" class="action-menu-item"
                                                     data-name="@user.DisplayName"
+                                                    data-username="@user.Username"
                                                     data-action-name="Reactivate account"
+                                                    data-question="Do you want to reactivate the account for"
                                                     data-message="This user will regain access to their account."
                                                     data-url="@Url.Action("ReactivateUser", "Admin", new { id = user.Id })"
                                                     onclick="openUserActionModal(this)">Reactivate account</button>
@@ -526,7 +529,9 @@
 
                                         <button type="button" class="action-menu-item danger"
                                                 data-name="@user.DisplayName"
+                                                data-username="@user.Username"
                                                 data-action-name="Delete account"
+                                                data-question="Do you want to delete the account for"
                                                 data-message="This action permanently removes the account and cannot be undone."
                                                 data-url="@Url.Action("DeleteUser", "Admin", new { id = user.Id })"
                                                 onclick="openUserActionModal(this)">Delete account</button>
@@ -537,24 +542,23 @@
                     }
                 </tbody>
             </table>
-        </div>
-
-        @if (Model != null && Model.Items.Count > 0)
-        {
-            <div class="pager">
-                <span>Page @Model.Page of @Model.TotalPages &middot; @Model.TotalCount users</span>
-                <div style="display:flex;gap:8px;">
-                    <a asp-action="UserRoles" asp-route-page="@(Model.Page - 1)"
-                       class="btn-invite @(Model.HasPrevious ? "" : "pager-disabled")">
-                        Previous
-                    </a>
-                    <a asp-action="UserRoles" asp-route-page="@(Model.Page + 1)"
-                       class="btn-invite @(Model.HasNext ? "" : "pager-disabled")">
-                        Next
-                    </a>
+            @if (Model != null && Model.Items.Count > 0)
+            {
+                <div class="pager">
+                    <span>Page @Model.Page of @Model.TotalPages &middot; @Model.TotalCount users</span>
+                    <div style="display:flex;gap:8px;">
+                        <a asp-action="UserRoles" asp-route-page="@(Model.Page - 1)"
+                           class="btn-invite @(Model.HasPrevious ? "" : "pager-disabled")">
+                            Previous
+                        </a>
+                        <a asp-action="UserRoles" asp-route-page="@(Model.Page + 1)"
+                           class="btn-invite @(Model.HasNext ? "" : "pager-disabled")">
+                            Next
+                        </a>
+                    </div>
                 </div>
-            </div>
-        }
+            }
+        </div>
 
         <div class="footer-note">
             <div>
@@ -565,7 +569,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </section>
 
     <div id="userActionModal" class="floating-overlay" style="display:none;">
         <div class="floating-card" role="dialog" aria-modal="true">
@@ -631,7 +635,6 @@
 
     <div class="registry-overlay" id="staffRegistryModal" role="dialog" aria-modal="true" aria-label="Register new user">
         <div class="registry-dialog">
-            <button type="button" class="registry-close" onclick="closeStaffRegistry()" aria-label="Close registration">×</button>
             <iframe class="registry-frame" id="staffRegistryFrame" title="Staff registration form" data-src="@Url.Action("RegisterStaff", "Account")"></iframe>
         </div>
     </div>
@@ -653,10 +656,12 @@
 
         function openUserActionModal(button) {
             document.getElementById('userActionTitle').textContent = button.dataset.actionName + '?';
-            document.getElementById('userActionUser').textContent = button.dataset.name;
+            const username = button.dataset.username || button.dataset.name;
+            const question = button.dataset.question || ('Do you want to continue with');
+            document.getElementById('userActionUser').textContent = question + ' "' + username + '"?';
             document.getElementById('userActionMessage').textContent = button.dataset.message;
             document.getElementById('userActionForm').action = button.dataset.url;
-            document.getElementById('userActionConfirm').textContent = 'OK';
+            document.getElementById('userActionConfirm').textContent = button.dataset.actionName;
             document.getElementById('userActionModal').style.display = 'flex';
         }
 
@@ -707,5 +712,3 @@
             if (e.key === 'Escape') closeStaffRegistry();
         });
     </script>
-</body>
-</html>

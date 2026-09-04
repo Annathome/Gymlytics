@@ -39,8 +39,7 @@ namespace Gym.Services
                 .GetAllAsync(a => a.Session.StartTime.Date == today && a.IsAttended)).ToList();
 
             var pendingPayments = (await _paymentRepository
-                .GetAllAsync(p => p.Status == PaymentStatus.Pending ||
-                           p.Status == PaymentStatus.Overdue)).ToList();
+                .GetAllAsync(p => p.Status == PaymentStatus.Overdue)).ToList();
 
             var equipment = (await _equipmentRepository.GetAllAsync()).ToList();
             var equipmentIssues = equipment

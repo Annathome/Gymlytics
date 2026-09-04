@@ -1,5 +1,6 @@
 ﻿using Gym.Models;
 using Gym.Services;
+using Gym.Data;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
@@ -15,19 +16,22 @@ namespace Gym.Controllers
         private readonly GmailValidationService _gmailService;
         private readonly PendingRegistrationService _pendingRegistrationService;
         private readonly IConfiguration _configuration;
+        private readonly GymDbContext _context;
 
         public AccountController(
             SetupService setupService,
             HashingService hashingService,
             GmailValidationService gmailService,
             PendingRegistrationService pendingRegistrationService,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            GymDbContext context)
         {
             _setupService = setupService;
             _hashingService = hashingService;
             _gmailService = gmailService;
             _pendingRegistrationService = pendingRegistrationService;
             _configuration = configuration;
+            _context = context;
         }
 
         // GET: /Account/RegisterAdmin
@@ -144,6 +148,15 @@ namespace Gym.Controllers
 
             await _setupService.RecordLoginAsync(userId);
 
+            // A prior authorization challenge can leave this TempData entry behind
+            // while the user completes a valid sign-in. Do not carry that stale
+            // denial banner onto the authenticated role's landing page.
+            if (TempData["ErrorMessage"] is string staleErrorMessage &&
+                staleErrorMessage.StartsWith("Access Denied:", StringComparison.OrdinalIgnoreCase))
+            {
+                TempData.Remove("ErrorMessage");
+            }
+
             if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
             {
                 return Redirect(returnUrl);
@@ -171,7 +184,8 @@ namespace Gym.Controllers
                 return View(model);
             }
 
-            var (created, createError, newStaffId) = await _setupService.CreatePendingStaffAsync(model);
+            var passwordHash = _hashingService.HashPassword(model.Password);
+            var (created, createError, newStaffId) = await _setupService.CreatePendingStaffAsync(model, passwordHash);
 
             if (!created)
             {
@@ -182,7 +196,7 @@ namespace Gym.Controllers
             // Create 30-minute valid token
             string token = _pendingRegistrationService.CreateToken(newStaffId.ToString());
 
-            string confirmUrl = $"{Request.Scheme}://{Request.Host}{Url.Action("SetCredentials", "Account", new { token })}";
+            string confirmUrl = $"{Request.Scheme}://{Request.Host}{Url.Action("ConfirmStaffRegistration", "Account", new { token })}";
 
             var (emailSent, emailError) = await _gmailService.SendConfirmationEmailAsync(model.Email, confirmUrl);
 
@@ -203,6 +217,34 @@ namespace Gym.Controllers
         {
             ViewBag.Email = email;
             return View("CheckEmail");
+        }
+
+        // GET: /Account/ConfirmStaffRegistration?token=...
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> ConfirmStaffRegistration(string token)
+        {
+            if (string.IsNullOrWhiteSpace(token))
+            {
+                ViewBag.Error = "This confirmation link is invalid or has expired.";
+                return View("ConfirmationFailed");
+            }
+
+            var (consumed, staffIdText) = _pendingRegistrationService.Consume(token);
+            if (!consumed || !int.TryParse(staffIdText, out var staffId))
+            {
+                ViewBag.Error = "This confirmation link has expired or has already been used. Please contact an admin for a new invitation.";
+                return View("ConfirmationFailed");
+            }
+
+            var (activated, activationError) = await _setupService.ActivateStaffAsync(staffId);
+            if (!activated)
+            {
+                ViewBag.Error = activationError ?? "The account could not be activated.";
+                return View("ConfirmationFailed");
+            }
+
+            return RedirectToAction(nameof(ConfirmationSuccess));
         }
 
         // GET: /Account/SetCredentials?token=...
@@ -275,7 +317,8 @@ namespace Gym.Controllers
         {
             return View(new ChangePasswordViewModel
             {
-                CurrentUsername = User.FindFirst("Username")?.Value ?? string.Empty
+                CurrentUsername = User.FindFirst("Username")?.Value ?? string.Empty,
+                NewUsername = User.FindFirst("Username")?.Value ?? string.Empty
             });
         }
 
@@ -312,15 +355,31 @@ namespace Gym.Controllers
             }
 
             var newPasswordHash = _hashingService.HashPassword(model.NewPassword);
-            if (!await _setupService.UpdatePasswordHashAsync(currentUserId, newPasswordHash))
+            var (updated, updateError) = await _setupService.UpdateCredentialsAsync(
+                currentUserId,
+                model.NewUsername.Trim(),
+                newPasswordHash);
+            if (!updated)
             {
-                ModelState.AddModelError(string.Empty, "The password could not be updated.");
+                ModelState.AddModelError(string.Empty, updateError ?? "The credentials could not be updated.");
                 return View(model);
             }
 
+            _context.FrontDeskEmailNotifications.Add(new FrontDeskEmailNotification
+            {
+                StaffId = currentUserId,
+                Title = "User password changed",
+                Message = $"{model.CurrentUsername.Trim()} changed their account username or password.",
+                Status = "Activity",
+                EmailType = "Security",
+                DeliveryKey = $"PasswordChanged:{currentUserId}:{DateTime.Now:yyyyMMddHHmmss}",
+                CreatedDate = DateTime.Now
+            });
+            await _context.SaveChangesAsync();
+
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             TempData["SuccessMessage"] =
-                "Password updated successfully. Sign in using your new password.";
+                "Credentials updated successfully. Sign in using your new username and password.";
             return RedirectToAction(nameof(Login));
         }
 

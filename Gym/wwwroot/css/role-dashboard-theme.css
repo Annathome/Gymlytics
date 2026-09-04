@@ -1,0 +1,3502 @@
+.role-shell {
+    min-height: 100vh;
+    background: #37373A !important;
+    color: #c4ccc6;
+    font-family: "Inria Serif", serif;
+}
+
+.role-shell .nav-header {
+    width: 280px !important;
+    flex: 0 0 280px;
+    min-height: 100vh;
+    background: #2E2E2F !important;
+    border-right: 1px solid #1f6b37 !important;
+}
+
+.role-shell .navbar {
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    box-shadow: none !important;
+}
+
+.role-shell .container.g-3 {
+    padding: 32px 20px 20px !important;
+}
+
+.role-shell .navbar-logo {
+    width: 62px !important;
+    height: 62px !important;
+    border: 1px solid #3b9850 !important;
+}
+
+.role-shell .navbar-brand {
+    color: #d7ddd8 !important;
+    font-size: 25px !important;
+    font-weight: 700 !important;
+}
+
+.role-shell .navbar-nav {
+    width: 100%;
+    margin-top: 30px !important;
+    gap: 10px !important;
+}
+
+.role-shell .nav-item,
+.role-shell .nav-item-btn {
+    width: 100% !important;
+    min-height: 58px;
+    margin: 0 !important;
+    padding: 0 14px !important;
+    border: 0 !important;
+    border-radius: 7px !important;
+    background: transparent !important;
+    color: #d7ddd8 !important;
+    box-shadow: none !important;
+}
+
+.role-shell .nav-item:hover,
+.role-shell .nav-item.active,
+.role-shell .nav-item-btn:hover,
+.role-shell .nav-item-btn.active {
+    background: #1b351f !important;
+    box-shadow: inset 3px 0 0 #7cef72 !important;
+}
+
+.role-shell .nav-link,
+.role-shell .icon {
+    color: #d7ddd8 !important;
+    font-size: 15px !important;
+}
+
+.role-shell .nav-link {
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.role-shell .nav-admin {
+    background: #1f4829 !important;
+    color: #9de5aa !important;
+}
+
+.role-shell .admin-role-subtitle,
+.role-shell .admin-link {
+    color: #9ba49d !important;
+}
+
+/* Keep the sidebar profile button consistent on every role dashboard. */
+.admin-shell .btn-admin,
+.role-shell .btn-admin {
+    width: 100% !important;
+    padding: 20px 0 !important;
+}
+
+.admin-shell .btn-admin-inner,
+.role-shell .btn-admin-inner {
+    display: flex !important;
+    align-items: center !important;
+    width: 100% !important;
+    min-height: 95px !important;
+    padding: 10px !important;
+    gap: 18px !important;
+    border: 0 !important;
+    border-radius: 9px !important;
+    background: transparent !important;
+    cursor: pointer !important;
+    transition: background-color .2s ease, transform .2s ease !important;
+}
+
+.admin-shell .btn-admin-inner:hover,
+.role-shell .btn-admin-inner:hover {
+    background: #0b4f19 !important;
+    transform: translateY(-1px);
+}
+
+.admin-shell .btn-admin-inner .nav-admin,
+.role-shell .btn-admin-inner .nav-admin {
+    flex: 0 0 75px !important;
+    width: 75px !important;
+    height: 75px !important;
+    margin: 0 !important;
+    border: 2px solid #6df083 !important;
+    border-radius: 0 !important;
+    background: #194d29 !important;
+    color: #b8e8c2 !important;
+    font-family: "Inria Serif", serif !important;
+    font-size: 18px !important;
+    font-weight: 700 !important;
+}
+
+.admin-shell .btn-admin-inner .admin-link-info,
+.role-shell .btn-admin-inner .admin-link-info {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    min-width: 0 !important;
+    gap: 5px !important;
+}
+
+.admin-shell .btn-admin-inner .admin-link,
+.role-shell .btn-admin-inner .admin-link {
+    color: #b8e8c2 !important;
+    font-size: 18px !important;
+    line-height: 1.2 !important;
+}
+
+.admin-shell .btn-admin-inner .admin-role-subtitle,
+.role-shell .btn-admin-inner .admin-role-subtitle {
+    color: #9fd3aa !important;
+    font-size: 15px !important;
+    line-height: 1.2 !important;
+}
+
+.trainer-shell .btn-admin > hr {
+    display: none !important;
+}
+
+.frontdesk-shell > .container,
+.frontdesk-shell > .admin-main,
+.trainer-shell > .container-fluid {
+    flex: 1;
+    width: auto !important;
+    max-width: none !important;
+    min-width: 0;
+    margin: 0 !important;
+    padding: 32px !important;
+    background: #37373A !important;
+}
+
+.frontdesk-shell .frontdesk-main {
+    flex: 1 !important;
+    width: auto !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 32px !important;
+    background: #37373A !important;
+}
+
+
+/* Dashboard/menu wrappers stay transparent; cards use the neutral fill. */
+.frontdesk-shell .fd-summary-grid,
+.frontdesk-shell .fd-insights-grid,
+.trainer-shell .ts-stats,
+.admin-shell .ad-stats,
+.admin-shell .aa-stats,
+.admin-shell .ae-stats,
+.admin-shell .ap-stats,
+.admin-shell .atm-stats {
+    padding: 0 !important;
+    background: transparent !important;
+}
+
+.frontdesk-shell .fd-panel,
+.frontdesk-shell .fd-summary-card,
+.trainer-shell .ts-panel,
+.trainer-shell .ts-stat,
+.admin-shell .am-card,
+.admin-shell .aa-card,
+.admin-shell .ae-card,
+.admin-shell .ap-card,
+.admin-shell .atm-grid-shell,
+.admin-shell .ua-card,
+.admin-shell .page-wrap .card {
+    background: #5E5D63 !important;
+/*    border: 2px solid #000 !important;*/
+    outline: 0 !important;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, .42) !important;
+}
+
+.frontdesk-shell .fd-chart,
+.frontdesk-shell .fd-availability,
+.trainer-shell .ts-day,
+.admin-shell .ad-stat,
+.admin-shell .ad-panel,
+.admin-shell .aa-stat,
+.admin-shell .ae-stat,
+.admin-shell .ap-stat,
+.admin-shell .atm-stat {
+    background: #5E5D63 !important;
+    border: 2px solid #535159 !important;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, .42) !important;
+}
+
+.admin-shell .admin-main .ad-stat,
+.admin-shell .admin-main .ad-panel {
+    background: #5E5D63 !important;
+/*    border: 2px solid #000 !important;*/
+    border-radius: 5px !important;
+}
+
+.frontdesk-shell .nav.container {
+    width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.frontdesk-shell .navbar-nav.flex-column {
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+.frontdesk-shell .nav-item {
+    display: flex !important;
+    align-items: center !important;
+    gap: 15px !important;
+    text-decoration: none !important;
+}
+
+.frontdesk-shell .btn-admin {
+    margin-top: auto !important;
+    padding: 20px 0 0 !important;
+    border-top: 1px solid #293029;
+}
+
+.role-shell main[role="main"] {
+    width: 100%;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.role-shell h1 {
+    color: #d7ddd8 !important;
+    font-size: 30px !important;
+    font-weight: 700 !important;
+    line-height: 1.2 !important;
+}
+
+.role-shell h2,
+.role-shell h3 {
+    color: #d7ddd8 !important;
+    font-size: 20px !important;
+}
+
+.role-shell p,
+.role-shell td,
+.role-shell label {
+    color: #9ba49d !important;
+    font-size: 15px !important;
+}
+
+.role-shell th,
+.role-shell small {
+    color: #9ba49d !important;
+    font-size: 10px !important;
+}
+
+.role-shell table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    background: #5E5D63 !important;
+}
+
+.role-shell th {
+    padding: 14px 13px !important;
+    background: #343735 !important;
+    border-bottom: 1px solid #313632 !important;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+.role-shell td {
+    padding: 14px 13px !important;
+    background: #5E5D63 !important;
+    border-bottom: 1px solid #313632 !important;
+}
+
+.role-shell button,
+.role-shell .btn,
+.role-shell input,
+.role-shell select,
+.role-shell textarea {
+    border-radius: 0 !important;
+}
+
+.role-shell input,
+.role-shell select,
+.role-shell textarea {
+    background: #1b1e1c !important;
+    border: 1px solid #59635c !important;
+    color: #d7ddd8 !important;
+}
+
+.role-shell button[type="submit"],
+.role-shell .btn-primary,
+.role-shell .fd-primary {
+    background: #a8df32 !important;
+    border-color: #a8df32 !important;
+    color: #20271f !important;
+    font-weight: 800 !important;
+}
+
+/* Front Desk dashboard aligned with the Admin overview. */
+.frontdesk-shell .fd-dashboard {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    transform: none !important;
+    color: #c4ccc6 !important;
+}
+
+.frontdesk-shell .role-dashboard-head,
+.trainer-shell .ts-title {
+    margin: 0 0 30px !important;
+}
+
+.frontdesk-shell .role-dashboard-head p,
+.trainer-shell .ts-title p {
+    margin: 5px 0 0 !important;
+}
+
+.frontdesk-shell .fd-summary-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 20px !important;
+}
+
+.frontdesk-shell .fd-summary-card,
+.frontdesk-shell .fd-panel,
+.trainer-shell .ts-stat,
+.trainer-shell .ts-panel {
+    background: #5E5D63 !important;
+    border: 2px solid #535159 !important;
+    border-radius: 6px !important;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, .42) !important;
+}
+
+.frontdesk-shell .fd-summary-card {
+    min-height: 150px !important;
+    padding: 22px !important;
+    border-left-width: 2px !important;
+}
+
+.frontdesk-shell .fd-summary-value,
+.trainer-shell .ts-stat strong,
+.trainer-shell .ts-time,
+.trainer-shell .ts-count {
+    color: #b9ff20 !important;
+}
+
+.frontdesk-shell .fd-summary-value,
+.trainer-shell .ts-stat strong {
+    font-size: 30px !important;
+}
+
+.frontdesk-shell .fd-insights-grid {
+    gap: 22px !important;
+    margin-top: 28px !important;
+}
+
+.frontdesk-shell .fd-chart,
+.frontdesk-shell .fd-availability,
+.frontdesk-shell .fd-schedule {
+    padding: 22px !important;
+}
+
+/* Trainer dashboard and menu pages use the same content grid. */
+.trainer-shell :is(
+    .trainer-schedule,
+    .tm-page,
+    .availability-page,
+    .trainer-equipment,
+    .trainer-notifications
+) {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    color: #c4ccc6 !important;
+    box-sizing: border-box !important;
+}
+
+/* Consistent white titles across every Trainer page. */
+body.trainer-shell :is(
+    .ts-title h1,
+    .tm-head h1,
+    .availability-page h1,
+    .te-header h1,
+    .tn-title,
+    .trainer-notifications h1
+) {
+    color: #ffffff !important;
+}
+
+/* Keep the assigned-member count directly below the My Members title. */
+body.trainer-shell .tm-head {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
+    gap: 5px !important;
+}
+
+body.trainer-shell .tm-head h1,
+body.trainer-shell .tm-head p {
+    width: 100% !important;
+}
+
+.trainer-shell .ts-stats {
+    gap: 20px !important;
+    margin-bottom: 28px !important;
+}
+
+.trainer-shell .ts-stat {
+    min-height: 150px;
+    padding: 22px !important;
+}
+
+.trainer-shell .ts-panel-head {
+    border-color: #293029 !important;
+}
+
+.trainer-shell .ts-day {
+    background: #101b13 !important;
+    border-color: #293029 !important;
+    color: #9ba49d !important;
+}
+
+.trainer-shell .ts-day.selected {
+    border-color: #7faf31 !important;
+    box-shadow: inset 0 3px #7faf31 !important;
+    color: #c4ccc6 !important;
+}
+
+@media (max-width: 900px) {
+    .role-shell .nav-header { width: 240px !important; flex-basis: 240px; }
+    .frontdesk-shell > .container,
+    .trainer-shell > .container-fluid { padding: 20px !important; }
+    .frontdesk-shell .fd-summary-grid,
+    .trainer-shell .ts-stats { grid-template-columns: 1fr !important; }
+}
+
+/* Payment follows the Front Desk Members page composition. */
+.frontdesk-shell .pay-head {
+    display: block !important;
+    min-height: 96px !important;
+    margin: 0 0 34px !important;
+    padding: 0 0 24px !important;
+    border-bottom: 1px solid #293029 !important;
+}
+
+.frontdesk-shell .pay-head h1,
+.frontdesk-shell .pay-head p {
+    margin-left: 0 !important;
+    text-align: left !important;
+}
+
+.frontdesk-shell .pay-head p {
+    margin-top: 5px !important;
+    margin-bottom: 0 !important;
+}
+
+.frontdesk-shell .pay-action {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    width: 100% !important;
+    margin: 0 0 18px !important;
+    gap: 15px !important;
+}
+
+.frontdesk-shell .pay-action .pay-search {
+    display: flex !important;
+    flex: 1 1 auto !important;
+    width: auto !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    gap: 15px !important;
+}
+
+.frontdesk-shell .pay-action .pay-search input {
+    flex: 1 1 auto !important;
+    width: auto !important;
+    min-width: 0 !important;
+    height: 56px !important;
+}
+
+.frontdesk-shell .pay-action .pay-search button {
+    flex: 0 0 150px !important;
+    width: 150px !important;
+    height: 56px !important;
+}
+
+.frontdesk-shell .pay-action > form:last-child {
+    flex: 0 0 205px !important;
+    margin: 0 !important;
+}
+
+/* System-wide pagination dimensions and typography. */
+:is(.frontdesk-shell, .trainer-shell, .admin-shell) :is(
+    .pagination-bar,
+    .am-footer,
+    .eq-foot,
+    .pay-foot,
+    .fd-table-foot,
+    .wi-footer,
+    .email-pagination,
+    .tm-foot,
+    .te-footer,
+    .aa-pager,
+    .ae-pager,
+    .ap-pager,
+    .ua-foot,
+    .activity-pagination
+),
+.admin-shell .am-pager,
+.admin-shell .page-wrap > .card > .pager {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+    min-height: 80px !important;
+    padding: 14px 20px !important;
+    background: #5E5D63 !important;
+    box-sizing: border-box !important;
+}
+
+:is(.frontdesk-shell, .trainer-shell, .admin-shell) :is(
+    .pagination-bar,
+    .am-footer,
+    .eq-foot,
+    .pay-foot,
+    .fd-table-foot,
+    .wi-footer,
+    .email-pagination,
+    .tm-foot,
+    .te-footer,
+    .aa-pager,
+    .ae-pager,
+    .ap-pager,
+    .ua-foot,
+    .activity-pagination
+) > span,
+.admin-shell .am-pager > span,
+.admin-shell .page-wrap > .card > .pager > span {
+    color: #aab3ac !important;
+    font-size: 15px !important;
+    font-weight: 400 !important;
+}
+
+:is(.frontdesk-shell, .trainer-shell, .admin-shell) :is(
+    .pagination-arrows,
+    .pager,
+    .eq-pager,
+    .pay-pager,
+    .fd-pager,
+    .wi-pages,
+    .email-pagination nav,
+    .tm-pager,
+    .te-pager,
+    .aa-pages,
+    .ae-pages,
+    .ap-page-buttons,
+    .am-page-actions,
+    .ua-pages,
+    .activity-pagination-buttons
+) {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+}
+
+:is(.frontdesk-shell, .trainer-shell, .admin-shell) :is(
+    .pagination-arrows,
+    .pager,
+    .eq-pager,
+    .pay-pager,
+    .fd-pager,
+    .wi-pages,
+    .email-pagination nav,
+    .tm-pager,
+    .te-pager,
+    .aa-pages,
+    .ae-pages,
+    .ap-page-buttons,
+    .am-page-actions,
+    .ua-pages,
+    .activity-pagination-buttons
+) :is(a, button) {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 102px !important;
+    min-width: 102px !important;
+    height: 50px !important;
+    padding: 0 !important;
+    border: 1px solid #74777a !important;
+    border-radius: 5px !important;
+    background: transparent !important;
+    color: #fff !important;
+    box-shadow: none !important;
+    font-family: Arial, sans-serif !important;
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    line-height: 1 !important;
+    text-align: center !important;
+    text-decoration: none !important;
+    text-transform: uppercase !important;
+    box-sizing: border-box !important;
+}
+
+:is(.frontdesk-shell, .trainer-shell, .admin-shell) :is(
+    .pagination-arrows,
+    .pager,
+    .eq-pager,
+    .pay-pager,
+    .fd-pager,
+    .wi-pages,
+    .email-pagination nav,
+    .tm-pager,
+    .te-pager,
+    .aa-pages,
+    .ae-pages,
+    .ap-page-buttons,
+    .am-page-actions,
+    .ua-pages,
+    .activity-pagination-buttons
+) :is(.disabled, .pager-disabled, :disabled) {
+    opacity: .4 !important;
+    pointer-events: none !important;
+}
+
+.frontdesk-shell .pagination-arrows a::after {
+    content: none !important;
+}
+
+/* Final Payments sizing and full-width table alignment. */
+body.frontdesk-shell .pay-action .pay-search input,
+body.frontdesk-shell .pay-action .pay-search button,
+body.frontdesk-shell .pay-action .pay-status {
+    height: 56px !important;
+    box-sizing: border-box !important;
+    font-size: 15px !important;
+    color: #fff !important;
+}
+
+body.frontdesk-shell .pay-action .pay-search button {
+    background: #A8DF32 !important;
+    border: 1px solid #535159 !important;
+    color: #000 !important;
+}
+
+body.frontdesk-shell .pay-action .pay-search button:hover {
+    background: #96C92C !important;
+    color: #000 !important;
+}
+
+body.frontdesk-shell .pay-action .pay-search input::placeholder {
+    color: #fff !important;
+    opacity: .8;
+}
+
+body.frontdesk-shell .pay-card,
+body.frontdesk-shell .pay-table {
+    width: 100% !important;
+    max-width: none !important;
+}
+
+body.frontdesk-shell .pay-card {
+    border: none !important;
+    border-radius: 8px !important;
+    overflow: hidden !important;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, .42) !important;
+}
+
+body.frontdesk-shell .pay-card .pay-foot {
+    border: 0 !important;
+    border-top: 1px solid #293029 !important;
+}
+
+body.frontdesk-shell .pay-table th {
+    color: #fff !important;
+    font-size: 15px !important;
+}
+
+body.frontdesk-shell main[role="main"] .pay-head h1 {
+    color: #fff !important;
+}
+
+/* Keep every Payments toolbar control visually aligned. */
+.frontdesk-shell .pay-action .pay-search input,
+.frontdesk-shell .pay-action .pay-search button,
+.frontdesk-shell .pay-action .pay-status {
+    height: 56px !important;
+    box-sizing: border-box !important;
+    font-size: 15px !important;
+    color: #fff !important;
+}
+
+.frontdesk-shell .pay-action .pay-search input::placeholder {
+    color: #fff !important;
+    opacity: .8;
+}
+
+.frontdesk-shell .pay-action .pay-status option {
+    color: #fff;
+    background: #1b1e1c;
+}
+
+.frontdesk-shell .pay-card,
+.frontdesk-shell .pay-table,
+.frontdesk-shell .pay-table thead,
+.frontdesk-shell .pay-table thead tr {
+    width: 100% !important;
+}
+
+.frontdesk-shell .pay-table th {
+    color: #fff !important;
+}
+
+/* Definitive menu-page titles: this must remain the final cascade block. */
+body.frontdesk-shell main[role="main"] h1,
+body.trainer-shell main[role="main"] h1 {
+    margin-top: 0 !important;
+    margin-bottom: 5px !important;
+    color: #9ba49d !important;
+    font-family: "Inria Serif", serif !important;
+    font-size: 30px !important;
+    font-weight: 700 !important;
+    line-height: 1.2 !important;
+    letter-spacing: 0 !important;
+    text-transform: none !important;
+}
+
+body.frontdesk-shell main[role="main"] :is(.header-subtitle, .page-subtitle, .role-page-subtitle, .pay-head > p, .wi-head p, .eq-head p),
+body.trainer-shell main[role="main"] :is(.header-subtitle, .page-subtitle, .role-page-subtitle, .tm-head > p, .te-header > p, .ts-title > p, .lead) {
+    margin-top: 0 !important;
+    color: #ffffff !important;
+    font-family: "Inria Serif", serif !important;
+    font-size: 15px !important;
+    font-weight: 400 !important;
+    line-height: 1.4 !important;
+    letter-spacing: 0 !important;
+    text-transform: none !important;
+}
+
+/* Definitive menu-page title typography. Keep this at the end so page CSS cannot override it. */
+body.frontdesk-shell main[role="main"] h1,
+body.trainer-shell main[role="main"] h1 {
+    margin-top: 0 !important;
+    margin-bottom: 5px !important;
+    color: #9ba49d !important;
+    font-family: "Inria Serif", serif !important;
+    font-size: 30px !important;
+    font-weight: 700 !important;
+    line-height: 1.2 !important;
+    letter-spacing: 0 !important;
+    text-transform: none !important;
+}
+
+body.frontdesk-shell main[role="main"] :is(
+    .header-subtitle,
+    .page-subtitle,
+    .role-page-subtitle,
+    .pay-head > p,
+    .wi-head p,
+    .eq-head p
+),
+body.trainer-shell main[role="main"] :is(
+    .header-subtitle,
+    .page-subtitle,
+    .role-page-subtitle,
+    .tm-head > p,
+    .te-header > p,
+    .ts-title > p,
+    .lead
+) {
+    margin-top: 0 !important;
+    color: #ffffff !important;
+    font-family: "Inria Serif", serif !important;
+    font-size: 15px !important;
+    font-weight: 400 !important;
+    line-height: 1.4 !important;
+    letter-spacing: 0 !important;
+    text-transform: none !important;
+}
+
+/* Members title aligns with Attendance Monitoring. */
+.frontdesk-shell .page-container .top-member-bar {
+    align-items: flex-start !important;
+    min-height: 0 !important;
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+}
+
+.frontdesk-shell .page-container .header-title h1 {
+    margin: 0 0 5px !important;
+    color: #9ba49d !important;
+    font-size: 30px !important;
+    font-weight: 700 !important;
+    line-height: 1.2 !important;
+}
+
+/* Muted separator between Attendance title and search controls. */
+.frontdesk-shell .atten-searchbar {
+    margin-top: 34px !important;
+    padding-top: 34px !important;
+    border-top: 1px solid #293029 !important;
+}
+
+/* Menu-page titles match the role overview heading. */
+.frontdesk-shell main h1,
+.trainer-shell main h1 {
+    margin: 0 0 5px !important;
+    color: #9ba49d !important;
+    font-family: "Inria Serif", serif !important;
+    font-size: 30px !important;
+    font-weight: 700 !important;
+    line-height: 1.2 !important;
+    letter-spacing: 0 !important;
+    text-transform: none !important;
+}
+
+.frontdesk-shell .header-subtitle,
+.frontdesk-shell .pay-head > p,
+.frontdesk-shell .wi-head p,
+.frontdesk-shell .eq-head p,
+.frontdesk-shell .am-title + p,
+.trainer-shell .tm-head > p,
+.trainer-shell .te-header > p,
+.trainer-shell .availability-page .lead,
+.trainer-shell .trainer-notifications .subtitle {
+    margin: 0 !important;
+    color: #ffffff !important;
+    font-family: "Inria Serif", serif !important;
+    font-size: 15px !important;
+    font-weight: 400 !important;
+    line-height: 1.4 !important;
+    letter-spacing: 0 !important;
+    text-transform: none !important;
+}
+
+.frontdesk-shell .pay-action .pay-status {
+    width: 100% !important;
+    height: 48px !important;
+}
+
+@media (max-width: 900px) {
+    .frontdesk-shell .pay-action {
+        align-items: stretch !important;
+        flex-direction: column !important;
+    }
+
+    .frontdesk-shell .pay-action .pay-search,
+    .frontdesk-shell .pay-action > form:last-child {
+        width: 100% !important;
+    }
+}
+
+/* Attendance search sits independently without a separator rule. */
+.frontdesk-shell .am-search {
+    padding-bottom: 0 !important;
+    border-bottom: 0 !important;
+}
+
+/* Final Attendance Monitoring typography and control alignment. */
+body.frontdesk-shell .am-page .am-title,
+body.frontdesk-shell .am-page .am-card-head h2 {
+    color: #fff !important;
+}
+
+body.frontdesk-shell .am-page .am-search input,
+body.frontdesk-shell .am-page .am-search .attendance-search-button {
+    height: 56px !important;
+    box-sizing: border-box !important;
+    font-size: 15px !important;
+}
+
+body.frontdesk-shell .am-page .am-table th {
+    color: #fff !important;
+    font-size: 15px !important;
+}
+
+/* Keep Payment aligned with Members after all legacy rules. */
+.frontdesk-shell .pay-head {
+    display: block !important;
+    min-height: 96px !important;
+    margin: 0 0 34px !important;
+    padding: 0 0 24px !important;
+    border-bottom: 1px solid #293029 !important;
+}
+
+.frontdesk-shell .pay-head p {
+    margin: 5px 0 0 !important;
+    text-align: left !important;
+}
+
+.frontdesk-shell .pay-action {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    width: 100% !important;
+    margin: 0 0 18px !important;
+    gap: 15px !important;
+}
+
+.frontdesk-shell .pay-action .pay-search {
+    display: flex !important;
+    flex: 1 1 auto !important;
+    width: auto !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    gap: 15px !important;
+}
+
+.frontdesk-shell .pay-action .pay-search input {
+    flex: 1 1 auto !important;
+    width: auto !important;
+    min-width: 0 !important;
+    height: 56px !important;
+}
+
+.frontdesk-shell .pay-action .pay-search button {
+    flex: 0 0 150px !important;
+    width: 150px !important;
+    height: 56px !important;
+}
+
+.frontdesk-shell .pay-action > form:last-child {
+    flex: 0 0 205px !important;
+    margin: 0 !important;
+}
+
+.frontdesk-shell .pay-action .pay-status {
+    width: 100% !important;
+    height: 48px !important;
+}
+
+.frontdesk-shell .am-page,
+.frontdesk-shell .atten-searchbar,
+.frontdesk-shell .am-search {
+    border-top: 0 !important;
+    box-shadow: none !important;
+}
+
+.frontdesk-shell .atten-searchbar::before,
+.frontdesk-shell .am-search::before {
+    display: none !important;
+    content: none !important;
+}
+
+/* Walk-in list refinements. */
+.frontdesk-shell .wi-search {
+    padding-bottom: 0 !important;
+    border-bottom: 0 !important;
+    box-shadow: none !important;
+}
+
+/* Final Walk-in page control and table typography. */
+body.frontdesk-shell .wi-page .wi-card {
+    border: 0 !important;
+    border-radius: 8px !important;
+    overflow: hidden !important;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, .42) !important;
+}
+
+body.frontdesk-shell .wi-page .wi-search input,
+body.frontdesk-shell .wi-page .wi-search .walkin-search-button {
+    height: 56px !important;
+    box-sizing: border-box !important;
+    font-size: 15px !important;
+}
+
+body.frontdesk-shell .wi-page .wi-table th {
+    color: #fff !important;
+    font-size: 15px !important;
+}
+
+body.frontdesk-shell .wi-page .wi-table tbody td {
+    border-top: 0 !important;
+    border-bottom: 1px solid #3f4441 !important;
+}
+
+.frontdesk-shell .wi-search::after {
+    display: none !important;
+    content: none !important;
+}
+
+.frontdesk-shell .reason {
+    background: transparent !important;
+    color: #ffffff !important;
+    border: 0 !important;
+}
+
+.frontdesk-shell .wi-pay {
+    min-width: 120px !important;
+    min-height: 46px !important;
+    border: 1px solid #a8df32 !important;
+    border-radius: 0 !important;
+    background: #a8df32 !important;
+    color: #293029 !important;
+    font-size: 15px !important;
+    font-weight: 800 !important;
+}
+
+.frontdesk-shell .wi-pay:disabled {
+    border-color: #59635c !important;
+    background: transparent !important;
+    color: #9ba49d !important;
+    opacity: .55 !important;
+}
+
+/* Table section titles match Attendance's Daily Check-in Log. */
+.frontdesk-shell .am-card-head,
+.frontdesk-shell .wi-card > h2,
+.frontdesk-shell .eq-card > h2,
+.trainer-shell .te-card > h2 {
+    margin: 0 !important;
+    padding: 18px !important;
+    background: transparent !important;
+    color: #ffffff !important;
+    font-size: 20px !important;
+    font-weight: 700 !important;
+    line-height: 1.2 !important;
+}
+
+.frontdesk-shell .wi-page > .wi-search {
+    padding-bottom: 0 !important;
+    border: 0 !important;
+    box-shadow: none !important;
+}
+
+/* Unified menu-page composition: title/actions, then search/filters. */
+.frontdesk-shell .top-member-bar,
+.frontdesk-shell .eq-head,
+.frontdesk-shell .wi-head,
+.frontdesk-shell .pay-head,
+.trainer-shell .tm-head,
+.trainer-shell .te-header,
+.trainer-shell .availability-page > header,
+.trainer-shell .trainer-notifications > header {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+    min-height: 96px !important;
+    margin: 0 0 34px !important;
+    padding: 0 0 24px !important;
+    border: 0 !important;
+    border-bottom: 1px solid #293029 !important;
+    background: transparent !important;
+}
+
+.frontdesk-shell .top-member-bar .btn-add,
+.frontdesk-shell .eq-head .eq-add,
+.frontdesk-shell .wi-head .wi-add {
+    flex: 0 0 auto !important;
+    margin-left: auto !important;
+}
+
+.frontdesk-shell .eq-search,
+.frontdesk-shell .wi-search,
+.frontdesk-shell .am-search,
+.trainer-shell .tm-search,
+.trainer-shell .te-search {
+    display: flex !important;
+    align-items: center !important;
+    width: 100% !important;
+    max-width: none !important;
+    min-height: 56px !important;
+    margin: 0 0 24px !important;
+    padding: 0 !important;
+    gap: 15px !important;
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+.frontdesk-shell .eq-search input,
+.frontdesk-shell .wi-search input,
+.frontdesk-shell .am-search input,
+.trainer-shell .tm-search input,
+.trainer-shell .te-search input {
+    flex: 1 1 auto !important;
+    width: auto !important;
+    min-width: 0 !important;
+    height: 56px !important;
+}
+
+.frontdesk-shell .eq-search button,
+.frontdesk-shell .wi-search button,
+.frontdesk-shell .am-search button,
+.trainer-shell .tm-search button,
+.trainer-shell .te-search button {
+    flex: 0 0 150px !important;
+    width: 150px !important;
+    height: 56px !important;
+}
+
+@media (max-width: 900px) {
+    .frontdesk-shell .top-member-bar,
+    .frontdesk-shell .eq-head,
+    .frontdesk-shell .wi-head,
+    .trainer-shell .tm-head,
+    .trainer-shell .te-header {
+        align-items: stretch !important;
+        flex-direction: column !important;
+        gap: 18px !important;
+    }
+}
+
+/* Shared Front Desk + Trainer visual scale.
+   Keep this final so legacy page-level styles cannot change the role theme. */
+.frontdesk-shell,
+.trainer-shell {
+    color: #9ba49d !important;
+    font-size: 15px !important;
+}
+
+.frontdesk-shell .navbar-brand,
+.trainer-shell .navbar-brand {
+    font-size: 20px !important;
+}
+
+.frontdesk-shell main h1,
+.trainer-shell main h1,
+.frontdesk-shell .fd-title,
+.trainer-shell .ts-title h1 {
+    margin-top: 0 !important;
+    color: #9ba49d !important;
+    font-size: 30px !important;
+    font-weight: 700 !important;
+    line-height: 1.2 !important;
+}
+
+.frontdesk-shell main h2,
+.frontdesk-shell main h3,
+.trainer-shell main h2,
+.trainer-shell main h3 {
+    color: #9ba49d !important;
+    font-size: 20px !important;
+    font-weight: 700 !important;
+}
+
+.frontdesk-shell main p,
+.frontdesk-shell main td,
+.frontdesk-shell main label,
+.frontdesk-shell main input,
+.frontdesk-shell main select,
+.frontdesk-shell main textarea,
+.trainer-shell main p,
+.trainer-shell main td,
+.trainer-shell main label,
+.trainer-shell main input,
+.trainer-shell main select,
+.trainer-shell main textarea {
+    color: #9ba49d !important;
+    font-size: 15px !important;
+}
+
+.frontdesk-shell main th,
+.frontdesk-shell main small,
+.trainer-shell main th,
+.trainer-shell main small,
+.frontdesk-shell .fd-summary-label,
+.trainer-shell .ts-stat > span {
+    color: #9ba49d !important;
+    font-size: 10px !important;
+}
+
+.frontdesk-shell main button,
+.frontdesk-shell main .btn,
+.trainer-shell main button,
+.trainer-shell main .btn,
+.frontdesk-shell main [class*="btn-"],
+.trainer-shell main [class*="btn-"] {
+    font-size: 15px !important;
+}
+
+.frontdesk-shell main button[type="submit"],
+.frontdesk-shell main .btn-primary,
+.frontdesk-shell main .fd-primary,
+.trainer-shell main button[type="submit"],
+.trainer-shell main .btn-primary {
+    color: #293029 !important;
+}
+
+.frontdesk-shell .fd-summary-card,
+.frontdesk-shell .fd-panel,
+.frontdesk-shell .table-card,
+.frontdesk-shell .am-card,
+.frontdesk-shell .eq-card,
+.frontdesk-shell .pay-card,
+.frontdesk-shell .wi-card,
+.frontdesk-shell .email-log,
+.frontdesk-shell .eq-stat,
+.frontdesk-shell .renew-card,
+.frontdesk-shell .member-renewal-card,
+.frontdesk-shell .form-card,
+.frontdesk-shell .modal-card,
+.trainer-shell .ts-stat,
+.trainer-shell .ts-panel,
+.trainer-shell .tm-card,
+.trainer-shell .te-card,
+.trainer-shell .te-stat,
+.trainer-shell .availability-card,
+.trainer-shell .tn-list {
+    background: #283313 !important;
+}
+
+.frontdesk-shell .fd-summary-value,
+.frontdesk-shell .eq-stat strong,
+.frontdesk-shell .renew-card strong,
+.frontdesk-shell .member-renewal-count,
+.trainer-shell .ts-stat strong,
+.trainer-shell .ts-time,
+.trainer-shell .ts-count,
+.trainer-shell .te-stat strong {
+    color: #b9ff20 !important;
+}
+
+.frontdesk-shell .fd-summary-value,
+.trainer-shell .ts-stat strong,
+.trainer-shell .te-stat strong {
+    font-size: 30px !important;
+    font-weight: 700 !important;
+}
+
+/* Front Desk menu pages follow the Members page composition. */
+.frontdesk-shell .page-container,
+.frontdesk-shell .am-page,
+.frontdesk-shell .eq-page,
+.frontdesk-shell .pay-page,
+.frontdesk-shell .wi-page,
+.frontdesk-shell .email-notifications {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    transform: none !important;
+    background: transparent !important;
+    color: #c4ccc6 !important;
+    font: 15px Arial, sans-serif !important;
+}
+
+/* Admin Walk-ins and Notifications mirror their Front Desk counterparts. */
+.admin-shell .wi-page,
+.admin-shell .email-notifications {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    transform: none !important;
+    background: transparent !important;
+    color: #c4ccc6 !important;
+    font: 15px Arial, sans-serif !important;
+}
+
+.admin-shell .wi-head,
+.admin-shell .email-notifications > .role-page-header {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+    min-height: 76px !important;
+    margin: 0 0 28px !important;
+    padding: 0 0 20px !important;
+    border-bottom: 1px solid #303430 !important;
+    background: transparent !important;
+}
+
+.admin-shell .wi-head h1,
+.admin-shell .email-notifications h1 {
+    margin: 0 0 5px !important;
+    color: #9ba49d !important;
+    font-family: "Inria Serif", serif !important;
+    font-size: 30px !important;
+    font-weight: 700 !important;
+}
+
+.admin-shell .wi-head p,
+.admin-shell .email-notifications .subtitle {
+    margin: 0 !important;
+    color: #ffffff !important;
+    font-family: "Inria Serif", serif !important;
+    font-size: 15px !important;
+}
+
+.admin-shell .wi-search {
+    display: flex !important;
+    align-items: center !important;
+    width: 100% !important;
+    gap: 15px !important;
+    margin: 0 0 28px !important;
+}
+
+.admin-shell .wi-search input {
+    flex: 1 1 auto !important;
+    width: auto !important;
+    min-width: 0 !important;
+    height: 56px !important;
+    padding: 0 18px !important;
+    border: 1px solid #8d958f !important;
+    border-radius: 0 !important;
+    background: #1b1e1c !important;
+    color: #ffffff !important;
+    font-size: 15px !important;
+}
+
+.admin-shell .wi-search button,
+.admin-shell .wi-add,
+.admin-shell .wi-pay {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-width: 150px !important;
+    height: 56px !important;
+    padding: 0 20px !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: #a8df32 !important;
+    color: #20271f !important;
+    font-size: 10px !important;
+    font-weight: 800 !important;
+    text-transform: uppercase !important;
+}
+
+.admin-shell .wi-card,
+.admin-shell .email-log {
+    width: 100% !important;
+    overflow: hidden !important;
+    border: 1px solid #293029 !important;
+    border-radius: 0 !important;
+    background: #5E5D63 !important;
+    box-shadow: none !important;
+}
+
+.admin-shell .wi-card > h2 {
+    margin: 0 !important;
+    padding: 18px 16px !important;
+    background: #5E5D63 !important;
+    color: #ffffff !important;
+    font-size: 20px !important;
+    font-weight: 700 !important;
+}
+
+.admin-shell .wi-table,
+.admin-shell .email-log-header,
+.admin-shell .email-log-row {
+    color: #ffffff !important;
+}
+
+.admin-shell .wi-table th,
+.admin-shell .email-log-header {
+    background: #343735 !important;
+    color: #9ba49d !important;
+    font-size: 10px !important;
+    text-transform: uppercase !important;
+}
+
+.admin-shell .wi-table td,
+.admin-shell .email-log-row {
+    border-color: #313632 !important;
+    background: #5E5D63 !important;
+    color: #ffffff !important;
+    font-size: 15px !important;
+}
+
+.admin-shell .wi-table .reason,
+.admin-shell .wi-table .wi-visits,
+.admin-shell .email-message,
+.admin-shell .email-date {
+    background: transparent !important;
+    color: #9ba49d !important;
+}
+
+.admin-shell .email-title {
+    color: #ffffff !important;
+}
+
+.admin-shell .wi-modal {
+    border: 1px solid #293029 !important;
+    background: #5E5D63 !important;
+    color: #ffffff !important;
+}
+
+.admin-shell .wi-modal p,
+.admin-shell .wi-modal label {
+    color: #ffffff !important;
+}
+
+.admin-shell .wi-modal input,
+.admin-shell .wi-modal select {
+    border: 1px solid #8d958f !important;
+    background: transparent !important;
+    color: #ffffff !important;
+}
+
+.admin-shell .wi-modal select option {
+    background: #5E5D63;
+    color: #ffffff;
+}
+
+.admin-shell .wi-modal select option:hover,
+.admin-shell .wi-modal select option:checked {
+    background: #5E5D63;
+    color: #a8df32;
+}
+
+.frontdesk-shell .wi-modal input,
+.frontdesk-shell .wi-modal select {
+    background: #ffffff !important;
+    color: #101510 !important;
+}
+
+.frontdesk-shell .wi-modal select option {
+    background: #ffffff;
+    color: #101510;
+}
+
+.frontdesk-shell .wi-modal .wi-cancel:hover {
+    color: #a8df32 !important;
+}
+
+.admin-shell .wi-cancel {
+    min-width: 150px !important;
+    height: 56px !important;
+    border: 1px solid #8d958f !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    color: #ffffff !important;
+}
+
+.frontdesk-shell .top-member-bar,
+.frontdesk-shell .am-search,
+.frontdesk-shell .eq-head,
+.frontdesk-shell .pay-toolbar,
+.frontdesk-shell .wi-head,
+.frontdesk-shell .wi-search {
+    width: 100% !important;
+    min-height: 76px;
+    margin: 0 0 28px !important;
+    padding: 0 0 20px !important;
+    border: 0 !important;
+    border-bottom: 1px solid #303430 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+/* Allow the Front Desk member row action menu to open over the paging footer. */
+.frontdesk-shell .page-container .table-card {
+    position: relative;
+    z-index: 2;
+    overflow: visible !important;
+}
+
+.frontdesk-shell .page-container .pagination-bar {
+    position: relative;
+    z-index: 1;
+}
+
+.frontdesk-shell .page-container .action-menu {
+    z-index: 100;
+}
+
+/* Front Desk membership cancellation confirmation. */
+.frontdesk-shell #cancelMembershipModal {
+    background: transparent !important;
+}
+
+.frontdesk-shell #cancelMembershipModal .modal-card,
+.frontdesk-shell #cancelMembershipModal .modal-card p {
+    background: #5E5D63 !important;
+    color: #ffffff !important;
+}
+
+.frontdesk-shell #cancelMembershipModal .modal-card {
+    border: 1px solid #293029 !important;
+    box-shadow: 0 14px 35px rgba(0, 0, 0, .35) !important;
+}
+
+.frontdesk-shell #cancelMembershipModal .modal-card h3 {
+    color: #ffffff !important;
+    font-size: 20px !important;
+}
+
+.frontdesk-shell #cancelMembershipModal .modal-buttons {
+    display: flex !important;
+    align-items: stretch !important;
+    gap: 12px !important;
+}
+
+.frontdesk-shell #cancelMembershipModal .modal-buttons > button,
+.frontdesk-shell #cancelMembershipModal .modal-buttons > form {
+    flex: 1 1 0 !important;
+    width: 0 !important;
+    margin: 0 !important;
+}
+
+.frontdesk-shell #cancelMembershipModal .modal-buttons > button,
+.frontdesk-shell #cancelMembershipModal .modal-buttons > form button {
+    width: 100% !important;
+    height: 44px !important;
+    padding: 0 16px !important;
+    box-sizing: border-box !important;
+}
+
+/* Front Desk membership termination confirmation. */
+.frontdesk-shell #terminateModal {
+    background: transparent !important;
+}
+
+.frontdesk-shell #terminateModal .modal-card,
+.frontdesk-shell #terminateModal .modal-card p {
+    background: #5E5D63 !important;
+    color: #ffffff !important;
+}
+
+.frontdesk-shell #terminateModal .modal-card {
+    border: 1px solid #293029 !important;
+    box-shadow: 0 14px 35px rgba(0, 0, 0, .35) !important;
+}
+
+.frontdesk-shell #terminateModal .modal-card h3 {
+    color: #ffffff !important;
+    font-size: 20px !important;
+}
+
+.frontdesk-shell #terminateModal .modal-buttons {
+    display: flex !important;
+    align-items: stretch !important;
+    gap: 12px !important;
+}
+
+.frontdesk-shell #terminateModal .modal-buttons > button,
+.frontdesk-shell #terminateModal .modal-buttons > form {
+    flex: 1 1 0 !important;
+    width: 0 !important;
+    margin: 0 !important;
+}
+
+.frontdesk-shell #terminateModal .modal-buttons > button,
+.frontdesk-shell #terminateModal .modal-buttons > form button {
+    width: 100% !important;
+    height: 44px !important;
+    padding: 0 16px !important;
+    box-sizing: border-box !important;
+}
+
+.frontdesk-shell .header-row,
+.frontdesk-shell .pay-head,
+.frontdesk-shell .email-notifications > h1,
+.frontdesk-shell .am-title {
+    margin-top: 0 !important;
+}
+
+.frontdesk-shell .header-row h1,
+.frontdesk-shell .am-title,
+.frontdesk-shell .eq-head h1,
+.frontdesk-shell .pay-head h1,
+.frontdesk-shell .wi-head h1,
+.frontdesk-shell .email-notifications h1 {
+    margin-bottom: 5px !important;
+    color: #d7ddd8 !important;
+    font-size: 30px !important;
+    font-weight: 700 !important;
+}
+
+.frontdesk-shell .top-member-search,
+.frontdesk-shell .am-search,
+.frontdesk-shell .eq-search,
+.frontdesk-shell .pay-search,
+.frontdesk-shell .wi-search {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+}
+
+.frontdesk-shell .top-member-search input,
+.frontdesk-shell .am-search input,
+.frontdesk-shell .eq-search input,
+.frontdesk-shell .pay-search input,
+.frontdesk-shell .wi-search input {
+    flex: 1 !important;
+    width: auto !important;
+    height: 56px !important;
+    padding: 0 18px !important;
+    background: #1b1e1c !important;
+    border: 1px solid #8d958f !important;
+    color: #d7ddd8 !important;
+    font-size: 15px !important;
+}
+
+.frontdesk-shell .search-btn,
+.frontdesk-shell .am-search button,
+.frontdesk-shell .eq-search button,
+.frontdesk-shell .pay-search button,
+.frontdesk-shell .wi-search button,
+.frontdesk-shell .btn-add,
+.frontdesk-shell .eq-add,
+.frontdesk-shell .wi-add {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: auto !important;
+    min-width: 120px !important;
+    height: 56px !important;
+    padding: 0 20px !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: #a8df32 !important;
+    color: #20271f !important;
+    font-size: 10px !important;
+    font-weight: 800 !important;
+    text-transform: uppercase;
+}
+
+.frontdesk-shell .table-card,
+.frontdesk-shell .am-card,
+.frontdesk-shell .eq-card,
+.frontdesk-shell .pay-card,
+.frontdesk-shell .wi-card,
+.frontdesk-shell .email-log {
+    width: 100% !important;
+    overflow: hidden !important;
+    border: 1px solid #293029 !important;
+    border-radius: 0 !important;
+    background: #5E5D63 !important;
+    box-shadow: none !important;
+}
+
+.frontdesk-shell .am-card-head,
+.frontdesk-shell .pay-card > h2 {
+    padding: 14px !important;
+    background: transparent !important;
+    color: #d7ddd8 !important;
+    font-size: 15px !important;
+}
+
+.frontdesk-shell .eq-stats {
+    gap: 14px !important;
+    margin: 24px 0 !important;
+}
+
+.frontdesk-shell .eq-stat,
+.frontdesk-shell .renew-card,
+.frontdesk-shell .member-renewal-card {
+    background: #5E5D63 !important;
+    border: 1px solid #293029 !important;
+    border-radius: 4px !important;
+    box-shadow: none !important;
+}
+
+.frontdesk-shell .eq-stat strong,
+.frontdesk-shell .renew-card strong,
+.frontdesk-shell .member-renewal-count {
+    color: #b9ff20 !important;
+}
+
+.frontdesk-shell .am-footer,
+.frontdesk-shell .eq-foot,
+.frontdesk-shell .pay-foot,
+.frontdesk-shell .table-footer {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    min-height: 76px;
+    padding: 18px 14px !important;
+    border-top: 1px solid #293029 !important;
+    background: #101311 !important;
+    color: #9ba49d !important;
+}
+
+.frontdesk-shell .pager,
+.frontdesk-shell .eq-pager,
+.frontdesk-shell .pay-pager,
+.frontdesk-shell .pagination-controls {
+    display: flex !important;
+    gap: 10px !important;
+}
+
+.frontdesk-shell .pager a,
+.frontdesk-shell .eq-pager a,
+.frontdesk-shell .pay-pager a,
+.frontdesk-shell .pagination-controls a,
+.frontdesk-shell .pagination-controls button {
+    display: grid !important;
+    place-items: center !important;
+    min-width: 82px !important;
+    width: auto !important;
+    height: 40px !important;
+    padding: 0 12px !important;
+    border: 0 !important;
+    border-radius: 4px !important;
+    background: #a8df32 !important;
+    color: #20271f !important;
+    font-size: 10px !important;
+    font-weight: 800 !important;
+    text-transform: uppercase;
+}
+
+.frontdesk-shell .pager .disabled,
+.frontdesk-shell .eq-pager .disabled,
+.frontdesk-shell .pay-pager .disabled,
+.frontdesk-shell .pagination-controls .disabled,
+.frontdesk-shell .pagination-controls button:disabled {
+    opacity: .35 !important;
+    pointer-events: none;
+}
+
+.frontdesk-shell .email-log-header,
+.frontdesk-shell .email-log-row {
+    background: #5E5D63 !important;
+    color: #c4ccc6 !important;
+    border-color: #313632 !important;
+}
+
+.frontdesk-shell .email-log-header {
+    background: #343735 !important;
+    color: #9ba49d !important;
+    font-size: 10px !important;
+    text-transform: uppercase;
+}
+
+/* Final Front Desk Email Notifications text treatment. */
+body.frontdesk-shell .email-notifications,
+body.frontdesk-shell .email-notifications h1,
+body.frontdesk-shell .email-notifications .subtitle,
+body.frontdesk-shell .email-notifications .email-log-header,
+body.frontdesk-shell .email-notifications .email-log-row,
+body.frontdesk-shell .email-notifications .email-title,
+body.frontdesk-shell .email-notifications .email-message,
+body.frontdesk-shell .email-notifications .email-date,
+body.frontdesk-shell .email-notifications .email-empty {
+    color: #fff !important;
+}
+
+body.frontdesk-shell .email-notifications .email-log-header {
+    font-size: 15px !important;
+}
+
+body.frontdesk-shell .email-notifications .email-log,
+body.admin-shell .email-notifications .email-log {
+    border: 0 !important;
+    border-radius: 8px !important;
+    overflow: hidden !important;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, .42) !important;
+}
+
+body.frontdesk-shell .email-notifications .email-pagination,
+body.admin-shell .email-notifications .email-pagination {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+    min-height: 80px !important;
+    padding: 14px 20px !important;
+    border: 0 !important;
+    border-top: 1px solid #313632 !important;
+    background: #5e5d63 !important;
+    color: #9ba49d !important;
+    box-sizing: border-box !important;
+}
+
+body.frontdesk-shell .email-notifications .email-pagination > span,
+body.admin-shell .email-notifications .email-pagination > span {
+    color: #aab3ac !important;
+    font-size: 15px !important;
+}
+
+body.frontdesk-shell .email-notifications .email-pagination nav,
+body.admin-shell .email-notifications .email-pagination nav {
+    display: flex !important;
+    align-items: center !important;
+    gap: 12px !important;
+}
+
+body.frontdesk-shell .email-notifications .email-pagination nav a,
+body.admin-shell .email-notifications .email-pagination nav a {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-width: 102px !important;
+    height: 50px !important;
+    padding: 0 18px !important;
+    border: 1px solid #74777a !important;
+    border-radius: 5px !important;
+    background: transparent !important;
+    color: rgba(255, 255, 255, .4) !important;
+    box-shadow: none !important;
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    line-height: 1 !important;
+    text-align: center !important;
+    text-decoration: none !important;
+    text-transform: uppercase !important;
+    box-sizing: border-box !important;
+}
+
+body.frontdesk-shell .email-notifications .email-pagination nav a.disabled,
+body.admin-shell .email-notifications .email-pagination nav a.disabled {
+    opacity: 1 !important;
+    pointer-events: none !important;
+}
+
+/* Final Attendance Monitoring card and row typography. */
+body.frontdesk-shell .am-page .am-card {
+    border: 0 !important;
+    border-radius: 8px !important;
+    overflow: hidden !important;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, .42) !important;
+}
+
+body.frontdesk-shell .am-page .am-table tbody td:nth-child(4),
+body.frontdesk-shell .am-page .am-table .badge {
+    font-size: 15px !important;
+}
+
+body.frontdesk-shell .am-page .am-table .action-cell button {
+    font-size: 15px !important;
+}
+
+/* Final Front Desk dashboard heading and chart typography. */
+body.frontdesk-shell .fd-dashboard .fd-title,
+body.frontdesk-shell .fd-dashboard .fd-chart-head h2,
+body.frontdesk-shell .fd-dashboard .fd-legend,
+body.frontdesk-shell .fd-dashboard .fd-key,
+body.frontdesk-shell .fd-dashboard .fd-availability > h2 {
+    color: #fff !important;
+}
+
+body.frontdesk-shell .fd-dashboard .fd-summary-label {
+    color: #e2dfd5 !important;
+    font-size: 12px !important;
+}
+
+body.frontdesk-shell .fd-dashboard .fd-availability-table th {
+    color: #fff !important;
+    font-size: 15px !important;
+    height: auto !important;
+    padding: 7px 13px !important;
+    line-height: 1.1 !important;
+}
+
+body.frontdesk-shell .fd-dashboard .fd-availability-table td,
+body.frontdesk-shell .fd-dashboard .fd-trainer-name,
+body.frontdesk-shell .fd-dashboard .fd-trainer-days,
+body.frontdesk-shell .fd-dashboard .fd-slot-count,
+body.frontdesk-shell .fd-dashboard .fd-not-set {
+    font-size: 15px !important;
+}
+
+body.frontdesk-shell .fd-dashboard .fd-schedule-head h2,
+body.frontdesk-shell .fd-dashboard .fd-table th {
+    color: #fff !important;
+}
+
+body.frontdesk-shell .fd-dashboard .fd-table th,
+body.frontdesk-shell .fd-dashboard .fd-badge,
+body.frontdesk-shell .fd-dashboard .fd-action {
+    font-size: 15px !important;
+}
+
+body.frontdesk-shell main.fd-dashboard .fd-schedule .fd-reminder-form button.fd-action.remind,
+body.frontdesk-shell main.fd-dashboard .fd-schedule .fd-reminder-form button.fd-action.reminded {
+    font-size: 15px !important;
+}
+
+@media (max-width: 900px) {
+    .frontdesk-shell .top-member-bar,
+    .frontdesk-shell .eq-head,
+    .frontdesk-shell .wi-head { align-items: stretch !important; flex-direction: column !important; }
+    .frontdesk-shell .top-member-search,
+    .frontdesk-shell .am-search,
+    .frontdesk-shell .eq-search,
+    .frontdesk-shell .pay-search,
+    .frontdesk-shell .wi-search { width: 100% !important; flex-direction: column !important; }
+}
+
+/* Final palette overrides for every Front Desk and Trainer menu page. */
+.frontdesk-shell main h1,
+.frontdesk-shell main .fd-title,
+.trainer-shell main h1,
+.trainer-shell main .ts-title h1 {
+    margin-top: 0 !important;
+    color: #9ba49d !important;
+    font-size: 30px !important;
+    font-weight: 700 !important;
+}
+
+.frontdesk-shell main h2,
+.frontdesk-shell main h3,
+.trainer-shell main h2,
+.trainer-shell main h3 {
+    color: #9ba49d !important;
+    font-size: 20px !important;
+}
+
+.frontdesk-shell main,
+.trainer-shell main,
+.frontdesk-shell main p,
+.frontdesk-shell main td,
+.frontdesk-shell main label,
+.trainer-shell main p,
+.trainer-shell main td,
+.trainer-shell main label {
+    color: #9ba49d !important;
+    font-size: 15px !important;
+}
+
+.frontdesk-shell main th,
+.frontdesk-shell main small,
+.trainer-shell main th,
+.trainer-shell main small {
+    color: #9ba49d !important;
+    font-size: 10px !important;
+}
+
+.frontdesk-shell .fd-summary-card,
+.frontdesk-shell .fd-panel,
+.frontdesk-shell .table-card,
+.frontdesk-shell .am-card,
+.frontdesk-shell .eq-card,
+.frontdesk-shell .pay-card,
+.frontdesk-shell .wi-card,
+.frontdesk-shell .email-log,
+.frontdesk-shell .eq-stat,
+.frontdesk-shell .renew-card,
+.frontdesk-shell .member-renewal-card,
+.frontdesk-shell .form-card,
+.trainer-shell .ts-stat,
+.trainer-shell .ts-panel,
+.trainer-shell .tm-card,
+.trainer-shell .te-card,
+.trainer-shell .te-stat,
+.trainer-shell .availability-card,
+.trainer-shell .tn-list {
+    background-color: #283313 !important;
+}
+
+.frontdesk-shell .fd-summary-value,
+.frontdesk-shell .eq-stat strong,
+.frontdesk-shell .renew-card strong,
+.frontdesk-shell .member-renewal-count,
+.trainer-shell .ts-stat strong,
+.trainer-shell .ts-time,
+.trainer-shell .ts-count,
+.trainer-shell .te-stat strong {
+    color: #b9ff20 !important;
+}
+
+.frontdesk-shell main button,
+.frontdesk-shell main .btn,
+.trainer-shell main button,
+.trainer-shell main .btn {
+    font-size: 15px !important;
+}
+
+.frontdesk-shell main button[type="submit"],
+.frontdesk-shell main .btn-primary,
+.trainer-shell main button[type="submit"],
+.trainer-shell main .btn-primary {
+    color: #293029 !important;
+}
+
+/* Regular content copy is white; headings, small labels and accents retain
+   their dedicated role-theme colors. */
+.frontdesk-shell main p,
+.frontdesk-shell main td,
+.frontdesk-shell main label,
+.frontdesk-shell main li,
+.frontdesk-shell main .header-subtitle,
+.frontdesk-shell main .subtitle,
+.trainer-shell main p,
+.trainer-shell main td,
+.trainer-shell main label,
+.trainer-shell main li,
+.trainer-shell main .lead {
+    color: #ffffff !important;
+}
+
+/* Match the dark green surface used by the Admin Revenue Today panel. */
+.frontdesk-shell .fd-summary-card,
+.frontdesk-shell .fd-panel,
+.frontdesk-shell .table-card,
+.frontdesk-shell .am-card,
+.frontdesk-shell .eq-card,
+.frontdesk-shell .pay-card,
+.frontdesk-shell .wi-card,
+.frontdesk-shell .email-log,
+.frontdesk-shell .eq-stat,
+.frontdesk-shell .renew-card,
+.frontdesk-shell .member-renewal-card,
+.frontdesk-shell .form-card,
+.trainer-shell .ts-stat,
+.trainer-shell .ts-panel,
+.trainer-shell .tm-card,
+.trainer-shell .te-card,
+.trainer-shell .te-stat,
+.trainer-shell .availability-card,
+.trainer-shell .tn-list {
+    background-color: #5E5D63 !important;
+}
+
+/* Unified paging controls for Front Desk and Trainer. */
+.frontdesk-shell .pager a,
+.frontdesk-shell .eq-pager a,
+.frontdesk-shell .pay-pager a,
+.frontdesk-shell .pagination-controls a,
+.frontdesk-shell .pagination-controls button,
+.frontdesk-shell .pagination-arrows a,
+.frontdesk-shell .fd-pager button,
+.trainer-shell .tm-pager a,
+.trainer-shell .te-pager a,
+.trainer-shell .ts-pager a,
+.trainer-shell .pager a,
+.trainer-shell .pagination a {
+    display: grid !important;
+    place-items: center !important;
+    width: auto !important;
+    min-width: 82px !important;
+    height: 40px !important;
+    padding: 0 12px !important;
+    border: 1px solid #9ba49d !important;
+    border-radius: 4px !important;
+    background: transparent !important;
+    color: #ffffff !important;
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    line-height: 1 !important;
+    text-decoration: none !important;
+    text-transform: uppercase !important;
+}
+
+.frontdesk-shell .pagination-arrows a {
+    font-size: 0 !important;
+}
+
+.frontdesk-shell .pagination-arrows a:first-child::after {
+    content: "Previous" !important;
+    color: #ffffff !important;
+    font-size: 10px !important;
+}
+
+.frontdesk-shell .pagination-arrows a:last-child::after {
+    content: "Next" !important;
+    color: #ffffff !important;
+    font-size: 10px !important;
+}
+
+.frontdesk-shell .pager .disabled,
+.frontdesk-shell .eq-pager .disabled,
+.frontdesk-shell .pay-pager .disabled,
+.frontdesk-shell .pagination-controls .disabled,
+.frontdesk-shell .pagination-arrows .disabled,
+.frontdesk-shell .fd-pager button:disabled,
+.trainer-shell .tm-pager .disabled,
+.trainer-shell .te-pager .disabled,
+.trainer-shell .pager .disabled,
+.trainer-shell .pagination .disabled {
+    opacity: .4 !important;
+    background: transparent !important;
+    color: #ffffff !important;
+}
+
+/* Distinct equipment-condition badges for Front Desk and Trainer. */
+.frontdesk-shell .condition,
+.trainer-shell .te-condition {
+    border: 1px solid currentColor !important;
+    background: #293640 !important;
+    color: #9ed2ff !important;
+    font-size: 10px !important;
+    font-weight: 800 !important;
+    text-transform: uppercase !important;
+}
+
+.frontdesk-shell .condition.good,
+.trainer-shell .te-condition.good {
+    background: #184d2b !important;
+    color: #6ff59a !important;
+}
+
+.frontdesk-shell .condition.fair,
+.trainer-shell .te-condition.fair {
+    background: #45401b !important;
+    color: #f0d76a !important;
+}
+
+.frontdesk-shell .condition.needs-maintenance,
+.frontdesk-shell .condition.need-maintenance,
+.frontdesk-shell .condition.maintenance,
+.trainer-shell .te-condition.needs-maintenance,
+.trainer-shell .te-condition.need-maintenance,
+.trainer-shell .te-condition.maintenance {
+    background: #593812 !important;
+    color: #ffb84d !important;
+}
+
+.frontdesk-shell .condition.out-of-order,
+.trainer-shell .te-condition.out-of-order {
+    background: #562326 !important;
+    color: #ff8383 !important;
+}
+
+.frontdesk-shell .condition.other,
+.frontdesk-shell .condition.unknown,
+.trainer-shell .te-condition.other,
+.trainer-shell .te-condition.unknown {
+    background: #293640 !important;
+    color: #9ed2ff !important;
+}
+
+/* Side indicators for menu-page summaries (dashboard summaries excluded). */
+.frontdesk-shell .eq-stat,
+.frontdesk-shell .member-renewal-card,
+.trainer-shell .te-stat {
+    border-left: 5px solid #22c55e !important;
+}
+
+.frontdesk-shell .eq-stat.maintenance,
+.trainer-shell .te-stat.maintenance {
+    border-left-color: #f59e0b !important;
+}
+
+.frontdesk-shell .eq-stat.out,
+.trainer-shell .te-stat.out {
+    border-left-color: #ef4444 !important;
+}
+
+/* Unified table paging footer for Front Desk and Trainer. */
+.frontdesk-shell .am-footer,
+.frontdesk-shell .eq-foot,
+.frontdesk-shell .pay-foot,
+.frontdesk-shell .table-footer,
+.frontdesk-shell .pagination-bar,
+.frontdesk-shell .fd-table-foot,
+.trainer-shell .tm-foot,
+.trainer-shell .te-footer,
+.trainer-shell .table-footer,
+.trainer-shell .pagination-footer {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+    min-height: 80px !important;
+    margin: 0 !important;
+    padding: 14px 20px !important;
+    border-top: 1px solid #293029 !important;
+    border-right: 1px solid #1f6b37 !important;
+    border-bottom: 1px solid #1f6b37 !important;
+    border-left: 1px solid #1f6b37 !important;
+    border-radius: 0 0 6px 6px !important;
+    background: #5E5D63 !important;
+    color: #9ba49d !important;
+    font-size: 15px !important;
+}
+
+.frontdesk-shell .am-footer > span,
+.frontdesk-shell .eq-foot > span,
+.frontdesk-shell .pay-foot > span,
+.frontdesk-shell .table-footer > span,
+.frontdesk-shell .pagination-bar > span,
+.frontdesk-shell .fd-table-foot > span,
+.trainer-shell .tm-foot > span,
+.trainer-shell .te-footer > span,
+.trainer-shell .table-footer > span,
+.trainer-shell .pagination-footer > span {
+    color: #9ba49d !important;
+    font-size: 15px !important;
+}
+
+.frontdesk-shell .pager a,
+.frontdesk-shell .eq-pager a,
+.frontdesk-shell .pay-pager a,
+.frontdesk-shell .pagination-controls a,
+.frontdesk-shell .pagination-controls button,
+.frontdesk-shell .pagination-arrows a,
+.frontdesk-shell .fd-pager button,
+.trainer-shell .tm-pager a,
+.trainer-shell .te-pager a,
+.trainer-shell .ts-pager a,
+.trainer-shell .pager a,
+.trainer-shell .pagination a {
+    min-width: 102px !important;
+    height: 50px !important;
+}
+
+/* Front Desk equipment report modal. */
+.frontdesk-shell .eq-modal,
+.frontdesk-shell .eq-modal-head,
+.frontdesk-shell .eq-form,
+.frontdesk-shell .eq-modal-actions {
+    background: #5E5D63 !important;
+    color: #ffffff !important;
+}
+
+.frontdesk-shell .eq-modal {
+    border: 0 !important;
+}
+
+.frontdesk-shell .eq-modal-head {
+    border-bottom: 1px solid #526044 !important;
+}
+
+.frontdesk-shell .eq-modal-head h2,
+.frontdesk-shell .eq-modal-head button,
+.frontdesk-shell .eq-field label,
+.frontdesk-shell .condition-label {
+    color: #ffffff !important;
+}
+
+.frontdesk-shell .eq-field input,
+.frontdesk-shell .eq-field select,
+.frontdesk-shell .eq-field textarea,
+.frontdesk-shell .eq-form input[type="file"],
+.frontdesk-shell .condition-option span {
+    background: transparent !important;
+    color: #ffffff !important;
+    border-color: #9ba49d !important;
+}
+
+.frontdesk-shell .eq-field input::placeholder,
+.frontdesk-shell .eq-field textarea::placeholder {
+    color: #9ba49d !important;
+}
+
+.frontdesk-shell .condition-option input:checked + span {
+    background: #184d2b !important;
+    border-color: #6ff59a !important;
+    color: #6ff59a !important;
+}
+
+.frontdesk-shell .eq-modal-actions {
+    border-top: 1px solid #526044 !important;
+}
+
+/* No rule above the Trainer Availability table header. */
+.frontdesk-shell .fd-availability-wrap,
+.frontdesk-shell .fd-availability-table,
+.frontdesk-shell .fd-availability-table thead,
+.frontdesk-shell .fd-availability-table thead tr,
+.frontdesk-shell .fd-availability-table thead th {
+    border-top: 0 !important;
+    outline: 0 !important;
+    box-shadow: none !important;
+}
+
+/* Final role-page heading override; the rules below only control layout. */
+body.frontdesk-shell main[role="main"] h1,
+body.trainer-shell main[role="main"] h1 {
+    margin-top: 0 !important;
+    margin-bottom: 5px !important;
+    color: #9ba49d !important;
+    font-family: "Inria Serif", serif !important;
+    font-size: 30px !important;
+    font-weight: 700 !important;
+    line-height: 1.2 !important;
+    letter-spacing: 0 !important;
+    text-transform: none !important;
+}
+
+/* Consistent Front Desk menu-page header row and divider. */
+body.frontdesk-shell main[role="main"] :is(
+    .page-container > .top-member-bar,
+    .am-page > .role-page-header,
+    .eq-page > .eq-head,
+    .wi-page > .wi-head,
+    .email-notifications > .role-page-header
+) {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+    min-height: 70px !important;
+    margin: 0 0 35px !important;
+    padding: 0 0 25px !important;
+    border-bottom: 1px solid #303530 !important;
+}
+
+body.frontdesk-shell main[role="main"] :is(
+    .page-container > .top-member-bar h1,
+    .am-page > .role-page-header h1,
+    .eq-page > .eq-head h1,
+    .wi-page > .wi-head h1,
+    .email-notifications > .role-page-header h1
+) {
+    margin: 0 0 5px !important;
+    color: #9ba49d !important;
+    font-family: "Inria Serif", serif !important;
+    font-size: 30px !important;
+    font-weight: 700 !important;
+    line-height: 1.2 !important;
+    letter-spacing: 0 !important;
+    text-transform: none !important;
+}
+
+body.frontdesk-shell main[role="main"] :is(
+    .page-container > .top-member-bar .header-subtitle,
+    .wi-page > .wi-head p,
+    .email-notifications > .role-page-header .subtitle
+) {
+    margin: 0 !important;
+    color: #ffffff !important;
+    font-family: "Inria Serif", serif !important;
+    font-size: 15px !important;
+    font-weight: 400 !important;
+    line-height: 1.4 !important;
+    text-transform: none !important;
+}
+
+body.frontdesk-shell main[role="main"] :is(.header-subtitle, .page-subtitle, .role-page-subtitle, .pay-head > p, .wi-head p, .eq-head p),
+body.trainer-shell main[role="main"] :is(.header-subtitle, .page-subtitle, .role-page-subtitle, .tm-head > p, .te-header > p, .ts-title > p, .lead) {
+    margin-top: 0 !important;
+    color: #ffffff !important;
+    font-family: "Inria Serif", serif !important;
+    font-size: 15px !important;
+    font-weight: 400 !important;
+    line-height: 1.4 !important;
+    letter-spacing: 0 !important;
+    text-transform: none !important;
+}
+
+.frontdesk-shell .pay-action {
+    display: flex !important;
+    justify-content: space-between !important;
+    flex-direction: row !important;
+}
+
+/* Clear separation between Equipment header controls. */
+.frontdesk-shell .eq-head {
+    column-gap: 24px !important;
+}
+
+.frontdesk-shell .eq-search {
+    gap: 15px !important;
+}
+
+/* Final Equipment Inventory card, controls, and typography. */
+body.frontdesk-shell .eq-page .eq-card {
+    border: 0 !important;
+    border-radius: 8px !important;
+    overflow: hidden !important;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, .42) !important;
+}
+
+body.frontdesk-shell .eq-page .eq-card .eq-foot {
+    border: 0 !important;
+    border-top: 1px solid #293029 !important;
+    border-radius: 0 0 8px 8px !important;
+}
+
+body.frontdesk-shell .eq-page .eq-search input,
+body.frontdesk-shell .eq-page .eq-search .equipment-search-button {
+    height: 56px !important;
+    box-sizing: border-box !important;
+    font-size: 15px !important;
+}
+
+body.frontdesk-shell .eq-page .eq-table th {
+    color: #fff !important;
+    font-size: 15px !important;
+}
+
+body.frontdesk-shell .eq-page .eq-stat > span {
+    color: #fff !important;
+    font-size: 15px !important;
+}
+
+body.frontdesk-shell .eq-page .eq-add {
+    height: 44px !important;
+    font-size: 15px !important;
+}
+
+.frontdesk-shell .eq-add {
+    margin-left: 0 !important;
+}
+
+/* Front Desk Members header and search/filter alignment. */
+.frontdesk-shell .page-container .top-member-bar {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+    gap: 20px !important;
+}
+
+.frontdesk-shell .page-container .top-member-bar .btn-add {
+    flex: 0 0 auto !important;
+    margin-left: auto !important;
+}
+
+.frontdesk-shell .page-container .header-row {
+    display: flex !important;
+    align-items: center !important;
+    width: 100% !important;
+    gap: 15px !important;
+}
+
+.frontdesk-shell .page-container .top-member-search {
+    display: flex !important;
+    flex: 1 1 auto !important;
+    width: auto !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    gap: 15px !important;
+}
+
+.frontdesk-shell .page-container .top-member-search .search-box {
+    flex: 1 1 auto !important;
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    height: 56px !important;
+    border: 0 !important;
+}
+
+.frontdesk-shell .page-container .top-member-search .search-box input {
+    width: 100% !important;
+    height: 56px !important;
+    box-sizing: border-box !important;
+}
+
+.frontdesk-shell .page-container .member-filter-form {
+    flex: 0 0 auto !important;
+    margin: 0 !important;
+}
+
+.frontdesk-shell .page-container .member-filter-form .dropdown-filters {
+    gap: 15px !important;
+}
+
+/* Final Front Desk Members sizing and card treatment. */
+body.frontdesk-shell .page-container {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+body.frontdesk-shell .page-container .header-title h1 {
+    color: #fff !important;
+}
+
+body.frontdesk-shell .page-container .table-card {
+    border: 0 !important;
+    border-radius: 8px !important;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, .42) !important;
+}
+
+body.frontdesk-shell .page-container .table-card .pagination-bar {
+    border: 0 !important;
+    border-top: 1px solid #293029 !important;
+    border-radius: 0 0 8px 8px !important;
+}
+
+body.frontdesk-shell .page-container .table-card .pagination-arrows a {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 !important;
+    text-align: center !important;
+}
+
+body.frontdesk-shell .page-container .table-card .pagination-arrows a::after {
+    display: block;
+    line-height: 1 !important;
+}
+
+body.frontdesk-shell .page-container .members-table th {
+    color: #fff !important;
+    font-size: 15px !important;
+}
+
+body.frontdesk-shell .page-container .member-name-btn {
+    color: #fff !important;
+    font-size: 15px !important;
+}
+
+body.frontdesk-shell .page-container .top-member-search .search-box,
+body.frontdesk-shell .page-container .top-member-search .search-box input,
+body.frontdesk-shell .page-container .top-member-search .search-btn,
+body.frontdesk-shell .page-container .member-filter-form .filter-select {
+    height: 56px !important;
+    box-sizing: border-box !important;
+    font-size: 15px !important;
+}
+
+body.frontdesk-shell .page-container .btn-add {
+    height: 44px !important;
+    box-sizing: border-box !important;
+    font-size: 15px !important;
+}
+
+@media (max-width: 900px) {
+    .frontdesk-shell .page-container .header-row {
+        align-items: stretch !important;
+        flex-direction: column !important;
+    }
+
+    .frontdesk-shell .page-container .top-member-search,
+    .frontdesk-shell .page-container .member-filter-form,
+    .frontdesk-shell .page-container .member-filter-form .dropdown-filters {
+        width: 100% !important;
+    }
+}
+
+.frontdesk-shell .am-search {
+    padding-bottom: 0 !important;
+    border-bottom: 0 !important;
+}
+
+.frontdesk-shell .pay-head {
+    display: block !important;
+}
+
+.frontdesk-shell .pay-head p {
+    margin: 5px 0 0 !important;
+    text-align: left !important;
+}
+
+.frontdesk-shell .pay-action {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    width: 100% !important;
+    gap: 15px !important;
+}
+
+.frontdesk-shell .pay-action .pay-search {
+    flex: 1 1 auto !important;
+    width: auto !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+}
+
+.frontdesk-shell .pay-action .pay-search input {
+    flex: 1 1 auto !important;
+    width: auto !important;
+    min-width: 0 !important;
+}
+
+.frontdesk-shell .pay-action > form:last-child {
+    flex: 0 0 205px !important;
+    margin: 0 !important;
+}
+
+/* Final pagination override: identical sizing in every role. */
+html body:is(.frontdesk-shell,.trainer-shell,.admin-shell) :is(.pagination-bar,.am-footer,.eq-foot,.pay-foot,.fd-table-foot,.wi-footer,.email-pagination,.tm-foot,.te-footer,.aa-pager,.ae-pager,.ap-pager,.ua-foot,.activity-pagination),
+html body.admin-shell :is(.am-pager,.page-wrap > .card > .pager) {
+    display:flex !important; align-items:center !important; justify-content:space-between !important;
+    width:100% !important; min-height:80px !important; padding:14px 20px !important;
+    background:#5E5D63 !important; box-sizing:border-box !important;
+}
+
+html body:is(.frontdesk-shell,.trainer-shell,.admin-shell) :is(.pagination-bar,.am-footer,.eq-foot,.pay-foot,.fd-table-foot,.wi-footer,.email-pagination,.tm-foot,.te-footer,.aa-pager,.ae-pager,.ap-pager,.ua-foot,.activity-pagination) > span,
+html body.admin-shell :is(.am-pager,.page-wrap > .card > .pager) > span {
+    color:#aab3ac !important; font:400 15px Arial,sans-serif !important;
+}
+
+html body:is(.frontdesk-shell,.trainer-shell,.admin-shell) :is(.pagination-arrows,.pager,.eq-pager,.pay-pager,.fd-pager,.wi-pages,.email-pagination nav,.tm-pager,.te-pager,.aa-pages,.ae-pages,.ap-page-buttons,.am-page-actions,.ua-pages,.activity-pagination-buttons) {
+    display:flex !important; align-items:center !important; gap:12px !important;
+}
+
+html body:is(.frontdesk-shell,.trainer-shell,.admin-shell) :is(.pagination-arrows,.pager,.eq-pager,.pay-pager,.fd-pager,.wi-pages,.email-pagination nav,.tm-pager,.te-pager,.aa-pages,.ae-pages,.ap-page-buttons,.am-page-actions,.ua-pages,.activity-pagination-buttons) :is(a,button) {
+    display:inline-flex !important; align-items:center !important; justify-content:center !important;
+    width:102px !important; min-width:102px !important; height:50px !important; padding:0 !important;
+    border:1px solid #74777a !important; border-radius:5px !important; background:transparent !important;
+    color:#fff !important; box-shadow:none !important; font:700 10px/1 Arial,sans-serif !important;
+    text-align:center !important; text-decoration:none !important; text-transform:uppercase !important;
+    box-sizing:border-box !important;
+}
+
+html body:is(.frontdesk-shell,.trainer-shell,.admin-shell) :is(.pagination-arrows,.pager,.eq-pager,.pay-pager,.fd-pager,.wi-pages,.email-pagination nav,.tm-pager,.te-pager,.aa-pages,.ae-pages,.ap-page-buttons,.am-page-actions,.ua-pages,.activity-pagination-buttons) :is(.disabled,.pager-disabled,:disabled) {
+    opacity:.4 !important; pointer-events:none !important;
+}
+
+html body.frontdesk-shell .pagination-arrows a::after { content:none !important; }
+/* Shared dashboard search-control sizing. */
+body.admin-shell :is(.am-search, .aa-search, .ae-search, .ap-search),
+body.frontdesk-shell :is(.top-member-search, .am-search, .eq-search, .pay-search, .wi-search),
+body.trainer-shell :is(.tm-search, .te-search) {
+    display: flex !important;
+    align-items: stretch !important;
+    gap: 15px !important;
+    width: 100% !important;
+}
+
+body.admin-shell :is(.am-search, .aa-search, .ae-search, .ap-search) input,
+body.frontdesk-shell :is(.top-member-search, .am-search, .eq-search, .pay-search, .wi-search) input,
+body.trainer-shell :is(.tm-search, .te-search) input {
+    flex: 1 1 auto !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 56px !important;
+    padding: 0 18px !important;
+    box-sizing: border-box !important;
+    background: #1b1e1c !important;
+    border: 1px solid #8d958f !important;
+    border-radius: 0 !important;
+    color: #fff !important;
+    font-size: 15px !important;
+}
+
+
+body.admin-shell :is(.am-search, .aa-search, .ae-search, .ap-search) button,
+body.frontdesk-shell :is(.top-member-search, .am-search, .eq-search, .pay-search, .wi-search) button,
+body.trainer-shell :is(.tm-search, .te-search) button {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex: 0 0 120px !important;
+    width: 120px !important;
+    min-width: 120px !important;
+    height: 56px !important;
+    padding: 0 20px !important;
+    box-sizing: border-box !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: #a8df32 !important;
+    color: #20271f !important;
+    font-size: 15px !important;
+    font-weight: 400 !important;
+    text-align: center !important;
+    text-transform: uppercase !important;
+}
+
+body.admin-shell :is(.am-filters, .ap-filter) select,
+body.frontdesk-shell :is(.member-filter-form, .pay-filter) select {
+    height: 56px !important;
+    min-width: 145px !important;
+    padding: 0 18px !important;
+    box-sizing: border-box !important;
+    background: #1b1e1c !important;
+    border: 1px solid #535b55 !important;
+    border-radius: 0 !important;
+    color: #d7ddd8 !important;
+    font-size: 15px !important;
+}
+
+/* Keep every Front Desk trainer reachable inside the availability card. */
+body.frontdesk-shell .fd-dashboard .fd-availability-wrap {
+    height: 240px !important;
+    max-height: 240px !important;
+    width: calc(100% + 14px) !important;
+    margin-right: -14px !important;
+    overflow-x: hidden !important;
+    overflow-y: scroll !important;
+    scrollbar-gutter: auto !important;
+    scrollbar-width: thin;
+    scrollbar-color: #858a87 #4c4c50;
+}
+
+body.frontdesk-shell .fd-dashboard .fd-availability-table thead {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
+body.frontdesk-shell .fd-dashboard .fd-availability-table thead th {
+    background: #303532 !important;
+}
+
+body.frontdesk-shell .fd-dashboard .fd-availability-wrap::-webkit-scrollbar {
+    width: 8px;
+}
+
+body.frontdesk-shell .fd-dashboard .fd-availability-wrap::-webkit-scrollbar-track {
+    background: #4c4c50;
+}
+
+body.frontdesk-shell .fd-dashboard .fd-availability-wrap::-webkit-scrollbar-thumb {
+    background: #858a87;
+    border-radius: 8px;
+}
+
+/* Today's Schedule pagination container has no visible outline. */
+body.frontdesk-shell .fd-dashboard .fd-schedule .fd-table-foot {
+    border-color: transparent !important;
+    outline: 0 !important;
+}
+
+/* Unified three-dot table action buttons across role pages. */
+body.admin-shell :is(.am-actions, .aa-actions, .ae-actions) > summary,
+body.frontdesk-shell .pay-row-action details > summary,
+body.frontdesk-shell button.action-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 34px !important;
+    min-width: 34px !important;
+    height: 42px !important;
+    min-height: 42px !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+    list-style: none !important;
+    border: 1px solid #b8bdbc !important;
+    border-radius: 5px !important;
+    background: transparent !important;
+    color: #f2f2f2 !important;
+    font-size: 15px !important;
+    font-weight: 400 !important;
+    line-height: 1 !important;
+    text-align: center !important;
+    box-shadow: none !important;
+    cursor: pointer !important;
+}
+
+body.admin-shell :is(.am-actions, .aa-actions, .ae-actions) > summary:hover,
+body.frontdesk-shell .pay-row-action details > summary:hover,
+body.frontdesk-shell button.action-btn:hover {
+    border-color: #b8bdbc !important;
+    background: transparent !important;
+    color: #f2f2f2 !important;
+}
+
+body.admin-shell :is(.am-actions, .aa-actions, .ae-actions) > summary::-webkit-details-marker,
+body.frontdesk-shell .pay-row-action details > summary::-webkit-details-marker {
+    display: none !important;
+}
+
+/* Unified hover treatment for dropdown menu items. */
+body.admin-shell :is(
+    .am-actions-menu,
+    .aa-menu,
+    .ae-menu,
+    .action-menu,
+    .am-export-menu,
+    .aa-export-menu,
+    .ae-export-menu,
+    .ap-export-menu,
+    .ad-export-menu
+) :is(a, button):not(:disabled):hover,
+body.frontdesk-shell :is(.action-menu, .pay-action-menu) :is(a, button):not(:disabled):hover,
+body.trainer-shell :is(.action-menu, .dropdown-menu) :is(a, button):not(:disabled):hover {
+    background: #303630 !important;
+    color: #a8df32 !important;
+    border-color: transparent !important;
+}
+
+/* Let the Admin Members search control use all space before its filters. */
+body.admin-shell .am-head {
+    gap: 15px !important;
+}
+
+body.admin-shell .am-head .am-search {
+    flex: 1 1 auto !important;
+    width: auto !important;
+    max-width: none !important;
+    min-width: 0 !important;
+}
+
+body.admin-shell .am-head .am-filters {
+    flex: 0 0 auto !important;
+}
+
+/* Unified transparent Export triggers across every role page. */
+body.admin-shell :is(.am-export, .aa-export, .ae-export, .ap-export) > summary,
+body.admin-shell .ad-export > button,
+body:is(.admin-shell, .frontdesk-shell, .trainer-shell) :is(.export-btn, .export-button, .btn-export) {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 112px !important;
+    min-width: 112px !important;
+    height: 44px !important;
+    min-height: 44px !important;
+    padding: 0 14px !important;
+    box-sizing: border-box !important;
+    list-style: none !important;
+    border: 1px solid #a8df32 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    color: #a8df32 !important;
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    line-height: 1 !important;
+    text-align: center !important;
+    text-transform: uppercase !important;
+    text-decoration: none !important;
+    box-shadow: none !important;
+}
+
+body.admin-shell :is(.am-export, .aa-export, .ae-export, .ap-export) > summary:hover,
+body.admin-shell :is(.am-export, .aa-export, .ae-export, .ap-export)[open] > summary,
+body.admin-shell .ad-export > button:hover,
+body:is(.admin-shell, .frontdesk-shell, .trainer-shell) :is(.export-btn, .export-button, .btn-export):hover {
+    border-color: #b9ff20 !important;
+    background: #b9ff20 !important;
+    color: #000000 !important;
+}
+
+body.admin-shell :is(.am-export, .aa-export, .ae-export, .ap-export) > summary::-webkit-details-marker {
+    display: none !important;
+}
+
+/* Admin dashboard equipment colors follow each item's current condition. */
+body.admin-shell .ad-equipment-row:is(.condition-good, .condition-available) .ad-equipment-main::before {
+    background: #b9ff20 !important;
+}
+
+body.admin-shell .ad-condition:is(.good, .available) {
+    background: #283313 !important;
+    color: #b9ff20 !important;
+}
+
+body.admin-shell .ad-equipment-row:is(.condition-needs-maintenance, .condition-maintenance, .condition-fair) .ad-equipment-main::before {
+    background: #ffb020 !important;
+}
+
+body.admin-shell .ad-condition:is(.needs-maintenance, .maintenance, .fair) {
+    background: #4a3512 !important;
+    color: #ffbd42 !important;
+}
+
+body.admin-shell .ad-equipment-row:is(.condition-out-of-order, .condition-out-of-service) .ad-equipment-main::before {
+    background: #ff7878 !important;
+}
+
+body.admin-shell .ad-condition:is(.out-of-order, .out-of-service) {
+    background: #482326 !important;
+    color: #ff9292 !important;
+}
+
+body.admin-shell .ad-equipment-row.condition-in-use .ad-equipment-main::before {
+    background: #6aa9ff !important;
+}
+
+body.admin-shell .ad-condition.in-use {
+    background: #203a59 !important;
+    color: #8ec1ff !important;
+}
+
+/* Final Admin Attendance summary, search, and Live Log treatment. */
+body.admin-shell .aa .aa-stat {
+    border: 2px solid #535159 !important;
+}
+
+body.admin-shell .aa .aa-stats .aa-stat:nth-child(1) {
+    border-left: 5px solid #22d36f !important;
+}
+
+body.admin-shell .aa .aa-stats .aa-stat:nth-child(2) {
+    border-left: 5px solid #4b91ff !important;
+}
+
+body.admin-shell .aa .aa-stats .aa-stat:nth-child(3) {
+    border-left: 5px solid #ffb000 !important;
+}
+
+body.admin-shell .aa .aa-stat :is(.aa-label, .aa-value, .aa-value.active) {
+    color: #ffffff !important;
+}
+
+body.admin-shell .aa .aa-search {
+    display: flex !important;
+    width: 100% !important;
+    max-width: none !important;
+    box-sizing: border-box !important;
+}
+
+body.admin-shell .aa .aa-search input {
+    flex: 1 1 auto !important;
+    width: 100% !important;
+    min-width: 0 !important;
+}
+
+body.admin-shell .aa .aa-search input,
+body.admin-shell .aa .aa-search button {
+    height: 56px !important;
+    min-height: 56px !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+}
+
+body.admin-shell .aa .aa-card > h2 {
+    color: #ffffff !important;
+    font-size: 20px !important;
+}
+
+body.admin-shell .aa .aa-table thead,
+body.admin-shell .aa .aa-table thead tr,
+body.admin-shell .aa .aa-table th,
+body.admin-shell .ae .ae-table thead,
+body.admin-shell .ae .ae-table thead tr,
+body.admin-shell .ae .ae-table th
+{
+    background: #303532 !important;
+}
+
+body.admin-shell .aa .aa-table th,
+body.admin-shell .ae .ae-table th {
+    color: #ffffff !important;
+    font-size: 15px !important;
+}
+
+body.admin-shell .aa .aa-table tbody td,
+body.admin-shell .aa .aa-table .aa-member,
+body.admin-shell .aa .aa-info {
+    color: #ffffff !important;
+}
+
+body.admin-shell .aa .aa-badge {
+    color: #ffffff !important;
+    border-radius: 3px !important;
+}
+
+body.admin-shell .aa .aa-badge.checked-in {
+    background: #176b35 !important;
+    color: #ffffff !important;
+}
+
+body.admin-shell .aa .aa-badge.not-checked-in {
+    background: #713438 !important;
+    color: #ffffff !important;
+}
+
+body.admin-shell .aa .aa-badge.checked-out {
+    background: #285a78 !important;
+    color: #ffffff !important;
+}
+
+/* Admin equipment report follows the Front Desk report-modal layout. */
+body.admin-shell #equipmentModal .ae-dialog {
+    width: min(650px, 96vw) !important;
+    overflow: hidden !important;
+    background: #5E5D63 !important;
+    border: 2px solid #225d31 !important;
+    border-radius: 8px !important;
+    box-shadow: 0 14px 35px rgba(0, 0, 0, .4) !important;
+}
+
+body.admin-shell #equipmentModal .ae-dialog > h2 {
+    padding: 18px 24px !important;
+    background: transparent !important;
+    border-bottom: 1px solid #535159 !important;
+    color: #ffffff !important;
+    font-size: 20px !important;
+}
+
+body.admin-shell #equipmentModal .ae-form {
+    padding: 24px !important;
+}
+
+body.admin-shell #equipmentModal .ae-grid {
+    grid-template-columns: 1fr !important;
+    gap: 17px !important;
+}
+
+body.admin-shell #equipmentModal .ae-form label {
+    color: #ffffff !important;
+    font-size: 15px !important;
+    text-transform: none !important;
+}
+
+body.admin-shell #equipmentModal .ae-form :is(input, select) {
+    height: 44px !important;
+    background: #5E5D63 !important;
+    border: 1px solid #b8bdbc !important;
+    color: #ffffff !important;
+    font-size: 15px !important;
+}
+
+body.admin-shell #equipmentModal .ae-conditions {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+}
+
+body.admin-shell #equipmentModal .ae-condition span {
+    min-height: 88px !important;
+    border: 1px solid #b8bdbc !important;
+    border-radius: 5px !important;
+    color: #ffffff !important;
+    font-size: 13px !important;
+}
+
+body.admin-shell #equipmentModal .ae-condition input:checked + span {
+    border: 2px solid #35e477 !important;
+    background: #155c31 !important;
+    color: #ffffff !important;
+}
+
+body.admin-shell #equipmentModal .ae-modal-actions {
+    align-items: stretch !important;
+    margin: 22px -24px -24px !important;
+    padding: 16px 24px !important;
+    border-top: 1px solid #535159 !important;
+}
+
+body.admin-shell #equipmentModal .ae-modal-actions button {
+    flex: 1 1 0 !important;
+    height: 44px !important;
+}
+
+body.admin-shell #equipmentModal .ae-form small,
+body.frontdesk-shell #equipmentModal .eq-form small {
+    color: #8d978f !important;
+    font-size: 10px !important;
+}
+
+body.admin-shell #equipmentModal .ae-modal-actions button,
+body.frontdesk-shell #equipmentModal .eq-modal-actions button {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    padding: 0 16px !important;
+    text-align: left !important;
+    font-size: 10px !important;
+}
+
+body.admin-shell #equipmentModal .ae-modal-actions button[type="button"],
+body.frontdesk-shell #equipmentModal .eq-modal-actions .eq-cancel {
+    background: #ffffff !important;
+    border: 1px solid #2f8b4a !important;
+    color: #2f7542 !important;
+}
+
+body.admin-shell #equipmentModal .ae-modal-actions button[type="submit"],
+body.frontdesk-shell #equipmentModal .eq-modal-actions .eq-save {
+    background: #a8df32 !important;
+    border: 1px solid #a8df32 !important;
+    color: #31551f !important;
+}
+
+body.admin-shell .ae-heading
+{  
+    position:relative !important;
+    margin-bottom: 60px !important;
+}
+/* Wider Admin Equipment header actions for full, readable labels. */
+body.admin-shell .ae-heading .equipbtn .ae-add {
+    width: 190px !important;
+    min-width: 190px !important;
+    height: 44px !important;
+    padding: 0 18px !important;
+    font-size: 15px !important;
+    font-weight: 400 !important;
+    white-space: nowrap !important;
+
+}
+
+body.admin-shell .ae .ae-toolbar,
+body.admin-shell .ae .ae-search {
+    width: 100% !important;
+    max-width: none !important;
+}
+
+body.admin-shell .ae .ae-search input,
+body.admin-shell .ae .ae-search .equipment-search-button {
+    height: 56px !important;
+    min-height: 56px !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+}
+
+body.admin-shell .ae .ae-table th, .page-wrap .card-table th,
+.ap-wrap .ap-table th {
+    color: #ffffff !important;
+    font-size: 15px !important;
+}
+
+body.admin-shell .atm .atm-stats .atm-stat:nth-child(1) {
+    border-left: 5px solid #22d36f !important;
+}
+
+body.admin-shell .atm .atm-stats .atm-stat:nth-child(2) {
+    border-left: 5px solid #4b91ff !important;
+}
+
+body.admin-shell .atm .atm-stats .atm-stat:nth-child(3) {
+    border-left: 5px solid #ffb000 !important;
+}
+
+
+body.admin-shell .ae .ae-stats .ae-stat:nth-child(1) {
+    border-left: 5px solid #22d36f !important;
+}
+
+body.admin-shell .ae .ae-stats .ae-stat:nth-child(2) {
+    border-left: 5px solid #4b91ff !important;
+}
+
+body.admin-shell .ae .ae-stats .ae-stat:nth-child(3) {
+    border-left: 5px solid #ffb000 !important;
+}
+
+/* Unified table headers across Admin, Front Desk, and Trainer pages. */
+html body:is(.admin-shell, .frontdesk-shell, .trainer-shell) main[role="main"] table {
+    width: 100% !important;
+}
+
+html body:is(.admin-shell, .frontdesk-shell, .trainer-shell) main[role="main"] table thead,
+html body:is(.admin-shell, .frontdesk-shell, .trainer-shell) main[role="main"] table thead tr {
+    width: 100% !important;
+    background: #303430 !important;
+}
+
+html body:is(.admin-shell, .frontdesk-shell, .trainer-shell) main[role="main"] table th {
+    height: 52px !important;
+    padding: 0 16px !important;
+    box-sizing: border-box !important;
+    background: #303430 !important;
+    color: #ffffff !important;
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    line-height: 1.2 !important;
+    letter-spacing: .04em !important;
+    text-align: left !important;
+    text-transform: uppercase !important;
+    vertical-align: middle !important;
+}
+
+/* The notification list uses a CSS grid instead of a semantic table. */
+html body:is(.admin-shell, .frontdesk-shell) .email-notifications .email-log-header {
+    width: 100% !important;
+    min-height: 52px !important;
+    padding: 0 16px !important;
+    box-sizing: border-box !important;
+    background: #303430 !important;
+    color: #ffffff !important;
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    line-height: 1.2 !important;
+    letter-spacing: .04em !important;
+    text-transform: uppercase !important;
+}
+
+/* Remove the light outer wrap around the Admin User Roles table. */
+body.admin-shell .page-wrap > .card {
+    border-color: transparent !important;
+    outline: 0 !important;
+}
+
+/* White Admin User Roles and User Attendance page headings. */
+body.admin-shell .page-wrap .page-header h1,
+body.admin-shell .page-wrap .page-header p,
+body.admin-shell .ua-page .ua-head h1,
+body.admin-shell .ua-page .ua-head p {
+    color: #ffffff !important;
+}
+
+body.admin-shell .page-wrap .footer-note,
+body.admin-shell .page-wrap .footer-note strong,
+body.admin-shell .page-wrap .footer-note-item {
+    color: #ffffff !important;
+}
+
+body.admin-shell .page-wrap .footer-note strong {
+    font-size: 20px !important;
+    line-height: 1.25 !important;
+}
+
+body.admin-shell .page-wrap .footer-note-item {
+    font-size: 15px !important;
+    line-height: 1.4 !important;
+}
+
+/* Match the User Roles invite action to the shared primary buttons. */
+body.admin-shell .page-wrap .page-header .btn-invite {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 190px !important;
+    min-width: 190px !important;
+    height: 56px !important;
+    padding: 0 18px !important;
+    box-sizing: border-box !important;
+    background: #a8df32 !important;
+    border: 1px solid #a8df32 !important;
+    border-radius: 0 !important;
+    color: #101510 !important;
+    font-size: 24px !important;
+    font-weight: 800 !important;
+    line-height: 1 !important;
+    text-align: center !important;
+}
+
+/* User Roles action dropdown matches the shared dark action menus. */
+body.admin-shell .page-wrap .actions-cell .action-menu {
+    width: 190px !important;
+    min-width: 190px !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    background: #1b1e1c !important;
+    border: 1px solid #303630 !important;
+    border-radius: 0 !important;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, .42) !important;
+}
+
+body.admin-shell .page-wrap .actions-cell .action-menu .action-menu-item,
+body.admin-shell .page-wrap .actions-cell .action-menu .action-menu-item.danger {
+    display: flex !important;
+    align-items: center !important;
+    width: 100% !important;
+    min-height: 44px !important;
+    margin: 0 !important;
+    padding: 0 16px !important;
+    box-sizing: border-box !important;
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    color: #ffffff !important;
+    font-size: 15px !important;
+    font-weight: 400 !important;
+    line-height: 1.2 !important;
+    text-align: left !important;
+    text-decoration: none !important;
+}
+
+body.admin-shell .page-wrap .actions-cell .action-menu .action-menu-item:hover,
+body.admin-shell .page-wrap .actions-cell .action-menu .action-menu-item.danger:hover {
+    background: #303630 !important;
+    color: #a8df32 !important;
+}
+
+/* Full-width content canvas for every page inside the Admin layout. */
+body.admin-shell .admin-main > main {
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+}
+
+body.admin-shell .admin-main > main > :is(
+    .ad-wrap,
+    .aa,
+    .ae,
+    .ap-wrap,
+    .atm,
+    .ua-page,
+    .page-wrap,
+    .email-notifications,
+    .container
+) {
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    transform: none !important;
+    box-sizing: border-box !important;
+}
+
+body.admin-shell .admin-main > main > .container {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+/* Align Admin Payments with Trainer Management's top and side canvas. */
+body.admin-shell .admin-main > main > .ap-wrap {
+    padding: 0 !important;
+}
+
+body.admin-shell .admin-main > main > .ap-wrap .ap-heading {
+    margin-top: 0 !important;
+}
+
+/* Rounded, high-contrast Admin User Roles table. */
+body.admin-shell .page-wrap > .card {
+    background: #5e5d63 !important;
+    border: 0 !important;
+    border-radius: 8px !important;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, .5) !important;
+}
+
+body.admin-shell .page-wrap .card-table thead th:first-child {
+    border-top-left-radius: 8px !important;
+}
+
+body.admin-shell .page-wrap .card-table thead th:last-child {
+    border-top-right-radius: 8px !important;
+}
+
+body.admin-shell .page-wrap .card-table tbody td,
+body.admin-shell .page-wrap .card-table .access-text,
+body.admin-shell .page-wrap .card-table .last-login,
+body.admin-shell .page-wrap .card-table .user-name-button,
+body.admin-shell .page-wrap .card-table .user-name-button:hover,
+body.admin-shell .page-wrap .card-table .user-name-button:focus,
+body.admin-shell .page-wrap .card-table .user-name-text,
+body.admin-shell .page-wrap .card-table .user-name-text span,
+body.admin-shell .page-wrap .card-table .menu-dots-btn,
+body.admin-shell .page-wrap > .card > .pager {
+    color: #ffffff !important;
+}
+
+body.admin-shell .page-wrap > .card > .pager {
+    border-bottom-left-radius: 8px !important;
+    border-bottom-right-radius: 8px !important;
+}
+
+/* Full-width, rounded Admin Payments transaction card. */
+body.admin-shell .ap-wrap .ap-card {
+    width: 100% !important;
+    max-width: none !important;
+    overflow: hidden !important;
+    border: 0 !important;
+    border-radius: 8px !important;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, .5) !important;
+}
+
+body.admin-shell .ap-wrap .ap-table-wrap,
+body.admin-shell .ap-wrap .ap-table,
+body.admin-shell .ap-wrap .ap-table thead,
+body.admin-shell .ap-wrap .ap-table thead tr {
+    width: 100% !important;
+    max-width: none !important;
+}
+
+body.admin-shell .ap-wrap .ap-table {
+    table-layout: fixed !important;
+}
+
+body.admin-shell .ap-wrap .ap-table th:nth-child(1) { width: 17% !important; }
+body.admin-shell .ap-wrap .ap-table th:nth-child(2) { width: 23% !important; }
+body.admin-shell .ap-wrap .ap-table th:nth-child(3) { width: 13% !important; }
+body.admin-shell .ap-wrap .ap-table th:nth-child(4) { width: 15% !important; }
+body.admin-shell .ap-wrap .ap-table th:nth-child(5) { width: 17% !important; }
+body.admin-shell .ap-wrap .ap-table th:nth-child(6) { width: 15% !important; }
+
+body.admin-shell .ap-wrap .ap-card h2 {
+    border-top-left-radius: 8px !important;
+    border-top-right-radius: 8px !important;
+}
+
+body.admin-shell .ap-wrap .ap-pager {
+    border-bottom-left-radius: 8px !important;
+    border-bottom-right-radius: 8px !important;
+}
+
+/* High-contrast text for the User Attendance History rows. */
+body.admin-shell .ua-page .ua-table tbody td,
+body.admin-shell .ua-page .ua-table .ua-name,
+body.admin-shell .ua-page .ua-table .ua-role {
+    color: #ffffff !important;
+}
+
+/* Table-only PDF/print exports shared by all Admin data pages. */
+@media print {
+    @page {
+        size: landscape;
+        margin: 12mm;
+    }
+
+    body.admin-shell,
+    body.admin-shell .admin-main,
+    body.admin-shell .admin-main > main {
+        width: 100% !important;
+        min-height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #ffffff !important;
+    }
+
+    body.admin-shell * {
+        visibility: hidden !important;
+    }
+
+    body.admin-shell :is(.am-table, .aa-table, .ae-table, .ap-table),
+    body.admin-shell :is(.am-table, .aa-table, .ae-table, .ap-table) * {
+        visibility: visible !important;
+    }
+
+    body.admin-shell :is(.am-table, .aa-table, .ae-table, .ap-table) {
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        margin: 0 !important;
+        border-collapse: collapse !important;
+        table-layout: auto !important;
+        background: #ffffff !important;
+        color: #000000 !important;
+        box-shadow: none !important;
+    }
+
+    body.admin-shell :is(.am-table, .aa-table, .ae-table, .ap-table) :is(th, td),
+    body.admin-shell :is(.am-table, .aa-table, .ae-table, .ap-table) :is(th, td) * {
+        background: #ffffff !important;
+        color: #000000 !important;
+        border-color: #777777 !important;
+        box-shadow: none !important;
+        text-shadow: none !important;
+    }
+
+    body.admin-shell :is(.am-table, .aa-table, .ae-table, .ap-table) th {
+        font-weight: 700 !important;
+    }
+}
+
+body.admin-shell .admin-renewal-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+    margin-top: 18px !important;
+}
+
+body.admin-shell .admin-renewal-grid > div {
+    padding: 12px !important;
+    background: #171a18 !important;
+    border: 1px solid #505750 !important;
+}
+
+body.admin-shell .admin-renewal-grid small,
+body.admin-shell .admin-renewal-grid strong {
+    display: block !important;
+}
+
+body.admin-shell .admin-renewal-grid small {
+    margin-bottom: 6px !important;
+    color: #b9c1bb !important;
+    font-size: 10px !important;
+    text-transform: uppercase !important;
+}
+
+body.admin-shell .admin-renewal-grid strong {
+    color: #ffffff !important;
+    font-size: 15px !important;
+}
+
+body.admin-shell .admin-renewal-grid > div:last-child strong {
+    color: #b7ff1b !important;
+    font-size: 20px !important;
+}
+
+/* Align Equipment, Trainer Schedule/Management, and User Roles with Members. */
+body.admin-shell .admin-main > main > :is(.ae, .atm, .page-wrap) {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+}
+
+body.admin-shell :is(.ae-heading, .atm-heading, .page-header) {
+    margin-top: 0 !important;
+}
+
+body.admin-shell .ae-heading h1,
+body.admin-shell .atm h1,
+body.admin-shell .page-header h1 {
+    margin-top: 0 !important;
+}
+
+body.admin-shell .ae .ae-stats .ae-stat:nth-child(4) {
+    border-left: 5px solid #ff5f67 !important;
+}
+
+/* Final Trainer heading color override (kept last to beat legacy page styles). */
+html body.trainer-shell main :is(
+    .trainer-schedule .ts-title h1,
+    .tm-page .tm-head h1,
+    .availability-page > h1,
+    .trainer-equipment .te-header h1,
+    .trainer-notifications .tn-title
+) {
+    color: #ffffff !important;
+}
+
+/* Trainer Overview uses a single high-contrast text color. */
+html body.trainer-shell main .trainer-schedule,
+html body.trainer-shell main .trainer-schedule :is(
+    h1, h2, p, span, strong, a, time
+) {
+    color: #ffffff !important;
+}
+
+html body.trainer-shell main .trainer-schedule .ts-day {
+    background: #2E2E2F !important;
+    border: 2px solid #535159 !important;
+}
+
+html body.trainer-shell main .trainer-schedule .ts-day.selected {
+    border-color: #a8df32 !important;
+    box-shadow: inset 0 3px #a8df32, 0 5px 12px rgba(0, 0, 0, .35) !important;
+}

@@ -17,10 +17,6 @@ public class AttendanceMemberItem
     public string Initials { get; set; } = string.Empty;
     public string Membership { get; set; } = string.Empty;
     public DateTime? CheckInAt { get; set; }
-    // Retained for the separate Admin attendance workflow. Front Desk does not
-    // display or accept check-out actions.
-    public DateTime? CheckOutAt { get; set; }
     public string Status { get; set; } = "Not checked in";
     public bool CanCheckIn => !CheckInAt.HasValue;
-    public bool CanCheckOut => Status == "Active";
 }

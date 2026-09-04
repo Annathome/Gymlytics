@@ -5,10 +5,9 @@ public sealed class AdminPaymentsViewModel
     public List<AdminPaymentTransaction> Payments { get; set; } = new();
     public string? SearchTerm { get; set; }
     public PaymentStatus? SelectedStatus { get; set; }
-    public decimal CollectedThisMonth { get; set; }
-    public decimal PendingAmount { get; set; }
+    public decimal MemberRevenueThisMonth { get; set; }
+    public decimal WalkInRevenueThisMonth { get; set; }
     public int OverdueAccounts { get; set; }
-    public int UpcomingRenewals { get; set; }
     public int Page { get; set; } = 1;
     public int TotalPages { get; set; } = 1;
     public int TotalCount { get; set; }

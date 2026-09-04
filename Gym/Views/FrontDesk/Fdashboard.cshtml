@@ -1,4 +1,3 @@
-
 @model Gym.Models.FrontDeskDashboardViewModel
 
 @{
@@ -15,31 +14,79 @@
     }
 
     /* ========================================
-           Dashboard
-           ======================================== */
-
+       Dashboard shell
+       ======================================== */
     .fd-dashboard {
-        width: min(1180px, calc(100vw - 380px));
-        margin: 22px auto;
-        transform: translateX(10px);
-        color: #102630;
+        width: 100%;
+        max-width: none;
+        margin: 0;
+        color: #c4ccc6;
+        background: transparent;
         font: 15px Arial, Helvetica, sans-serif;
     }
 
-        .fd-dashboard > section + section {
-            margin-top: 28px;
-        }
+    .fd-dashboard > section + section {
+        margin-top: 28px;
+    }
 
-    .fd-title {
-        margin: 0 0 18px;
-        font-size: 22px;
+    .role-dashboard-head {
+        margin: 0 0 30px;
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+    }
+
+    .role-dashboard-head h1 {
+        margin: 0 0 5px;
+        color: #d7ddd8;
+        font-size: 30px;
         font-weight: 700;
     }
 
-    .fd-panel {
-        background: #fff;
-        border: 1px solid #dce5e1;
-        border-radius: 8px;
+    .role-dashboard-head p {
+        margin: 0;
+        color: #9ba49d;
+        font-size: 15px;
+    }
+
+    .fd-notification-bell {
+        position: relative;
+        display: grid;
+        place-items: center;
+        width: 40px;
+        height: 38px;
+        color: #b9ff20;
+        text-decoration: none;
+        font-size: 28px;
+    }
+
+    .fd-notification-bell:hover,
+    .fd-notification-bell:focus { color: #fff; }
+
+    .fd-notification-bell i { font-size: 28px !important; }
+
+    .fd-notification-count {
+        position: absolute;
+        top: -6px;
+        right: -5px;
+        display: grid;
+        place-items: center;
+        min-width: 17px;
+        height: 17px;
+        padding: 0 4px;
+        border-radius: 20px;
+        background: #d92d20;
+        color: #fff;
+        font-size: 10px;
+        font-weight: 700;
+        line-height: 1;
+    }
+
+    .fd-panel,
+    .fd-summary-card {
+        background: #5E5D63;
+        border: 1px solid #1f6b37;
+        border-radius: 6px;
         box-shadow: none;
     }
 
@@ -47,43 +94,42 @@
     .fd-summary-grid {
         display: grid;
         grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 28px;
+        gap: 20px;
     }
 
     .fd-summary-card {
-        min-height: 126px;
-        padding: 20px;
-        border: 1px solid #d3e1d7;
-        border-left: 4px solid #08752a;
-        border-radius: 7px;
-        background: #f8fbf8;
+        min-height: 150px;
+        padding: 22px;
+        border-left-width: 1px;
         box-sizing: border-box;
     }
 
     .fd-summary-label {
         margin: 0 0 14px;
-        color: #405047;
-        font-size: 15px;
+        color: #d7ddd8;
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .06em;
     }
 
     .fd-summary-value {
         margin: 0;
-        color: #08752a;
-        font-size: 34px;
+        color: #b9ff20;
+        font-size: 30px;
         font-weight: 700;
         line-height: 1;
     }
 
     .fd-summary-description {
         margin: 9px 0 0;
-        color: #718078;
+        color: #9ba49d;
         font-size: 12px;
     }
 
     /* ========================================
-           Chart
-           ======================================== */
-
+       Chart + trainer availability
+       ======================================== */
     .fd-insights-grid {
         display: grid;
         grid-template-columns: minmax(0, 1.45fr) minmax(360px, .85fr);
@@ -92,8 +138,9 @@
         align-items: stretch;
     }
 
-    .fd-chart {
-        padding: 24px;
+    .fd-chart,
+    .fd-availability {
+        padding: 22px;
     }
 
     .fd-chart-head {
@@ -103,15 +150,23 @@
         margin-bottom: 22px;
     }
 
-        .fd-chart-head h2 {
-            margin: 0;
-            font-size: 20px;
-        }
+    .fd-chart-head h2,
+    .fd-availability > h2,
+    .fd-schedule-head h2 {
+        margin: 0;
+        color: #d7ddd8;
+        font-size: 20px;
+    }
+
+    .fd-legend,
+    .fd-trainer-days,
+    .fd-not-set {
+        color: #9ba49d;
+    }
 
     .fd-legend {
         display: flex;
         gap: 24px;
-        color: #56635b;
     }
 
     .fd-key::before {
@@ -127,7 +182,7 @@
     .fd-key.walkins::before {
         height: 0;
         background: none;
-        border-top: 3px dashed #d98218;
+        border-top: 3px solid #d98218;
     }
 
     .fd-chart-wrap {
@@ -141,41 +196,98 @@
         height: 100%;
     }
 
-    .fd-availability { overflow:hidden; }
-    .fd-availability h2 { margin:0; padding:20px; border-bottom:1px solid #dce5e1; font-size:19px; }
-    .fd-availability-wrap { max-height:336px; overflow:auto; }
-    .fd-availability-table { width:100%; border-collapse:collapse; font-size:13px; }
-    .fd-availability-table th { padding:11px 13px; background:#edf6f1; color:#46564d; text-align:left; font-size:11px; }
-    .fd-availability-table td { padding:13px; border-top:1px solid #e7ede9; vertical-align:top; }
-    .fd-trainer-name { display:block; margin-bottom:4px; font-weight:700; }
-    .fd-trainer-days { color:#68766e; font-size:11px; line-height:1.35; }
-    .fd-slot-count { display:inline-block; min-width:27px; padding:5px 8px; border-radius:999px; background:#dcf5df; color:#08752a; text-align:center; font-weight:800; }
-    .fd-slot-count.full { background:#fde7df; color:#a93a20; }
-    .fd-not-set { color:#8a958f; font-style:italic; }
+    .fd-availability {
+        overflow: hidden;
+    }
+
+    .fd-availability > h2 {
+        padding: 20px;
+        border-bottom: 1px solid #dce5e1;
+    }
+
+    .fd-availability-wrap {
+        max-height: 336px;
+        overflow: auto;
+    }
+
+    .fd-table,
+    .fd-availability-table {
+        background: transparent;
+        color: #9ba49d;
+    
+    }
+
+    .fd-availability-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+    }
+
+    .fd-table th,
+    .fd-availability-table th {
+        padding: 11px 13px;
+        color: #9ba49d;
+        text-align: left;
+        font-size: 11px;
+        border:none;
+    }
+
+    .fd-availability-table td {
+        padding: 13px;
+        border-top: 1px solid #e7ede9;
+        vertical-align: top;
+    }
+
+    .fd-trainer-name {
+        display: block;
+        margin-bottom: 4px;
+        font-weight: 700;
+    }
+
+    .fd-trainer-days {
+        font-size: 11px;
+        line-height: 1.35;
+    }
+
+    .fd-slot-count {
+        display: inline-block;
+        min-width: 27px;
+        padding: 5px 8px;
+        border-radius: 999px;
+        background: #dcf5df;
+        color: #08752a;
+        text-align: center;
+        font-weight: 800;
+    }
+
+    .fd-slot-count.full {
+        background: #fde7df;
+        color: #a93a20;
+    }
+
+    .fd-not-set {
+        font-style: italic;
+    }
 
     /* ========================================
-           Schedule
-           ======================================== */
-
+       Today's schedule
+       ======================================== */
     .fd-schedule {
         margin-top: 18px;
+        padding: 0;
         overflow: hidden;
     }
 
     .fd-schedule-head {
-        min-height: 54px;
+        min-height: 58px;
         display: flex;
         align-items: center;
         justify-content: space-between;
         padding: 0 18px;
-        background: #394c55;
+        background: #5E5D63;
         color: #fff;
+        border-bottom: 1px solid #293029;
     }
-
-        .fd-schedule-head h2 {
-            margin: 0;
-            font-size: 20px;
-        }
 
     .fd-table-wrap {
         overflow-x: auto;
@@ -187,59 +299,70 @@
         border-collapse: collapse;
     }
 
-        .fd-table th {
-            padding: 14px 22px;
-            background: #edf6f2;
-            color: #3e4941;
-            text-align: left;
-            font-size: 15px;
-        }
-
-        .fd-table td {
-            padding: 14px 22px;
-            border-top: 1px solid #edf0ee;
-            font-size: 15px;
-        }
-
-    /* ========================================
-           Status Badges
-           ======================================== */
-
-    .fd-badge {
-        display: inline-block;
-        padding: 5px 10px;
-        border-radius: 999px;
-        font-size: 15px;
-        font-weight: 600;
+    .fd-table th {
+        padding: 12px 18px;
+        background: #5E5D63;
+        color: #9ba49d;
+        font-size: 10px;
+        border-bottom: 1px solid #293029;
     }
 
-        .fd-badge.scheduled {
-            color: #946700;
-            background: #fff8e6;
-            border: 1px solid #efd27a;
-        }
+    .fd-table td {
+        height: auto;
+        padding: 13px 18px;
+        background: #5E5D63;
+        color: #9ba49d;
+        font-size: 15px;
+        border-top: 0;
+        border-bottom: 1px solid #293029;
+    }
 
-        .fd-badge.confirmed {
-            color: #176b2c;
-            background: #e8f7e8;
-            border: 1px solid #b8dab9;
-        }
-
-        .fd-badge.completed {
-            color: #285d78;
-            background: #eaf5fa;
-            border: 1px solid #bdd9e7;
-        }
-
-        .fd-badge.cancelled {
-            color: #9b2828;
-            background: #faeaea;
-            border: 1px solid #e7baba;
-        }
+    .fd-table td[colspan] {
+        padding: 20px 18px;
+        text-align: center;
+    }
 
     /* ========================================
-           Table Actions
-           ======================================== */
+       Status badges
+       ======================================== */
+    .fd-badge {
+        display: inline-block;
+        padding: 5px 9px;
+        border-radius: 0;
+        font-size: 10px;
+        font-weight: 700;
+    }
+
+    .fd-badge.scheduled {
+        color: #946700;
+        background: #fff8e6;
+        border: 1px solid #efd27a;
+    }
+
+    .fd-badge.confirmed {
+        color: #176b2c;
+        background: #e8f7e8;
+        border: 1px solid #b8dab9;
+    }
+
+    .fd-badge.completed {
+        color: #285d78;
+        background: #eaf5fa;
+        border: 1px solid #bdd9e7;
+    }
+
+    .fd-badge.cancelled {
+        color: #9b2828;
+        background: #faeaea;
+        border: 1px solid #e7baba;
+    }
+
+    /* ========================================
+       Table actions
+       ======================================== */
+    .fd-reminder-form {
+        margin: 0;
+    }
 
     .fd-action {
         padding: 7px 12px;
@@ -250,29 +373,72 @@
         cursor: pointer;
     }
 
-    .fd-reminder-form { margin: 0; }
-    .fd-action.remind { border-color: #08752a; background: #08752a; color: #fff; cursor: pointer; font-weight: 700; }
-    .fd-action.remind:hover { background: #065f22; }
-    .fd-action.reminded { border-color: #69786f; background: #dce6df; color: #355143; cursor: default; }
-    .fd-notice { margin: 0 0 14px; padding: 11px 14px; border-radius: 7px; }
-    .fd-notice.success { background: #e8f7e8; color: #176b2c; }
-    .fd-notice.error { background: #faeaea; color: #9b2828; }
-    .fd-toast { position: fixed; top: 24px; right: 24px; z-index: 9000; min-width: 260px; padding: 15px 18px; border-left: 5px solid #0ec52d; border-radius: 8px; background: #fff; color: #176b2c; box-shadow: 0 12px 30px rgba(0,0,0,.2); animation: fdToastIn .25s ease-out; }
-    @@keyframes fdToastIn { from { opacity: 0; transform: translateY(-12px); } to { opacity: 1; transform: translateY(0); } }
+    .fd-action.remind {
+        border-color: #08752a;
+        background: #08752a;
+        color: #fff;
+        font-weight: 700;
+    }
+
+    .fd-action.remind:hover {
+        background: #065f22;
+    }
+
+    .fd-action.reminded {
+        border-color: #69786f;
+        background: #dce6df;
+        color: #355143;
+        cursor: default;
+    }
+
+    .fd-notice {
+        margin: 0 0 14px;
+        padding: 11px 14px;
+        border-radius: 7px;
+    }
+
+    .fd-notice.success {
+        background: #e8f7e8;
+        color: #176b2c;
+    }
+
+    .fd-notice.error {
+        background: #faeaea;
+        color: #9b2828;
+    }
+
+    .fd-toast {
+        position: fixed;
+        top: 24px;
+        right: 24px;
+        z-index: 9000;
+        min-width: 260px;
+        padding: 15px 18px;
+        border-left: 5px solid #0ec52d;
+        border-radius: 8px;
+        background: #fff;
+        color: #176b2c;
+        box-shadow: 0 12px 30px rgba(0, 0, 0, .2);
+        animation: fdToastIn .25s ease-out;
+    }
+
+    @@keyframes fdToastIn {
+        from { opacity: 0; transform: translateY(-12px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
 
     /* ========================================
-           Table Footer / Pagination
-           ======================================== */
-
+       Table footer / pagination
+       ======================================== */
     .fd-table-foot {
-        min-height: 76px;
+        min-height: 62px;
         display: flex;
         align-items: center;
         gap: 14px;
-        padding: 16px 20px;
-        border-top: 1px solid #edf0ee;
-        background: #e8f6fc;
-        color: #111;
+        padding: 12px 18px;
+        border-top: 0;
+        background: #5E5D63;
+        color: #9ba49d;
         font-size: 15px;
     }
 
@@ -283,62 +449,46 @@
         gap: 8px;
     }
 
-        .fd-pager button {
-            width: 55px;
-            height: 43px;
-            display: inline-block;
-            padding: 0;
-            border: 1px solid #d5e1e5;
-            border-radius: 6px;
-            background: #f7fbfc;
-            color: #879397;
-            font-size: 13px;
-            font-weight: 400;
-            cursor: pointer;
-        }
+    .fd-pager button {
+        width: 42px;
+        height: 34px;
+        display: inline-block;
+        padding: 0;
+        border: 1px solid #415128;
+        border-radius: 0;
+        background: #283313;
+        color: #a8df32;
+        font-size: 10px;
+        font-weight: 400;
+        text-align: center;
+        cursor: pointer;
+    }
 
-            .fd-pager button:disabled {
-                opacity: 0.5;
-                cursor: default;
-            }
+    .fd-pager button:disabled {
+        opacity: .45;
+        cursor: default;
+    }
 
     /* ========================================
-           Responsive
-           ======================================== */
-
+       Responsive
+       ======================================== */
     @@media (max-width: 1100px) {
-        .fd-dashboard {
-            width: calc(100vw - 370px);
-            margin-left: auto;
-            margin-right: auto;
-            transform: translateX(6px);
-        }
-
-        .fd-check-row {
+        .fd-insights-grid {
             grid-template-columns: 1fr;
         }
+    }
 
-        .fd-primary {
-            height: 58px;
+    @@media (max-width: 900px) {
+        .fd-summary-grid,
+        .fd-insights-grid {
+            grid-template-columns: 1fr;
         }
-
-        .fd-insights-grid { grid-template-columns:1fr; }
     }
 
     @@media (max-width: 760px) {
-        .fd-dashboard {
-            width: calc(100vw - 48px);
-            margin: 20px auto;
-            transform: none;
-        }
-
         .fd-summary-grid {
             grid-template-columns: 1fr;
             gap: 14px;
-        }
-
-        .fd-chart {
-            padding: 20px;
         }
 
         .fd-chart-head {
@@ -359,9 +509,20 @@
 
 <main class="fd-dashboard">
 
-    <h1 class="fd-title">
-        Front Desk Dashboard
-    </h1>
+    <header class="role-dashboard-head">
+        <div>
+            <h1 class="fd-title">Front Desk Overview</h1>
+            <p>Live facility operations and member service activity.</p>
+        </div>
+        <a class="fd-notification-bell" asp-controller="FrontDesk" asp-action="Notifications"
+           title="Front desk notifications" aria-label="Front desk notifications">
+            <i class="bi bi-bell"></i>
+            @if (Model.UnreadNotificationsCount > 0)
+            {
+                <span class="fd-notification-count">@Model.UnreadNotificationsCount</span>
+            }
+        </a>
+    </header>
 
     <!-- Weekly Summary -->
     <section class="fd-summary-grid" aria-label="Weekly front desk summary">
@@ -383,72 +544,73 @@
     </section>
 
     <section class="fd-insights-grid" aria-label="Weekly traffic and trainer availability">
-      <!-- Weekly Traffic Chart -->
-      <section class="fd-panel fd-chart">
 
-        <div class="fd-chart-head">
-
-            <h2>
-                Weekly Gym Traffic
-            </h2>
-
-            <div class="fd-legend">
-
-                <span class="fd-key">
-                    Member check-ins
-                </span>
-
-                <span class="fd-key walkins">
-                    Walk-ins
-                </span>
-
+        <!-- Weekly Traffic Chart -->
+        <section class="fd-panel fd-chart">
+            <div class="fd-chart-head">
+                <h2>Weekly Gym Traffic</h2>
+                <div class="fd-legend">
+                    <span class="fd-key">Member check-ins</span>
+                    <span class="fd-key walkins">Walk-ins</span>
+                </div>
             </div>
+            <div class="fd-chart-wrap">
+                <canvas id="weeklyTrafficChart" aria-label="Weekly comparison of walk-ins and member check-ins"></canvas>
+            </div>
+        </section>
 
-        </div>
+        <!-- Trainer Availability -->
+        <section class="fd-panel fd-availability">
+            <h2>Trainer Availability</h2>
+            <div class="fd-availability-wrap">
+                <table class="fd-availability-table">
+                    <thead>
+                        <tr>
+                            <th>TRAINER / HOURS</th>
+                            <th>ASSIGNED</th>
+                            <th>REMAINING</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.TrainerAvailability.Count == 0)
+                        {
+                            <tr><td colspan="3" class="fd-not-set">No active trainers found.</td></tr>
+                        }
+                        @foreach (var trainer in Model.TrainerAvailability)
+                        {
+                            <tr>
+                                <td>
+                                    <span class="fd-trainer-name">@trainer.TrainerName</span>
+                                    @if (trainer.StartTime.HasValue && trainer.EndTime.HasValue)
+                                    {
+                                        <span class="fd-trainer-days">
+                                            @trainer.AvailableDays.Replace(",", ", ")<br />
+                                            @DateTime.Today.Add(trainer.StartTime.Value).ToString("h:mm tt")–@DateTime.Today.Add(trainer.EndTime.Value).ToString("h:mm tt")
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="fd-not-set">Schedule not set</span>
+                                    }
+                                </td>
+                                <td>@trainer.AssignedMembers / @(trainer.WeeklyMemberLimit?.ToString() ?? "—")</td>
+                                <td>
+                                    @if (trainer.RemainingSlots.HasValue)
+                                    {
+                                        <span class="fd-slot-count @(trainer.RemainingSlots == 0 ? "full" : "")">@trainer.RemainingSlots</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="fd-not-set">—</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </section>
 
-        <div class="fd-chart-wrap">
-            <canvas id="weeklyTrafficChart"
-                    aria-label="Weekly comparison of walk-ins and member check-ins">
-            </canvas>
-        </div>
-
-      </section>
-
-      <section class="fd-panel fd-availability">
-        <h2>Trainer Availability</h2>
-        <div class="fd-availability-wrap">
-          <table class="fd-availability-table">
-            <thead><tr><th>TRAINER / HOURS</th><th>ASSIGNED</th><th>REMAINING</th></tr></thead>
-            <tbody>
-              @if (Model.TrainerAvailability.Count == 0)
-              {
-                <tr><td colspan="3" class="fd-not-set">No active trainers found.</td></tr>
-              }
-              @foreach (var trainer in Model.TrainerAvailability)
-              {
-                <tr>
-                  <td>
-                    <span class="fd-trainer-name">@trainer.TrainerName</span>
-                    @if (trainer.StartTime.HasValue && trainer.EndTime.HasValue)
-                    {
-                      <span class="fd-trainer-days">@trainer.AvailableDays.Replace(",", ", ")<br />@DateTime.Today.Add(trainer.StartTime.Value).ToString("h:mm tt")–@DateTime.Today.Add(trainer.EndTime.Value).ToString("h:mm tt")</span>
-                    }
-                    else { <span class="fd-not-set">Schedule not set</span> }
-                  </td>
-                  <td>@trainer.AssignedMembers / @(trainer.WeeklyMemberLimit?.ToString() ?? "—")</td>
-                  <td>
-                    @if (trainer.RemainingSlots.HasValue)
-                    {
-                      <span class="fd-slot-count @(trainer.RemainingSlots == 0 ? "full" : "")">@trainer.RemainingSlots</span>
-                    }
-                    else { <span class="fd-not-set">—</span> }
-                  </td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
-      </section>
     </section>
 
     <!-- Today's Schedule -->
@@ -460,19 +622,15 @@
     {
         <div class="fd-notice error">@reminderError</div>
     }
-    <section class="fd-panel fd-schedule"
-             id="schedule">
+
+    <section class="fd-panel fd-schedule" id="schedule">
 
         <div class="fd-schedule-head">
-            <h2>
-                Today's Schedule
-            </h2>
+            <h2>Today's Schedule</h2>
         </div>
 
         <div class="fd-table-wrap">
-
             <table class="fd-table">
-
                 <thead>
                     <tr>
                         <th>TRAINER</th>
@@ -483,93 +641,49 @@
                         <th></th>
                     </tr>
                 </thead>
-
                 <tbody>
-
                     @if (Model.Schedule.Count == 0)
                     {
                         <tr>
-                            <td colspan="6"
-                                style="text-align: center; color: #718078;">
-                                No upcoming sessions found.
-                            </td>
+                            <td colspan="6" class="fd-not-set">No upcoming sessions found.</td>
                         </tr>
                     }
-
                     @foreach (var item in Model.Schedule)
                     {
                         var statusClass = item.DisplayStatus.ToLowerInvariant();
                         var sessionPassed = item.StartTime <= DateTime.Now;
 
                         <tr>
-
-                            <td>
-                                @item.TrainerName
-                            </td>
-
-                            <td>
-                                @item.MemberName
-                            </td>
-
-                            <td>
-                                @item.Date.ToString("yyyy-MM-dd")
-                            </td>
-
-                            <td>
-                                @item.StartTime.ToString("h:mm tt")
-                                -
-                                @item.EndTime.ToString("h:mm tt")
-                            </td>
-
-                            <td>
-                                <span class="fd-badge @statusClass">
-                                    @item.DisplayStatus
-                                </span>
-                            </td>
-
+                            <td>@item.TrainerName</td>
+                            <td>@item.MemberName</td>
+                            <td>@item.Date.ToString("yyyy-MM-dd")</td>
+                            <td>@item.StartTime.ToString("h:mm tt") - @item.EndTime.ToString("h:mm tt")</td>
+                            <td><span class="fd-badge @statusClass">@item.DisplayStatus</span></td>
                             <td>
                                 <form class="fd-reminder-form" asp-action="SendSessionReminder" method="post">
                                     @Html.AntiForgeryToken()
                                     <input type="hidden" name="clientId" value="@item.ClientId" />
                                     <input type="hidden" name="date" value="@item.Date.ToString("yyyy-MM-dd")" />
                                     <button class="fd-action @((item.IsReminded || sessionPassed) ? "reminded" : "remind")"
-                                            type="submit" disabled="@(item.IsReminded || sessionPassed)"
+                                            type="submit"
+                                            disabled="@(item.IsReminded || sessionPassed)"
                                             title="@(sessionPassed ? "This training session has already started or passed." : null)">
                                         @(sessionPassed ? "Time passed" : item.IsReminded ? "Reminded" : "Remind")
                                     </button>
                                 </form>
                             </td>
-
                         </tr>
                     }
-
                 </tbody>
-
             </table>
-
         </div>
 
         <div class="fd-table-foot">
-
-            <span>
-                Showing @Model.Schedule.Count of @Model.Schedule.Count
-                (page 1 of 1)
-            </span>
-
+            <span>Showing @Model.Schedule.Count of @Model.Schedule.Count (page 1 of 1)</span>
             <div class="fd-pager">
-
-                <button type="button"
-                        disabled>
-                    &lt;
-                </button>
-
-                <button type="button"
-                        disabled>
-                    &gt;
-                </button>
-
+                <button type="button" disabled>Previous</button>
+                <button type="button" disabled>Next</button>
             </div>
-
         </div>
 
     </section>
@@ -578,223 +692,95 @@
 
 <script>
     (() => {
-        const points = @Html.Raw(
-                        System.Text.Json.JsonSerializer.Serialize(Model.WeeklyTraffic)
-                        );
-
+        const points = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.WeeklyTraffic));
         const canvas = document.getElementById("weeklyTrafficChart");
         const ctx = canvas.getContext("2d");
 
         function draw() {
             const ratio = window.devicePixelRatio || 1;
-
             const width = canvas.clientWidth;
             const height = canvas.clientHeight;
 
             canvas.width = width * ratio;
             canvas.height = height * ratio;
+            ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+            ctx.clearRect(0, 0, width, height);
 
-            ctx.setTransform(
-                ratio,
-                0,
-                0,
-                ratio,
-                0,
-                0
-            );
+            const pad = { l: 38, r: 18, t: 14, b: 30 };
+            const chartWidth = width - pad.l - pad.r;
+            const chartHeight = height - pad.t - pad.b;
 
-            ctx.clearRect(
-                0,
-                0,
-                width,
-                height
-            );
-
-            const pad = {
-                l: 38,
-                r: 18,
-                t: 14,
-                b: 30
-            };
-
-            const chartWidth =
-                width - pad.l - pad.r;
-
-            const chartHeight =
-                height - pad.t - pad.b;
-
-            const highest = Math.max(
-                0,
-                ...points.map(p =>
-                    Math.max(
-                        p.MemberAttendance,
-                        p.WalkIns
-                    )
-                )
-            );
-
-            const max = Math.max(
-                10,
-                Math.ceil(highest / 5) * 5
-            );
-
+            const highest = Math.max(0, ...points.map(p => Math.max(p.MemberAttendance, p.WalkIns)));
+            const max = Math.max(10, Math.ceil(highest / 5) * 5);
             const tickCount = max / 5;
 
             ctx.font = "12px Arial";
-            ctx.strokeStyle = "#e2e8e4";
-            ctx.fillStyle = "#66736b";
+            ctx.strokeStyle = "#293029";
+            ctx.fillStyle = "#ffffff";
             ctx.lineWidth = 1;
 
-            /* Horizontal grid lines */
+            // Horizontal grid lines
             for (let i = 0; i <= tickCount; i++) {
-                const y =
-                    pad.t +
-                    (chartHeight * i / tickCount);
-
-                const value =
-                    max - (i * 5);
+                const y = pad.t + (chartHeight * i / tickCount);
+                const value = max - (i * 5);
 
                 ctx.beginPath();
-
-                ctx.moveTo(
-                    pad.l,
-                    y
-                );
-
-                ctx.lineTo(
-                    width - pad.r,
-                    y
-                );
-
+                ctx.moveTo(pad.l, y);
+                ctx.lineTo(width - pad.r, y);
                 ctx.stroke();
-
-                ctx.fillText(
-                    value,
-                    8,
-                    y + 4
-                );
+                ctx.fillText(value, 8, y + 4);
             }
 
-            const x = i =>
-                pad.l +
-                (
-                    points.length === 1
-                        ? chartWidth / 2
-                        : chartWidth * i / (points.length - 1)
-                );
+            const x = i => pad.l + (points.length === 1 ? chartWidth / 2 : chartWidth * i / (points.length - 1));
+            const y = value => pad.t + chartHeight - (value / max) * chartHeight;
 
-            const y = value =>
-                pad.t +
-                chartHeight -
-                (value / max) * chartHeight;
-
-            /* Day labels */
+            // Day labels
             points.forEach((point, i) => {
-                ctx.fillText(
-                    point.Day,
-                    x(i) - 10,
-                    height - 8
-                );
+                ctx.fillText(point.Day, x(i) - 10, height - 8);
             });
 
-            function line(
-                key,
-                color,
-                dashed,
-                squareMarker
-            ) {
+            function line(key, color, dashed, squareMarker) {
                 ctx.save();
-
                 ctx.strokeStyle = color;
                 ctx.fillStyle = color;
                 ctx.lineWidth = 3;
-
-                ctx.setLineDash(
-                    dashed
-                        ? [8, 6]
-                        : []
-                );
+                ctx.setLineDash(dashed ? [8, 6] : []);
 
                 ctx.beginPath();
-
                 points.forEach((point, i) => {
                     const px = x(i);
                     const py = y(point[key]);
-
-                    if (i) {
-                        ctx.lineTo(px, py);
-                    } else {
-                        ctx.moveTo(px, py);
-                    }
+                    if (i) ctx.lineTo(px, py);
+                    else ctx.moveTo(px, py);
                 });
-
                 ctx.stroke();
-
                 ctx.setLineDash([]);
 
                 ctx.font = "bold 11px Arial";
                 ctx.textAlign = "center";
-
                 points.forEach((point, i) => {
                     const px = x(i);
                     const py = y(point[key]);
 
                     ctx.beginPath();
-
-                    if (squareMarker) {
-                        ctx.rect(
-                            px - 4,
-                            py - 4,
-                            8,
-                            8
-                        );
-                    } else {
-                        ctx.arc(
-                            px,
-                            py,
-                            4.5,
-                            0,
-                            Math.PI * 2
-                        );
-                    }
-
+                    if (squareMarker) ctx.rect(px - 4, py - 4, 8, 8);
+                    else ctx.arc(px, py, 4.5, 0, Math.PI * 2);
                     ctx.fill();
 
-                    ctx.fillText(
-                        point[key],
-                        px,
-                        Math.max(11, py - 10)
-                    );
+                    ctx.fillText(point[key], px, Math.max(11, py - 10));
                 });
-
                 ctx.restore();
             }
 
-            line(
-                "MemberAttendance",
-                "#08752a",
-                false,
-                false
-            );
-
-            line(
-                "WalkIns",
-                "#d98218",
-                true,
-                true
-            );
+            line("MemberAttendance", "#b9ff20", false, false);
+            line("WalkIns", "#d4a24c", true, true);
         }
 
         draw();
-
-        window.addEventListener(
-            "resize",
-            draw
-        );
+        window.addEventListener("resize", draw);
     })();
 </script>
 <script>
     const reminderToast = document.getElementById('reminderToast');
     if (reminderToast) window.setTimeout(() => reminderToast.remove(), 3500);
 </script>
-```

@@ -1,4 +1,4 @@
-﻿@model Gym.Models.PagedResult<Gym.Models.ActivityLogEntry>
+@model Gym.Models.PagedResult<Gym.Models.ActivityLogEntry>
 @{
     ViewData["Title"] = "User Activity";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
@@ -6,6 +6,22 @@
     // Retrieves the "id" route/query parameter for building pagination links
     var userId = Context.Request.Query["id"].ToString();
 }
+<style>
+    .user-activity-card,
+    .user-activity-card .list-group,
+    .user-activity-card .list-group-item,
+    .user-activity-card .card-body {
+        background: #5E5D63 !important;
+    }
+
+    .user-activity-card .list-group-item {
+        border-color: #293029 !important;
+    }
+
+    .user-activity-card .text-muted {
+        color: #9ba49d !important;
+    }
+</style>
 <div class="container py-0 my-0" style="min-width: 50%;">
     <!-- Navigation Link -->
     <a asp-controller="Admin" asp-action="UserRoles" class="text-decoration-none text-secondary d-inline-flex align-items-center gap-2 mb-3 fw-bold">
@@ -18,7 +34,7 @@
         <p class="text-muted mb-0 fs-6">@(user?.Email)</p>
     </div>
     <!-- Activity Log Card -->
-    <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-3">
+    <div class="card user-activity-card border-0 shadow-sm rounded-4 overflow-hidden mb-3">
         @if (Model?.Items == null || !Model.Items.Any())
         {
             <div class="card-body text-center text-muted py-5">
@@ -50,9 +66,9 @@
     <!-- Pagination -->
     @if (Model?.Items != null && Model.Items.Any())
     {
-        <div class="d-flex justify-content-between align-items-center text-muted small mt-3">
+        <div class="activity-pagination d-flex justify-content-between align-items-center text-muted small mt-3">
             <span>Page @Model.Page of @Model.TotalPages &middot; @Model.TotalCount records</span>
-            <div class="d-flex gap-2">
+            <div class="activity-pagination-buttons d-flex gap-2">
                 <a asp-controller="Admin"
                    asp-action="UserActivity"
                    asp-route-id="@userId"

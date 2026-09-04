@@ -19,7 +19,6 @@
     public enum PaymentStatus
     {
         Paid = 0,
-        Pending = 1,
         Overdue = 2,
         Unpaid = 3
     }
@@ -32,15 +31,12 @@
         ExpiringSoon = 3,
         Expired = 4,
         Canceled = 5,
-        Terminated = 6,
-        PendingPayment = 7
+        Terminated = 6
     }
 
     public enum MembershipPlanType
     {
-        Monthly = 0,
-        Quarterly = 1,
-        Annual = 2
+        Monthly = 0
     }
 
     public enum GymGoal

@@ -1,12 +1,39 @@
+using System.Globalization;
+
 namespace Gym.Models;
 
 public sealed class AdminTrainerManagementViewModel
 {
     public int SessionsToday { get; set; }
     public List<AdminTrainerAvailabilityRow> Trainers { get; set; } = new();
+    public List<AdminTrainerMemberSchedule> MemberSchedules { get; set; } = new();
     public int AvailableNow => Trainers.Count(item => item.IsAvailable(DateTime.Now.DayOfWeek, DateTime.Now.TimeOfDay));
     public int ActiveBookings => Trainers.Sum(item => item.AssignedMembers);
     public int TotalCapacity => Trainers.Sum(item => item.WeeklyMemberLimit);
+
+    public List<AdminTrainerMemberSchedule> GetScheduledMembers(DayOfWeek day, TimeSpan slot) =>
+        MemberSchedules.Where(item => item.IsScheduled(day, slot)).ToList();
+}
+
+public sealed class AdminTrainerMemberSchedule
+{
+    public int TrainerId { get; set; }
+    public string TrainerName { get; set; } = string.Empty;
+    public string MemberName { get; set; } = string.Empty;
+    public string PreferredDays { get; set; } = string.Empty;
+    public string PreferredTimeSlot { get; set; } = string.Empty;
+
+    public bool IsScheduled(DayOfWeek day, TimeSpan slot)
+    {
+        var matchesDay = PreferredDays
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .Any(value => string.Equals(value, day.ToString(), StringComparison.OrdinalIgnoreCase));
+        if (!matchesDay) return false;
+
+        var startText = PreferredTimeSlot.Split('-', 2, StringSplitOptions.TrimEntries).FirstOrDefault();
+        return DateTime.TryParse(startText, CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces, out var start) &&
+            start.TimeOfDay == slot;
+    }
 }
 
 public sealed class AdminTrainerAvailabilityRow

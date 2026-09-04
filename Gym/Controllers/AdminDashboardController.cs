@@ -92,6 +92,8 @@ namespace Gym.Controllers
                     .Distinct()
                     .Count();
                 statistics.PendingWeeklyAttendanceReminders = Math.Max(0, statistics.ActiveMembers - sentWeeklyMemberIds);
+                statistics.UnreadNotificationsCount = await _context.FrontDeskEmailNotifications.AsNoTracking()
+                    .CountAsync(item => item.Status == "New");
                 statistics.EquipmentStatus = await _context.Equipments.AsNoTracking()
                     .OrderBy(equipment => equipment.Status == "Available" ? 1 : 0)
                     .ThenBy(equipment => equipment.EquipmentName)
@@ -198,12 +200,70 @@ namespace Gym.Controllers
 
         [HttpPost("/Admin/Members/Renew")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> RenewMember(int id)
+        public async Task<IActionResult> RenewMember(int id, decimal amount)
         {
+            var member = await _context.Clients.AsNoTracking()
+                .FirstOrDefaultAsync(client => client.UserId == id && client.Role == UserRole.Client);
+            if (member == null || member.Status == MemberStatus.Terminated)
+            {
+                TempData["ErrorMessage"] = "The member could not be renewed.";
+                return RedirectToAction(nameof(Members));
+            }
+
+            var planPrice = MembershipPlanPricing.GetPrice(member.MembershipPlan);
+            if (amount != planPrice)
+            {
+                TempData["ErrorMessage"] = $"The full renewal payment of ₱{planPrice:N2} is required.";
+                return RedirectToAction(nameof(Members));
+            }
+
+            var paidAt = DateTime.Now;
+            var duplicateRenewal = await _context.Payments.AsNoTracking().AnyAsync(payment =>
+                payment.ClientId == id && payment.Status == PaymentStatus.Paid &&
+                payment.PaymentDate >= paidAt.Date && payment.PaymentDate < paidAt.Date.AddDays(1) &&
+                payment.Notes != null && payment.Notes.Contains("renewal"));
+            if (duplicateRenewal)
+            {
+                TempData["ErrorMessage"] = "A membership renewal payment has already been recorded for this member today.";
+                return RedirectToAction(nameof(Members));
+            }
+
+            var transactionCode = $"TXN-{paidAt:yyyyMMdd}-{Guid.NewGuid().ToString("N")[..6].ToUpperInvariant()}";
+            _context.Payments.Add(new Payment
+            {
+                ClientId = id,
+                Amount = amount,
+                Status = PaymentStatus.Paid,
+                TransactionCode = transactionCode,
+                PaymentDate = paidAt,
+                DueDate = paidAt,
+                Notes = "Cash membership renewal payment recorded by Admin."
+            });
+
             var expiration = await _memberService.RenewMembershipAsync(id);
-            TempData[expiration.HasValue ? "SuccessMessage" : "ErrorMessage"] = expiration.HasValue
-                ? $"Membership renewed through {expiration.Value:MMM d, yyyy}."
-                : "The membership could not be renewed.";
+            if (expiration.HasValue)
+            {
+                var memberName = $"{member.FirstName} {member.LastName}".Trim();
+                await AddAdminActivityAsync("Membership renewed", $"{memberName}'s membership was renewed through {expiration.Value:MMM d, yyyy}.", "Membership");
+
+                if (!string.IsNullOrWhiteSpace(member.Email))
+                {
+                    var (sent, error) = await _gmailService.SendMemberPaymentReceiptAsync(
+                        member.Email, memberName, transactionCode, amount, paidAt,
+                        MembershipPlanPricing.GetName(member.MembershipPlan), planPrice, amount, 0m);
+                    TempData[sent ? "SuccessMessage" : "ErrorMessage"] = sent
+                        ? $"Payment received, membership renewed through {expiration.Value:MMM d, yyyy}, and the digital receipt was emailed."
+                        : $"Payment received and membership renewed through {expiration.Value:MMM d, yyyy}, but the digital receipt could not be emailed. {error}";
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = $"Payment received and membership renewed through {expiration.Value:MMM d, yyyy}, but this member has no email address for the digital receipt.";
+                }
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "The membership could not be renewed.";
+            }
             return RedirectToAction(nameof(Members));
         }
 
@@ -220,11 +280,66 @@ namespace Gym.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CancelMember(int id)
         {
+            var memberName = await _context.Clients.AsNoTracking()
+                .Where(client => client.UserId == id)
+                .Select(client => (client.FirstName + " " + client.LastName).Trim())
+                .FirstOrDefaultAsync() ?? $"Member #{id}";
             var consumedDays = await _memberService.CancelMembershipAsync(id);
+            if (consumedDays.HasValue)
+            {
+                await AddAdminActivityAsync("Membership canceled", $"{memberName}'s membership was canceled. {consumedDays.Value} elapsed membership day(s) were consumed.", "Membership");
+            }
             TempData[consumedDays.HasValue ? "SuccessMessage" : "ErrorMessage"] = consumedDays.HasValue
-                ? $"Membership canceled. {consumedDays.Value} attended gym day(s) consumed."
+                ? $"Membership canceled. {consumedDays.Value} calendar membership day(s) consumed after confirmation."
                 : "The member could not be found.";
             return RedirectToAction(nameof(Members));
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Notifications(int page = 1)
+        {
+            var unreadNotifications = await _context.FrontDeskEmailNotifications
+                .Where(item => item.Status == "New")
+                .ToListAsync();
+            foreach (var notification in unreadNotifications)
+            {
+                notification.Status = "Read";
+            }
+            if (unreadNotifications.Count > 0)
+            {
+                await _context.SaveChangesAsync();
+            }
+
+            const int pageSize = 5;
+            var notificationQuery = _context.FrontDeskEmailNotifications.AsNoTracking()
+                .OrderByDescending(item => item.CreatedDate);
+            var totalCount = await notificationQuery.CountAsync();
+            var totalPages = Math.Max(1, (int)Math.Ceiling(totalCount / (double)pageSize));
+            page = Math.Clamp(page, 1, totalPages);
+            var notifications = await notificationQuery
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+            ViewBag.Page = page;
+            ViewBag.TotalPages = totalPages;
+            ViewBag.TotalCount = totalCount;
+            return View("~/Views/FrontDesk/Notifications.cshtml", notifications);
+        }
+
+        private async Task AddAdminActivityAsync(string title, string message, string type)
+        {
+            if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var userId)) return;
+            _context.FrontDeskEmailNotifications.Add(new FrontDeskEmailNotification
+            {
+                StaffId = userId,
+                Title = title,
+                Message = message,
+                Status = "Activity",
+                EmailType = type,
+                DeliveryKey = $"AdminActivity:{type}:{DateTime.Now:yyyyMMddHHmmssfff}",
+                CreatedDate = DateTime.Now
+            });
+            await _context.SaveChangesAsync();
         }
 
         [HttpPost("/Admin/Members/Terminate")]
@@ -311,6 +426,23 @@ namespace Gym.Controllers
                     .GroupBy(client => client.AssignedTrainerId!.Value)
                     .Select(group => new { TrainerId = group.Key, Count = group.Count() })
                     .ToDictionaryAsync(item => item.TrainerId, item => item.Count);
+                var assignedMemberSchedules = await _context.Clients.AsNoTracking()
+                    .Where(client => client.AssignedTrainerId.HasValue &&
+                        trainerIds.Contains(client.AssignedTrainerId.Value) &&
+                        client.IsActive && client.IsActiveMember &&
+                        !string.IsNullOrWhiteSpace(client.PreferredDays) &&
+                        !string.IsNullOrWhiteSpace(client.PreferredTimeSlot))
+                    .Select(client => new
+                    {
+                        TrainerId = client.AssignedTrainerId!.Value,
+                        MemberName = client.FirstName + " " + client.LastName,
+                        PreferredDays = client.PreferredDays!,
+                        PreferredTimeSlot = client.PreferredTimeSlot!
+                    })
+                    .ToListAsync();
+                var trainerNames = trainers.ToDictionary(
+                    trainer => trainer.UserId,
+                    trainer => $"{trainer.FirstName} {trainer.LastName}");
                 var today = DateTime.Today;
                 var sessionsToday = await _context.Sessions.AsNoTracking()
                     .CountAsync(session => trainerIds.Contains(session.TrainerId) &&
@@ -320,6 +452,14 @@ namespace Gym.Controllers
                 var model = new AdminTrainerManagementViewModel
                 {
                     SessionsToday = sessionsToday,
+                    MemberSchedules = assignedMemberSchedules.Select(item => new AdminTrainerMemberSchedule
+                    {
+                        TrainerId = item.TrainerId,
+                        TrainerName = trainerNames[item.TrainerId],
+                        MemberName = item.MemberName,
+                        PreferredDays = item.PreferredDays,
+                        PreferredTimeSlot = item.PreferredTimeSlot
+                    }).ToList(),
                     Trainers = trainers.Select(trainer =>
                     {
                         availability.TryGetValue(trainer.UserId, out var schedule);
@@ -386,8 +526,6 @@ namespace Gym.Controllers
                 var totalPages = Math.Max(1, (int)Math.Ceiling(filtered.Count / (double)pageSize));
                 page = Math.Clamp(page, 1, totalPages);
                 var monthStart = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
-                var today = DateTime.Today;
-                var renewalLimit = today.AddDays(7);
                 var model = new AdminPaymentsViewModel
                 {
                     Payments = printAll
@@ -395,14 +533,13 @@ namespace Gym.Controllers
                         : filtered.Skip((page - 1) * pageSize).Take(pageSize).ToList(),
                     SearchTerm = searchTerm,
                     SelectedStatus = status,
-                    CollectedThisMonth = allTransactions.Where(payment => payment.Status == PaymentStatus.Paid && payment.Date >= monthStart).Sum(payment => payment.Amount),
-                    PendingAmount = allPayments.Where(payment => payment.Status == PaymentStatus.Pending).Sum(payment => payment.Amount),
+                    MemberRevenueThisMonth = allPayments
+                        .Where(payment => payment.Status == PaymentStatus.Paid && payment.PaymentDate >= monthStart)
+                        .Sum(payment => payment.Amount),
+                    WalkInRevenueThisMonth = walkInPayments
+                        .Where(walkIn => walkIn.RegisteredAt >= monthStart)
+                        .Sum(walkIn => walkIn.AmountPaid),
                     OverdueAccounts = allPayments.Where(payment => payment.Status is PaymentStatus.Overdue or PaymentStatus.Unpaid).Select(payment => payment.ClientId).Distinct().Count(),
-                    UpcomingRenewals = await _context.Clients.AsNoTracking().CountAsync(client =>
-                        client.IsActiveMember &&
-                        client.MembershipEndDate.HasValue &&
-                        client.MembershipEndDate.Value >= today &&
-                        client.MembershipEndDate.Value <= renewalLimit),
                     Page = page,
                     TotalPages = totalPages,
                     TotalCount = filtered.Count,
@@ -599,7 +736,8 @@ namespace Gym.Controllers
                 WalkInsToday = await _context.WalkInClients.AsNoTracking()
                     .CountAsync(walkIn => walkIn.RegisteredAt >= today && walkIn.RegisteredAt < tomorrow),
                 CurrentlyInGym = await _context.MemberAttendanceLogs.AsNoTracking()
-                    .CountAsync(log => log.CheckInAt >= today && log.CheckInAt < tomorrow && !log.CheckOutAt.HasValue),
+                    .Where(log => log.CheckInAt >= today && log.CheckInAt < tomorrow)
+                    .Select(log => log.ClientId).Distinct().CountAsync(),
                 Page = page,
                 PageSize = pageSize,
                 TotalCount = items.Count
@@ -619,18 +757,19 @@ namespace Gym.Controllers
             }
 
             var today = DateTime.Today;
-            var latest = await _context.MemberAttendanceLogs
+            if (!string.Equals(attendanceAction, "checkin", StringComparison.OrdinalIgnoreCase))
+            {
+                TempData["ErrorMessage"] = "Only member check-in is available.";
+                return RedirectToAction(nameof(Attendance));
+            }
+
+            var alreadyCheckedIn = await _context.MemberAttendanceLogs.AsNoTracking()
                 .Where(log => log.ClientId == id && log.CheckInAt >= today && log.CheckInAt < today.AddDays(1))
-                .OrderByDescending(log => log.CheckInAt).FirstOrDefaultAsync();
-            if (attendanceAction == "checkin" && (latest == null || latest.CheckOutAt.HasValue))
+                .AnyAsync();
+            if (!alreadyCheckedIn)
             {
                 _context.MemberAttendanceLogs.Add(new MemberAttendanceLog { ClientId = id, CheckInAt = DateTime.Now });
                 TempData["SuccessMessage"] = "Member checked in successfully.";
-            }
-            else if (attendanceAction == "checkout" && latest != null && !latest.CheckOutAt.HasValue)
-            {
-                latest.CheckOutAt = DateTime.Now;
-                TempData["SuccessMessage"] = "Member checked out successfully.";
             }
             else
             {
@@ -646,12 +785,11 @@ namespace Gym.Controllers
         {
             var members = await GetAttendanceItemsAsync(searchTerm);
             static string Csv(string value) => $"\"{value.Replace("\"", "\"\"")}\"";
-            var headers = new[] { "Member", "Type", "Membership", "Check in", "Check out", "Status" };
+            var headers = new[] { "Member", "Type", "Membership", "Check in", "Status" };
             var rows = members.Select(member => new[]
             {
                 member.FullName, "Member", member.Membership,
                 member.CheckInAt?.ToString("yyyy-MM-dd h:mm tt") ?? string.Empty,
-                member.CheckOutAt?.ToString("yyyy-MM-dd h:mm tt") ?? string.Empty,
                 member.Status
             }).ToList();
             var fileBase = $"YOKOKS-Attendance-{DateTime.Today:yyyy-MM-dd}";
@@ -691,8 +829,7 @@ namespace Gym.Controllers
                     Initials = (parts.Length > 1 ? $"{parts[0][0]}{parts[^1][0]}" : name[..Math.Min(2, name.Length)]).ToUpperInvariant(),
                     Membership = MembershipPlanPricing.GetName(client.MembershipPlan),
                     CheckInAt = log?.CheckInAt,
-                    CheckOutAt = log?.CheckOutAt,
-                    Status = log == null ? "Not checked in" : log.CheckOutAt.HasValue ? "Checked out" : "Active"
+                    Status = log == null ? "Not checked in" : "Checked in"
                 };
             }).ToList();
             searchTerm = searchTerm?.Trim();
@@ -870,9 +1007,47 @@ namespace Gym.Controllers
         {
             try
             {
+                var equipment = await _context.Equipments
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(item => item.EquipmentId == equipmentId);
                 var success = await _adminService.UpdateEquipmentStatusAsync(equipmentId, status);
                 if (success)
                 {
+                    var equipmentName = equipment?.EquipmentName ?? $"Equipment #{equipmentId}";
+                    var notificationTitle = "Equipment status updated";
+                    var notificationMessage = $"{equipmentName} was marked as {status} by the administrator.";
+
+                    _context.FrontDeskEmailNotifications.Add(new FrontDeskEmailNotification
+                    {
+                        StaffId = 0,
+                        Title = notificationTitle,
+                        Message = notificationMessage,
+                        Status = "New",
+                        EmailType = "EquipmentStatus",
+                        DeliveryKey = $"EquipmentStatus:{equipmentId}:{status}:{DateTime.UtcNow.Ticks}",
+                        CreatedDate = DateTime.Now
+                    });
+
+                    var trainerIds = await _context.Trainers
+                        .AsNoTracking()
+                        .Where(trainer => trainer.IsActive)
+                        .Select(trainer => trainer.UserId)
+                        .ToListAsync();
+
+                    foreach (var trainerId in trainerIds)
+                    {
+                        _context.Notifications.Add(new Notification
+                        {
+                            UserId = trainerId,
+                            Title = notificationTitle,
+                            Message = notificationMessage,
+                            NotificationType = $"EquipmentStatus:{status}",
+                            IsRead = false,
+                            CreatedDate = DateTime.Now
+                        });
+                    }
+
+                    await _context.SaveChangesAsync();
                     TempData["SuccessMessage"] = "Equipment status updated successfully.";
                 }
                 else
@@ -1073,6 +1248,199 @@ namespace Gym.Controllers
                 : "The password could not be updated. Confirm that the account is active.";
 
             return RedirectToAction(nameof(UserRoles), new { page });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> WalkInClient(string? searchTerm, int page = 1)
+        {
+            var query = _context.WalkInClients.AsNoTracking();
+            searchTerm = searchTerm?.Trim();
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                query = query.Where(item =>
+                    item.FirstName.Contains(searchTerm) ||
+                    item.LastName.Contains(searchTerm) ||
+                    (item.FirstName + " " + item.LastName).Contains(searchTerm) ||
+                    item.ContactNumber.Contains(searchTerm) ||
+                    (item.Email != null && item.Email.Contains(searchTerm)) ||
+                    item.ReasonForVisit.Contains(searchTerm));
+            }
+
+            var matches = await query.OrderByDescending(item => item.RegisteredAt).ToListAsync();
+            var allRegistrations = matches
+                .GroupBy(item => !string.IsNullOrWhiteSpace(item.Email)
+                    ? $"email:{item.Email.Trim().ToLowerInvariant()}"
+                    : !string.IsNullOrWhiteSpace(item.ContactNumber)
+                        ? $"contact:{new string(item.ContactNumber.Where(char.IsDigit).ToArray())}"
+                        : $"name:{item.FirstName.Trim().ToLowerInvariant()}:{item.LastName.Trim().ToLowerInvariant()}")
+                .Select(group =>
+                {
+                    var latest = group.OrderByDescending(item => item.RegisteredAt).First();
+                    return new WalkInClientListItem
+                    {
+                        WalkInClientId = latest.WalkInClientId,
+                        FirstName = latest.FirstName,
+                        LastName = latest.LastName,
+                        ContactNumber = latest.ContactNumber,
+                        Email = latest.Email,
+                        ReasonForVisit = latest.ReasonForVisit,
+                        FirstRegisteredAt = group.Min(item => item.RegisteredAt),
+                        LastVisitAt = latest.RegisteredAt,
+                        VisitCount = group.Count()
+                    };
+                })
+                .OrderByDescending(item => item.LastVisitAt)
+                .ToList();
+
+            const int pageSize = 5;
+            var totalCount = allRegistrations.Count;
+            var totalPages = Math.Max(1, (int)Math.Ceiling(totalCount / (double)pageSize));
+            page = Math.Clamp(page, 1, totalPages);
+            var registrations = allRegistrations
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            ViewBag.SearchTerm = searchTerm ?? string.Empty;
+            ViewBag.Page = page;
+            ViewBag.TotalPages = totalPages;
+            ViewBag.TotalCount = totalCount;
+            return View("~/Views/FrontDesk/WalkInClient.cshtml", registrations);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> WalkInRegister(WalkInRegistrationViewModel form)
+        {
+            ModelState.Remove(nameof(form.IssueDigitalReceipt));
+            if (!ModelState.IsValid)
+            {
+                TempData["ErrorMessage"] = "Please complete all required walk-in registration fields.";
+                return RedirectToAction(nameof(WalkInClient));
+            }
+
+            var firstName = form.FirstName.Trim();
+            var lastName = form.LastName.Trim();
+            var contact = form.ContactNumber.Trim();
+            var email = string.IsNullOrWhiteSpace(form.Email) ? null : form.Email.Trim();
+            var today = DateTime.Today;
+            var tomorrow = today.AddDays(1);
+            var alreadyRegisteredToday = await _context.WalkInClients.AsNoTracking()
+                .AnyAsync(item => item.RegisteredAt >= today && item.RegisteredAt < tomorrow &&
+                    ((!string.IsNullOrWhiteSpace(email) && item.Email == email) ||
+                     item.ContactNumber == contact ||
+                     (item.FirstName == firstName && item.LastName == lastName)));
+            if (alreadyRegisteredToday)
+            {
+                TempData["ErrorMessage"] = "This walk-in client has already been registered today. Registration is available again tomorrow.";
+                return RedirectToAction(nameof(WalkInClient));
+            }
+
+            var registeredAt = DateTime.Now;
+            _context.WalkInClients.Add(new WalkInClient
+            {
+                FirstName = firstName,
+                LastName = lastName,
+                ContactNumber = contact,
+                Email = email,
+                ReasonForVisit = form.ReasonForVisit,
+                PaymentMethod = "Cash",
+                AmountPaid = form.AmountPaid,
+                IssueDigitalReceipt = email != null,
+                LiabilityAccepted = false,
+                Status = "Checked-in",
+                RegisteredAt = registeredAt
+            });
+            await _context.SaveChangesAsync();
+
+            await SendAdminWalkInReceiptAsync(email, $"{firstName} {lastName}".Trim(), form.AmountPaid, registeredAt, true);
+            return RedirectToAction(nameof(WalkInClient));
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RecordWalkInPayment(int id, decimal amount)
+        {
+            if (amount <= 0)
+            {
+                TempData["ErrorMessage"] = "The cash payment amount must be greater than zero.";
+                return RedirectToAction(nameof(WalkInClient));
+            }
+
+            var client = await _context.WalkInClients.AsNoTracking()
+                .FirstOrDefaultAsync(item => item.WalkInClientId == id);
+            if (client == null)
+            {
+                TempData["ErrorMessage"] = "The walk-in client could not be found.";
+                return RedirectToAction(nameof(WalkInClient));
+            }
+
+            var today = DateTime.Today;
+            var tomorrow = today.AddDays(1);
+            var alreadyRegisteredToday = await _context.WalkInClients.AsNoTracking()
+                .AnyAsync(item => item.RegisteredAt >= today && item.RegisteredAt < tomorrow &&
+                    ((!string.IsNullOrWhiteSpace(client.Email) && item.Email == client.Email) ||
+                     item.ContactNumber == client.ContactNumber));
+            if (alreadyRegisteredToday)
+            {
+                TempData["ErrorMessage"] = "This walk-in client has already been registered today.";
+                return RedirectToAction(nameof(WalkInClient));
+            }
+
+            var registeredAt = DateTime.Now;
+            _context.WalkInClients.Add(new WalkInClient
+            {
+                FirstName = client.FirstName,
+                LastName = client.LastName,
+                ContactNumber = client.ContactNumber,
+                Email = client.Email,
+                ReasonForVisit = client.ReasonForVisit,
+                PaymentMethod = "Cash",
+                AmountPaid = amount,
+                IssueDigitalReceipt = client.IssueDigitalReceipt,
+                LiabilityAccepted = client.LiabilityAccepted,
+                Status = "Checked-in",
+                RegisteredAt = registeredAt
+            });
+            await _context.SaveChangesAsync();
+
+            await SendAdminWalkInReceiptAsync(client.Email, $"{client.FirstName} {client.LastName}".Trim(), amount, registeredAt, false);
+            return RedirectToAction(nameof(WalkInClient));
+        }
+
+        private async Task SendAdminWalkInReceiptAsync(string? email, string fullName, decimal amount, DateTime registeredAt, bool isRegistration)
+        {
+            if (!string.IsNullOrWhiteSpace(email))
+            {
+                var (sent, error) = await _gmailService.SendWalkInReceiptAsync(email, fullName, amount, registeredAt, "Cash");
+                if (int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var userId))
+                {
+                    _context.FrontDeskEmailNotifications.Add(new FrontDeskEmailNotification
+                    {
+                        StaffId = userId,
+                        Title = $"Email {(sent ? "Sent" : "Failed")}: Walk-in receipt",
+                        Message = sent
+                            ? $"Walk-in receipt was sent to {fullName} ({email})."
+                            : $"Walk-in receipt for {fullName} ({email}) was not sent. {error ?? "Email delivery failed."}",
+                        Status = sent ? "Sent" : "Failed",
+                        EmailType = "Walk-in receipt",
+                        DeliveryKey = string.Empty,
+                        CreatedDate = DateTime.Now
+                    });
+                    await _context.SaveChangesAsync();
+                }
+                TempData[sent ? "SuccessMessage" : "ErrorMessage"] = sent
+                    ? (isRegistration
+                        ? "Walk-in client registered and the digital receipt was emailed successfully."
+                        : $"A new cash visit for {fullName} was recorded and the receipt was emailed.")
+                    : error;
+            }
+            else
+            {
+                TempData["SuccessMessage"] = isRegistration
+                    ? "Walk-in client registered successfully."
+                    : $"A new cash visit for {fullName} was recorded successfully.";
+            }
         }
 
         // POST: /Admin/SuspendUser

@@ -521,11 +521,13 @@
     .page-container .pagination-arrows a:last-child::after { content:"Next"; font-size:10px; text-transform:uppercase; }
     .page-container .pagination-arrows a.disabled { opacity:.35; }
     @@media(max-width:900px){ .page-container{padding:18px}.top-member-bar,.header-row{gap:12px}.table-card{overflow-x:auto!important}.members-table{min-width:950px}.header-row{align-items:flex-start!important}.member-filter-form .dropdown-filters{flex-wrap:wrap} }
-    .registration-modal { position:fixed; inset:0; z-index:2500; display:none; align-items:center; justify-content:center; padding:24px; background:rgba(0,0,0,.68); }
+    .registration-modal { position:fixed; inset:0; z-index:2500; display:none; align-items:center; justify-content:center; padding:32px; background:rgba(0,0,0,.76); backdrop-filter:blur(3px); }
     .registration-modal.open { display:flex; }
-    .registration-shell { position:relative; width:min(1000px,96vw); height:min(900px,92vh); overflow:hidden; border-radius:8px; background:#fff; box-shadow:0 24px 70px rgba(0,0,0,.4); }
-    .registration-frame { width:100%; height:100%; border:0; background:#fff; }
-    .registration-close { position:absolute; top:12px; right:16px; z-index:2; width:36px; height:36px; border:0; border-radius:4px; background:#111; color:#fff; font-size:23px; cursor:pointer; }
+    .registration-shell { position:relative; width:min(920px,92vw); height:min(760px,86vh); overflow:hidden; border:1px solid #000; border-radius:14px; background:#242824; box-shadow:0 28px 80px rgba(0,0,0,.65); }
+    .registration-frame { width:100%; height:100%; border:0; background:#242824; }
+    .registration-close { position:absolute; top:14px; right:18px; z-index:2; width:38px; height:38px; border:1px solid #6f786f; border-radius:50%; background:#171a18; color:#fff; font-size:24px; line-height:1; cursor:pointer; }
+    .registration-close:hover { border-color:#b7ff1b; color:#b7ff1b; }
+    @@media(max-width:700px) { .registration-modal{padding:12px}.registration-shell{width:100%;height:94vh;border-radius:10px}.registration-close{top:10px;right:10px} }
     .member-renewal-card { display:flex; align-items:center; gap:14px; min-width:210px; padding:12px 16px; border:1px solid #343a35; border-radius:4px; background:#1d201e; }
     .member-renewal-count { color:#b7ff1b; font-size:27px; font-weight:800; line-height:1; }
     .member-renewal-label { display:block; color:#f4f6f4; font-size:10px; font-weight:800; text-transform:uppercase; }
@@ -533,7 +535,17 @@
 </style>
 
 <div class="page-container">
+
+   
     <div class="top-member-bar">
+        <div class="header-title"><h1 style="color:#fff !important;">Members</h1><div class="header-subtitle">@Model.ListViewModel.ActiveCount active member(s)</div></div>
+        <button type="button" class="btn-add" onclick="openAddMemberModal()">
+            <span>+</span> Add member
+        </button>
+    </div>
+
+    <div class="header-row">
+      
         <form class="top-member-search" method="get" asp-action="Member" asp-controller="FrontDesk">
             <div class="search-box">
                 <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
@@ -541,17 +553,6 @@
             </div>
             <button type="submit" class="search-btn">Search</button>
         </form>
-        <button type="button" class="btn-add" onclick="openAddMemberModal()">
-            <span>+</span> Add member
-        </button>
-    </div>
-
-    <div class="header-row">
-        <div class="header-title"><h1>Members</h1><div class="header-subtitle">@Model.ListViewModel.ActiveCount active member(s)</div></div>
-        <div class="member-renewal-card" aria-label="Upcoming membership renewals">
-            <span class="member-renewal-count">@Model.ListViewModel.IncomingRenewalCount</span>
-            <span><span class="member-renewal-label">Upcoming renewals</span><span class="member-renewal-period">Next 7 days</span></span>
-        </div>
         <form method="get" asp-action="Member" asp-controller="FrontDesk" id="memberFilterForm" class="member-filter-form">
         <input type="hidden" name="page" value="1" />
             <input type="hidden" name="searchTerm" value="@Model.ListViewModel.SearchTerm" />
@@ -633,14 +634,12 @@
                             Gym.Models.MemberStatus.Inactive => "badge-inactive",
                             Gym.Models.MemberStatus.Canceled => "badge-canceled",
                             Gym.Models.MemberStatus.Terminated => "badge-terminated",
-                            Gym.Models.MemberStatus.PendingPayment => "badge-overdue",
                             _ => "badge-active"
                         };
 
                         string statusText = member.Status switch
                         {
                             Gym.Models.MemberStatus.ExpiringSoon => "Expiring soon",
-                            Gym.Models.MemberStatus.PendingPayment => "Renewable membership",
                             _ => member.Status.ToString()
                         };
 
@@ -720,7 +719,7 @@
 
                             <td class="action-cell">
                                 <button type="button" class="action-btn" aria-label="Actions for @member.FullName"
-                                        onclick="toggleActionMenu(event, this)">•••</button>
+                                        onclick="toggleActionMenu(event, this)">⋮</button>
                                 <div class="action-menu" onclick="event.stopPropagation()">
                                     @if (member.Status != Gym.Models.MemberStatus.Canceled &&
                                          member.Status != Gym.Models.MemberStatus.Terminated)
@@ -728,6 +727,10 @@
                                         <button type="button" class="menu-item"
                                                 data-member-id="@member.Id"
                                                 data-member-name="@member.FullName"
+                                                data-plan-price="@member.PlanPrice.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+                                                data-paid-amount="@member.PaidAmount.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+                                                data-consumed-days="@member.ConsumedTrainingDays"
+                                                data-estimated-refund="@member.EstimatedRefund.ToString(System.Globalization.CultureInfo.InvariantCulture)"
                                                 onclick="openCancelMembershipModal(this)">
                                             Cancel membership
                                         </button>
@@ -755,7 +758,6 @@
                 }
             </tbody>
         </table>
-    </div>
 
     <!-- PAGINATION -->
     <div class="pagination-bar">
@@ -770,21 +772,20 @@
                asp-route-selectedStatus="@Model.ListViewModel.SelectedStatus"
                asp-route-selectedPlan="@Model.ListViewModel.SelectedPlan"
                asp-route-page="@(Model.ListViewModel.Page - 1)"
-               class="@(!Model.ListViewModel.HasPrevious ? "disabled" : "")">&lt;</a>
+               class="@(!Model.ListViewModel.HasPrevious ? "disabled" : "")">Previous</a>
 
             <a asp-action="Member"
                asp-route-searchTerm="@Model.ListViewModel.SearchTerm"
                asp-route-selectedStatus="@Model.ListViewModel.SelectedStatus"
                asp-route-selectedPlan="@Model.ListViewModel.SelectedPlan"
                asp-route-page="@(Model.ListViewModel.Page + 1)"
-               class="@(!Model.ListViewModel.HasNext ? "disabled" : "")">&gt;</a>
+               class="@(!Model.ListViewModel.HasNext ? "disabled" : "")">Next</a>
         </div>
     </div>
 </div>
 
 <div id="addMemberModal" class="registration-modal" role="dialog" aria-modal="true" aria-label="Register member">
     <div class="registration-shell">
-        <button type="button" class="registration-close" aria-label="Close registration" onclick="closeAddMemberModal()">&times;</button>
         <iframe id="addMemberFrame" class="registration-frame" title="Member registration form"></iframe>
     </div>
 </div>
@@ -911,9 +912,11 @@ else if (TempData["ErrorMessage"] is string errorMessage)
     <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="cancelMembershipTitle">
         <h3 id="cancelMembershipTitle">Cancel membership?</h3>
         <p id="cancelMembershipMessage"></p>
-        <p style="margin-top:-12px; color:#b45309; background:#fffbeb; border:1px solid #fde68a; border-radius:8px; padding:10px 12px;">
-            Only distinct gym dates with confirmed attendance will be counted as consumed days. Scheduled or missed sessions are excluded.
-        </p>
+        <div style="margin-top:-10px; color:#ffffff; background:#293029; border-radius:8px; padding:12px; line-height:1.6;">
+            <div>Amount of membership plan: <strong id="cancelPlanAmount"></strong></div>
+            <div>Membership days consumed: <strong id="cancelConsumedDays"></strong></div>
+            <div>Amount refundable: <strong id="cancelRefundAmount"></strong></div>
+        </div>
         <div class="modal-buttons">
             <button type="button" class="btn-cancel" onclick="closeCancelMembershipModal()">Cancel</button>
             <form asp-action="CancelMembership" asp-controller="FrontDesk" method="post" style="display:inline;">
@@ -922,6 +925,7 @@ else if (TempData["ErrorMessage"] is string errorMessage)
                 <button type="submit" class="btn-confirm-delete">OK</button>
             </form>
         </div>
+    </div>
     </div>
 </div>
 
@@ -1066,9 +1070,16 @@ else if (TempData["ErrorMessage"] is string errorMessage)
     function openCancelMembershipModal(button) {
         const memberId = button.dataset.memberId;
         const memberName = button.dataset.memberName;
+        const planPrice = Number(button.dataset.planPrice || 0);
+        const consumedDays = Number(button.dataset.consumedDays || 0);
+        const estimatedRefund = Number(button.dataset.estimatedRefund || 0);
+        const peso = value => '₱' + value.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         document.getElementById('cancelMembershipId').value = memberId;
         document.getElementById('cancelMembershipMessage').textContent =
             `You are about to cancel ${memberName}'s membership. The member will lose active membership access.`;
+        document.getElementById('cancelPlanAmount').textContent = peso(planPrice);
+        document.getElementById('cancelConsumedDays').textContent = consumedDays;
+        document.getElementById('cancelRefundAmount').textContent = peso(estimatedRefund);
         document.getElementById('cancelMembershipModal').style.display = 'flex';
     }
 

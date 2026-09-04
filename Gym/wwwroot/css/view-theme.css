@@ -1,4 +1,4 @@
-:root {
+ap-edit-plans:root {
     --yokoks-green: rgb(14, 197, 45);
     --yokoks-deep-green: rgb(8, 75, 2);
     --yokoks-black: #111;
@@ -77,6 +77,12 @@ table thead,
 .navbar,
 .admin-logout {
     font-family: var(--yokoks-font);
+}
+
+/* Shared Cancel-button interaction across Admin, Front Desk, and Trainer views. */
+.cancel-hover-lime:hover,
+.cancel-hover-lime:focus-visible {
+    color: #a8df32 !important;
 }
 
 @media (prefers-reduced-motion: reduce) {

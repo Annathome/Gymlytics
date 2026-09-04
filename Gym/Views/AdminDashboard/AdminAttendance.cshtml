@@ -14,15 +14,7 @@
         font-family: "Inria Serif",serif;
     }
 
-    /* .aa {
-        min-height: 100vh;
-        padding: 25px 38px;
-        background: #101311;
-        color: #f4f6f4;
-        font-family: Arial, sans-serif;
-    } */
-
-    /* Toolbar */
+   
     .aa-toolbar {
         display: flex;
         gap: 10px;
@@ -31,11 +23,23 @@
         border-bottom: 1px solid #303430;
     }
 
+    .aa-card > h2 {
+        margin: 0;
+        padding: 10px 16px;
+        background: transparent !important;
+        color: #d7ddd8 !important;
+        font-size: 15px !important;
+        font-weight: 700;
+        line-height: 1.2;
+    }
+
     .aa-search {
         display: flex;
         gap: 10px;
         flex: 1;
         max-width: 804px;
+        margin-top:30px;
+        margin-bottom: 10px;
     }
 
         .aa-search input {
@@ -73,11 +77,18 @@
         .aa-export summary {
             list-style: none;
             cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 92px;
+            height: 52px;
             border: 1px solid #7fae1b;
             color: #b7ff1b;
-            padding: 12px 16px;
+            padding: 0 16px;
             font-size: 10px;
             font-weight: 800;
+            text-align: center;
+            box-sizing: border-box;
         }
 
             .aa-export summary::-webkit-details-marker {
@@ -116,7 +127,7 @@
 
     /* Heading */
     .aa-heading {
-        margin: 22px 0;
+        margin: 0;
     }
 
         .aa-heading h1 {
@@ -139,9 +150,7 @@
         display: grid;
         grid-template-columns: repeat(3, 1fr);
         gap: 12px;
-        margin-bottom: 24px;
-        margin-top: 20px;
-        margin-bottom: 30px;
+        margin: 16px 0;
     }
 
     .aa-stat {
@@ -149,6 +158,7 @@
         background: #1d201e;
         border: 1px solid #343a35;
         border-radius: 4px;
+        margin-bottom: 30px;
 
     }
 
@@ -173,15 +183,17 @@
     /* Card / table */
     .aa-card {
         overflow: visible;
-        border: 1px solid #303630;
-        background: #1b1e1c;
-        margin-top:5px;
+        border: 0;
+        border-radius: 8px;
+        background: #5E5D63;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, .42);
+        margin-top: 0;
     }
 
         .aa-card h2 {
             margin: 0;
             padding: 14px;
-            background: #343735;
+            background: transparent;
             font-size: 13px;
         }
 
@@ -208,6 +220,7 @@
             font-size: 9px;
             letter-spacing: .08em;
             text-transform: uppercase;
+            background: #9ba49d;
         }
 
         .aa-table td {
@@ -219,6 +232,7 @@
         align-items: center;
         gap: 9px;
         font-weight: 700;
+        color: #d7ddd8;
     }
 
     .aa-avatar {
@@ -322,31 +336,38 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 17px 13px;
+        min-height: 80px;
+        padding: 14px 20px;
+        border-radius: 0 0 8px 8px;
+        background: #5E5D63;
+        box-sizing: border-box;
     }
 
     .aa-info {
-        color: #aeb6b0;
-        font-size: 10px;
+        color: #aab3ac;
+        font-size: 15px;
     }
 
     .aa-pages {
         display: flex;
-        gap: 10px;
+        gap: 12px;
     }
 
     .aa-page {
         display: grid;
         place-items: center;
-        min-width: 78px;
-        height: 32px;
-        border-radius: 3px;
-        background: #b7ff1b;
-        color: #101510;
+        min-width: 102px;
+        height: 50px;
+        padding: 0 18px;
+        border: 1px solid #74777a;
+        border-radius: 5px;
+        background: transparent;
+        color: #fff;
         text-decoration: none;
-        font-size: 9px;
-        font-weight: 800;
+        font-size: 10px;
+        font-weight: 700;
         text-transform: uppercase;
+        box-sizing: border-box;
     }
 
         .aa-page.disabled {
@@ -482,7 +503,7 @@
 
     <form class="aa-search" method="get" asp-controller="Admin" asp-action="Attendance">
         <input name="searchTerm" value="@Model.SearchTerm" placeholder="Search member, ID, membership, or status..." />
-        <button type="submit">SEARCH</button>
+        <button type="submit" class="attendance-search-button">SEARCH</button>
     </form>
 
     <div class="aa-card">
@@ -495,7 +516,6 @@
                         <th>Type</th>
                         <th>Membership</th>
                         <th>Check-in</th>
-                        <th>Check-out</th>
                         <th>Status</th>
                         <th>Action</th>
                     </tr>
@@ -504,7 +524,7 @@
                     @if (Model.Members.Count == 0)
                     {
                         <tr>
-                            <td colspan="7" class="aa-empty">No members found.</td>
+                            <td colspan="6" class="aa-empty">No members found.</td>
                         </tr>
                     }
                     @foreach (var member in Model.Members)
@@ -520,7 +540,6 @@
                             <td>Member</td>
                             <td>@member.Membership</td>
                             <td>@(member.CheckInAt?.ToString("h:mm tt") ?? "—")</td>
-                            <td>@(member.CheckOutAt?.ToString("h:mm tt") ?? "—")</td>
                             <td><span class="aa-badge @badgeClass">@member.Status</span></td>
                             <td class="aa-action">
                                 <details class="aa-actions">
@@ -532,12 +551,6 @@
                                             <input type="hidden" name="attendanceAction" value="checkin" />
                                             <button type="submit" disabled="@(!member.CanCheckIn)">Check In</button>
                                         </form>
-                                        <form asp-controller="Admin" asp-action="UpdateAttendance" method="post">
-                                            @Html.AntiForgeryToken()
-                                            <input type="hidden" name="id" value="@member.ClientId" />
-                                            <input type="hidden" name="attendanceAction" value="checkout" />
-                                            <button type="submit" disabled="@(!member.CanCheckOut)">Check Out</button>
-                                        </form>
                                     </div>
                                 </details>
                             </td>
@@ -548,7 +561,7 @@
         </div>
 
         <div class="aa-pager">
-            <span class="aa-info">Page @Model.Page of @Model.TotalPages · @Model.TotalCount member(s)</span>
+            <span class="aa-info">Showing @Model.Members.Count of @Model.TotalCount members</span>
             <div class="aa-pages">
                 <a class="aa-page @(Model.Page <= 1 ? "disabled" : "")" asp-action="Attendance" asp-route-searchTerm="@Model.SearchTerm" asp-route-page="@(Model.Page - 1)">Previous</a>
                 <a class="aa-page @(Model.Page >= Model.TotalPages ? "disabled" : "")" asp-action="Attendance" asp-route-searchTerm="@Model.SearchTerm" asp-route-page="@(Model.Page + 1)">Next</a>
