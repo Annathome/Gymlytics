@@ -51,7 +51,7 @@
     <header class="role-page-header">
         <div>
             <h1 style="color:#fff !important;">@(isAdmin ? "Admin Notifications" : "Email Notifications")</h1>
-            <p class="subtitle">@(isAdmin ? "Security, reminders, trainer availability, and membership activity." : "Delivery activity for emails sent by the Front Desk.")</p>
+            <p class="subtitle @(isAdmin ? "dashboard-caption" : "")" style="@(isAdmin ? "font-family:'Inria Serif',serif!important;font-size:14px!important;font-weight:400!important;color:#aeb7b0!important;line-height:1.4!important;" : "")">@(isAdmin ? "Security, reminders, trainer availability, and membership activity." : "Delivery activity for emails sent by the Front Desk.")</p>
         </div>
     </header>
 

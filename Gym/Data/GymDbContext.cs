@@ -28,6 +28,7 @@ namespace Gym.Data
         public DbSet<Equipment> Equipments => Set<Equipment>();
         public DbSet<EquipmentNameCatalog> EquipmentNameCatalog => Set<EquipmentNameCatalog>();
         public DbSet<WalkInClient> WalkInClients => Set<WalkInClient>();
+        public DbSet<WalkInPaymentType> WalkInPaymentTypes => Set<WalkInPaymentType>();
         public DbSet<MemberAttendanceLog> MemberAttendanceLogs => Set<MemberAttendanceLog>();
         public DbSet<MembershipPlanSetting> MembershipPlanSettings => Set<MembershipPlanSetting>();
 

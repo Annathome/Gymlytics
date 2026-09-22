@@ -2,6 +2,7 @@ namespace Gym.Models;
 
 public sealed class AdminPaymentsViewModel
 {
+    public List<WalkInPaymentType> WalkInPaymentTypes { get; set; } = new();
     public List<AdminPaymentTransaction> Payments { get; set; } = new();
     public string? SearchTerm { get; set; }
     public PaymentStatus? SelectedStatus { get; set; }

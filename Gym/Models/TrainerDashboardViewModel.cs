@@ -94,6 +94,14 @@ namespace Gym.Models
 
     public class TrainerAssignedSessionViewModel
     {
+        public DateTime? GetEndTime(DateTime date)
+        {
+            var parts = TimeSlot.Replace('–', '-').Replace('—', '-').Split('-', StringSplitOptions.TrimEntries);
+            if (parts.Length != 2 || !DateTime.TryParse(parts[1], System.Globalization.CultureInfo.InvariantCulture,
+                System.Globalization.DateTimeStyles.NoCurrentDateDefault, out var end)) return null;
+            return date.Date.Add(end.TimeOfDay);
+        }
+
         public int ClientId { get; set; }
         public string MemberName { get; set; } = string.Empty;
         public string TimeSlot { get; set; } = string.Empty;

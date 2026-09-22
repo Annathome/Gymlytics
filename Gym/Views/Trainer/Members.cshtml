@@ -7,6 +7,7 @@
 <style>
     .tm-page { width: min(1180px, calc(100vw - 340px)); margin: 30px auto; color: #f0f7f1; font-size: 15px; }
     .tm-head { margin-bottom: 22px; }
+    body.trainer-shell .tm-page .tm-head { border-bottom: none !important; }
     .tm-head h1 { margin: 0 0 6px; color: #7cef72; font-size: 29px; }
     .tm-head p { margin: 0; color: #b9cbbb; }
     .tm-search { display: flex; gap: 10px; margin-bottom: 20px; }
@@ -33,7 +34,7 @@
     <header class="tm-head"><h1>My Members</h1><p>@Model.TotalCount assigned member@(Model.TotalCount == 1 ? "" : "s")</p></header>
     <form class="tm-search" method="get" asp-action="Members">
         <input name="searchTerm" value="@Model.SearchTerm" placeholder="Search assigned members by name or membership number..." />
-        <button type="submit">Search</button>
+        <button type="submit" class="search-btn">Search</button>
     </form>
     <section class="tm-card">
         <table class="tm-table">

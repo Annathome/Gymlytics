@@ -202,6 +202,8 @@ namespace Gym.Models
         public Dictionary<int, List<string>> TrainerAvailableDays { get; set; }
             = new();
 
+        public Dictionary<int, List<string>> TrainerTimeSlots { get; set; } = new();
+
         public List<SelectListItem> GymGoalOptions { get; set; }
             = new();
 

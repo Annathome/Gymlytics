@@ -223,6 +223,7 @@ namespace Gym.Models
     {
         [Key]
         public int WalkInClientId { get; set; }
+        [StringLength(100)] public string? PaymentTypeName { get; set; }
         [Required, StringLength(100)] public string FirstName { get; set; } = string.Empty;
         [Required, StringLength(100)] public string LastName { get; set; } = string.Empty;
         [Required, StringLength(20)] public string ContactNumber { get; set; } = string.Empty;

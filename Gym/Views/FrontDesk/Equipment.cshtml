@@ -533,10 +533,10 @@
             </div>
             <div class="condition-label">Current Condition *</div>
             <div class="conditions">
-                @foreach (var condition in new[] { "Good", "Needs Maintenance", "Out of Order" })
+                @foreach (var condition in new[] { "Needs Maintenance", "Out of Order" })
                 {
                     <label class="condition-option">
-                        <input type="radio" name="Condition" value="@condition" checked="@(condition == "Good")" />
+                        <input type="radio" name="Condition" value="@condition" checked="@(condition == "Needs Maintenance")" />
                         <span>@condition</span>
                     </label>
                 }
@@ -565,7 +565,7 @@
 
     function updateEvidenceRequirement() {
         const condition = document.querySelector('input[name="Condition"]:checked')?.value;
-        document.getElementById('evidencePhoto').required = condition !== "Good"
+        document.getElementById('evidencePhoto').required = true
     }
     document.querySelectorAll('input[name="Condition"]').forEach(input =>
         input.addEventListener('change', updateEvidenceRequirement));

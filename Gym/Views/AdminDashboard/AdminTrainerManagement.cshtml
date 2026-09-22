@@ -97,7 +97,8 @@
     .atm-note {
         font-size: 10px;
         color: #b7beb8;
-        margin-left: 7px;
+        display: block;
+        margin-top: 6px;
     }
 
     .atm-grid-shell {
@@ -228,18 +229,22 @@
 </style>
 
 <section class="atm">
+    @if (TempData["ErrorMessage"] is string scheduleError)
+    {
+        <div class="alert alert-danger" role="alert">@scheduleError</div>
+    }
 
     <div class="atm-heading">
         <h1>Trainer Management</h1>
-        <div class="atm-sub">Capacity enforced per time slot · zero conflicts</div>
+        <div class="atm-sub dashboard-caption" style="font-family:'Inria Serif',serif!important;font-size:14px!important;font-weight:400!important;color:#aeb7b0!important;line-height:1.4!important;">Capacity enforced per time slot · zero conflicts</div>
     </div>
 
     <div class="atm-stats">
         <div class="atm-stat">
-            <div class="atm-label">Available trainers</div>
+            <div class="atm-label">Available trainer member capacity</div>
             <div class="atm-value">
-                <strong>@Model.AvailableNow</strong>
-                <span class="atm-note">Active now</span>
+                <strong>@Model.AvailableMemberCapacity</strong>
+                <span class="atm-note">Remaining member slots out of @Model.TotalCapacity slots</span>
             </div>
         </div>
         <div class="atm-stat">
@@ -250,7 +255,6 @@
             <div class="atm-label">Active bookings</div>
             <div class="atm-value">
                 @Model.ActiveBookings
-                <span class="atm-note">Capacity @Model.TotalCapacity</span>
             </div>
         </div>
     </div>
@@ -282,32 +286,25 @@
                         @foreach (var day in days)
                         {
                             var scheduledMembers = Model.GetScheduledMembers(day, slot);
-                            var available = Model.Trainers.Where(trainer => trainer.IsAvailable(day, slot)).ToList();
 
                             <td class="atm-slot">
                                 @if (scheduledMembers.Count > 0)
                                 {
-                                    @foreach (var member in scheduledMembers)
+                                    @foreach (var trainerGroup in scheduledMembers.GroupBy(member => member.TrainerId))
                                     {
-                                        <span class="atm-member-schedule" data-trainer-name="@member.TrainerName.ToLowerInvariant()">
-                                            <strong>@member.MemberName</strong>
-                                            <small>Trainer: @member.TrainerName</small>
+                                        var firstMember = trainerGroup.First();
+                                        <span class="atm-member-schedule" data-trainer-name="@firstMember.TrainerName.ToLowerInvariant()">
+                                            @foreach (var member in trainerGroup)
+                                            {
+                                                <strong style="display:block;margin-bottom:4px">@member.MemberName</strong>
+                                            }
+                                            <small>@(firstMember.TrainerId.HasValue ? $"Trainer: {firstMember.TrainerName}" : "Self-guided")</small>
                                         </span>
                                     }
-                                }
-                                else if (available.Count == 0)
-                                {
-                                    <span class="atm-open">Open</span>
                                 }
                                 else
                                 {
-                                    @foreach (var trainer in available)
-                                    {
-                                        <span class="atm-trainer" data-trainer-name="@trainer.TrainerName.ToLowerInvariant()">
-                                            <strong>@trainer.TrainerName</strong>
-                                            <span class="atm-cap">@trainer.AssignedMembers/@trainer.WeeklyMemberLimit assigned · @trainer.RemainingSlots left</span>
-                                        </span>
-                                    }
+                                    <span class="atm-open">Open</span>
                                 }
                             </td>
                         }
@@ -318,12 +315,12 @@
 
         </table>
 
-        @if (Model.Trainers.Count == 0)
+        @if (Model.MemberSchedules.Count == 0)
         {
-            <div class="atm-empty">No active trainers found.</div>
+            <div class="atm-empty">No member schedules found.</div>
         }
 
-        <div class="atm-legend">Green = trainer available · Open = no trainer availability saved for this hour</div>
+        <div class="atm-legend">Only members' selected training days and times are shown · Open = no member scheduled for this hour</div>
     </div>
 
 </section>
@@ -332,7 +329,7 @@
     function filterTrainerGrid(event) {
         event.preventDefault();
         var term = document.getElementById('trainerGridSearch').value.trim().toLowerCase();
-        document.querySelectorAll('.atm-trainer').forEach(function(item) {
+        document.querySelectorAll('.atm-member-schedule').forEach(function(item) {
             item.style.display = !term || item.dataset.trainerName.includes(term) ? 'block' : 'none';
         });
     }

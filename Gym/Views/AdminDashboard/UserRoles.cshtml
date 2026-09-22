@@ -401,6 +401,14 @@
         .user-name-button { appearance:none; border:0 !important; outline:0 !important; box-shadow:none !important; background:transparent; padding:0; color:#1a1a1a; font:inherit; cursor:pointer; text-align:left; display:flex; align-items:center; gap:12px; }
         .user-name-button:hover,.user-name-button:focus { color:rgb(8,61,2); border:0; outline:0; box-shadow:none; }
         .user-name-text { display:flex; flex-direction:column; }
+        html body.admin-shell .page-wrap .card-table .user-name-button .user-name-text,
+        html body.admin-shell .page-wrap .card-table .user-name-button .user-name-text span {
+            color:#b7ff1b !important;
+        }
+        html body.admin-shell .user-name-button:is(:hover, :focus-visible) .user-name-text {
+            text-decoration:underline;
+            text-underline-offset:3px;
+        }
         .details-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px 16px; margin:18px 0; }
         .details-field { min-width:0; }
         .details-field.full { grid-column:1/-1; }
@@ -425,7 +433,7 @@
         <div class="page-header">
             <div>
                 <h1>User roles</h1>
-                <p>Login authentication and access control</p>
+                <p class="dashboard-caption" style="font-family:'Inria Serif',serif!important;font-size:14px!important;font-weight:400!important;color:#aeb7b0!important;line-height:1.4!important;">Login authentication and access control</p>
             </div>
             <div style="display:flex;gap:10px;align-items:center;">
                 <button type="button" class="btn-invite" onclick="openStaffRegistry()">
@@ -471,7 +479,6 @@
                                             <span class="avatar">@user.Initials</span>
                                             <span class="user-name-text">
                                                 <span>@user.DisplayName</span>
-                                                <span style="font-size:0.78rem;color:#9ca3af;">@user.Email</span>
                                             </span>
                                         </button>
                                     </div>
@@ -633,6 +640,14 @@
         </div>
     }
 
+    <div class="registry-overlay" id="staffRegistrationSuccess" role="alertdialog" aria-modal="true" aria-labelledby="staffSuccessTitle">
+        <div style="width:min(520px,90vw);padding:32px;background:#1b201c;color:white;border:1px solid #3c443d;border-radius:14px;text-align:center">
+            <h2 id="staffSuccessTitle" style="color:#b7ff1b">Account created</h2>
+            <p>The account is pending email verification. A confirmation link was sent to <strong id="staffSuccessEmail"></strong>.</p>
+            <p>The recipient must verify their email to complete registration.</p>
+            <button type="button" class="floating-confirm" onclick="finishStaffRegistration()">Back to User Role Dashboard</button>
+        </div>
+    </div>
     <div class="registry-overlay" id="staffRegistryModal" role="dialog" aria-modal="true" aria-label="Register new user">
         <div class="registry-dialog">
             <iframe class="registry-frame" id="staffRegistryFrame" title="Staff registration form" data-src="@Url.Action("RegisterStaff", "Account")"></iframe>
@@ -653,6 +668,36 @@
             document.getElementById('staffRegistryModal').classList.remove('open');
             document.body.style.overflow = '';
         }
+
+        function finishStaffRegistration() {
+            closeStaffRegistry();
+            window.location.assign('@Url.Action("UserRoles", "Admin")');
+        }
+
+        function showStaffRegistrationSuccess(email) {
+            closeStaffRegistry();
+            document.getElementById('staffSuccessEmail').textContent = email;
+            document.getElementById('staffRegistrationSuccess').classList.add('open');
+            document.body.style.overflow = 'hidden';
+            document.querySelector('#staffRegistrationSuccess button').focus();
+        }
+
+        document.getElementById('staffRegistryFrame').addEventListener('load', function () {
+            // Older confirmation pages may navigate within the frame.
+            try {
+                const confirmation = this.contentDocument.querySelector('[data-staff-confirmation-email]');
+                if (confirmation) {
+                    showStaffRegistrationSuccess(confirmation.dataset.staffConfirmationEmail);
+                    return;
+                }
+                const dashboardPath = new URL('@Url.Action("UserRoles", "Admin")', window.location.origin).pathname;
+                if (this.contentWindow.location.pathname.toLowerCase() === dashboardPath.toLowerCase()) {
+                    finishStaffRegistration();
+                }
+            } catch (_) {
+                // External email pages cannot be inspected across origins.
+            }
+        });
 
         function openUserActionModal(button) {
             document.getElementById('userActionTitle').textContent = button.dataset.actionName + '?';

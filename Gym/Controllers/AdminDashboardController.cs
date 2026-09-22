@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
@@ -79,23 +79,23 @@ namespace Gym.Controllers
                     .CountAsync(attendance => attendance.CheckInAt >= today && attendance.CheckInAt < tomorrow);
                 statistics.TodayWalkIns = await _context.WalkInClients.AsNoTracking()
                     .CountAsync(walkIn => walkIn.RegisteredAt >= today && walkIn.RegisteredAt < tomorrow);
-                var daysSinceMonday = ((int)today.DayOfWeek + 6) % 7;
-                var previousWeekStart = today.AddDays(-daysSinceMonday - 7);
-                var deliverySuffix = $":{previousWeekStart:yyyyMMdd}";
-                var sentWeeklyMemberIds = (await _context.FrontDeskEmailNotifications.AsNoTracking()
-                        .Where(item => item.EmailType == "Weekly attendance summary" && item.Status == "Sent" && item.DeliveryKey.EndsWith(deliverySuffix))
-                        .Select(item => item.DeliveryKey)
-                        .ToListAsync())
-                    .Select(key => key.Split(':'))
-                    .Where(parts => parts.Length == 3 && int.TryParse(parts[1], out _))
-                    .Select(parts => int.Parse(parts[1]))
-                    .Distinct()
-                    .Count();
-                statistics.PendingWeeklyAttendanceReminders = Math.Max(0, statistics.ActiveMembers - sentWeeklyMemberIds);
+                var activeMemberships = await _context.Clients.AsNoTracking()
+                    .Where(member => member.IsActive && member.IsActiveMember)
+                    .Select(member => new { member.UserId, member.MembershipStartDate }).ToListAsync();
+                var sentWeeklyKeys = (await _context.FrontDeskEmailNotifications.AsNoTracking()
+                    .Where(item => item.EmailType == "Weekly attendance summary" && item.Status == "Sent")
+                    .Select(item => item.DeliveryKey).ToListAsync()).ToHashSet();
+                statistics.PendingWeeklyAttendanceReminders = activeMemberships.Count(member =>
+                {
+                    var start = MembershipAttendanceWeek.LatestCompletedStart(member.MembershipStartDate, today);
+                    return start.HasValue && !sentWeeklyKeys.Contains(MembershipAttendanceWeek.DeliveryKey(member.UserId, start.Value));
+                });
                 statistics.UnreadNotificationsCount = await _context.FrontDeskEmailNotifications.AsNoTracking()
                     .CountAsync(item => item.Status == "New");
                 statistics.EquipmentStatus = await _context.Equipments.AsNoTracking()
-                    .OrderBy(equipment => equipment.Status == "Available" ? 1 : 0)
+                    .Where(equipment => equipment.Category != "Inventory" &&
+                        (equipment.Status == "Needs Maintenance" || equipment.Status == "Out of Order" || equipment.Status == "Fair"))
+                    .OrderBy(equipment => equipment.Status == "Out of Order" ? 0 : 1)
                     .ThenBy(equipment => equipment.EquipmentName)
                     .Take(5)
                     .Select(equipment => new AdminEquipmentStatusItem
@@ -310,7 +310,7 @@ namespace Gym.Controllers
                 await _context.SaveChangesAsync();
             }
 
-            const int pageSize = 5;
+            const int pageSize = 10;
             var notificationQuery = _context.FrontDeskEmailNotifications.AsNoTracking()
                 .OrderByDescending(item => item.CreatedDate);
             var totalCount = await notificationQuery.CountAsync();
@@ -410,7 +410,8 @@ namespace Gym.Controllers
         {
             try
             {
-                var trainers = (await _adminService.GetAllTrainersAsync())
+                var allTrainers = await _context.Trainers.AsNoTracking().ToListAsync();
+                var trainers = allTrainers
                     .Where(trainer => trainer.IsActive)
                     .OrderBy(trainer => trainer.FirstName)
                     .ThenBy(trainer => trainer.LastName)
@@ -427,27 +428,24 @@ namespace Gym.Controllers
                     .Select(group => new { TrainerId = group.Key, Count = group.Count() })
                     .ToDictionaryAsync(item => item.TrainerId, item => item.Count);
                 var assignedMemberSchedules = await _context.Clients.AsNoTracking()
-                    .Where(client => client.AssignedTrainerId.HasValue &&
-                        trainerIds.Contains(client.AssignedTrainerId.Value) &&
-                        client.IsActive && client.IsActiveMember &&
+                    .Where(client => client.IsActive && client.IsActiveMember &&
                         !string.IsNullOrWhiteSpace(client.PreferredDays) &&
                         !string.IsNullOrWhiteSpace(client.PreferredTimeSlot))
                     .Select(client => new
                     {
-                        TrainerId = client.AssignedTrainerId!.Value,
+                        TrainerId = client.AssignedTrainerId,
                         MemberName = client.FirstName + " " + client.LastName,
                         PreferredDays = client.PreferredDays!,
                         PreferredTimeSlot = client.PreferredTimeSlot!
                     })
                     .ToListAsync();
-                var trainerNames = trainers.ToDictionary(
+                var trainerNames = allTrainers.ToDictionary(
                     trainer => trainer.UserId,
                     trainer => $"{trainer.FirstName} {trainer.LastName}");
                 var today = DateTime.Today;
-                var sessionsToday = await _context.Sessions.AsNoTracking()
-                    .CountAsync(session => trainerIds.Contains(session.TrainerId) &&
-                        session.StartTime >= today && session.StartTime < today.AddDays(1) &&
-                        session.Status != SessionStatus.Cancelled);
+                var sessionsToday = assignedMemberSchedules.Count(item =>
+                    item.PreferredDays.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                        .Any(day => string.Equals(day, today.DayOfWeek.ToString(), StringComparison.OrdinalIgnoreCase)));
 
                 var model = new AdminTrainerManagementViewModel
                 {
@@ -455,7 +453,9 @@ namespace Gym.Controllers
                     MemberSchedules = assignedMemberSchedules.Select(item => new AdminTrainerMemberSchedule
                     {
                         TrainerId = item.TrainerId,
-                        TrainerName = trainerNames[item.TrainerId],
+                        TrainerName = item.TrainerId.HasValue
+                            ? trainerNames.GetValueOrDefault(item.TrainerId.Value, "Trainer unavailable")
+                            : "Self-guided",
                         MemberName = item.MemberName,
                         PreferredDays = item.PreferredDays,
                         PreferredTimeSlot = item.PreferredTimeSlot
@@ -543,7 +543,8 @@ namespace Gym.Controllers
                     Page = page,
                     TotalPages = totalPages,
                     TotalCount = filtered.Count,
-                    PlanSettings = await _context.MembershipPlanSettings.AsNoTracking().OrderBy(setting => setting.Plan).ToListAsync()
+                    PlanSettings = await _context.MembershipPlanSettings.AsNoTracking().OrderBy(setting => setting.Plan).ToListAsync(),
+                    WalkInPaymentTypes = await _context.WalkInPaymentTypes.AsNoTracking().OrderBy(item => item.Name).ToListAsync()
                 };
                 ViewBag.AutoPrint = printAll;
                 return View("~/Views/AdminDashboard/AdminPayments.cshtml", model);
@@ -862,32 +863,33 @@ namespace Gym.Controllers
 
         // GET: /Admin/Equipment
         [HttpGet("/Admin/Equipment")]
-        public async Task<IActionResult> Equipment(string? searchTerm, int page = 1)
+        public async Task<IActionResult> Equipment(string? searchTerm, int page = 1, string tab = "equipment")
         {
             try
             {
                 const int pageSize = 8;
                 searchTerm = searchTerm?.Trim();
-                var query = _context.Equipments.AsNoTracking().AsQueryable();
-                if (!string.IsNullOrWhiteSpace(searchTerm))
-                    query = query.Where(item => item.EquipmentName.Contains(searchTerm) || item.Category.Contains(searchTerm) || item.Status.Contains(searchTerm));
-                var totalCount = await query.CountAsync();
-                var totalPages = Math.Max(1, (int)Math.Ceiling(totalCount / (double)pageSize));
-                page = Math.Clamp(page, 1, totalPages);
+                tab = tab == "reports" ? "reports" : "equipment";
                 var all = await _context.Equipments.AsNoTracking().ToListAsync();
-                var equipmentNames = await _context.EquipmentNameCatalog.AsNoTracking()
-                    .OrderBy(item => item.Name)
-                    .ToListAsync();
+                var equipmentNames = await _context.EquipmentNameCatalog.AsNoTracking().OrderBy(item => item.Name).ToListAsync();
+                var inventory = EquipmentStock.Summarize(equipmentNames, all);
+                var reports = all.Where(item => !EquipmentStock.IsInventory(item));
+                var filteredInventory = inventory.Where(item => string.IsNullOrEmpty(searchTerm) || item.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)).ToList();
+                var filteredReports = reports.Where(item => string.IsNullOrEmpty(searchTerm) || item.EquipmentName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) || item.Status.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)).OrderByDescending(item => item.AddedDate).ToList();
+                var totalCount = tab == "reports" ? filteredReports.Count : filteredInventory.Count;
+                page = Math.Clamp(page, 1, Math.Max(1, (int)Math.Ceiling(totalCount / (double)pageSize)));
                 var model = new AdminEquipmentViewModel
                 {
-                    Items = await query.OrderBy(item => item.EquipmentName).Skip((page - 1) * pageSize).Take(pageSize).ToListAsync(),
+                    Tab = tab,
+                    Inventory = filteredInventory.Skip((page - 1) * pageSize).Take(pageSize).ToList(),
+                    Items = filteredReports.Skip((page - 1) * pageSize).Take(pageSize).ToList(),
                     EquipmentNames = equipmentNames,
                     SearchTerm = searchTerm ?? string.Empty,
-                    TotalAssets = all.Sum(item => item.Quantity),
-                    Available = all.Sum(item => item.AvailableQuantity),
-                    InUse = all.Sum(item => Math.Max(0, item.Quantity - item.AvailableQuantity)),
-                    Maintenance = all.Where(item => item.Status == "Needs Maintenance").Sum(item => item.Quantity),
-                    OutOfService = all.Where(item => item.Status == "Out of Order").Sum(item => item.Quantity),
+                    TotalAssets = inventory.Sum(item => item.Total),
+                    Available = inventory.Sum(item => item.Available),
+                    InUse = inventory.Sum(item => item.Reported),
+                    Maintenance = reports.Where(item => item.Status is "Needs Maintenance" or "Fair").Sum(item => item.Quantity),
+                    OutOfService = reports.Where(item => item.Status == "Out of Order").Sum(item => item.Quantity),
                     Page = page, PageSize = pageSize, TotalCount = totalCount
                 };
                 return View("~/Views/AdminDashboard/AdminEquipment.cshtml", model);
@@ -900,16 +902,50 @@ namespace Gym.Controllers
             }
         }
 
+        [HttpPost("/Admin/Payments/WalkInTypes/Save")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SaveWalkInPaymentType(int? id, string name, decimal amount, bool isActive = true)
+        {
+            name = name?.Trim() ?? string.Empty;
+            if (name.Length == 0 || name.Length > 100 || amount <= 0 || amount > 1000000 || decimal.Round(amount, 2) != amount || !ModelState.IsValid)
+            {
+                TempData["ErrorMessage"] = "Enter a payment type name and a valid amount with at most two decimal places.";
+                return RedirectToAction(nameof(Payments));
+            }
+            if (await _context.WalkInPaymentTypes.AnyAsync(item => item.Id != id && item.Name == name))
+            {
+                TempData["ErrorMessage"] = "A payment type with that name already exists.";
+                return RedirectToAction(nameof(Payments));
+            }
+            var rate = id.HasValue ? await _context.WalkInPaymentTypes.FindAsync(id.Value) : new WalkInPaymentType();
+            if (rate == null) return NotFound();
+            if (!id.HasValue) _context.WalkInPaymentTypes.Add(rate);
+            rate.Name = name;
+            rate.Amount = amount;
+            rate.IsActive = isActive;
+            await _context.SaveChangesAsync();
+            TempData["SuccessMessage"] = "Walk-in payment type saved.";
+            return RedirectToAction(nameof(Payments));
+        }
+
         [HttpPost("/Admin/Equipment/Add")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddEquipment(AddEquipmentViewModel form)
         {
-            var allowed = new[] { "Good", "Fair", "Needs Maintenance", "Out of Order" };
+            var allowed = new[] { "Needs Maintenance", "Out of Order" };
+            await using var stockTransaction = await _context.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable);
             var normalizedName = form.EquipmentName?.Trim() ?? string.Empty;
             var catalogItem = await _context.EquipmentNameCatalog.AsNoTracking()
                 .SingleOrDefaultAsync(item => item.Name == normalizedName);
             if (catalogItem is null)
                 ModelState.AddModelError(nameof(form.EquipmentName), "Select a name from the equipment catalog.");
+            if (catalogItem is not null)
+            {
+                var stockRecords = await _context.Equipments.AsNoTracking().Where(item => item.EquipmentName == catalogItem.Name).ToListAsync();
+                var stock = EquipmentStock.Summarize(new[] { catalogItem }, stockRecords).Single();
+                if (form.Quantity > stock.Available)
+                    ModelState.AddModelError(nameof(form.Quantity), $"Only {stock.Available} units are available to report.");
+            }
             var hasIssue = form.Condition is "Fair" or "Needs Maintenance" or "Out of Order";
             if (hasIssue && (form.EvidencePhoto is null || form.EvidencePhoto.Length == 0))
                 ModelState.AddModelError(nameof(form.EvidencePhoto), "Upload a photo showing the equipment issue.");
@@ -920,8 +956,13 @@ namespace Gym.Controllers
             }
             if (!allowed.Contains(form.Condition) || !ModelState.IsValid)
             {
-                TempData["ErrorMessage"] = "Complete all required equipment fields.";
-                return RedirectToAction(nameof(Equipment));
+                TempData["EquipmentFormError"] = string.Join(" ", ModelState.Values
+                    .SelectMany(value => value.Errors)
+                    .Select(error => error.ErrorMessage)
+                    .Where(message => !string.IsNullOrWhiteSpace(message)));
+                if (string.IsNullOrWhiteSpace(TempData["EquipmentFormError"]?.ToString()))
+                    TempData["EquipmentFormError"] = "Complete all required equipment fields.";
+                return RedirectToAction(nameof(Equipment), new { tab = "reports" });
             }
             string? evidencePhotoPath = null;
             if (form.EvidencePhoto is { Length: > 0 })
@@ -929,16 +970,16 @@ namespace Gym.Controllers
             _context.Equipments.Add(new Equipment
             {
                 EquipmentName = catalogItem!.Name, Category = "General", Quantity = form.Quantity,
-                AvailableQuantity = form.Condition is "Good" or "Fair" ? form.Quantity : 0,
+                AvailableQuantity = 0,
                 Status = form.Condition, AddedDate = DateTime.Now,
                 PurchaseDate = catalogItem.PurchaseDate,
                 GymArrivalDate = catalogItem.GymArrivalDate,
                 EvidencePhotoPath = evidencePhotoPath
             });
-            try { await _context.SaveChangesAsync(); }
+            try { await _context.SaveChangesAsync(); await stockTransaction.CommitAsync(); }
             catch { _equipmentEvidence.Delete(evidencePhotoPath); throw; }
             TempData["SuccessMessage"] = "Equipment issue report submitted successfully.";
-            return RedirectToAction(nameof(Equipment));
+            return RedirectToAction(nameof(Equipment), new { tab = "reports" });
         }
 
         [HttpPost("/Admin/Equipment/Names/Add")]
@@ -954,22 +995,22 @@ namespace Gym.Controllers
                 return RedirectToAction(nameof(Equipment));
             }
 
-            if (await _context.EquipmentNameCatalog.AnyAsync(item => item.Name == normalizedName))
+            var existing = await _context.EquipmentNameCatalog.SingleOrDefaultAsync(item => item.Name == normalizedName);
+            if (existing is null)
+                _context.EquipmentNameCatalog.Add(new EquipmentNameCatalog
+                {
+                    Name = normalizedName, PurchaseDate = form.GymArrivalDate!.Value.Date,
+                    GymArrivalDate = form.GymArrivalDate.Value.Date, CreatedAt = DateTime.Now
+                });
+            _context.Equipments.Add(new Equipment
             {
-                TempData["ErrorMessage"] = "That equipment name already exists.";
-                return RedirectToAction(nameof(Equipment));
-            }
-
-            _context.EquipmentNameCatalog.Add(new EquipmentNameCatalog
-            {
-                Name = normalizedName,
-                // Retained internally for compatibility with existing databases.
-                PurchaseDate = form.GymArrivalDate!.Value.Date,
-                GymArrivalDate = form.GymArrivalDate!.Value.Date,
-                CreatedAt = DateTime.Now
+                EquipmentName = existing?.Name ?? normalizedName, Category = "Inventory",
+                Quantity = form.Quantity, AvailableQuantity = form.Quantity, Status = "Available",
+                GymArrivalDate = form.GymArrivalDate!.Value.Date, PurchaseDate = form.GymArrivalDate.Value.Date,
+                AddedDate = DateTime.Now
             });
             await _context.SaveChangesAsync();
-            TempData["SuccessMessage"] = "Equipment name added to the Front Desk dropdown.";
+            TempData["SuccessMessage"] = "Equipment quantity added successfully.";
             return RedirectToAction(nameof(Equipment));
         }
 
@@ -978,10 +1019,10 @@ namespace Gym.Controllers
         {
             var query = _context.Equipments.AsNoTracking().AsQueryable();
             if (!string.IsNullOrWhiteSpace(searchTerm)) query = query.Where(item => item.EquipmentName.Contains(searchTerm) || item.Category.Contains(searchTerm) || item.Status.Contains(searchTerm));
-            var items = await query.OrderBy(item => item.EquipmentName).ToListAsync();
+            var items = (await query.OrderBy(item => item.EquipmentName).ToListAsync()).Where(item => !EquipmentStock.IsInventory(item)).ToList();
             static string Csv(string value) => $"\"{value.Replace("\"", "\"\"")}\"";
-            var headers = new[] { "Equipment", "Quantity", "Available", "Brought in", "Condition", "Last serviced", "Added" };
-            var rows = items.Select(item => new[] { item.EquipmentName, item.Quantity.ToString(), item.AvailableQuantity.ToString(),
+            var headers = new[] { "Equipment", "Quantity affected", "Brought in", "Condition", "Last serviced", "Added" };
+            var rows = items.Select(item => new[] { item.EquipmentName, item.Quantity.ToString(),
                 item.GymArrivalDate?.ToString("yyyy-MM-dd") ?? string.Empty,
                 item.Status, item.LastMaintenanceDate?.ToString("yyyy-MM-dd") ?? string.Empty, item.AddedDate.ToString("yyyy-MM-dd") }).ToList();
             var fileBase = $"YOKOKS-Equipment-{DateTime.Today:yyyy-MM-dd}";
@@ -1005,6 +1046,8 @@ namespace Gym.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateEquipmentStatus(int equipmentId, string status)
         {
+            if (status is not ("Needs Maintenance" or "Out of Order"))
+                return BadRequest("Select a valid equipment issue status.");
             try
             {
                 var equipment = await _context.Equipments
@@ -1061,7 +1104,7 @@ namespace Gym.Controllers
                 TempData["ErrorMessage"] = "An error occurred while updating status.";
             }
 
-            return RedirectToAction(nameof(Equipment));
+            return RedirectToAction(nameof(Equipment), new { tab = "reports" });
         }
 
         // GET: /Admin/UserRoles
@@ -1253,6 +1296,7 @@ namespace Gym.Controllers
         [HttpGet]
         public async Task<IActionResult> WalkInClient(string? searchTerm, int page = 1)
         {
+            ViewBag.WalkInPaymentTypes = await _context.WalkInPaymentTypes.AsNoTracking().Where(item => item.IsActive).OrderBy(item => item.Name).ToListAsync();
             var query = _context.WalkInClients.AsNoTracking();
             searchTerm = searchTerm?.Trim();
             if (!string.IsNullOrWhiteSpace(searchTerm))
@@ -1312,6 +1356,19 @@ namespace Gym.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> WalkInRegister(WalkInRegistrationViewModel form)
         {
+            if (!await _context.WalkInPaymentTypes.AnyAsync(item => item.IsActive))
+            {
+                TempData["ErrorMessage"] = "Walk-in registration is unavailable. An administrator must add an active walk-in payment type first.";
+                return RedirectToAction(nameof(WalkInClient));
+            }
+            var rate = await _context.WalkInPaymentTypes.AsNoTracking().FirstOrDefaultAsync(item => item.Id == form.PaymentTypeId && item.IsActive);
+            if (rate == null)
+            {
+                TempData["ErrorMessage"] = "Select an active walk-in payment type.";
+                return RedirectToAction(nameof(WalkInClient));
+            }
+            form.AmountPaid = rate.Amount;
+            ModelState.Remove(nameof(form.AmountPaid));
             ModelState.Remove(nameof(form.IssueDigitalReceipt));
             if (!ModelState.IsValid)
             {
@@ -1343,7 +1400,7 @@ namespace Gym.Controllers
                 LastName = lastName,
                 ContactNumber = contact,
                 Email = email,
-                ReasonForVisit = form.ReasonForVisit,
+                PaymentTypeName = rate.Name, ReasonForVisit = form.ReasonForVisit,
                 PaymentMethod = "Cash",
                 AmountPaid = form.AmountPaid,
                 IssueDigitalReceipt = email != null,
@@ -1359,9 +1416,15 @@ namespace Gym.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> RecordWalkInPayment(int id, decimal amount)
+        public async Task<IActionResult> RecordWalkInPayment(int id, decimal amount, int? paymentTypeId)
         {
-            if (amount <= 0)
+            var rate = await _context.WalkInPaymentTypes.AsNoTracking().FirstOrDefaultAsync(item => item.Id == paymentTypeId && item.IsActive);
+            if (rate == null)
+            {
+                TempData["ErrorMessage"] = "Select an active walk-in payment type.";
+                return RedirectToAction(nameof(WalkInClient));
+            }
+            amount = rate.Amount;            if (amount <= 0)
             {
                 TempData["ErrorMessage"] = "The cash payment amount must be greater than zero.";
                 return RedirectToAction(nameof(WalkInClient));
@@ -1394,7 +1457,7 @@ namespace Gym.Controllers
                 LastName = client.LastName,
                 ContactNumber = client.ContactNumber,
                 Email = client.Email,
-                ReasonForVisit = client.ReasonForVisit,
+                PaymentTypeName = rate.Name, ReasonForVisit = client.ReasonForVisit,
                 PaymentMethod = "Cash",
                 AmountPaid = amount,
                 IssueDigitalReceipt = client.IssueDigitalReceipt,

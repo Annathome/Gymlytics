@@ -8,6 +8,7 @@
     var totalCount = ViewBag.TotalCount is int itemCount ? itemCount : Model.Count;
     Layout = isAdmin ? "~/Views/Shared/_AdminLayout.cshtml" : "~/Views/Shared/_FrontDeskLayout.cshtml";
     ViewData["Title"] = "Walk-in Clients";
+    var paymentTypes = ViewBag.WalkInPaymentTypes as List<Gym.Models.WalkInPaymentType> ?? new();
 }
 
 <style>
@@ -200,15 +201,25 @@
         <div>
             <h1 style="color:#fff !important;">Walk-in Client Registration</h1>
 
-            <p>
+            <p class="dashboard-caption" style="font-family:'Inria Serif',serif!important;font-size:14px!important;font-weight:400!important;color:#aeb7b0!important;line-height:1.4!important;">
                 Quickly register a new visitor and grant temporary facility access.
             </p>
         </div>
 
-        <button type="button" class="wi-add" id="openWalkInRegistration" style="font-size:15px !important;">
-            ＋ Register Walk-in
-        </button>
+        <div style="display:flex;align-items:center;justify-content:flex-end;gap:12px;flex-wrap:wrap">
+            @if (isAdmin)
+            {
+                <a class="wi-add" asp-controller="Admin" asp-action="Payments" asp-route-manageWalkInTypes="true" style="display:inline-flex;text-decoration:none">＋ Add walk-in payment type</a>
+            }
+            <button type="button" class="wi-add" id="openWalkInRegistration" style="font-size:15px !important;">
+                ＋ Register Walk-in
+            </button>
+        </div>
     </header>
+    @if (paymentTypes.Count == 0)
+    {
+        <p role="alert">Walk-in registration is unavailable. An administrator must add an active walk-in payment type first.</p>
+    }
 
     @if (TempData["SuccessMessage"] is string message)
     {
@@ -314,6 +325,34 @@
 
 </main>
 
+<style>
+    html body #walkInRegistrationModal { background:rgba(0,0,0,.7); }
+    html body #walkInRegistrationModal .wi-register-modal {
+        background:#1b201c !important; color:#fff !important;
+        border:1px solid #3c443d !important; border-radius:14px;
+        padding:28px; box-shadow:0 18px 55px #0006;
+    }
+    html body #walkInRegistrationModal h2 { color:#fff !important; font-size:28px !important; }
+    html body #walkInRegistrationModal p { color:#fff !important; margin-bottom:24px; }
+    html body #walkInRegistrationModal .wi-form-grid { border:1px solid #3c443d; padding:16px; gap:20px 16px; }
+    html body #walkInRegistrationModal label { color:#fff !important; text-transform:none !important; }
+    html body #walkInRegistrationModal :is(input, select) {
+        background:#1b201c !important; color:#fff !important;
+        border:1px solid #bcc3bd !important; border-radius:0 !important;
+        height:42px; padding:0 12px; box-shadow:none !important; color-scheme:dark;
+    }
+    html body #walkInRegistrationModal :is(input, select):hover { border-color:#b7ff1b !important; }
+    html body #walkInRegistrationModal :is(input, select):focus {
+        border-color:#b7ff1b !important; outline:2px solid #35552c !important; outline-offset:2px;
+    }
+    html body #walkInRegistrationModal input:-webkit-autofill {
+        -webkit-text-fill-color:#fff !important;
+        -webkit-box-shadow:0 0 0 1000px #1b201c inset !important;
+        box-shadow:0 0 0 1000px #1b201c inset !important; caret-color:#fff;
+    }
+    html body #walkInRegistrationModal #walkInAmount { margin-top:4px; }
+    html body #walkInRegistrationModal label[for="walkInAmount"] { margin-top:16px; }
+</style>
 <div class="wi-modal-backdrop" id="walkInRegistrationModal" aria-hidden="true">
     <section class="wi-modal wi-register-modal" role="dialog" aria-modal="true" aria-labelledby="walkInRegistrationTitle">
         <h2 id="walkInRegistrationTitle">Register walk-in client</h2>
@@ -338,19 +377,22 @@
                     <input id="walkInEmail" name="Email" type="email" required />
                 </div>
                 <div class="wi-form-group">
-                    <label for="walkInReason">Reason for visit *</label>
-                    <select id="walkInReason" name="ReasonForVisit" required>
-                        <option>Day Pass</option><option>Guest Tour</option><option>Trial Session</option><option>Event</option>
+                    <label for="walkInType">Payment type *</label>
+                    <select id="walkInType" name="PaymentTypeId" required data-amount-target="walkInAmount">
+                        <option value="">Select payment type</option>
+                        @foreach (var rate in paymentTypes)
+                        {
+                            <option value="@rate.Id" data-amount="@rate.Amount.ToString(System.Globalization.CultureInfo.InvariantCulture)">@rate.Name — ₱@rate.Amount.ToString("N2")</option>
+                        }
                     </select>
-                </div>
-                <div class="wi-form-group">
-                    <label for="walkInAmount">Amount paid (₱) *</label>
-                    <input id="walkInAmount" name="AmountPaid" type="number" min="0.01" step="0.01" required />
+                    <label for="walkInAmount">Amount paid (₱)</label>
+                    <input id="walkInAmount" name="AmountPaid" type="number" min="0.01" step="0.01" readonly required />
+                    @if (paymentTypes.Count == 0) { <small>Ask an administrator to add a walk-in payment type in Payments.</small> }
                 </div>
             </div>
             <div class="wi-modal-actions">
                 <button type="button" class="wi-cancel" id="closeWalkInRegistration">Cancel</button>
-                <button type="submit" class="wi-pay">Register client</button>
+                <button type="submit" class="wi-pay" disabled="@(paymentTypes.Count == 0)">Register client</button>
             </div>
         </form>
     </section>
@@ -363,8 +405,16 @@
         <form asp-action="RecordWalkInPayment" asp-controller="@walkInController" method="post" id="walkInPaymentForm">
             @Html.AntiForgeryToken()
             <input type="hidden" name="id" id="walkInPaymentId" />
+            <label for="walkInPaymentType">Payment type</label>
+            <select id="walkInPaymentType" name="paymentTypeId" required data-amount-target="walkInPaymentAmount">
+                <option value="">Select payment type</option>
+                @foreach (var rate in paymentTypes)
+                {
+                    <option value="@rate.Id" data-amount="@rate.Amount.ToString(System.Globalization.CultureInfo.InvariantCulture)">@rate.Name — ₱@rate.Amount.ToString("N2")</option>
+                }
+            </select>
             <label for="walkInPaymentAmount">Cash amount (₱)</label>
-            <input type="number" name="amount" id="walkInPaymentAmount" min="0.01" step="0.01" required />
+            <input type="number" name="amount" id="walkInPaymentAmount" min="0.01" step="0.01" readonly required />
             <div class="wi-modal-actions">
                 <button type="button" class="wi-cancel" id="closeWalkInPayment">Cancel</button>
                 <button type="submit" class="wi-pay">Confirm payment</button>
@@ -399,6 +449,7 @@
             idInput.value = button.dataset.id;
             clientText.textContent = button.dataset.name + ' · Cash only';
             amountInput.value = '';
+            document.getElementById('walkInPaymentType').value = '';
             modal.classList.add('show');
             modal.setAttribute('aria-hidden', 'false');
             amountInput.focus();
@@ -411,4 +462,11 @@
             button.textContent = 'Processing...';
         });
     })();
+</script>
+<script>
+    document.querySelectorAll('select[data-amount-target]').forEach(select => {
+        select.addEventListener('change', () => {
+            document.getElementById(select.dataset.amountTarget).value = select.selectedOptions[0]?.dataset.amount || '';
+        });
+    });
 </script>

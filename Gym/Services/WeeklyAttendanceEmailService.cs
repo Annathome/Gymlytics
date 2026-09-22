@@ -41,11 +41,6 @@ public sealed class WeeklyAttendanceEmailService : BackgroundService
         var emailService = scope.ServiceProvider.GetRequiredService<GmailValidationService>();
 
         var today = DateTime.Today;
-        var daysSinceMonday = ((int)today.DayOfWeek + 6) % 7;
-        var currentWeekStart = today.AddDays(-daysSinceMonday);
-        var weekStart = currentWeekStart.AddDays(-7);
-        var weekEndExclusive = currentWeekStart;
-        var weekEnd = weekEndExclusive.AddDays(-1);
 
         var members = await context.Clients
             .AsNoTracking()
@@ -54,30 +49,30 @@ public sealed class WeeklyAttendanceEmailService : BackgroundService
             {
                 client.UserId,
                 client.Email,
+                client.MembershipStartDate,
                 FullName = (client.FirstName + " " + client.LastName).Trim()
             })
             .ToListAsync(cancellationToken);
 
-        var attendance = await context.MemberAttendanceLogs
-            .AsNoTracking()
-            .Where(log => log.CheckInAt >= weekStart && log.CheckInAt < weekEndExclusive)
-            .Select(log => new { log.ClientId, log.CheckInAt })
-            .ToListAsync(cancellationToken);
-
         foreach (var member in members)
         {
-            var deliveryKey = $"WeeklyAttendance:{member.UserId}:{weekStart:yyyyMMdd}";
+            var completedStart = MembershipAttendanceWeek.LatestCompletedStart(member.MembershipStartDate, today);
+            if (!completedStart.HasValue) continue;
+            var weekStart = completedStart.Value;
+            var weekEndExclusive = weekStart.AddDays(7);
+            var weekEnd = weekEndExclusive.AddDays(-1);
+            var deliveryKey = MembershipAttendanceWeek.DeliveryKey(member.UserId, weekStart);
             var alreadySent = await context.FrontDeskEmailNotifications
                 .AsNoTracking()
                 .AnyAsync(item => item.DeliveryKey == deliveryKey && item.Status == "Sent", cancellationToken);
             if (alreadySent) continue;
 
-            var checkInDates = attendance
-                .Where(log => log.ClientId == member.UserId)
+            var checkInDates = await context.MemberAttendanceLogs.AsNoTracking()
+                .Where(log => log.ClientId == member.UserId && log.CheckInAt >= weekStart && log.CheckInAt < weekEndExclusive)
                 .Select(log => log.CheckInAt.Date)
                 .Distinct()
                 .OrderBy(date => date)
-                .ToList();
+                .ToListAsync(cancellationToken);
 
             var (sent, error) = string.IsNullOrWhiteSpace(member.Email)
                 ? (false, "The member has no email address.")

@@ -187,23 +187,29 @@
                 <input class="control" asp-for="Email" placeholder="jane.doe@example.com" required /> 
                 <span class="validation" asp-validation-for="Email"> </span>
             </div>
-            <div class="group">
-                <label asp-for="ReasonForVisit">Reason for Visit <span class="required">*</span>
-                    </label><select class="control" asp-for="ReasonForVisit">
-                        <option>Day Pass </option>
-                        <option>Guest Tour</option>
-                        <option>Trial Session</option>
-                        <option>Event</option></select>
-                    </div>
             <h2 class="section-title" style="margin-top:26px">Payment Details</h2>
             <div class="group">
+                <label asp-for="PaymentTypeId">Payment type *</label>
+                <select class="control" asp-for="PaymentTypeId" required onchange="document.getElementById('AmountPaid').value = this.selectedOptions[0]?.dataset.amount || ''">
+                    <option value="">Select payment type</option>
+                    @foreach (var rate in (ViewBag.WalkInPaymentTypes as List<Gym.Models.WalkInPaymentType> ?? new()))
+                    {
+                        <option value="@rate.Id" data-amount="@rate.Amount.ToString(System.Globalization.CultureInfo.InvariantCulture)">@rate.Name — ₱@rate.Amount.ToString("N2")</option>
+                    }
+                </select>
+            </div>
+            <div class="group">
                 <label asp-for="AmountPaid">Amount Paid <span class="required">*</span></label>
-                <input class="control" asp-for="AmountPaid" type="number" min="0.01" step="0.01" placeholder="0.00" />
+                <input class="control" asp-for="AmountPaid" type="number" min="0.01" step="0.01" placeholder="0.00" readonly />
                 <span class="validation" asp-validation-for="AmountPaid"></span>
             </div>
             <div class="actions">
                 <a class="cancel" asp-action="WalkInClient">CANCEL</a>
-                <button class="submit" type="submit">♙ &nbsp; REGISTER CLIENT </button>
+                @if (!(ViewBag.WalkInPaymentTypes is List<Gym.Models.WalkInPaymentType> availableTypes && availableTypes.Count > 0))
+                {
+                    <p role="alert">Walk-in registration is unavailable. An administrator must add an active walk-in payment type first.</p>
+                }
+                <button class="submit" type="submit" disabled="@(!(ViewBag.WalkInPaymentTypes is List<Gym.Models.WalkInPaymentType> types && types.Count > 0))">♙ &nbsp; REGISTER CLIENT </button>
             </div>
         </form>
     </main>

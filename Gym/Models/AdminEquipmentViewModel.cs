@@ -2,6 +2,8 @@ namespace Gym.Models;
 
 public sealed class AdminEquipmentViewModel
 {
+    public string Tab { get; set; } = "equipment";
+    public List<EquipmentInventoryRow> Inventory { get; set; } = new();
     public List<Equipment> Items { get; set; } = new();
     public List<EquipmentNameCatalog> EquipmentNames { get; set; } = new();
     public string SearchTerm { get; set; } = string.Empty;

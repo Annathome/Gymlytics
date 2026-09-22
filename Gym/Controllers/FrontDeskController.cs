@@ -1,4 +1,4 @@
-﻿using Gym.Models;
+using Gym.Models;
 using Gym.Services;
 using Gym.Data;
 using Microsoft.EntityFrameworkCore;
@@ -384,6 +384,7 @@ namespace Gym.Controllers
         [HttpGet]
         public async Task<IActionResult> WalkInClient(string? searchTerm, int page = 1)
         {
+            ViewBag.WalkInPaymentTypes = await _context.WalkInPaymentTypes.AsNoTracking().Where(item => item.IsActive).OrderBy(item => item.Name).ToListAsync();
             var query = _context.WalkInClients.AsNoTracking();
             searchTerm = searchTerm?.Trim();
             if (!string.IsNullOrWhiteSpace(searchTerm))
@@ -440,9 +441,15 @@ namespace Gym.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> RecordWalkInPayment(int id, decimal amount)
+        public async Task<IActionResult> RecordWalkInPayment(int id, decimal amount, int? paymentTypeId)
         {
-            if (amount <= 0)
+            var rate = await _context.WalkInPaymentTypes.AsNoTracking().FirstOrDefaultAsync(item => item.Id == paymentTypeId && item.IsActive);
+            if (rate == null)
+            {
+                TempData["ErrorMessage"] = "Select an active walk-in payment type.";
+                return RedirectToAction(nameof(WalkInClient));
+            }
+            amount = rate.Amount;            if (amount <= 0)
             {
                 TempData["ErrorMessage"] = "The cash payment amount must be greater than zero.";
                 return RedirectToAction(nameof(WalkInClient));
@@ -476,7 +483,7 @@ namespace Gym.Controllers
                 LastName = client.LastName,
                 ContactNumber = client.ContactNumber,
                 Email = client.Email,
-                ReasonForVisit = client.ReasonForVisit,
+                PaymentTypeName = rate.Name, ReasonForVisit = client.ReasonForVisit,
                 PaymentMethod = "Cash",
                 AmountPaid = amount,
                 IssueDigitalReceipt = client.IssueDigitalReceipt,
@@ -610,7 +617,7 @@ namespace Gym.Controllers
             page = Math.Max(1, page);
             searchTerm = searchTerm?.Trim();
 
-            var query = _context.Equipments.AsNoTracking().AsQueryable();
+            var query = _context.Equipments.AsNoTracking().Where(item => item.Category != "Inventory" && item.Status != "Good" && item.Status != "Available" && item.Status != "In Use");
             if (!string.IsNullOrWhiteSpace(searchTerm))
             {
                 query = query.Where(item =>
@@ -637,7 +644,7 @@ namespace Gym.Controllers
                 SearchTerm = searchTerm ?? string.Empty,
                 Items = items,
                 EquipmentNames = equipmentNames,
-                TotalAssets = allEquipment.Sum(item => item.Quantity),
+                TotalAssets = allEquipment.Where(EquipmentStock.IsInventory).Sum(item => item.Quantity),
                 InMaintenance = allEquipment
                     .Where(item => item.Status == "Needs Maintenance")
                     .Sum(item => item.Quantity),
@@ -654,12 +661,13 @@ namespace Gym.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddEquipment(AddEquipmentViewModel form)
         {
-            var allowedConditions = new[] { "Good", "Fair", "Needs Maintenance", "Out of Order" };
+            var allowedConditions = new[] { "Needs Maintenance", "Out of Order" };
             if (!allowedConditions.Contains(form.Condition))
             {
                 ModelState.AddModelError(nameof(form.Condition), "Select a valid condition.");
             }
 
+            await using var stockTransaction = await _context.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable);
             var normalizedName = form.EquipmentName?.Trim() ?? string.Empty;
             var catalogItem = await _context.EquipmentNameCatalog.AsNoTracking()
                 .SingleOrDefaultAsync(item => item.Name == normalizedName);
@@ -669,6 +677,13 @@ namespace Gym.Controllers
                     "Select an equipment name created by an administrator.");
             }
 
+            if (catalogItem is not null)
+            {
+                var stockRecords = await _context.Equipments.AsNoTracking().Where(item => item.EquipmentName == catalogItem.Name).ToListAsync();
+                var stock = EquipmentStock.Summarize(new[] { catalogItem }, stockRecords).Single();
+                if (form.Quantity > stock.Available)
+                    ModelState.AddModelError(nameof(form.Quantity), $"Only {stock.Available} units are available to report.");
+            }
             var hasIssue = form.Condition is "Fair" or "Needs Maintenance" or "Out of Order";
             if (hasIssue && (form.EvidencePhoto is null || form.EvidencePhoto.Length == 0))
             {
@@ -705,7 +720,7 @@ namespace Gym.Controllers
                 EquipmentName = catalogItem!.Name,
                 Category = "General",
                 Quantity = form.Quantity,
-                AvailableQuantity = form.Condition is "Good" or "Fair" ? form.Quantity : 0,
+                AvailableQuantity = 0,
                 Status = form.Condition,
                 AddedDate = DateTime.Now,
                 PurchaseDate = catalogItem!.PurchaseDate,
@@ -716,7 +731,7 @@ namespace Gym.Controllers
             _context.Equipments.Add(equipment);
             try
             {
-                await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync(); await stockTransaction.CommitAsync();
             }
             catch
             {
@@ -830,13 +845,30 @@ namespace Gym.Controllers
         }
 
         [HttpGet]
-        public IActionResult WalkInRegister() =>
-            View(new WalkInRegistrationViewModel());
+        public async Task<IActionResult> WalkInRegister()
+        {
+            ViewBag.WalkInPaymentTypes = await _context.WalkInPaymentTypes.AsNoTracking()
+                .Where(item => item.IsActive).OrderBy(item => item.Name).ToListAsync();
+            return View(new WalkInRegistrationViewModel());
+        }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> WalkInRegister(WalkInRegistrationViewModel form)
         {
+            if (!await _context.WalkInPaymentTypes.AnyAsync(item => item.IsActive))
+            {
+                TempData["ErrorMessage"] = "Walk-in registration is unavailable. An administrator must add an active walk-in payment type first.";
+                return RedirectToAction(nameof(WalkInClient));
+            }
+            var rate = await _context.WalkInPaymentTypes.AsNoTracking().FirstOrDefaultAsync(item => item.Id == form.PaymentTypeId && item.IsActive);
+            if (rate == null)
+            {
+                TempData["ErrorMessage"] = "Select an active walk-in payment type.";
+                return RedirectToAction(nameof(WalkInClient));
+            }
+            form.AmountPaid = rate.Amount;
+            ModelState.Remove(nameof(form.AmountPaid));
             ModelState.Remove(nameof(form.IssueDigitalReceipt));
             if (!ModelState.IsValid)
             {
@@ -867,7 +899,7 @@ namespace Gym.Controllers
                 FirstName = firstName, LastName = lastName,
                 ContactNumber = contact,
                 Email = email,
-                ReasonForVisit = form.ReasonForVisit, PaymentMethod = "Cash",
+                PaymentTypeName = rate.Name, ReasonForVisit = form.ReasonForVisit, PaymentMethod = "Cash",
                 AmountPaid = form.AmountPaid, IssueDigitalReceipt = email != null,
                 LiabilityAccepted = false, Status = "Checked-in",
                 RegisteredAt = registeredAt

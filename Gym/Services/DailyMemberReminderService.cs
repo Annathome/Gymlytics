@@ -16,13 +16,6 @@ public sealed class DailyMemberReminderService : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        // A short grace period handles application startup immediately after
-        // midnight without postponing that day's reminders for 24 hours.
-        if (DateTime.Now.TimeOfDay >= TimeSpan.FromMinutes(5))
-        {
-            await DelayUntilNextMidnightAsync(stoppingToken);
-        }
-
         while (!stoppingToken.IsCancellationRequested)
         {
             try
@@ -34,7 +27,7 @@ public sealed class DailyMemberReminderService : BackgroundService
                 _logger.LogError(ex, "Daily member reminder processing failed.");
             }
 
-            await DelayUntilNextMidnightAsync(stoppingToken);
+            await Task.Delay(TimeSpan.FromMinutes(15), stoppingToken);
         }
     }
 

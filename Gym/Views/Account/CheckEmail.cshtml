@@ -3,14 +3,65 @@
     Layout = "~/Views/Shared/_LoginLayout.cshtml";
 }
 
-<div class="container mt-5 text-center" style="max-width: 450px;">
-    <h3 class="mb-3">Check your inbox</h3>
-    <p class="text-muted">
+<style>
+    html, body, body > main, body > main > div {
+        margin: 0;
+        min-height: 100vh;
+        background: #1b201c;
+        color: #fff;
+    }
+
+    .email-confirmation {
+        min-height: 100vh;
+        padding: 48px 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        box-sizing: border-box;
+    }
+
+    .email-confirmation-content { width: 100%; max-width: 520px; }
+    .email-confirmation h1 { color: #b7ff1b; font-size: 28px; margin: 0 0 20px; }
+    .email-confirmation p { color: #fff; font-size: 16px; line-height: 1.7; margin: 0 0 28px; }
+    .email-confirmation strong { overflow-wrap: anywhere; }
+    .email-confirmation .email-return {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 44px;
+        padding: 12px 20px;
+        background: #292d2a;
+        border: 1px solid #586058;
+        color: #fff;
+        text-decoration: none;
+        font-size: 14px;
+        transition: border-color .15s ease, color .15s ease;
+    }
+    .email-confirmation .email-return:hover,
+    .email-confirmation .email-return:focus-visible { border-color: #b7ff1b; color: #b7ff1b; }
+</style>
+
+<section class="email-confirmation" data-staff-confirmation-email="@ViewBag.Email">
+  <div class="email-confirmation-content">
+    <h1>Check your inbox</h1>
+    <p>
         We sent a confirmation link to <strong>@ViewBag.Email</strong>.
         Click it to verify the account and complete registration.
     </p>
-    <!-- Fixed: added asp-controller="AdminDashboard" -->
-    <a asp-controller="Admin" asp-action="UserRoles" class="btn btn-outline-secondary mt-2">
+    <a asp-controller="Admin" asp-action="UserRoles" target="_top" class="email-return" onclick="return returnToUserRoles(event)">
         Back to User Role Dashboard
     </a>
-</div>
+  </div>
+</section>
+
+<script>
+    function returnToUserRoles(event) {
+        if (window.parent !== window && typeof window.parent.finishStaffRegistration === 'function') {
+            event.preventDefault();
+            window.parent.finishStaffRegistration();
+            return false;
+        }
+        return true;
+    }
+</script>

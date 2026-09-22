@@ -27,6 +27,7 @@
     }
 
     .am-toolbar {
+        margin-bottom: 24px;
         display:flex;
         position: relative;
         gap: 10px;
@@ -210,7 +211,7 @@
         border: 0;
         border-radius: 8px;
         background: #5E5D63;
-        overflow: hidden;
+        overflow: visible;
         box-shadow: 0 8px 20px rgba(0, 0, 0, .42);
     }
 
@@ -598,10 +599,11 @@
             <div class="am-toolbar">
                 <div>
                     <h1>Members</h1>
-                    <p>@ViewBag.ActiveCount ACTIVE · @ViewBag.ExpiringCount EXPIRING MEMBERSHIP</p>
+                    <p class="dashboard-caption" style="font-family:'Inria Serif',serif!important;font-size:14px!important;font-weight:400!important;color:#aeb7b0!important;line-height:1.4!important;">@ViewBag.ActiveCount ACTIVE · @ViewBag.ExpiringCount EXPIRING MEMBERSHIP</p>
                 </div>
                 <div class="mtop-tool">
-                    <button class="am-add" type="button" onclick="openAdminAddMemberModal()">＋ ADD MEMBER</button>
+                    <a class="am-add" asp-action="Payments" asp-route-managePlans="true" style="text-decoration:none">＋ Add membership plan</a>
+                    <button class="am-add" type="button" onclick="openAdminAddMemberModal()">＋ Register member</button>
                     <details class="am-export">
                         <summary>↧ EXPORT</summary>
                         <div class="am-export-menu" id="memberExportMenu">
@@ -690,19 +692,6 @@
                                     <details class="am-actions">
                                         <summary aria-label="Member actions" title="Member actions">⋮</summary>
                                         <div class="am-actions-menu">
-                                            <button class="am-menu-button" type="button" onclick="openAdminPayment(@member.UserId,'@fullName',@remaining.ToString(System.Globalization.CultureInfo.InvariantCulture))">Add payment</button>
-                                            <form asp-controller="Admin" asp-action="SendDailyMemberReminder" method="post">
-                                                @Html.AntiForgeryToken()
-                                                <input type="hidden" name="id" value="@member.UserId" />
-                                                @if (dailyReminderMemberIds.Contains(member.UserId))
-                                                {
-                                                    <button class="am-menu-button" type="button" disabled>✓ Daily reminder sent</button>
-                                                }
-                                                else
-                                                {
-                                                    <button class="am-menu-button" type="submit">Send daily reminder</button>
-                                                }
-                                            </form>
                                             <button class="am-menu-button" type="button"
                                                     data-client-id="@member.UserId"
                                                     data-member-name="@fullName"
@@ -710,11 +699,6 @@
                                                     data-plan-price="@planPrice.ToString(System.Globalization.CultureInfo.InvariantCulture)"
                                                     data-expired-date="@(member.MembershipEndDate?.ToString("MMM d, yyyy") ?? "No end date")"
                                                     onclick="openAdminRenewal(this)">Renew membership</button>
-                                            <form asp-controller="Admin" asp-action="MarkMemberInactive" method="post" onsubmit="return confirm('Mark @fullName inactive?');">
-                                                @Html.AntiForgeryToken()
-                                                <input type="hidden" name="id" value="@member.UserId" />
-                                                <button class="am-menu-button" type="submit">Mark inactive</button>
-                                            </form>
                                             <form asp-controller="Admin" asp-action="CancelMember" method="post" onsubmit="return confirm('Cancel @fullName membership? Only attended gym dates will count as consumed days.');">
                                                 @Html.AntiForgeryToken()
                                                 <input type="hidden" name="id" value="@member.UserId" />
@@ -725,10 +709,10 @@
                                                 <input type="hidden" name="id" value="@member.UserId" />
                                                 <button class="am-menu-button" type="submit">Terminate</button>
                                             </form>
-                                            <form asp-controller="Admin" asp-action="DeleteMember" method="post" onsubmit="return confirm('Permanently delete @fullName? This cannot be undone.');">
+                                            <form asp-controller="Admin" asp-action="MarkMemberInactive" method="post" onsubmit="return confirm('Mark @fullName inactive?');">
                                                 @Html.AntiForgeryToken()
                                                 <input type="hidden" name="id" value="@member.UserId" />
-                                                <button class="am-menu-button am-delete" type="submit">Delete</button>
+                                                <button class="am-menu-button" type="submit">Mark inactive</button>
                                             </form>
                                         </div>
                                     </details>

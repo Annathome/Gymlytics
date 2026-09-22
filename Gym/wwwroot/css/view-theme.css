@@ -1,4 +1,4 @@
-ap-edit-plans:root {
+:root {
     --yokoks-green: rgb(14, 197, 45);
     --yokoks-deep-green: rgb(8, 75, 2);
     --yokoks-black: #111;
@@ -8,6 +8,39 @@ ap-edit-plans:root {
     --yokoks-muted: #5e675f;
     --yokoks-radius: 12px;
     --yokoks-font: "Inria Serif", serif;
+}
+
+/* System-wide typeface. Icon elements keep their icon font. */
+html body,
+html body div,
+html body main,
+html body section,
+html body article,
+html body header,
+html body footer,
+html body nav,
+html body h1,
+html body h2,
+html body h3,
+html body h4,
+html body h5,
+html body h6,
+html body p,
+html body span,
+html body label,
+html body input,
+html body select,
+html body option,
+html body textarea,
+html body button,
+html body a,
+html body table,
+html body th,
+html body td,
+html body small,
+html body strong,
+html body summary {
+    font-family: "Inria Serif", serif !important;
 }
 
 html, body, button, input, select, textarea {

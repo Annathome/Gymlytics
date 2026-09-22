@@ -22,12 +22,13 @@ public class AddEquipmentViewModel
     [Required, StringLength(100)] public string EquipmentName { get; set; } = string.Empty;
     [StringLength(50)] public string Category { get; set; } = "General";
     [Range(1, 10000)] public int Quantity { get; set; } = 1;
-    [Required] public string Condition { get; set; } = "Good";
+    [Required] public string Condition { get; set; } = "Needs Maintenance";
     public IFormFile? EvidencePhoto { get; set; }
 }
 
 public class AddEquipmentNameViewModel
 {
+    [Range(1, 10000)] public int Quantity { get; set; } = 1;
     [Required, StringLength(100)]
     public string Name { get; set; } = string.Empty;
     [Required, DataType(DataType.Date)] public DateTime? GymArrivalDate { get; set; }

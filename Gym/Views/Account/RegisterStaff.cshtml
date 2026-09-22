@@ -1,4 +1,4 @@
-﻿@model Gym.Models.StaffViewModel
+@model Gym.Models.StaffViewModel
 @{
     ViewData["Title"] = "Staff Registration";
     Layout = "~/Views/Shared/_LoginLayout.cshtml";
@@ -14,7 +14,7 @@
     body {
         min-height: 100vh;
         width: 100vw;
-        background: #171b18;
+        background: #1b201c;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -24,7 +24,7 @@
 
     body > main,
     body > main > div {
-        background: #171b18;
+        background: #1b201c;
     }
 
     .login-wrap {
@@ -35,7 +35,7 @@
         align-items: center;
         justify-content: center;
         padding: 0;
-        background: #171b18;
+        background: #1b201c;
     }
 
     .login-form {
@@ -45,12 +45,12 @@
         max-width: none;
         min-height: 100vh;
         max-height: 100vh;
-        background-color: #171b18;
+        background-color: #1b201c;
         display: flex;
         flex-direction: column;
         padding: 30px 35px;
-        border-radius: 10px;
-        border: 1px solid #59635c;
+        border-radius: 0;
+        border: 1px solid #3c443d;
         box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
         overflow-y: auto;
     }
@@ -61,7 +61,7 @@
 
         .login-form::-webkit-scrollbar-thumb {
             background-color: rgba(0,0,0,0.2);
-            border-radius: 10px;
+            border-radius: 0;
         }
 
     .title {
@@ -119,8 +119,9 @@
     .staff-fields-wrapper {
         width: 100%;
         padding: 22px;
-        border-radius: 9px;
-        background: #5e5d63;
+        border-radius: 0;
+        background: transparent;
+        border: 1px solid #3c443d;
     }
 
     .form-group label {
@@ -138,7 +139,7 @@
         color: #fff;
         padding: 8px 12px;
         width: 100%;
-        border-radius: 8px;
+        border-radius: 0;
         font-size: 0.95rem;
         outline: none;
         transition: all 0.2s ease-in-out;
@@ -238,7 +239,7 @@
     }
 
     .form-group select option {
-        background: #171b18;
+        background: #1b201c;
         color: #fff;
     }
 
@@ -255,7 +256,7 @@
 
     .form-group select option:hover,
     .form-group select option:checked {
-        background: #171b18;
+        background: #1b201c;
         color: #a8df32;
     }
 
@@ -264,15 +265,44 @@
     }
 
     .form-group input[type="date"]::-webkit-calendar-picker-indicator {
-        filter: invert(1);
+        filter: brightness(0) invert(1);
         opacity: 1;
+    }
+
+    .staff-fields-wrapper .form-group input,
+    .staff-fields-wrapper .form-group select {
+        color: #fff;
+        caret-color: #fff;
+        border-color: #c5cbc6;
+        min-height: 42px;
+    }
+
+    .staff-fields-wrapper .form-group input:hover,
+    .staff-fields-wrapper .form-group select:hover,
+    .staff-fields-wrapper .form-group input:focus,
+    .staff-fields-wrapper .form-group select:focus {
+        color: #fff;
+        border-color: #b7ff1b;
+        box-shadow: 0 0 0 3px rgba(183, 255, 27, .12);
+    }
+
+    .staff-fields-wrapper .form-group input:-webkit-autofill,
+    .staff-fields-wrapper .form-group input:-webkit-autofill:hover,
+    .staff-fields-wrapper .form-group input:-webkit-autofill:focus {
+        -webkit-text-fill-color: #fff;
+        caret-color: #fff;
+        -webkit-box-shadow: 0 0 0 1000px #1b201c inset;
+    }
+
+    .staff-fields-wrapper input[type="password"]::-ms-reveal {
+        filter: invert(1);
     }
 
     /* Mobile Responsive Optimizations */
     @@media (max-width: 576px) {
         .login-form {
             padding: 20px;
-            border-radius: 10px;
+            border-radius: 0;
         }
 
         .role h3 {
@@ -295,7 +325,7 @@
         <form asp-controller="Account" asp-action="RegisterStaff" method="post">
             @Html.AntiForgeryToken()
             <div class="staff-fields-wrapper">
-                <div asp-validation-summary="ModelOnly" class="text-danger mb-2 small text-center"></div>
+                <div asp-validation-summary="All" class="text-danger mb-2 small text-center" role="alert" tabindex="-1"></div>
 
                 <!-- Full Name -->
                 <div class="row g-2 mb-2">
@@ -366,7 +396,7 @@
                         <select asp-for="Role" class="form-select" required>
                             <option value="">Select Role</option>
                             <option value="Trainer">Trainer</option>
-                            <option value="Staff">Staff / Front Desk</option>
+                            <option value="Staff">Front Desk Attendants</option>
                         </select>
                         <span asp-validation-for="Role" class="text-danger small"></span>
                     </div>
@@ -387,6 +417,11 @@
 </section>
 
 <script>
+    const registrationErrors = document.querySelector('.validation-summary-errors');
+    if (registrationErrors) {
+        registrationErrors.scrollIntoView({ block: 'start' });
+        registrationErrors.focus();
+    }
     function cancelStaffRegistration() {
         if (window.parent !== window && typeof window.parent.closeStaffRegistry === 'function') {
             window.parent.closeStaffRegistry();

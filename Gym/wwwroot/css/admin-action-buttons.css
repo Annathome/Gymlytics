@@ -1,0 +1,71 @@
+/* Important layered rules override legacy unlayered button sizing.
+   Explicit action selectors deliberately exclude exports and navigation. */
+@layer adminActionButtons {
+    body.admin-shell .am-actions-menu .am-menu-button,
+    body.admin-shell .action-menu .action-menu-item,
+    body.admin-shell .ae-actions .ae-menu button {
+        width: 100% !important;
+        justify-content: flex-start !important;
+        text-align: left !important;
+    }
+
+    body.admin-shell :is(
+        .am-search button, .aa-search button, .ae-search button, .ap-search button,
+        .walkin-search-button, .am-add, .ae-add, .ap-edit-plans, .btn-invite,
+        .wi-add, .wi-pay, .wi-cancel,
+        .am-page, .aa-page, .ae-page, .ap-page, .wi-page-button,
+        .am-menu-button, .action-menu-item, .aa-menu button,
+        .ae-modal-actions button, .ap-modal-actions button,
+        .admin-modal-actions button, .ap-plan-actions button, .ae-menu button,
+        .am-actions > summary, .aa-actions > summary, .ae-actions > summary,
+        .menu-dots-btn,
+        .floating-cancel, .floating-confirm
+    ) {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        flex: 0 0 auto !important;
+        width: max-content !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        height: auto !important;
+        min-height: 42px !important;
+        padding: 10px 14px !important;
+        box-sizing: border-box !important;
+        font-family: "Inria Serif", serif !important;
+        font-size: 15px !important;
+        font-weight: 500 !important;
+        line-height: 1.35 !important;
+        letter-spacing: .01em !important;
+        text-transform: none !important;
+        white-space: nowrap !important;
+        border: 1px solid transparent !important;
+        transition: background-color .15s, color .15s, border-color .15s;
+    }
+
+    body.admin-shell :is(
+        .am-search button, .aa-search button, .ae-search button, .ap-search button,
+        .walkin-search-button
+    ) {
+        height: 56px !important;
+        min-height: 56px !important;
+    }
+
+    body.admin-shell :is(
+        .am-search button, .aa-search button, .ae-search button, .ap-search button,
+        .walkin-search-button, .am-add, .ae-add, .ap-edit-plans, .btn-invite,
+        .wi-add, .wi-pay, .wi-cancel,
+        .am-page, .aa-page, .ae-page, .ap-page, .wi-page-button,
+        .am-menu-button, .action-menu-item, .aa-menu button,
+        .ae-modal-actions button, .ap-modal-actions button,
+        .admin-modal-actions button, .ap-plan-actions button, .ae-menu button,
+        .am-actions > summary, .aa-actions > summary, .ae-actions > summary,
+        .menu-dots-btn,
+        .floating-cancel, .floating-confirm
+    ):not(:disabled):not(.disabled):not(.pager-disabled):is(:hover, :focus-visible) {
+        background: transparent !important;
+        border-color: #b7ff1b !important;
+        color: #b7ff1b !important;
+        box-shadow: none !important;
+    }
+}

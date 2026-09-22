@@ -36,7 +36,7 @@ namespace Gym.Models
 
         public string RoleLabel => Role switch
         {
-            "MainAdmin" => "Super Admin",
+            "MainAdmin" => "Admin",
             "Admin" => "Admin",
             "Trainer" => "Trainer",
             "Staff" => "Staff",

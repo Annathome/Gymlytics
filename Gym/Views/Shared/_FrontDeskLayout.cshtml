@@ -335,17 +335,17 @@
                             <i class="icon bi bi-person-fill-check"></i>
                             <span class="nav-link">ATTENDANCE</span>
                         </a>
-                        <a class="nav-item @(currentAction == "Equipment" ? "active" : "")" asp-controller="FrontDesk" asp-action="Equipment">
-                            <i class="icon bi bi-tools"></i>
-                            <span class="nav-link">EQUIPMENT</span>
+                        <a class="nav-item @(currentAction == "WalkInClient" ? "active" : "")" asp-controller="FrontDesk" asp-action="WalkInClient">
+                            <i class="icon bi bi-person-walking"></i>
+                            <span class="nav-link">WALK-INS</span>
                         </a>
                         <a class="nav-item @(currentAction == "Payment" ? "active" : "")" asp-controller="FrontDesk" asp-action="Payment">
                             <i class="icon bi bi-cash-coin"></i>
                             <span class="nav-link">PAYMENT</span>
                         </a>
-                        <a class="nav-item @(currentAction == "WalkInClient" ? "active" : "")" asp-controller="FrontDesk" asp-action="WalkInClient">
-                            <i class="icon bi bi-person-walking"></i>
-                            <span class="nav-link">WALK-INS</span>
+                        <a class="nav-item @(currentAction == "Equipment" ? "active" : "")" asp-controller="FrontDesk" asp-action="Equipment">
+                            <i class="icon bi bi-tools"></i>
+                            <span class="nav-link">EQUIPMENT</span>
                         </a>
                         <a class="nav-item @(currentAction == "Notifications" ? "active" : "")" asp-controller="FrontDesk" asp-action="Notifications">
                             <i class="icon bi bi-bell-fill"></i>

@@ -3,6 +3,15 @@
     ViewData["Title"] = "Admin Dashboard";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
     var trainers = Model?.Trainers ?? new List<Gym.Models.AdminTrainerListItem>();
+    const int trainerPageSize = 3;
+    var trainerPages = Math.Max(1, (int)Math.Ceiling(trainers.Count / (double)trainerPageSize));
+    var trainerPage = Math.Clamp(int.TryParse(Context.Request.Query["trainerPage"], out var requestedTrainerPage) ? requestedTrainerPage : 1, 1, trainerPages);
+    string TrainerPageUrl(int page)
+    {
+        var query = Context.Request.Query.ToDictionary(item => item.Key, item => item.Value.ToString());
+        query["trainerPage"] = page.ToString();
+        return Context.Request.PathBase + Context.Request.Path + Microsoft.AspNetCore.Http.QueryString.Create(query).ToString() + "#trainer-list";
+    }
     var memberRevenue = Model?.TodayMemberRevenue ?? 0m;
     var walkInRevenue = Model?.TodayWalkInRevenue ?? 0m;
     var totalRevenue = memberRevenue + walkInRevenue;
@@ -13,7 +22,10 @@
     var attendanceMax = Math.Max(1, Math.Max(todayMembers, todayWalkIns));
     var memberAttendancePercent = todayMembers * 100 / attendanceMax;
     var walkInAttendancePercent = todayWalkIns * 100 / attendanceMax;
-    var equipmentItems = Model?.EquipmentStatus ?? new List<Gym.Models.AdminEquipmentStatusItem>();
+    var equipmentItems = (Model?.EquipmentStatus ?? new List<Gym.Models.AdminEquipmentStatusItem>())
+        .Where(item => item.Category != "Inventory" &&
+            item.Status is "Needs Maintenance" or "Out of Order" or "Fair")
+        .ToList();
 }
 <style>
     @@import url('https://fonts.googleapis.com/css2?family=Inria+Serif:wght@300;400;700&display=swap');
@@ -875,7 +887,7 @@
         <div class="ad-head">
             <div>
                 <h1>Admin Overview</h1>
-                <p>Live facility status and performance metrics.</p>
+                <p class="dashboard-caption" style="font-family:'Inria Serif',serif!important;font-size:14px!important;font-weight:400!important;color:#aeb7b0!important;line-height:1.4!important;">Live facility status and performance metrics.</p>
             </div>
             <div class="ad-head-tools">
                 <div class="ad-head-bell">
@@ -994,7 +1006,10 @@
                 <a class="ad-process" asp-controller="Admin" asp-action="Notifications">PROCESS REMINDERS</a>
             </div>
             <div class="ad-panel">
-                <div class="ad-panel-title"><span>Equipment Status</span></div>
+                <div class="ad-panel-title">
+                    <span>Equipment Status</span>
+                    <a asp-controller="Admin" asp-action="Equipment" asp-route-tab="reports" style="color:#b7ff1b;font-size:12px;text-decoration:none">View all</a>
+                </div>
                 <div class="ad-equipment-list">
                     @if (equipmentItems.Count > 0)
                     {
@@ -1015,7 +1030,7 @@
                     }
                     else
                     {
-                        <div class="ad-empty">No equipment records found.</div>
+                        <div class="ad-empty">No equipment issues reported.</div>
                     }
                 </div>
             </div>
@@ -1058,7 +1073,7 @@
             </div>
             <div class="ad-panel">
                 <div class="ad-panel-title">
-                    <span>Trainer List</span>
+                    <span id="trainer-list">Trainer List</span>
                     <span>@trainers.Count active</span>
                 </div>
                 <table class="ad-table">
@@ -1072,7 +1087,7 @@
                     <tbody>
                         @if (trainers.Count > 0)
                         {
-                            foreach (var trainer in trainers.Take(5))
+                            foreach (var trainer in trainers.Skip((trainerPage - 1) * trainerPageSize).Take(trainerPageSize))
                             {
                                 <tr data-dashboard-search="@trainer.FullName @trainer.Email active trainer">
                                     <td>
@@ -1092,10 +1107,32 @@
                         }
                     </tbody>
                 </table>
+                <div class="ad-trainer-pagination">
+                    <span>Page @trainerPage of @trainerPages · @trainers.Count trainers</span>
+                    <nav aria-label="Trainer list pages">
+                        @if (trainerPage > 1)
+                        {
+                            <a class="ad-trainer-page" href="@TrainerPageUrl(trainerPage - 1)">Previous</a>
+                        }
+                        else { <span class="ad-trainer-page" aria-disabled="true">Previous</span> }
+                        @if (trainerPage < trainerPages)
+                        {
+                            <a class="ad-trainer-page" href="@TrainerPageUrl(trainerPage + 1)">Next</a>
+                        }
+                        else { <span class="ad-trainer-page" aria-disabled="true">Next</span> }
+                    </nav>
+                </div>
             </div>
         </section>
     </div>
 
+    <style>
+        .ad-trainer-pagination { display:flex; justify-content:space-between; align-items:center; gap:12px; padding:16px; flex-wrap:wrap; }
+        .ad-trainer-pagination nav { display:flex; gap:10px; }
+        .ad-trainer-page { padding:10px 14px; border:1px solid #b7ff1b; color:#b7ff1b; text-decoration:none; }
+        .ad-trainer-page:hover { color:#b7ff1b; background:transparent; }
+        .ad-trainer-page[aria-disabled="true"] { opacity:.4; }
+    </style>
     <div id="trainerMessageModal" class="ad-overlay" style="display:none">
         <div class="ad-modal">
             <h3>Message trainer</h3>

@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Security.Claims;
@@ -18,12 +18,14 @@ namespace Gym.Controllers
         private readonly ITrainerService _trainerService;
         private readonly ILogger<TrainerController> _logger;
         private readonly GymDbContext _context;
+        private readonly EquipmentEvidenceService _equipmentEvidence;
 
-        public TrainerController(ITrainerService trainerService, ILogger<TrainerController> logger, GymDbContext context)
+        public TrainerController(ITrainerService trainerService, ILogger<TrainerController> logger, GymDbContext context, EquipmentEvidenceService equipmentEvidence)
         {
             _trainerService = trainerService;
             _logger = logger;
             _context = context;
+            _equipmentEvidence = equipmentEvidence;
         }
 
         [HttpGet("")]
@@ -48,7 +50,7 @@ namespace Gym.Controllers
                 viewModel.WeeklySchedule ??= new Dictionary<string, int>();
                 viewModel.AssignedWeek ??= new List<TrainerDayScheduleViewModel>();
 
-                return View("Schedule", viewModel);
+                return View("TrainerDashboard", viewModel);
             }
             catch (Exception ex)
             {
@@ -70,7 +72,7 @@ namespace Gym.Controllers
                 };
                 fallbackModel.WeekStart = fallbackModel.AssignedWeek[0].Date;
 
-                return View("Schedule", fallbackModel);
+                return View("TrainerDashboard", fallbackModel);
             }
         }
 
@@ -142,7 +144,7 @@ namespace Gym.Controllers
             page = Math.Max(1, page);
             searchTerm = searchTerm?.Trim();
 
-            var query = _context.Equipments.AsNoTracking().AsQueryable();
+            var query = _context.Equipments.AsNoTracking().Where(item => item.Category != "Inventory" && item.Status != "Good" && item.Status != "Available" && item.Status != "In Use");
             if (!string.IsNullOrWhiteSpace(searchTerm))
             {
                 query = query.Where(item =>
@@ -162,13 +164,99 @@ namespace Gym.Controllers
             {
                 SearchTerm = searchTerm ?? string.Empty,
                 Items = items,
-                TotalAssets = allEquipment.Sum(item => item.Quantity),
+                EquipmentNames = await _context.EquipmentNameCatalog.AsNoTracking().OrderBy(item => item.Name).ToListAsync(),
+                TotalAssets = allEquipment.Where(EquipmentStock.IsInventory).Sum(item => item.Quantity),
                 InMaintenance = allEquipment.Where(item => item.Status == "Needs Maintenance").Sum(item => item.Quantity),
                 OutOfOrder = allEquipment.Where(item => item.Status == "Out of Order").Sum(item => item.Quantity),
                 Page = page,
                 PageSize = pageSize,
                 TotalCount = totalCount
             });
+        }
+
+        [HttpPost("equipment/report")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddEquipment(AddEquipmentViewModel form)
+        {
+            var allowedConditions = new[] { "Needs Maintenance", "Out of Order" };
+            if (!allowedConditions.Contains(form.Condition))
+            {
+                ModelState.AddModelError(nameof(form.Condition), "Select a valid condition.");
+            }
+
+            await using var stockTransaction = await _context.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable);
+            var normalizedName = form.EquipmentName?.Trim() ?? string.Empty;
+            var catalogItem = await _context.EquipmentNameCatalog.AsNoTracking()
+                .SingleOrDefaultAsync(item => item.Name == normalizedName);
+            if (catalogItem is null)
+            {
+                ModelState.AddModelError(nameof(form.EquipmentName),
+                    "Select an equipment name created by an administrator.");
+            }
+
+            if (catalogItem is not null)
+            {
+                var stockRecords = await _context.Equipments.AsNoTracking().Where(item => item.EquipmentName == catalogItem.Name).ToListAsync();
+                var stock = EquipmentStock.Summarize(new[] { catalogItem }, stockRecords).Single();
+                if (form.Quantity > stock.Available)
+                    ModelState.AddModelError(nameof(form.Quantity), $"Only {stock.Available} units are available to report.");
+            }
+            var hasIssue = form.Condition is "Fair" or "Needs Maintenance" or "Out of Order";
+            if (hasIssue && (form.EvidencePhoto is null || form.EvidencePhoto.Length == 0))
+            {
+                ModelState.AddModelError(nameof(form.EvidencePhoto),
+                    "Upload a photo showing the equipment issue.");
+            }
+
+            string? evidencePhotoPath = null;
+            if (form.EvidencePhoto is { Length: > 0 })
+            {
+                var validationError = await _equipmentEvidence.ValidateAsync(form.EvidencePhoto);
+                if (validationError is not null)
+                {
+                    ModelState.AddModelError(nameof(form.EvidencePhoto), validationError);
+                }
+            }
+
+            if (!ModelState.IsValid)
+            {
+                TempData["ErrorMessage"] = string.Join(" ", ModelState.Values
+                    .SelectMany(value => value.Errors)
+                    .Select(error => error.ErrorMessage)
+                    .Where(message => !string.IsNullOrWhiteSpace(message)));
+                return RedirectToAction(nameof(Equipment));
+            }
+
+            if (form.EvidencePhoto is { Length: > 0 })
+            {
+                evidencePhotoPath = await _equipmentEvidence.SaveAsync(form.EvidencePhoto);
+            }
+
+            var equipment = new Equipment
+            {
+                EquipmentName = catalogItem!.Name,
+                Category = "General",
+                Quantity = form.Quantity,
+                AvailableQuantity = 0,
+                Status = form.Condition,
+                AddedDate = DateTime.Now,
+                PurchaseDate = catalogItem!.PurchaseDate,
+                GymArrivalDate = catalogItem.GymArrivalDate,
+                LastMaintenanceDate = null,
+                EvidencePhotoPath = evidencePhotoPath
+            };
+            _context.Equipments.Add(equipment);
+            try
+            {
+                await _context.SaveChangesAsync(); await stockTransaction.CommitAsync();
+            }
+            catch
+            {
+                _equipmentEvidence.Delete(evidencePhotoPath);
+                throw;
+            }
+            TempData["SuccessMessage"] = "Equipment issue report submitted successfully.";
+            return RedirectToAction(nameof(Equipment));
         }
 
         [HttpGet("notifications")]

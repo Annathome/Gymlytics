@@ -3491,6 +3491,16 @@ html body.trainer-shell main .trainer-schedule :is(
     color: #ffffff !important;
 }
 
+/* Keep short trainer pages comfortably spaced without stretching their content. */
+html body.trainer-shell main[role="main"] > .availability-page,
+html body.trainer-shell main[role="main"] > .trainer-notifications {
+    padding-bottom: 36px !important;
+}
+
+html body.trainer-shell .availability-page .availability-card {
+    padding-bottom: 30px !important;
+}
+
 html body.trainer-shell main .trainer-schedule .ts-day {
     background: #2E2E2F !important;
     border: 2px solid #535159 !important;
@@ -3499,4 +3509,135 @@ html body.trainer-shell main .trainer-schedule .ts-day {
 html body.trainer-shell main .trainer-schedule .ts-day.selected {
     border-color: #a8df32 !important;
     box-shadow: inset 0 3px #a8df32, 0 5px 12px rgba(0, 0, 0, .35) !important;
+}
+
+/* Requested muted captions on Admin and Front Desk pages. */
+html body.admin-shell main[role="main"] .dashboard-caption,
+html body.frontdesk-shell main[role="main"] .dashboard-caption {
+    color: #aeb7b0 !important;
+    font-size: 14px !important;
+}
+
+/* Equipment modal actions match the member registration form. */
+html body.admin-shell #equipmentModal .ae-modal-actions,
+html body.admin-shell #equipmentNameModal .ae-modal-actions {
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 10px !important;
+    margin: 12px 0 0 !important;
+    padding: 0 !important;
+    border-top: 0 !important;
+}
+
+html body.admin-shell #equipmentModal .ae-modal-actions button,
+html body.admin-shell #equipmentNameModal .ae-modal-actions button {
+    flex: 0 0 auto !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    height: 38px !important;
+    text-align: center !important;
+    font-size: 13px !important;
+}
+
+html body.admin-shell #equipmentModal .ae-modal-actions button[type="button"],
+html body.admin-shell #equipmentNameModal .ae-modal-actions button[type="button"] {
+    width: 130px !important;
+    min-width: 130px !important;
+    padding: 0 24px !important;
+    border: 1px solid #9ba49d !important;
+    background: transparent !important;
+    color: #ffffff !important;
+    font-weight: 500 !important;
+    text-transform: none !important;
+}
+
+html body.admin-shell #equipmentModal .ae-modal-actions button[type="button"]:hover,
+html body.admin-shell #equipmentModal .ae-modal-actions button[type="button"]:focus-visible,
+html body.admin-shell #equipmentNameModal .ae-modal-actions button[type="button"]:hover,
+html body.admin-shell #equipmentNameModal .ae-modal-actions button[type="button"]:focus-visible {
+    background: rgba(255, 255, 255, .08) !important;
+    color: #b7ff1b !important;
+}
+
+html body.admin-shell #equipmentModal .ae-modal-actions button[type="submit"],
+html body.admin-shell #equipmentNameModal .ae-modal-actions button[type="submit"] {
+    width: 210px !important;
+    min-width: 210px !important;
+    padding: 0 28px !important;
+    border: 1px solid #a8df32 !important;
+    background: #a8df32 !important;
+    color: #293029 !important;
+    font-weight: 800 !important;
+    text-transform: uppercase !important;
+}
+
+html body.admin-shell #equipmentModal .ae-modal-actions button[type="submit"]:hover,
+html body.admin-shell #equipmentModal .ae-modal-actions button[type="submit"]:focus-visible,
+html body.admin-shell #equipmentNameModal .ae-modal-actions button[type="submit"]:hover,
+html body.admin-shell #equipmentNameModal .ae-modal-actions button[type="submit"]:focus-visible {
+    border-color: #171a18 !important;
+    background: #171a18 !important;
+    color: #b7ff1b !important;
+}
+/* Shared pagination: equal-sized controls, including disabled states. */
+@layer dashboardPagers {
+    body :is(.am-page, .aa-page, .ae-page, .ap-page, .wi-page-button,
+        .ua-page-btn, .ad-trainer-page, .pager .btn-invite,
+        .activity-pagination-buttons a, .tm-pager a, .te-pager a,
+        .email-pagination a, .eq-pager a, .pay-pager a,
+        .pagination-arrows a, nav.pager a, .fd-pager button) {
+        display:inline-flex !important;
+        align-items:center !important;
+        justify-content:center !important;
+        width:104px !important;
+        min-width:104px !important;
+        height:44px !important;
+        min-height:44px !important;
+        flex:0 0 104px !important;
+        box-sizing:border-box !important;
+        padding:10px !important;
+        border:1px solid #b7ff1b !important;
+        border-radius:0 !important;
+        background:transparent !important;
+        color:#b7ff1b !important;
+        text-decoration:none !important;
+        font-size:15px !important;
+        font-weight:500 !important;
+        text-transform:none !important;
+    }
+}
+@layer summaryCardAccents {
+    body:is(.admin-shell, .frontdesk-shell, .trainer-shell)
+    :is(.ad-stat, .aa-stat, .ae-stat, .ap-stat, .atm-stat,
+        .te-stat, .ts-stat, .eq-stat, .fd-summary-card) {
+        border-left-color: #b7ff1b !important;
+    }
+}
+@layer summaryCardTitles {
+    body:is(.admin-shell, .frontdesk-shell, .trainer-shell) :is(
+        .ad-label, .aa-label, .ae-label, .ap-label, .atm-label,
+        .fd-summary-label, .te-stat > span, .ts-stat > span, .eq-stat > span
+    ) {
+        color: #fff !important;
+    }
+}
+
+@layer dashboardFilters {
+    body.admin-shell :is(.am-filters, .ap-filter) select:is(:hover, :focus) {
+        background:transparent !important;
+        color:#b7ff1b !important;
+        border-color:#b7ff1b !important;
+        outline:none !important;
+        box-shadow:none !important;
+    }
+    body.admin-shell :is(.am-filters, .ap-filter) select option {
+        color:#b7ff1b !important;
+        background:#1b201c !important;
+    }
+    body.admin-shell :is(.am-filters, .ap-filter) select option:is(:hover, :checked) {
+        color:#b7ff1b !important;
+        background:transparent !important;
+        border:1px solid #b7ff1b !important;
+    }
 }

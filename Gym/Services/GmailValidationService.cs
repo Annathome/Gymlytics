@@ -442,13 +442,16 @@ namespace Gym.Services
         }
 
         public async Task<(bool Success, string? ErrorMessage)> SendDailyTrainingReminderAsync(
-            string recipientEmail, string memberName, string trainerName, DateTime date, string timeSlot)
+            string recipientEmail, string memberName, string trainerName, DateTime date, string timeSlot, string? attendUrl = null, string? absentUrl = null)
         {
             try
             {
                 var safeMember = System.Net.WebUtility.HtmlEncode(memberName);
                 var safeTrainer = System.Net.WebUtility.HtmlEncode(trainerName);
                 var safeTime = System.Net.WebUtility.HtmlEncode(timeSlot);
+                var responseButtons = attendUrl != null && absentUrl != null
+                    ? $"<p>Replying is optional. Let your trainer know your plans:</p><p><a href='{System.Net.WebUtility.HtmlEncode(attendUrl)}' style='display:inline-block;padding:12px 22px;background:#b7ff1b;color:#000;text-decoration:none'>Attend</a> <a href='{System.Net.WebUtility.HtmlEncode(absentUrl)}' style='display:inline-block;padding:12px 22px;background:#292d2a;color:#fff;text-decoration:none'>Absent</a></p><p>Your response informs your trainer; actual attendance is recorded when you check in.</p>"
+                    : "";
                 var email = new MimeMessage();
                 email.From.Add(new MailboxAddress(_config["SmtpSettings:SenderName"], _config["SmtpSettings:SenderEmail"]));
                 email.To.Add(MailboxAddress.Parse(recipientEmail));
@@ -459,7 +462,7 @@ namespace Gym.Services
                     <div style='background:#083d02;color:white;padding:20px 24px'><h2 style='margin:0'>Daily Training Reminder</h2></div>
                     <div style='padding:24px'><p>Dear <strong>{safeMember}</strong>,</p><p>This is your reminder for today's scheduled gym training.</p>
                     <div style='margin:20px 0;padding:16px;background:#f0f7f2;border-left:4px solid #0ec52d'><div><strong>Trainer:</strong> {safeTrainer}</div><div><strong>Date:</strong> {date:MMMM d, yyyy}</div><div><strong>Time:</strong> {safeTime}</div></div>
-                    <p>We look forward to seeing you at YOKOKS Gym.</p></div></div>"
+                    {responseButtons}<p>We look forward to seeing you at YOKOKS Gym.</p></div></div>"
                 };
                 using var smtp = new SmtpClient();
                 await smtp.ConnectAsync(_config["SmtpSettings:Server"], int.Parse(_config["SmtpSettings:Port"]!), SecureSocketOptions.StartTls);

@@ -17,12 +17,17 @@
         background: #000;
         font-family: 'Inria Serif', serif;
         overflow-x: hidden;
+        margin-bottom: 0 !important;
+    }
+
+    body:has(#login-access) main > .pb-3 {
+        padding-bottom: 0 !important;
     }
 
     .login-wrap {
         position: relative;
         width: 100%;
-        min-height: 100vh;
+        height: 100vh;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -44,7 +49,7 @@
         z-index: 2;
         width: 100%;
         max-width: 450px;
-        max-height: 90vh;
+        max-height: calc(100vh - 40px);
         background-color: #171b18;
         color: #fff;
         font-size: 15px;
@@ -55,6 +60,12 @@
         border: 3px solid rgb(96,94,105);
         box-shadow: 0 18px 48px rgba(0, 0, 0, .78), 0 0 28px rgba(168, 223, 50, .24);
         overflow-y: auto;
+    }
+
+    @@media (min-height: 900px) {
+        body:has(#login-access) {
+            overflow-y: hidden;
+        }
     }
 
         .login-form::-webkit-scrollbar {
@@ -111,8 +122,8 @@
         margin-bottom: 20px;
     }
 
-        .reminder h2 {
-            font-size: 20px;
+        html body #login-access .reminder h2 {
+            font-size: 16px !important;
             color: #fff;
             letter-spacing: 0.5px;
             line-height: 1.4;
@@ -131,7 +142,7 @@
         gap: 15px;
     }
 
-    .form-group label {
+    html body #login-access .form-group label {
         color: rgb(14, 160, 38);
         font-weight: 700;
         font-size: 16px !important;
@@ -139,8 +150,8 @@
         display: block;
     }
 
-    .form-group input {
-        border: 1.5px solid rgb(14, 197, 45);
+    html body #login-access .form-group input.form-control {
+        border: 1.5px solid rgb(14, 197, 45) !important;
         padding: 10px 14px;
         width: 100%;
         border-radius: 8px;
@@ -150,12 +161,13 @@
         transition: all 0.2s ease-in-out;
     }
 
-        .form-group input::placeholder {
+        html body #login-access .form-group input::placeholder {
             color: rgba(14, 160, 38, 0.5);
+            font-size: 14px !important;
         }
 
-        .form-group input:focus {
-            border-color: rgb(14, 197, 45);
+        html body #login-access .form-group input.form-control:focus {
+            border-color: rgb(14, 197, 45) !important;
             box-shadow: 0 0 0 3px rgba(14, 197, 45, 0.2);
         }
 
@@ -221,7 +233,7 @@
         background: rgb(178, 233, 197) !important;
         color: #000 !important;
         font-family: "Inria Serif", serif !important;
-        font-size: 15px !important;
+        font-size: 16px !important;
         font-weight: 700 !important;
         line-height: 1 !important;
         letter-spacing: 0 !important;
@@ -241,7 +253,7 @@
 <section class="login-wrap">
     <img src="~/images/login.png" alt="login background" class="bg" />
 
-    <div class="login-form">
+    <div class="login-form" id="login-access">
         <div class="title">
             <img src="~/images/Yokok.jpg" alt="Gym logo" />
             <div class="role">
@@ -282,7 +294,7 @@
             </div>
 
             <button type="submit" class="btn-submit login-action mt-2"
-                    style="height:45px!important;min-height:45px!important;padding:0 14px!important;font-family:'Inria Serif',serif!important;font-size:15px!important;font-weight:700!important;line-height:1!important;">
+                    style="height:45px!important;min-height:45px!important;padding:0 14px!important;font-family:'Inria Serif',serif!important;font-size:16px!important;font-weight:700!important;line-height:1!important;">
                 Login
             </button>
 
@@ -291,7 +303,7 @@
             </div>
 
             <a asp-controller="MainHomepage" asp-action="Index" class="btn-submit login-action"
-               style="height:45px!important;min-height:45px!important;padding:0 14px!important;font-family:'Inria Serif',serif!important;font-size:15px!important;font-weight:700!important;line-height:1!important;">
+               style="height:45px!important;min-height:45px!important;padding:0 14px!important;font-family:'Inria Serif',serif!important;font-size:16px!important;font-weight:700!important;line-height:1!important;">
                 Back to Home Page
             </a>
         </form>

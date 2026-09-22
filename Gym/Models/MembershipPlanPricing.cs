@@ -5,7 +5,7 @@ public static class MembershipPlanPricing
     private static readonly object Sync = new();
     private static readonly Dictionary<MembershipPlanType, PlanDefinition> Plans = new()
     {
-        [MembershipPlanType.Monthly] = new("Monthly", 1200m, 1, true)
+        [MembershipPlanType.Monthly] = new("Monthly", 1200m, 1, false)
     };
 
     public static decimal GetPrice(MembershipPlanType plan)
@@ -40,14 +40,12 @@ public static class MembershipPlanPricing
 
     public static bool IsActive(MembershipPlanType plan)
     {
-        lock (Sync) return plan == MembershipPlanType.Monthly &&
-            Plans.TryGetValue(plan, out var value) && value.IsActive;
+        lock (Sync) return Plans.TryGetValue(plan, out var value) && value.IsActive;
     }
 
     public static IReadOnlyList<(MembershipPlanType Plan, string Name, decimal Price)> GetActivePlans()
     {
-        lock (Sync) return Plans.Where(item =>
-                item.Key == MembershipPlanType.Monthly && item.Value.IsActive)
+        lock (Sync) return Plans.Where(item => item.Value.IsActive)
             .OrderBy(item => (int)item.Key)
             .Select(item => (item.Key, item.Value.Name, item.Value.Price)).ToList();
     }

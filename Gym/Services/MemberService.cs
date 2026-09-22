@@ -249,6 +249,9 @@ namespace Gym.Services
                 item => item.AvailableDays
                     .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
                     .ToList());
+            model.TrainerTimeSlots = trainerAvailability.ToDictionary(
+                item => item.TrainerId,
+                item => TrainerTimeSlots.Build(item.StartTime, item.EndTime));
 
             model.TrainerOptions.Insert(
                 0,
@@ -281,7 +284,8 @@ namespace Gym.Services
                 }
             };
 
-            model.PlanOptions = MembershipPlanPricing.GetActivePlans()
+            model.PlanOptions = (await _context.MembershipPlanSettings.AsNoTracking()
+                .Where(item => item.IsActive).OrderBy(item => item.Plan).ToListAsync())
                 .Select(item => new SelectListItem
                 {
                     Value = ((int)item.Plan).ToString(),
@@ -411,6 +415,9 @@ namespace Gym.Services
         public async Task CreateClientAsync(
             AddMemberViewModel form)
         {
+            if (!await _context.MembershipPlanSettings.AnyAsync(item => item.IsActive))
+                throw new InvalidOperationException("Member registration is unavailable. An administrator must add a membership plan first.");
+
             if (!form.SelectedPlanId.HasValue)
             {
                 throw new InvalidOperationException(
@@ -457,7 +464,7 @@ namespace Gym.Services
                     }
                 }
             }
-            if (!MembershipPlanPricing.IsActive(form.SelectedPlanId.Value))
+            if (!await _context.MembershipPlanSettings.AnyAsync(item => item.Plan == form.SelectedPlanId.Value && item.IsActive))
             {
                 throw new InvalidOperationException("The selected membership plan is no longer available.");
             }
@@ -497,6 +504,11 @@ namespace Gym.Services
                 var availableDays = trainerAvailability.AvailableDays
                     .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
                     .ToList();
+                if (!TrainerTimeSlots.Build(trainerAvailability.StartTime, trainerAvailability.EndTime)
+                    .Contains(form.SelectedTimeSlot, StringComparer.OrdinalIgnoreCase))
+                {
+                    throw new InvalidOperationException("Select a time slot within the trainer's current availability.");
+                }
                 form.SelectedDays = form.SelectedDays
                     .Where(selectedDay => availableDays.Contains(selectedDay, StringComparer.OrdinalIgnoreCase))
                     .Distinct(StringComparer.OrdinalIgnoreCase)

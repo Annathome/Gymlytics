@@ -1,10 +1,11 @@
 @model Gym.Models.MembersPageViewModel
 
 @{
-    ViewData["Title"] = "Add Member";
+    ViewData["Title"] = "Register Member";
     Layout = null;
 
     var addMember = Model.AddMemberViewModel;
+    var hasMembershipPlans = addMember.PlanOptions.Any();
     var planPrices = MembershipPlanPricing.GetActivePlans()
         .ToDictionary(item => ((int)item.Plan).ToString(), item => item.Price);
 }
@@ -287,11 +288,121 @@
     }
 </style>
 
+@if (ViewBag.ReturnToAdmin == true)
+{
+    <style>
+        html, body, .add-member-container {
+            background: #1b201c;
+        }
+
+        .member-form input:-webkit-autofill,
+        .member-form input:-webkit-autofill:hover,
+        .member-form input:-webkit-autofill:focus,
+        .member-form input:-webkit-autofill:active {
+            -webkit-text-fill-color: #fff;
+            caret-color: #fff;
+            -webkit-box-shadow: 0 0 0 1000px #1b201c inset;
+            box-shadow: 0 0 0 1000px #1b201c inset;
+        }
+
+        .form-section {
+            background: transparent;
+            border: 1px solid #3c443d;
+            border-radius: 0;
+        }
+
+        .form-control, .form-select {
+            background: transparent;
+            border-color: #c5cbc6;
+            border-radius: 0;
+            min-height: 42px;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #b7ff1b;
+            outline: 2px solid #35552c;
+            outline-offset: 2px;
+        }
+
+        input[type="date"] {
+            color-scheme: dark;
+        }
+
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: none;
+        }
+
+        .btn-cancel, .btn-register, .day-button {
+            border: 1px solid #b7ff1b;
+            border-radius: 0;
+            background: transparent;
+            color: #b7ff1b;
+            cursor: pointer;
+            transition: background-color .15s ease, color .15s ease, border-color .15s ease;
+        }
+
+        .btn-cancel, .btn-register {
+            min-height: 42px;
+            justify-content: center;
+        }
+
+        .btn-register, .day-button.selected {
+            background: #b7ff1b;
+            color: #000;
+        }
+
+        .btn-register:hover {
+            background: #171a18;
+            border-color: #b7ff1b;
+            color: #b7ff1b;
+        }
+
+        .btn-cancel {
+            background: #292d2a;
+            border-color: #586058;
+            color: #fff;
+        }
+
+        .btn-cancel:hover, .btn-cancel:focus-visible {
+            background: #292d2a;
+            border-color: #b7ff1b;
+            color: #b7ff1b;
+        }
+
+        .day-button:not(:disabled):hover {
+            background: #b7ff1b;
+            color: #000;
+        }
+
+        .btn-cancel:focus-visible, .btn-register:focus-visible, .day-button:focus-visible {
+            outline: 2px solid #b7ff1b;
+            outline-offset: 3px;
+        }
+
+        .day-button:disabled {
+            border-color: #59635c;
+            color: #9ba49d;
+            cursor: not-allowed;
+        }
+
+        @@media (max-width: 700px) {
+            .form-actions {
+                flex-wrap: wrap;
+            }
+
+            .btn-cancel, .btn-register {
+                min-width: 0;
+                flex: 1 1 auto;
+            }
+        }
+    </style>
+}
+
 <div class="add-member-container ">
 
     <!-- HEADER -->
     <div class="add-member-header">
-        <h1>Add member</h1>
+        <h1>Register member</h1>
         <div class="add-member-subtitle">
             Register a new member and assign their trainer and schedule
         </div>
@@ -445,7 +556,6 @@
                     <select asp-for="AddMemberViewModel.SelectedTrainerId"
                             asp-items="addMember.TrainerOptions"
                             class="form-select">
-                        <option value="">No trainer (self-guided)</option>
                     </select>
                 </div>
 
@@ -512,7 +622,15 @@
                 success calls RedirectToAction(nameof(Member)), landing you
                 back on the list with the new member in the table.
             -->
-            <button type="submit" class="btn-register">
+            @if (!hasMembershipPlans)
+            {
+                <p role="alert">Member registration is unavailable. An administrator must add a membership plan first.</p>
+                @if (User.IsInRole("Admin"))
+                {
+                    <a href="/Admin/Payments?managePlans=true" target="_top" class="btn-cancel">Add membership plan</a>
+                }
+            }
+            <button type="submit" class="btn-register" disabled="@(!hasMembershipPlans)">
                 <span>✓</span>
                 Register member
             </button>
@@ -590,7 +708,23 @@
 
         trainerSelect.addEventListener("change", function () {
             applyTrainerAvailability(true);
+            updateTrainerTimeSlots();
         });
+
+        const timeSelect = document.getElementById('AddMemberViewModel_SelectedTimeSlot');
+        const defaultTimeSlots = Array.from(timeSelect.options).filter(option => option.value)
+            .map(option => ({ value: option.value, text: option.text }));
+        const trainerTimeSlots = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(addMember.TrainerTimeSlots));
+        function updateTrainerTimeSlots() {
+            const previousValue = timeSelect.value;
+            const slots = trainerSelect.value
+                ? (trainerTimeSlots[trainerSelect.value] || []).map(value => ({ value, text: value.replace(' - ', ' – ') }))
+                : defaultTimeSlots;
+            timeSelect.replaceChildren(new Option(slots.length ? 'Select time slot' : 'No availability set for this trainer', ''));
+            slots.forEach(slot => timeSelect.add(new Option(slot.text, slot.value)));
+            timeSelect.value = slots.some(slot => slot.value === previousValue) ? previousValue : '';
+        }
+        updateTrainerTimeSlots();
 
         if (trainerSelect.value && (!existingDays || existingDays.length === 0)) {
             applyTrainerAvailability(false);

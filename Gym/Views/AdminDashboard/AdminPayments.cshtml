@@ -25,7 +25,7 @@
         display: flex;
         align-items: center;
         gap: 10px;
-        padding-bottom: 18px;
+        padding-bottom: 0;
         border-bottom: 1px solid #303430;
     }
 
@@ -114,7 +114,7 @@
         display: flex;
         justify-content: space-between;
         align-items: end;
-        margin: 22px 0;
+        margin: 22px 0 30px;
     }
 
         .ap-heading h1 {
@@ -158,7 +158,7 @@
         display: grid;
         grid-template-columns: repeat(3, 1fr);
         gap: 12px;
-        margin-bottom: 24px;
+        margin-bottom: 60px;
     }
 
     .ap-stat {
@@ -213,6 +213,7 @@
         overflow: hidden;
         border: 1px solid #303630;
         background: #1b1e1c;
+        margin-top: 0;
     }
 
         .ap-card h2 {
@@ -435,6 +436,18 @@
                 color: #000;
                 font-weight: 800;
             }
+
+    #planEditor .ap-modal-actions button {
+        cursor: pointer;
+        transition: background-color .15s ease, border-color .15s ease, color .15s ease;
+    }
+
+    #planEditor .ap-modal-actions button:hover,
+    #planEditor .ap-modal-actions button:focus-visible {
+        background: #1b201c;
+        border-color: #b7ff1b;
+        color: #b7ff1b;
+    }
 
     #deletePlanConfirmation {
         z-index: 2600;
@@ -665,10 +678,9 @@
     <div class="ap-heading">
         <div>
             <h1>Payments</h1>
-            <p>Membership fees and session payments</p>
+            <p class="dashboard-caption" style="font-family:'Inria Serif',serif!important;font-size:14px!important;font-weight:400!important;color:#aeb7b0!important;line-height:1.4!important;">Membership fees and session payments</p>
         </div>
         <div class="ap-heading-actions">
-            <button class="ap-edit-plans" type="button" onclick="openPlanEditor()">Manage membership plans</button>
             <details class="ap-export">
                 <summary>↧ EXPORT</summary>
                 <div class="ap-export-menu">
@@ -795,17 +807,48 @@
 
 </section>
 
+<style>
+    #walkInTypesModal input[type="checkbox"] { accent-color: #b7ff1b; }
+</style>
+<div class="ap-modal" id="walkInTypesModal" role="dialog" aria-modal="true" aria-labelledby="walkInTypesTitle">
+    <div class="ap-dialog" style="max-height:90vh;overflow:auto">
+        <h2 id="walkInTypesTitle">Manage walk-in payment types</h2>
+        <p>Set the names and prices available during walk-in registration and repeat visits.</p>
+        <form asp-controller="Admin" asp-action="SaveWalkInPaymentType" method="post">
+            @Html.AntiForgeryToken()
+            <strong style="color:#b7ff1b">Add payment type</strong>
+            <div class="ap-plan-row"><label for="newWalkInType">Name</label><input id="newWalkInType" name="name" maxlength="100" required /></div>
+            <div class="ap-plan-row"><label for="newWalkInAmount">Amount (₱)</label><input id="newWalkInAmount" name="amount" type="number" min="0.01" max="1000000" step="0.01" required /></div>
+            <div class="ap-modal-actions">
+                <button type="button" onclick="closeWalkInTypes()">Close</button>
+                <button type="submit">Add type</button>
+            </div>
+        </form>
+        @foreach (var rate in Model.WalkInPaymentTypes)
+        {
+            <form asp-controller="Admin" asp-action="SaveWalkInPaymentType" method="post" style="border-top:1px solid #3c443d;margin-top:20px;padding-top:14px">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" value="@rate.Id" />
+                <div class="ap-plan-row"><label for="walkInName-@rate.Id">Name</label><input id="walkInName-@rate.Id" name="name" value="@rate.Name" maxlength="100" required /></div>
+                <div class="ap-plan-row"><label for="walkInAmount-@rate.Id">Amount (₱)</label><input id="walkInAmount-@rate.Id" name="amount" type="number" min="0.01" max="1000000" step="0.01" value="@rate.Amount.ToString(System.Globalization.CultureInfo.InvariantCulture)" required /></div>
+                <label><input name="isActive" type="checkbox" value="true" checked="@rate.IsActive" /> Available in registration</label>
+                <input type="hidden" name="isActive" value="false" />
+                <div class="ap-modal-actions"><button type="submit">Save changes</button></div>
+            </form>
+        }
+    </div>
+</div>
+
 <div class="ap-modal" id="planEditor" role="dialog" aria-modal="true" aria-labelledby="planEditorTitle">
     <div class="ap-dialog" style="max-height:90vh;overflow:auto">
         <div class="ap-dialog-heading">
             <h2 id="planEditorTitle">Manage membership plans</h2>
-            <button type="button" onclick="closePlanEditor()">Close</button>
         </div>
         <p>Add a plan or edit its name, price, and membership duration.</p>
 
         <form asp-controller="Admin" asp-action="SaveMembershipPlan" method="post" style="border:1px solid #3c443d;padding:14px;margin-bottom:18px">
             @Html.AntiForgeryToken()
-            <strong>Add new plan</strong>
+            <strong style="color: #b7ff1b">Add new plan</strong>
 
             <div class="ap-plan-row">
                 <label>Plan name</label>
@@ -821,12 +864,17 @@
             </div>
 
             <div class="ap-modal-actions">
+                <button type="button" onclick="closePlanEditor()">Close</button>
                 <button type="submit">Add plan</button>
             </div>
         </form>
 
-        @foreach (var plan in Model.PlanSettings.Where(item =>
-            item.IsActive && item.Plan == MembershipPlanType.Monthly))
+        <h3 style="font-size:18px;color:#fff;margin:24px 0 12px">Saved membership plans</h3>
+        @if (!Model.PlanSettings.Any(item => item.IsActive))
+        {
+            <p>No membership plans added yet.</p>
+        }
+        @foreach (var plan in Model.PlanSettings.Where(item => item.IsActive))
         {
             <div style="border-top:1px solid #3c443d;padding:14px 0">
                 <form id="savePlan-@((int)plan.Plan)" asp-controller="Admin" asp-action="SaveMembershipPlan" method="post">
@@ -890,9 +938,19 @@
         function openPlanEditor() {
             document.getElementById('planEditor').classList.add('open');
         }
+        if (new URLSearchParams(window.location.search).get('managePlans') === 'true') {
+            openPlanEditor();
+        }
+        if (new URLSearchParams(window.location.search).get('manageWalkInTypes') === 'true') {
+            document.getElementById('walkInTypesModal').classList.add('open');
+        }
 
     function closePlanEditor() {
-        document.getElementById('planEditor').classList.remove('open');
+        window.location.assign('@Url.Action("Members", "Admin")');
+    }
+
+    function closeWalkInTypes() {
+        window.location.assign('@Url.Action("WalkInClient", "Admin")');
     }
 
     function requestPlanDeletion(form) {

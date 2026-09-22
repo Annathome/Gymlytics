@@ -79,7 +79,7 @@
         right: 0;
         top: 45px;
         z-index: 100;
-        width: 160px;
+        width: 240px;
         padding: 5px;
         background: #171b18;
         border: 1px solid #3c433d;
@@ -361,6 +361,20 @@
         padding: 22px;
     }
 
+    #equipmentModal .ae-form-error {
+        margin: 0 0 16px;
+        padding: 10px 12px;
+        border: 1px solid #f3a2a2;
+        background: #592727;
+        color: #fff;
+        font-size: 14px;
+        line-height: 1.4;
+    }
+
+    #equipmentModal .ae-form-error[hidden] {
+        display: none !important;
+    }
+
     .ae-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -595,8 +609,47 @@
         align-items: center;
         justify-content: center;
         width: auto !important;
-        min-width: 84px !important;
         border-radius: 0 !important;
+    }
+
+    #equipmentModal .ae-modal-actions,
+    #equipmentNameModal .ae-modal-actions {
+        justify-content: flex-end !important;
+        gap: 10px !important;
+        margin-top: 12px !important;
+    }
+
+    #equipmentModal .ae-modal-actions button[type="button"],
+    #equipmentNameModal .ae-modal-actions button[type="button"] {
+        min-width: 130px !important;
+        height: 38px !important;
+        padding: 0 24px !important;
+        border: 1px solid #9ba49d !important;
+        background: transparent !important;
+        color: #fff !important;
+        font-size: 13px !important;
+        font-weight: 500 !important;
+        text-transform: none !important;
+    }
+
+    #equipmentModal .ae-modal-actions button[type="submit"],
+    #equipmentNameModal .ae-modal-actions button[type="submit"] {
+        min-width: 210px !important;
+        height: 38px !important;
+        padding: 0 28px !important;
+        border: 1px solid #a8df32 !important;
+        background: #a8df32 !important;
+        color: #293029 !important;
+        font-size: 13px !important;
+        font-weight: 800 !important;
+        text-transform: uppercase !important;
+    }
+
+    #equipmentModal .ae-modal-actions button[type="submit"]:hover,
+    #equipmentNameModal .ae-modal-actions button[type="submit"]:hover {
+        border-color: #171a18 !important;
+        background: #171a18 !important;
+        color: #b7ff1b !important;
     }
 
     #equipmentModal .ae-dialog,
@@ -701,11 +754,12 @@
 
     <div class="ae-heading">
         <div>
-            <h1>Equipment</h1>
-            <p>@Model.TotalAssets total items · @(Model.Maintenance + Model.OutOfService) need attention</p>
+            <h1>@(Model.Tab == "reports" ? "Equipment Report" : "Equipment")</h1>
+            <p class="dashboard-caption" style="font-family:'Inria Serif',serif!important;font-size:14px!important;font-weight:400!important;color:#aeb7b0!important;line-height:1.4!important;">@Model.TotalAssets total items · @(Model.Maintenance + Model.OutOfService) need attention</p>
         </div>
         <div class="equipbtn">
-            <button class="ae-add" type="button" onclick="openEquipmentNameModal()">＋ Add equipment name</button>
+            @if (Model.Tab == "equipment") { <button class="ae-add" type="button" onclick="openEquipmentNameModal()">＋ Add equipment</button> }
+            @if (Model.Tab == "reports") {
             <button class="ae-add" type="button" onclick="openEquipmentModal()">＋ Report equipment issue</button>
 
             <details class="ae-export">
@@ -717,6 +771,7 @@
                     <a asp-action="ExportEquipment" asp-route-format="txt" asp-route-searchTerm="@Model.SearchTerm">Text file</a>
                 </div>
             </details>
+            }
         </div>
     </div>
 
@@ -726,7 +781,7 @@
             <div class="ae-value available">@Model.Available</div>
         </div>
         <div class="ae-stat">
-            <div class="ae-label">In use</div>
+            <div class="ae-label">Reported units</div>
             <div class="ae-value">@Model.InUse</div>
         </div>
         <div class="ae-stat">
@@ -741,13 +796,31 @@
 
     <div class="ae-toolbar">
         <form class="ae-search" method="get" asp-controller="Admin" asp-action="Equipment">
-            <input name="searchTerm" value="@Model.SearchTerm" placeholder="Search equipment, category, or status..." />
+            <input type="hidden" name="tab" value="@Model.Tab" /><input name="searchTerm" value="@Model.SearchTerm" placeholder="Search equipment, category, or status..." />
             <button type="submit" class="equipment-search-button">SEARCH</button>
         </form>
 
     </div>
 
     <div class="ae-card">
+        @if (Model.Tab == "equipment")
+        {
+            <table class="ae-table">
+                <thead><tr><th>Equipment</th><th>Total quantity</th><th>Reported quantity</th><th>Available quantity</th><th>Brought in</th></tr></thead>
+                <tbody>
+                    @if (Model.Inventory.Count == 0)
+                    {
+                        <tr><td colspan="5" class="ae-empty">No equipment added yet.</td></tr>
+                    }
+                    @foreach (var item in Model.Inventory)
+                    {
+                        <tr><td class="ae-item">@item.Name</td><td>@item.Total</td><td>@item.Reported</td><td>@item.Available</td><td>@item.BroughtIn.ToString("MMM d, yyyy")</td></tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
         <table class="ae-table">
 
             <thead>
@@ -778,7 +851,7 @@
                     <tr>
                         <td class="ae-item">@item.EquipmentName</td>
 
-                        <td>@item.AvailableQuantity / @item.Quantity available</td>
+                        <td>@item.Quantity affected</td>
 
                         <td>@(item.GymArrivalDate?.ToString("MMM d, yyyy") ?? "—")</td>
 
@@ -803,7 +876,7 @@
                             <details class="ae-actions">
                                 <summary aria-label="Equipment actions" title="Equipment actions">⋮</summary>
                                 <div class="ae-menu">
-                                    @foreach (var status in new[] { "Good", "Needs Maintenance", "Out of Order" })
+                                    @foreach (var status in new[] { "Needs Maintenance", "Out of Order" })
                                     {
                                         <form class="equipment-status-form" asp-controller="Admin" asp-action="UpdateEquipmentStatus" method="post">
                                             @Html.AntiForgeryToken()
@@ -825,19 +898,20 @@
 
         </table>
 
+        }
         <div class="ae-pager">
-            <span class="ae-info">Showing @Model.Items.Count of @Model.TotalCount equipment records</span>
+            <span class="ae-info">Showing @(Model.Tab == "reports" ? Model.Items.Count : Model.Inventory.Count) of @Model.TotalCount equipment records</span>
             <div class="ae-pages">
                 <a class="ae-page @(Model.Page <= 1 ? "disabled" : "")"
                    asp-action="Equipment"
                    asp-route-searchTerm="@Model.SearchTerm"
-                   asp-route-page="@(Model.Page - 1)">
+                   asp-route-tab="@Model.Tab" asp-route-page="@(Model.Page - 1)">
                     Previous
                 </a>
                 <a class="ae-page @(Model.Page >= Model.TotalPages ? "disabled" : "")"
                    asp-action="Equipment"
                    asp-route-searchTerm="@Model.SearchTerm"
-                   asp-route-page="@(Model.Page + 1)">
+                   asp-route-tab="@Model.Tab" asp-route-page="@(Model.Page + 1)">
                     Next
                 </a>
             </div>
@@ -846,11 +920,61 @@
 
 </section>
 
+<style>
+    html body.admin-shell :is(#equipmentModal, #equipmentNameModal) { background:rgba(0,0,0,.72) !important; padding:20px; }
+    html body.admin-shell :is(#equipmentModal, #equipmentNameModal) .ae-dialog {
+        background:#1b201c !important; color:#fff !important; border:1px solid #3c443d !important;
+        border-radius:14px !important; padding:28px !important; max-height:90vh; overflow-y:auto;
+        box-shadow:0 20px 60px #0006 !important;
+    }
+    html body.admin-shell :is(#equipmentModal, #equipmentNameModal) h2 {
+        background:transparent !important; color:#fff !important; font-size:28px !important;
+        margin:0 0 24px !important; padding:0 !important; border:0 !important;
+    }
+    html body.admin-shell :is(#equipmentModal, #equipmentNameModal) .ae-form {
+        padding:20px !important; border:1px solid #3c443d; background:transparent !important;
+    }
+    html body.admin-shell :is(#equipmentModal, #equipmentNameModal) label {
+        color:#fff !important; text-transform:none !important; margin-bottom:8px;
+    }
+    html body.admin-shell :is(#equipmentModal, #equipmentNameModal) :is(input:not([type="radio"]), select) {
+        background:#1b201c !important; color:#fff !important; border:1px solid #bcc3bd !important;
+        border-radius:0 !important; box-shadow:none !important; color-scheme:dark; min-height:42px;
+    }
+    html body.admin-shell :is(#equipmentModal, #equipmentNameModal) :is(input, select):hover { border-color:#b7ff1b !important; }
+    html body.admin-shell :is(#equipmentModal, #equipmentNameModal) :is(input, select):focus {
+        border-color:#b7ff1b !important; outline:2px solid #35552c !important; outline-offset:2px;
+    }
+    html body.admin-shell :is(#equipmentModal, #equipmentNameModal) input:-webkit-autofill {
+        -webkit-text-fill-color:#fff !important; box-shadow:0 0 0 1000px #1b201c inset !important;
+    }
+    html body.admin-shell #equipmentNameModal input[type="date"]::-webkit-calendar-picker-indicator { filter:brightness(0) invert(1); opacity:1; }
+    html body.admin-shell #equipmentModal .ae-conditions { display:flex; gap:12px; }
+    html body.admin-shell #equipmentModal .ae-condition { flex:1; }
+    html body.admin-shell #equipmentModal .ae-condition span {
+        background:#252c26 !important; color:#fff !important; border:1px solid #697169 !important;
+        border-radius:6px !important; padding:16px 10px !important; min-height:56px !important;
+    }
+    html body.admin-shell #equipmentModal .ae-condition input:checked + span {
+        background:#334321 !important; border-color:#b7ff1b !important; color:#b7ff1b !important;
+    }
+    html body.admin-shell #equipmentModal .ae-condition:hover span { border-color:#b7ff1b !important; }
+    html body.admin-shell #equipmentModal small { display:block; color:#c2cac3 !important; margin-top:8px; }
+    html body.admin-shell #equipmentModal input[type="file"]::file-selector-button {
+        background:#303a2c; color:#fff; border:0; border-right:1px solid #697169; padding:10px 12px; margin-right:12px; cursor:pointer;
+    }
+    html body.admin-shell :is(#equipmentModal, #equipmentNameModal) .ae-modal-actions {
+        margin-top:24px !important; padding-top:20px !important; border-top:1px solid #3c443d !important;
+        gap:12px !important; flex-wrap:wrap;
+    }
+</style>
 <div id="equipmentModal" class="ae-modal">
     <div class="ae-dialog">
         <h2>Report Equipment Issue</h2>
-        <form class="ae-form" asp-controller="Admin" asp-action="AddEquipment" method="post" enctype="multipart/form-data">
+        <form class="ae-form" asp-controller="Admin" asp-action="AddEquipment" method="post" enctype="multipart/form-data" novalidate>
             @Html.AntiForgeryToken()
+
+            <div id="adminEquipmentFormError" class="ae-form-error" role="alert" aria-live="assertive" hidden></div>
 
             <div class="ae-grid">
                 <div>
@@ -871,10 +995,10 @@
 
             <label style="margin-top:16px">Current condition</label>
             <div class="ae-conditions">
-                @foreach (var condition in new[] { "Good", "Needs Maintenance", "Out of Order" })
+                @foreach (var condition in new[] { "Needs Maintenance", "Out of Order" })
                 {
                     <label class="ae-condition">
-                        <input type="radio" name="Condition" value="@condition" checked="@(condition == "Good")" />
+                        <input type="radio" name="Condition" value="@condition" checked="@(condition == "Needs Maintenance")" />
                         <span>@condition</span>
                     </label>
                 }
@@ -888,7 +1012,7 @@
 
             <div class="ae-modal-actions">
                 <button type="button" onclick="closeEquipmentModal()">Cancel</button>
-                <button type="submit" @(Model.EquipmentNames.Count == 0 ? "disabled" : null)>Submit Report</button>
+                <button type="submit" @(Model.EquipmentNames.Count == 0 ? "disabled" : null)><span aria-hidden="true">✓</span>&nbsp; Submit Report</button>
             </div>
         </form>
     </div>
@@ -896,13 +1020,15 @@
 
 <div id="equipmentNameModal" class="ae-modal">
     <div class="ae-dialog">
-        <h2>Add Equipment Name</h2>
+        <h2>Add Equipment</h2>
         <form class="ae-form" asp-controller="Admin" asp-action="AddEquipmentName" method="post">
             @Html.AntiForgeryToken()
 
             <div>
                 <label>Equipment name</label>
                 <input name="Name" required maxlength="100" placeholder="e.g. Treadmill" />
+                <label style="margin-top:16px">Quantity to add</label>
+                <input name="Quantity" type="number" min="1" max="10000" value="1" required />
             </div>
 
             <div style="margin-top:16px">
@@ -912,7 +1038,7 @@
 
             <div class="ae-modal-actions">
                 <button type="button" onclick="closeEquipmentNameModal()">Cancel</button>
-                <button type="submit">Add to dropdown</button>
+                <button type="submit"><span aria-hidden="true">✓</span>&nbsp; Add equipment</button>
             </div>
         </form>
     </div>
@@ -979,7 +1105,58 @@
 
     function updateAdminEvidenceRequirement() {
         const condition = document.querySelector('#equipmentModal input[name="Condition"]:checked')?.value;
-        document.getElementById('adminEvidencePhoto').required = condition !== "Good";
+        document.getElementById('adminEvidencePhoto').required = true;
+    }
+
+    const adminEquipmentForm = document.querySelector('#equipmentModal .ae-form');
+    const adminEquipmentError = document.getElementById('adminEquipmentFormError');
+    adminEquipmentForm.addEventListener('submit', function (event) {
+        const name = adminEquipmentForm.querySelector('[name="EquipmentName"]');
+        const quantity = adminEquipmentForm.querySelector('[name="Quantity"]');
+        const condition = adminEquipmentForm.querySelector('[name="Condition"]:checked');
+        const photo = document.getElementById('adminEvidencePhoto');
+        const errors = [];
+        let firstInvalid = null;
+
+        if (!name.value) {
+            errors.push('Select an equipment name.');
+            firstInvalid ??= name;
+        }
+        const count = Number(quantity.value);
+        if (!quantity.value.trim() || !Number.isInteger(count) || count < 1 || count > 10000) {
+            errors.push('Enter a quantity from 1 to 10,000.');
+            firstInvalid ??= quantity;
+        }
+        if (!condition) {
+            errors.push('Select the current condition.');
+            firstInvalid ??= adminEquipmentForm.querySelector('[name="Condition"]');
+        }
+        if (photo.files.length === 0) {
+            errors.push('Upload an evidence photo for the equipment issue.');
+            firstInvalid ??= photo;
+        }
+        if (photo.files.length > 0 && photo.files[0].size > 5 * 1024 * 1024) {
+            errors.push('The evidence photo must not exceed 5 MB.');
+            firstInvalid ??= photo;
+        }
+
+        if (errors.length > 0) {
+            event.preventDefault();
+            adminEquipmentError.textContent = errors.join(' ');
+            adminEquipmentError.hidden = false;
+            firstInvalid?.focus();
+        } else {
+            adminEquipmentError.hidden = true;
+        }
+    });
+
+    @if (TempData["EquipmentFormError"] is string equipmentFormError)
+    {
+        <text>
+        adminEquipmentError.textContent = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(equipmentFormError));
+        adminEquipmentError.hidden = false;
+        openEquipmentModal();
+        </text>
     }
 
     document.querySelectorAll('#equipmentModal input[name="Condition"]').forEach(input =>
