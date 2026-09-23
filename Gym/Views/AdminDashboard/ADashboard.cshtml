@@ -892,7 +892,7 @@
             <div class="ad-head-tools">
                 <div class="ad-head-bell">
                     <a class="ad-bell" asp-controller="Admin" asp-action="Notifications" title="Admin notifications" aria-label="Admin notifications">
-                        <i class="bi bi-bell"></i>
+                        <i class="bi bi-bell-fill"></i>
                         @if ((Model?.UnreadNotificationsCount ?? 0) > 0)
                         {
                             <span class="ad-bell-count">@Model!.UnreadNotificationsCount</span>
@@ -929,12 +929,12 @@
             </div>
             <div class="ad-stat">
                 <div class="ad-label">Expiring soon</div>
-                <div class="ad-value">@(Model?.ExpiringMembershipsCount ?? 0)</div>
+                <div class="ad-value summary-warning">@(Model?.ExpiringMembershipsCount ?? 0)</div>
                 <div class="ad-desc">Memberships within 7 days</div>
             </div>
             <div class="ad-stat">
                 <div class="ad-label">Maintenance</div>
-                <div class="ad-value">@(Model?.EquipmentIssues ?? 0)</div>
+                <div class="ad-value summary-danger">@(Model?.EquipmentIssues ?? 0)</div>
                 <div class="ad-desc">Equipment requiring attention</div>
             </div>
             <div class="ad-stat">

@@ -1,4 +1,4 @@
-﻿using MailKit.Net.Smtp;
+using MailKit.Net.Smtp;
 using MailKit.Security;
 using Microsoft.Extensions.Configuration;
 using MimeKit;
@@ -241,22 +241,21 @@ namespace Gym.Services
                 email.Body = new TextPart("html")
                 {
                     Text = $@"
-                    <div style='font-family:Arial,sans-serif;max-width:540px;margin:auto;border:1px solid #dbe5df;border-radius:8px;overflow:hidden;color:#183028'>
-                      <div style='background:#083d02;color:#fff;padding:20px 24px'><h2 style='margin:0'>Payment Receipt</h2></div>
+                    <div style='font-family:Arial,sans-serif;max-width:540px;margin:auto;border:1px solid #3c443d;border-radius:8px;overflow:hidden;background:#1b201c;color:#ffffff'>
+                      <div style='background:#b7ff1b;color:#182000;padding:20px 24px'><h2 style='margin:0'>Payment Receipt</h2></div>
                       <div style='padding:24px'>
                         <p>Dear <strong>{safeName}</strong>,</p>
                         <p>We received your cash payment. The transaction details are shown below.</p>
                         <table style='width:100%;border-collapse:collapse;margin:20px 0'>
-                          <tr><td style='padding:10px 0;color:#66736b'>Transaction code</td><td style='text-align:right;font-weight:bold'>{safeCode}</td></tr>
-                          <tr><td style='padding:10px 0;color:#66736b'>Payment method</td><td style='text-align:right'>Cash</td></tr>
-                          <tr><td style='padding:10px 0;color:#66736b'>Membership plan</td><td style='text-align:right'>{System.Net.WebUtility.HtmlEncode(membershipPlan)}</td></tr>
-                          <tr><td style='padding:10px 0;color:#66736b'>Plan price</td><td style='text-align:right'>₱{planPrice:N2}</td></tr>
-                          <tr><td style='padding:10px 0;color:#66736b'>Amount paid</td><td style='text-align:right;font-size:20px;font-weight:bold;color:#08752a'>₱{amountPaid:N2}</td></tr>
-                          <tr><td style='padding:10px 0;color:#66736b'>Total paid</td><td style='text-align:right'>₱{totalPaid:N2}</td></tr>
-                          <tr><td style='padding:12px 0;color:#66736b;border-top:1px solid #dbe5df'><strong>Remaining balance</strong></td><td style='text-align:right;font-size:20px;font-weight:bold;color:#b45309;border-top:1px solid #dbe5df'>₱{remainingBalance:N2}</td></tr>
-                          <tr><td style='padding:10px 0;color:#66736b'>Transaction date</td><td style='text-align:right'>{transactionDate:MMMM d, yyyy h:mm tt}</td></tr>
+                          <tr><td style='padding:10px 0;color:#c4ccc6'>Transaction code</td><td style='text-align:right;font-weight:bold'>{safeCode}</td></tr>
+                          <tr><td style='padding:10px 0;color:#c4ccc6'>Payment method</td><td style='text-align:right'>Cash</td></tr>
+                          <tr><td style='padding:10px 0;color:#c4ccc6'>Membership plan</td><td style='text-align:right'>{System.Net.WebUtility.HtmlEncode(membershipPlan)}</td></tr>
+                          <tr><td style='padding:10px 0;color:#c4ccc6'>Plan price</td><td style='text-align:right'>₱{planPrice:N2}</td></tr>
+                          <tr><td style='padding:10px 0;color:#c4ccc6'>Amount paid</td><td style='text-align:right;font-size:20px;font-weight:bold;color:#b7ff1b'>₱{amountPaid:N2}</td></tr>
+                          <tr><td style='padding:10px 0;color:#c4ccc6'>Total paid</td><td style='text-align:right'>₱{totalPaid:N2}</td></tr>
+                          <tr><td style='padding:10px 0;color:#c4ccc6'>Transaction date</td><td style='text-align:right'>{transactionDate:MMMM d, yyyy h:mm tt}</td></tr>
                         </table>
-                        <p style='font-size:12px;color:#7a857e'>This email is your official membership payment receipt.</p>
+                        <p style='font-size:12px;color:#aeb7b0'>This email is your official membership payment receipt.</p>
                       </div>
                     </div>"
                 };
@@ -277,6 +276,87 @@ namespace Gym.Services
             {
                 return (false, $"Payment was recorded, but the email receipt could not be sent: {ex.Message}");
             }
+        }
+
+        public async Task<(bool Success, string? ErrorMessage)> SendPasswordResetLinkAsync(string recipientEmail, string resetUrl)
+        {
+            try
+            {
+                var email = new MimeMessage();
+                email.From.Add(new MailboxAddress(_config["SmtpSettings:SenderName"], _config["SmtpSettings:SenderEmail"]));
+                email.To.Add(MailboxAddress.Parse(recipientEmail));
+                email.Subject = "YOKOKS Gym password reset";
+                email.Body = new TextPart("html") { Text = $@"<div style='max-width:540px;margin:auto;background:#1b201c;color:white;font-family:Arial,sans-serif;padding:24px;border:1px solid #b7ff1b'>
+                    <h2 style='color:#b7ff1b'>Reset your password</h2><p>Use the button below to choose a new password. This link expires in 30 minutes and can only be used once.</p>
+                    <p><a href='{System.Net.WebUtility.HtmlEncode(resetUrl)}' style='display:inline-block;background:#b7ff1b;color:#182000;padding:14px 22px;text-decoration:none'>Reset password</a></p>
+                    <p>If you did not request this, you can ignore this email. Your password has not changed.</p></div>" };
+                using var smtp = new SmtpClient();
+                await smtp.ConnectAsync(_config["SmtpSettings:Server"], int.Parse(_config["SmtpSettings:Port"]!), SecureSocketOptions.StartTls);
+                await smtp.AuthenticateAsync(_config["SmtpSettings:SenderEmail"], _config["SmtpSettings:Password"]);
+                await smtp.SendAsync(email);
+                await smtp.DisconnectAsync(true);
+                return (true, null);
+            }
+            catch (Exception ex) { return (false, ex.Message); }
+        }
+
+        public async Task<(bool Success, string? ErrorMessage)> SendAdminPasswordChangeNoticeAsync(
+            string recipientEmail, string accountName, DateTime changedAt)
+        {
+            try
+            {
+                var email = new MimeMessage();
+                email.From.Add(new MailboxAddress(_config["SmtpSettings:SenderName"], _config["SmtpSettings:SenderEmail"]));
+                email.To.Add(MailboxAddress.Parse(recipientEmail));
+                email.Subject = "YOKOKS Gym security notice: your password was changed";
+                email.Body = new TextPart("html") { Text = $@"
+                    <div style='max-width:540px;margin:auto;font-family:Arial,sans-serif;background:#1b201c;color:#fff;border:1px solid #3c443d'>
+                    <h2 style='margin:0;padding:24px;background:#b7ff1b;color:#182000'>Password changed</h2>
+                    <div style='padding:24px'><p>Dear {System.Net.WebUtility.HtmlEncode(accountName)},</p>
+                    <p>An administrator changed the password for your YOKOKS Gym account on {changedAt:MMMM d, yyyy h:mm tt} (gym local time).</p>
+                    <p>Your previous password will no longer work. Contact your administrator for access assistance.</p>
+                    <p>If you did not expect this change, contact gym management immediately.</p>
+                    <p style='color:#aeb7b0'>For your security, passwords are never included in this email.</p></div></div>" };
+                using var smtp = new SmtpClient();
+                await smtp.ConnectAsync(_config["SmtpSettings:Server"], int.Parse(_config["SmtpSettings:Port"]!), SecureSocketOptions.StartTls);
+                await smtp.AuthenticateAsync(_config["SmtpSettings:SenderEmail"], _config["SmtpSettings:Password"]);
+                await smtp.SendAsync(email);
+                await smtp.DisconnectAsync(true);
+                return (true, null);
+            }
+            catch (Exception ex) { return (false, $"The password was updated, but the account notification could not be emailed: {ex.Message}"); }
+        }
+
+        public async Task<(bool Success, string? ErrorMessage)> SendCancellationReceiptAsync(
+            string recipientEmail, string memberName, decimal planPrice, decimal paid,
+            int durationDays, int usedDays)
+        {
+            try
+            {
+                var deduction = decimal.Round(planPrice / Math.Max(1, durationDays) * usedDays, 2);
+                var refund = Math.Max(0m, paid - deduction);
+                var email = new MimeMessage();
+                email.From.Add(new MailboxAddress(_config["SmtpSettings:SenderName"], _config["SmtpSettings:SenderEmail"]));
+                email.To.Add(MailboxAddress.Parse(recipientEmail));
+                email.Subject = "YOKOKS Gym membership cancellation and refund breakdown";
+                email.Body = new TextPart("html") { Text = $@"
+                    <div style='max-width:540px;margin:auto;font-family:Arial,sans-serif;background:#1b201c;color:#fff;border:1px solid #b7ff1b'>
+                    <h2 style='margin:0;padding:24px;background:#b7ff1b;color:#182000'>Membership cancellation</h2>
+                    <div style='padding:24px'><p>Dear {System.Net.WebUtility.HtmlEncode(memberName)},</p>
+                    <p>Your membership has been cancelled on {DateTime.Today:MMMM d, yyyy}.</p>
+                    <p>Plan price: ₱{planPrice:N2}<br>Plan duration: {durationDays} days<br>
+                    Payment received: ₱{paid:N2}<br>Days used: {usedDays}<br>Deduction for days used: ₱{deduction:N2}</p>
+                    <p style='color:#b7ff1b;font-size:20px'>Estimated refund: ₱{refund:N2}</p>
+                    <p>This is the cancellation calculation, not confirmation of a refund payment. Please contact management to arrange your refund.</p>
+                    </div></div>" };
+                using var smtp = new SmtpClient();
+                await smtp.ConnectAsync(_config["SmtpSettings:Server"], int.Parse(_config["SmtpSettings:Port"]!), SecureSocketOptions.StartTls);
+                await smtp.AuthenticateAsync(_config["SmtpSettings:SenderEmail"], _config["SmtpSettings:Password"]);
+                await smtp.SendAsync(email);
+                await smtp.DisconnectAsync(true);
+                return (true, null);
+            }
+            catch (Exception ex) { return (false, $"Cancellation saved, but the refund breakdown could not be emailed: {ex.Message}"); }
         }
 
         public async Task<(bool Success, string? ErrorMessage)> SendTrainerSessionReminderAsync(
@@ -304,7 +384,7 @@ namespace Gym.Services
                       <div style='padding:24px'>
                         <p>Dear <strong>{safeMember}</strong>,</p>
                         <p>This is a reminder for your scheduled gym training session.</p>
-                        <div style='margin:20px 0;padding:15px;background:#f0f7f2;border-left:4px solid #0ec52d'>
+                        <div style='margin:20px 0;padding:15px;background:#293321;color:#f5f5f5;border-left:4px solid #b7ff1b'>
                           <div><strong>Trainer:</strong> {safeTrainer}</div>
                           <div><strong>Date:</strong> {startTime:MMMM d, yyyy}</div>
                           <div><strong>Time:</strong> {startTime:h:mm tt} - {endTime:h:mm tt}</div>
@@ -355,7 +435,7 @@ namespace Gym.Services
                       <div style='padding:24px'>
                         <p>Dear <strong>{safeName}</strong>,</p>
                         <p>Your YOKOKS Gym membership will expire in <strong>{daysRemaining} day(s)</strong>.</p>
-                        <div style='margin:20px 0;padding:15px;background:#f0f7f2;border-left:4px solid #0ec52d'>
+                        <div style='margin:20px 0;padding:15px;background:#293321;color:#f5f5f5;border-left:4px solid #b7ff1b'>
                           <strong>Expiration date:</strong> {expirationDate:MMMM d, yyyy}
                         </div>
                         <p>Please visit or contact the Front Desk if you would like to renew your membership.</p>
@@ -414,7 +494,7 @@ namespace Gym.Services
                       <div style='padding:24px'>
                         <p>Dear <strong>{safeName}</strong>,</p>
                         <p>Here is your gym attendance summary for {weekStart:MMMM d}–{weekEnd:MMMM d, yyyy}.</p>
-                        <div style='margin:20px 0;padding:16px;background:#f0f7f2;border-left:4px solid #0ec52d'>
+                        <div style='margin:20px 0;padding:16px;background:#293321;color:#f5f5f5;border-left:4px solid #b7ff1b'>
                           <div style='font-size:13px;color:#68756e'>Confirmed attendance days</div>
                           <div style='font-size:30px;font-weight:bold;color:#08752a'>{attendanceDays}</div>
                         </div>
@@ -450,7 +530,7 @@ namespace Gym.Services
                 var safeTrainer = System.Net.WebUtility.HtmlEncode(trainerName);
                 var safeTime = System.Net.WebUtility.HtmlEncode(timeSlot);
                 var responseButtons = attendUrl != null && absentUrl != null
-                    ? $"<p>Replying is optional. Let your trainer know your plans:</p><p><a href='{System.Net.WebUtility.HtmlEncode(attendUrl)}' style='display:inline-block;padding:12px 22px;background:#b7ff1b;color:#000;text-decoration:none'>Attend</a> <a href='{System.Net.WebUtility.HtmlEncode(absentUrl)}' style='display:inline-block;padding:12px 22px;background:#292d2a;color:#fff;text-decoration:none'>Absent</a></p><p>Your response informs your trainer; actual attendance is recorded when you check in.</p>"
+                    ? $"<p>Replying is optional. Let your trainer know your plans:</p><p><a href='{System.Net.WebUtility.HtmlEncode(attendUrl)}' style='display:inline-block;padding:12px 22px;background:#b7ff1b;color:#182000;border:1px solid #b7ff1b;border-radius:6px;font-weight:700;text-decoration:none'>Attend</a> <a href='{System.Net.WebUtility.HtmlEncode(absentUrl)}' style='display:inline-block;padding:12px 22px;background:#dc2626;color:#fff;border:1px solid #dc2626;border-radius:6px;font-weight:700;text-decoration:none'>Absent</a></p><p>Your response informs your trainer; actual attendance is recorded when you check in.</p>"
                     : "";
                 var email = new MimeMessage();
                 email.From.Add(new MailboxAddress(_config["SmtpSettings:SenderName"], _config["SmtpSettings:SenderEmail"]));
@@ -458,10 +538,10 @@ namespace Gym.Services
                 email.Subject = $"YOKOKS Gym daily training reminder - {date:MMM d, yyyy}";
                 email.Body = new TextPart("html")
                 {
-                    Text = $@"<div style='font-family:Arial,sans-serif;max-width:540px;margin:auto;border:1px solid #dbe5df;color:#183028'>
-                    <div style='background:#083d02;color:white;padding:20px 24px'><h2 style='margin:0'>Daily Training Reminder</h2></div>
+                    Text = $@"<div style='font-family:Arial,sans-serif;max-width:540px;margin:auto;border:1px solid #b7ff1b;background:#1b201c;color:#f5f5f5'>
+                    <div style='background:#b7ff1b;color:#182000;padding:20px 24px'><h2 style='margin:0'>Daily Training Reminder</h2></div>
                     <div style='padding:24px'><p>Dear <strong>{safeMember}</strong>,</p><p>This is your reminder for today's scheduled gym training.</p>
-                    <div style='margin:20px 0;padding:16px;background:#f0f7f2;border-left:4px solid #0ec52d'><div><strong>Trainer:</strong> {safeTrainer}</div><div><strong>Date:</strong> {date:MMMM d, yyyy}</div><div><strong>Time:</strong> {safeTime}</div></div>
+                    <div style='margin:20px 0;padding:16px;background:#293321;color:#f5f5f5;border-left:4px solid #b7ff1b'><div><strong>Trainer:</strong> {safeTrainer}</div><div><strong>Date:</strong> {date:MMMM d, yyyy}</div><div><strong>Time:</strong> {safeTime}</div></div>
                     {responseButtons}<p>We look forward to seeing you at YOKOKS Gym.</p></div></div>"
                 };
                 using var smtp = new SmtpClient();

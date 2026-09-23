@@ -460,9 +460,7 @@
                             <details>
                                 <summary aria-label="Payment actions">⋮</summary>
                                 <div class="pay-action-menu">
-                                    @if (item.MemberStatus != MemberStatus.Terminated &&
-                                         item.MembershipEndDate.HasValue &&
-                                         item.MembershipEndDate.Value.Date < DateTime.Today)
+                                    @if (MembershipRenewalRules.CanRenew(item.MemberStatus, item.MembershipEndDate, DateTime.Today))
                                     {
                                         <button type="button"
                                                 data-client-id="@item.ClientId"

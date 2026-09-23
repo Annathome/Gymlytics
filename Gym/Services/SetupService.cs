@@ -983,6 +983,27 @@ namespace Gym.Services
                 null);
         }
 
+        public async Task<(int Id, string Hash)?> FindPasswordResetAccountAsync(string email)
+        {
+            await using var connection = new SqlConnection(_connectionString);
+            await connection.OpenAsync();
+            await using var command = new SqlCommand("SELECT Id, PasswordHash FROM dbo.Staff WHERE Email = @Email AND Status = 'Active'", connection);
+            command.Parameters.Add("@Email", SqlDbType.NVarChar, 255).Value = email;
+            await using var reader = await command.ExecuteReaderAsync();
+            return await reader.ReadAsync() ? (reader.GetInt32(0), reader.GetString(1)) : null;
+        }
+
+        public async Task<bool> CompletePasswordResetAsync(int id, string previousHash, string newHash)
+        {
+            await using var connection = new SqlConnection(_connectionString);
+            await connection.OpenAsync();
+            await using var command = new SqlCommand("UPDATE dbo.Staff SET PasswordHash = @NewHash WHERE Id = @Id AND Status = 'Active' AND PasswordHash = @PreviousHash", connection);
+            command.Parameters.Add("@Id", SqlDbType.Int).Value = id;
+            command.Parameters.Add("@PreviousHash", SqlDbType.NVarChar, 255).Value = previousHash;
+            command.Parameters.Add("@NewHash", SqlDbType.NVarChar, 255).Value = newHash;
+            return await command.ExecuteNonQueryAsync() == 1;
+        }
+
         public async Task<bool> UpdatePasswordHashAsync(
             int staffId,
             string passwordHash)

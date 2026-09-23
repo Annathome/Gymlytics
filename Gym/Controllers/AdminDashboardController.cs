@@ -120,12 +120,16 @@ namespace Gym.Controllers
             string? searchTerm,
             MemberStatus? status,
             MembershipPlanType? plan,
-            int page = 1)
+            int page = 1,
+            int? year = null)
         {
             try
             {
                 const int pageSize = 5;
                 var clients = (await _adminService.GetAllClientsAsync()).ToList();
+                ViewBag.Years = clients.Select(client => client.MembershipStartDate.Year)
+                    .Distinct().OrderByDescending(value => value).ToList();
+                ViewBag.Year = year;
                 var trainerIds = clients.Where(client => client.AssignedTrainerId.HasValue)
                     .Select(client => client.AssignedTrainerId!.Value).Distinct().ToList();
                 ViewBag.TrainerNames = await _context.Trainers.AsNoTracking()
@@ -154,6 +158,7 @@ namespace Gym.Controllers
                 }
                 if (status.HasValue) clients = clients.Where(client => client.Status == status.Value).ToList();
                 if (plan.HasValue) clients = clients.Where(client => client.MembershipPlan == plan.Value).ToList();
+                if (year.HasValue) clients = clients.Where(client => client.MembershipStartDate.Year == year.Value).ToList();
 
                 var totalCount = clients.Count;
                 var totalPages = Math.Max(1, (int)Math.Ceiling(totalCount / (double)pageSize));
@@ -210,6 +215,11 @@ namespace Gym.Controllers
                 return RedirectToAction(nameof(Members));
             }
 
+            if (!MembershipRenewalRules.CanRenew(member.Status, member.MembershipEndDate, DateTime.Today))
+            {
+                TempData["ErrorMessage"] = "Renewal opens 7 days before the membership ends. Cancelled memberships can restart at the full plan price.";
+                return RedirectToAction(nameof(Members));
+            }
             var planPrice = MembershipPlanPricing.GetPrice(member.MembershipPlan);
             if (amount != planPrice)
             {
@@ -222,7 +232,7 @@ namespace Gym.Controllers
                 payment.ClientId == id && payment.Status == PaymentStatus.Paid &&
                 payment.PaymentDate >= paidAt.Date && payment.PaymentDate < paidAt.Date.AddDays(1) &&
                 payment.Notes != null && payment.Notes.Contains("renewal"));
-            if (duplicateRenewal)
+            if (duplicateRenewal && member.Status != MemberStatus.Canceled)
             {
                 TempData["ErrorMessage"] = "A membership renewal payment has already been recorded for this member today.";
                 return RedirectToAction(nameof(Members));
@@ -251,6 +261,8 @@ namespace Gym.Controllers
                     var (sent, error) = await _gmailService.SendMemberPaymentReceiptAsync(
                         member.Email, memberName, transactionCode, amount, paidAt,
                         MembershipPlanPricing.GetName(member.MembershipPlan), planPrice, amount, 0m);
+                    await AddAdminActivityAsync("Renewal receipt email",
+                        sent ? $"Renewal payment receipt emailed to {memberName}." : $"Renewal saved. {error}", "Payment receipt");
                     TempData[sent ? "SuccessMessage" : "ErrorMessage"] = sent
                         ? $"Payment received, membership renewed through {expiration.Value:MMM d, yyyy}, and the digital receipt was emailed."
                         : $"Payment received and membership renewed through {expiration.Value:MMM d, yyyy}, but the digital receipt could not be emailed. {error}";
@@ -280,6 +292,7 @@ namespace Gym.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CancelMember(int id)
         {
+            var member = await _context.Clients.AsNoTracking().FirstOrDefaultAsync(client => client.UserId == id);
             var memberName = await _context.Clients.AsNoTracking()
                 .Where(client => client.UserId == id)
                 .Select(client => (client.FirstName + " " + client.LastName).Trim())
@@ -292,6 +305,20 @@ namespace Gym.Controllers
             TempData[consumedDays.HasValue ? "SuccessMessage" : "ErrorMessage"] = consumedDays.HasValue
                 ? $"Membership canceled. {consumedDays.Value} calendar membership day(s) consumed after confirmation."
                 : "The member could not be found.";
+            if (consumedDays.HasValue && member != null)
+            {
+                var totalPaid = await _context.Payments.AsNoTracking()
+                    .Where(payment => payment.ClientId == id && payment.Status == PaymentStatus.Paid)
+                    .SumAsync(payment => (decimal?)payment.Amount) ?? 0m;
+                var end = member.MembershipEndDate ?? member.MembershipStartDate.AddMonths(MembershipPlanPricing.GetDurationMonths(member.MembershipPlan));
+                var days = Math.Max(1, (end.Date - member.MembershipStartDate.Date).Days);
+                var (sent, error) = await _gmailService.SendCancellationReceiptAsync(member.Email, memberName,
+                    MembershipPlanPricing.GetPrice(member.MembershipPlan), totalPaid, days, consumedDays.Value);
+                await AddAdminActivityAsync("Cancellation refund email", sent ? $"Refund breakdown emailed to {memberName}." : error!, "Cancellation refund breakdown");
+                TempData[sent ? "SuccessMessage" : "ErrorMessage"] = sent
+                    ? "Membership canceled and refund breakdown emailed."
+                    : error;
+            }
             return RedirectToAction(nameof(Members));
         }
 
@@ -1195,7 +1222,8 @@ namespace Gym.Controllers
             string format,
             string? searchTerm,
             MemberStatus? status,
-            MembershipPlanType? plan)
+            MembershipPlanType? plan,
+            int? year = null)
         {
             var clients = (await _adminService.GetAllClientsAsync()).ToList();
             if (!string.IsNullOrWhiteSpace(searchTerm))
@@ -1208,6 +1236,7 @@ namespace Gym.Controllers
             }
             if (status.HasValue) clients = clients.Where(client => client.Status == status.Value).ToList();
             if (plan.HasValue) clients = clients.Where(client => client.MembershipPlan == plan.Value).ToList();
+            if (year.HasValue) clients = clients.Where(client => client.MembershipStartDate.Year == year.Value).ToList();
 
             static string Csv(string value) => $"\"{value.Replace("\"", "\"\"")}\"";
             var rows = clients.Select(client => new[]
@@ -1271,6 +1300,7 @@ namespace Gym.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [NonAction]
         public async Task<IActionResult> ResetUserPassword(AdminResetUserPasswordViewModel model, int page = 1)
         {
             if (!ModelState.IsValid)
@@ -1282,6 +1312,7 @@ namespace Gym.Controllers
                 return RedirectToAction(nameof(UserRoles), new { page });
             }
 
+            var account = (await _setupService.GetAllUsersAsync()).FirstOrDefault(user => user.Id == model.Id);
             var updated = await _setupService.UpdatePasswordHashAsync(
                 model.Id,
                 _hashingService.HashPassword(model.NewPassword));
@@ -1289,6 +1320,18 @@ namespace Gym.Controllers
             TempData[updated ? "SuccessMessage" : "ErrorMessage"] = updated
                 ? "The user's password was updated successfully."
                 : "The password could not be updated. Confirm that the account is active.";
+
+            if (updated)
+            {
+                var (sent, error) = await _gmailService.SendAdminPasswordChangeNoticeAsync(
+                    account?.Email ?? string.Empty, account?.DisplayName ?? "Account owner", DateTime.Now);
+                await AddAdminActivityAsync("Password change notification",
+                    sent ? $"Password change notice emailed to account #{model.Id}." : $"Account #{model.Id}: {error}", "Security");
+                TempData.Remove("SuccessMessage");
+                TempData[sent ? "SuccessMessage" : "ErrorMessage"] = sent
+                    ? "The password was updated and the account owner was notified by email."
+                    : error;
+            }
 
             return RedirectToAction(nameof(UserRoles), new { page });
         }

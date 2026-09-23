@@ -14,7 +14,7 @@ namespace Gym.Services
         Task<AddMemberViewModel> BuildAddMemberViewModelAsync(
             AddMemberViewModel? existing = null);
 
-        Task CreateClientAsync(AddMemberViewModel form);
+        Task<Client> CreateClientAsync(AddMemberViewModel form);
 
         Task DeleteClientAsync(int id);
 

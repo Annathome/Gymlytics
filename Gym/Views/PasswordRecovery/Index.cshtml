@@ -1,0 +1,27 @@
+@model Gym.Models.PasswordRecoveryModel
+@{ Layout = "~/Views/Shared/_LoginLayout.cshtml"; ViewData["Title"] = "Forgot password"; }
+<partial name="_RecoveryStyle" />
+<main class="recovery-card">
+    @if (ViewBag.Message != null)
+    {
+        <div role="status" style="border:1px solid #b7ff1b;padding:20px;background:#252b26;">
+            <h1 style="color:#b7ff1b;">Check your email</h1>
+            <p>Your password reset request has been received.</p>
+            <p>@ViewBag.Message</p>
+            <p>The link expires in 30 minutes. If you recently requested a link, use the latest email or wait 5 minutes before trying again.</p>
+        </div>
+        <a asp-action="Index">Try another email</a>
+    }
+    else
+    {
+    <h1>Forgot password?</h1>
+    <p>Enter the email address registered to your account.</p>
+    <form method="post" asp-action="Index">
+        <div asp-validation-summary="All" role="alert"></div>
+        <label asp-for="Email">Email address</label>
+        <input asp-for="Email" type="email" required autocomplete="email" />
+        <button type="submit">Send reset link</button>
+    </form>
+    }
+    <a asp-controller="Account" asp-action="Login">Back to login</a>
+</main>

@@ -243,7 +243,7 @@
         <div class="atm-stat">
             <div class="atm-label">Available trainer member capacity</div>
             <div class="atm-value">
-                <strong>@Model.AvailableMemberCapacity</strong>
+                <strong class="@(Model.AvailableMemberCapacity <= 5 ? "summary-danger" : Model.AvailableMemberCapacity <= 10 ? "summary-warning" : "")">@Model.AvailableMemberCapacity</strong>
                 <span class="atm-note">Remaining member slots out of @Model.TotalCapacity slots</span>
             </div>
         </div>

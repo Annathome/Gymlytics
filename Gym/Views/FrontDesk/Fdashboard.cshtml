@@ -516,7 +516,7 @@
         </div>
         <a class="fd-notification-bell" asp-controller="FrontDesk" asp-action="Notifications"
            title="Front desk notifications" aria-label="Front desk notifications">
-            <i class="bi bi-bell"></i>
+            <i class="bi bi-bell-fill"></i>
             @if (Model.UnreadNotificationsCount > 0)
             {
                 <span class="fd-notification-count">@Model.UnreadNotificationsCount</span>
@@ -528,7 +528,7 @@
     <section class="fd-summary-grid" aria-label="Weekly front desk summary">
         <article class="fd-summary-card">
             <p class="fd-summary-label">Expiring Soon</p>
-            <p class="fd-summary-value">@Model.ExpiringSoonMemberships</p>
+            <p class="fd-summary-value summary-warning">@Model.ExpiringSoonMemberships</p>
             <p class="fd-summary-description">Membership(s) expiring within 7 days</p>
         </article>
         <article class="fd-summary-card">
@@ -538,7 +538,7 @@
         </article>
         <article class="fd-summary-card">
             <p class="fd-summary-label">Equipment Maintenance</p>
-            <p class="fd-summary-value">@Model.EquipmentNeedingMaintenance</p>
+            <p class="fd-summary-value summary-danger">@Model.EquipmentNeedingMaintenance</p>
             <p class="fd-summary-description">Equipment item(s) needing maintenance</p>
         </article>
     </section>

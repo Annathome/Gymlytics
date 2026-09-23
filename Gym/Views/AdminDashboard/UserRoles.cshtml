@@ -404,10 +404,11 @@
         html body.admin-shell .page-wrap .card-table .user-name-button .user-name-text,
         html body.admin-shell .page-wrap .card-table .user-name-button .user-name-text span {
             color:#b7ff1b !important;
+            font-size:16px !important;
+            text-decoration:none !important;
         }
         html body.admin-shell .user-name-button:is(:hover, :focus-visible) .user-name-text {
-            text-decoration:underline;
-            text-underline-offset:3px;
+            text-decoration:none !important;
         }
         .details-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px 16px; margin:18px 0; }
         .details-field { min-width:0; }
@@ -467,20 +468,12 @@
                             <tr>
                                 <td>
                                     <div class="user-cell">
-                                        <button type="button" class="user-name-button"
-                                                    data-id="@user.Id"
-                                                    data-name="@user.DisplayName"
-                                                    data-username="@user.Username"
-                                                    data-email="@user.Email"
-                                                    data-phone="@user.PhoneNumber"
-                                                    data-role="@user.RoleLabel"
-                                                    data-status="@user.Status"
-                                                    onclick="openUserDetails(this)">
+                                        <div style="display:flex;align-items:center;gap:12px;">
                                             <span class="avatar">@user.Initials</span>
                                             <span class="user-name-text">
-                                                <span>@user.DisplayName</span>
+                                                <span style="color:#fff!important;font-size:16px!important;text-decoration:none!important;">@user.DisplayName</span>
                                             </span>
-                                        </button>
+                                        </div>
                                     </div>
                                 </td>
                                 <td>
@@ -571,8 +564,8 @@
             <div>
                 <strong>Login security</strong>
                 <div class="footer-note-items">
-                    <div class="footer-note-item">🔒 Password + email verification</div>
-                    <div class="footer-note-item">⏱️ Session auto-expires after 30 min idle</div>
+                    <div class="footer-note-item">Password + email verification</div>
+                    <div class="footer-note-item">Session auto-expires after 30 min idle</div>
                 </div>
             </div>
         </div>
@@ -593,6 +586,7 @@
         </div>
     </div>
 
+    @* Account owners manage their own passwords through password recovery.
     <div id="userDetailsModal" class="floating-overlay" style="display:none;">
         <div class="floating-card" role="dialog" aria-modal="true" aria-labelledby="userDetailsTitle">
             <h3 id="userDetailsTitle">User information</h3>
@@ -619,6 +613,7 @@
         </div>
     </div>
 
+    *@
     @if (TempData["SuccessMessage"] is string successMessage)
     {
         <div id="userResultModal" class="floating-overlay">

@@ -1,0 +1,21 @@
+@model Gym.Models.PasswordRecoveryModel
+@{ Layout = "~/Views/Shared/_LoginLayout.cshtml"; ViewData["Title"] = "Reset password"; }
+<partial name="_RecoveryStyle" />
+<main class="recovery-card reset-password-card">
+    <h1>Reset password</h1>
+    @if (ViewBag.Message != null) { <p role="status">@ViewBag.Message</p> }
+    else
+    {
+        <form method="post" asp-action="Reset">
+            <input asp-for="Token" type="hidden" />
+            <div asp-validation-summary="All" role="alert"></div>
+            <label asp-for="Password">New password</label>
+            <input asp-for="Password" type="password" required minlength="8" maxlength="128" autocomplete="new-password" />
+            <label asp-for="ConfirmPassword">Confirm password</label>
+            <input asp-for="ConfirmPassword" type="password" required minlength="8" maxlength="128" autocomplete="new-password" />
+            <button type="submit">Update password</button>
+        </form>
+        <a asp-action="Index">Request another reset link</a>
+    }
+    <a asp-controller="Account" asp-action="Login">Back to login</a>
+</main>

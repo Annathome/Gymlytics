@@ -412,7 +412,7 @@ namespace Gym.Services
         // CREATE MEMBER
         // =====================================================
 
-        public async Task CreateClientAsync(
+        public async Task<Client> CreateClientAsync(
             AddMemberViewModel form)
         {
             if (!await _context.MembershipPlanSettings.AnyAsync(item => item.IsActive))
@@ -593,6 +593,7 @@ namespace Gym.Services
                 throw new InvalidOperationException(
                     "This Gmail address is already registered.", ex);
             }
+            return client;
         }
 
         // =====================================================
@@ -663,12 +664,12 @@ namespace Gym.Services
                 return null;
             }
 
-            // Preserve any remaining paid time. Expired memberships begin a
-            // fresh period today; active memberships extend from their end.
-            var renewalStart = client.MembershipEndDate.HasValue &&
-                               client.MembershipEndDate.Value.Date > DateTime.Today
-                ? client.MembershipEndDate.Value.Date
-                : DateTime.Today;
+            if (!MembershipRenewalRules.CanRenew(client.Status, client.MembershipEndDate, DateTime.Today))
+                return null;
+            var restart = client.Status == MemberStatus.Canceled ||
+                !client.MembershipEndDate.HasValue || client.MembershipEndDate.Value.Date < DateTime.Today;
+            var renewalStart = restart ? DateTime.Today : client.MembershipEndDate!.Value.Date;
+            if (restart) client.MembershipStartDate = DateTime.Today;
 
             client.MembershipEndDate = CalculateExpirationDate(
                 renewalStart,

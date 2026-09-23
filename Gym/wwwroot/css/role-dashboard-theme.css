@@ -1,3 +1,197 @@
+@layer profilePopupTheme {
+    body:is(.admin-shell, .trainer-shell, .frontdesk-shell) .admin-logout {
+        background:#083d02 !important; color:#fff !important; padding:24px !important; border-radius:14px !important;
+    }
+    body .admin-logout .top { display:flex; align-items:center; gap:15px; }
+    body .admin-logout .top .initials-circle {
+        width:60px !important; height:60px !important; flex:0 0 60px;
+        display:flex; align-items:center; justify-content:center;
+        border-radius:50% !important; background:#b7ff1b !important; color:#182000 !important;
+        font-size:16px !important; font-weight:700 !important;
+    }
+    body .admin-logout .top h3 { color:#fff !important; font-size:22px !important; margin:0; }
+    body .admin-logout .top-log { display:flex; flex-direction:column; gap:15px; }
+    body .admin-logout .top-log label { color:#d3d3d3 !important; font-size:16px !important; }
+    body .admin-logout .top-log label span { color:#fff !important; font-weight:700; }
+    body .admin-logout .btn-log {
+        width:100% !important; min-height:42px !important; margin-top:20px;
+        background:#b7ff1b !important; color:#182000 !important; border:1px solid #b7ff1b !important;
+        font-size:16px !important; font-weight:700 !important;
+    }
+    body .admin-logout .btn-log span { color:inherit !important; font-size:inherit !important; }
+    body .admin-logout .btn-log:is(:hover, :focus-visible) { background:transparent !important; color:#b7ff1b !important; }
+}
+
+@layer roleNavigationMatch {
+    body:is(.trainer-shell, .frontdesk-shell) .nav-header {
+        background:#2e2e2f !important;
+        border-right:1px solid #b7ff1b !important;
+    }
+    body:is(.trainer-shell, .frontdesk-shell) .navbar-nav {
+        display:flex !important; flex-direction:column !important;
+        gap:15px !important; margin-top:40px !important; padding:0 !important;
+        list-style:none !important;
+    }
+    body:is(.trainer-shell, .frontdesk-shell) .navbar-nav :is(.nav-item, .nav-item-btn) {
+        display:flex !important; align-items:center !important; gap:15px !important;
+        width:100% !important; min-height:58px !important; padding:10px !important;
+        margin:0 !important; box-sizing:border-box !important;
+        background:transparent !important; border:0 !important; border-radius:6px !important;
+        box-shadow:none !important; text-decoration:none !important; color:#fff !important;
+    }
+    body:is(.trainer-shell, .frontdesk-shell) .navbar-nav :is(.nav-item, .nav-item-btn):is(:hover, :focus-visible, .active) {
+        background:rgba(183,255,27,.12) !important;
+        box-shadow:inset 3px 0 0 #b7ff1b !important;
+    }
+    body:is(.trainer-shell, .frontdesk-shell) .navbar-nav :is(.nav-link, .icon) {
+        color:#fff !important; font-size:15px !important;
+    }
+    body:is(.trainer-shell, .frontdesk-shell) .navbar-nav .nav-link {
+        font-family:"Inria Serif",serif !important; font-weight:400 !important;
+    }
+}
+
+@layer notificationBells {
+    body :is(.ad-bell, .fd-notification-bell, .trainer-notification-bell) i::before {
+        content:'' !important;
+        display:block !important;
+        width:28px; height:28px;
+        background:#b7ff1b;
+        mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4M12 1v1' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain no-repeat;
+    }
+    body :is(.ad-bell, .fd-notification-bell, .trainer-notification-bell):is(:hover, :focus-visible) i::before {
+        mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9' fill='black' stroke='black' stroke-width='1.8' stroke-linejoin='round'/%3E%3Cpath d='M10 21h4M12 1v1' stroke='black' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E");
+    }
+    body :is(.ad-bell, .fd-notification-bell, .trainer-notification-bell),
+    body :is(.ad-bell, .fd-notification-bell, .trainer-notification-bell):is(:hover, :focus-visible) {
+        background: transparent !important;
+        border: 0 !important;
+        box-shadow: none !important;
+        color: #b7ff1b !important;
+    }
+    body :is(.ad-bell, .fd-notification-bell, .trainer-notification-bell) i {
+        background: transparent !important;
+        color: #b7ff1b !important;
+    }
+}
+
+@layer userInformationTheme {
+    #userDetailsModal .floating-card {
+        background: #1b201c !important;
+        color: #fff !important;
+        border: 1px solid #3c443d !important;
+        border-radius: 14px !important;
+        padding: 28px !important;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 20px 60px #0008 !important;
+    }
+    #userDetailsModal h3 { color: #fff !important; font-size: 26px !important; }
+    #userDetailsModal .details-field label { color: #fff !important; font-size: 15px !important; margin-bottom: 7px; }
+    #userDetailsModal :is(.details-value, .password-input) {
+        background: #252b26 !important;
+        color: #fff !important;
+        border: 1px solid #59635c !important;
+        border-radius: 6px !important;
+        font-size: 15px !important;
+        box-sizing: border-box;
+    }
+    #userDetailsModal .password-input { background: #1b201c !important; }
+    #userDetailsModal .password-input:focus {
+        border-color: #b7ff1b !important;
+        outline: 2px solid #b7ff1b33 !important;
+        outline-offset: 2px;
+    }
+    #userDetailsModal .password-note { color: #b7beb8 !important; line-height: 1.5; }
+    #userDetailsModal .floating-actions { border-top: 1px solid #3c443d; padding-top: 20px; gap: 12px; }
+    #userDetailsModal .floating-cancel { background: #292d2a !important; border: 1px solid transparent !important; color: #fff !important; border-radius: 0 !important; }
+    #userDetailsModal .floating-cancel:is(:hover, :focus-visible) {
+        background: transparent !important;
+        border-color: #b7ff1b !important;
+        color: #b7ff1b !important;
+    }
+    #userDetailsModal .floating-confirm { background: #b7ff1b !important; color: #182000 !important; border: 1px solid #b7ff1b !important; }
+    #userDetailsModal .floating-confirm:hover {
+        background: #b7ff1b1f !important; color: #b7ff1b !important; border-color: #b7ff1b !important;
+    }
+}
+
+@layer styledFilters {
+    body .styled-filter { position: relative; min-width: 145px; color: #fff; }
+    body .styled-filter > summary {
+        display: flex !important; align-items: center !important; justify-content: space-between !important; gap: 20px;
+        height: 56px !important; min-height: 56px !important; padding: 0 20px !important; box-sizing: border-box !important;
+        border: 1px solid #59635c !important; background: #1b201c !important; cursor: pointer; list-style: none !important;
+        font: 500 15px/1.35 "Inria Serif", serif !important;
+        color: #fff !important; text-transform: none !important;
+    }
+    body .styled-filter > summary::-webkit-details-marker { display: none; }
+    body .styled-filter > summary::after {
+        content: '' !important;
+        display: block !important;
+        width: 8px !important;
+        height: 8px !important;
+        flex: 0 0 8px !important;
+        border: solid currentColor !important;
+        border-width: 0 2px 2px 0 !important;
+        transform: translateY(-2px) rotate(45deg);
+    }
+    body .styled-filter-options {
+        position: absolute; top: 100%; right: 0; min-width: 100%; width: max-content;
+        max-height: min(420px, 60vh); overflow-y: auto; z-index: 100;
+        background: #1b201c; border: 1px solid #414841; box-shadow: 0 8px 20px #0006;
+    }
+    body .styled-filter-options button {
+        display: block !important; width: 100% !important; height: auto !important;
+        min-height: 42px !important; padding: 10px 14px !important;
+        border: 1px solid transparent !important; border-radius: 0 !important;
+        background: transparent !important; color: #fff !important;
+        text-align: left !important; font: 500 15px/1.35 "Inria Serif", serif !important; white-space: nowrap;
+        letter-spacing: .01em !important; text-transform: none !important;
+        box-sizing: border-box !important;
+    }
+    body .styled-filter-options button:is(:hover, :focus-visible),
+    body .styled-filter > summary:is(:hover, :focus-visible) {
+        color: #b7ff1b !important; border-color: #b7ff1b !important;
+        background: transparent !important; outline: none !important;
+    }
+}
+
+@layer dropdownHover {
+    body:is(.admin-shell, .frontdesk-shell, .trainer-shell) :is(
+        .am-actions-menu, .aa-menu, .ae-menu, .action-menu, .pay-action-menu
+    ) :is(button, a) {
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+        border: 1px solid transparent !important;
+        justify-content: flex-start !important;
+        text-align: left !important;
+    }
+
+    body:is(.admin-shell, .frontdesk-shell, .trainer-shell) :is(
+        .am-actions-menu, .aa-menu, .ae-menu, .action-menu, .pay-action-menu
+    ) :is(button, a):not(:disabled):is(:hover, :focus-visible),
+    body:is(.admin-shell, .frontdesk-shell, .trainer-shell) :is(
+        .am-filters select, .ap-filter select, .dropdown-filters select, .pay-status
+    ):is(:hover, :focus-visible) {
+        border-color: #b7ff1b !important;
+        color: #b7ff1b !important;
+        background: transparent !important;
+        box-shadow: none !important;
+        outline: none !important;
+    }
+}
+
+body.admin-shell .nav-header {
+    border-right-color: #b7ff1b !important;
+}
+
+body.admin-shell .navbar-nav .nav-item:is(:hover, :focus-visible, .active) {
+    background: rgba(183, 255, 27, .12) !important;
+    box-shadow: inset 3px 0 0 #b7ff1b !important;
+}
+
 .role-shell {
     min-height: 100vh;
     background: #37373A !important;
@@ -3614,6 +3808,20 @@ html body.admin-shell #equipmentNameModal .ae-modal-actions button[type="submit"
         border-left-color: #b7ff1b !important;
     }
 }
+@layer summaryCardSeverity {
+    body:is(.admin-shell, .frontdesk-shell, .trainer-shell) .summary-warning {
+        color: #ffad33 !important;
+    }
+
+    body:is(.admin-shell, .frontdesk-shell, .trainer-shell) :is(
+        .summary-danger, .ap-value.overdue, .ae-value.maintenance, .ae-value.out,
+        .te-stat.maintenance > strong, .te-stat.out > strong,
+        .eq-stat.maintenance > strong, .eq-stat.out > strong
+    ) {
+        color: #ff6b6b !important;
+    }
+}
+
 @layer summaryCardTitles {
     body:is(.admin-shell, .frontdesk-shell, .trainer-shell) :is(
         .ad-label, .aa-label, .ae-label, .ap-label, .atm-label,

@@ -38,7 +38,7 @@
 
     .availability-card {
         padding: 27px;
-        border: 1px solid #227a2b;
+        border: none;
         border-radius: 10px;
         background: #073418;
     }
@@ -229,6 +229,26 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        (() => {
+            const start = document.getElementById('StartTime');
+            const end = document.getElementById('EndTime');
+            const options = Array.from(end.options, option => option.cloneNode(true));
+            // TimeSpan values include seconds; the dropdown values use hours and minutes.
+            start.value = '@Model.StartTime.ToString(@"hh\:mm")';
+            end.value = '@Model.EndTime.ToString(@"hh\:mm")';
+            function updateEndTimes() {
+                const previous = end.value;
+                const available = options.filter(option =>
+                    option.value > start.value && (start.value !== '06:00' || option.value >= '12:00'));
+                end.replaceChildren(...available.map(option => option.cloneNode(true)));
+                if (available.some(option => option.value === previous)) end.value = previous;
+                else if (start.value === '06:00' && available.some(option => option.value === '18:00')) end.value = '18:00';
+            }
+            start.addEventListener('change', updateEndTimes);
+            updateEndTimes();
+        })();
+    </script>
 }
 <style>
     body.trainer-shell .availability-page { padding-bottom: 36px; }
@@ -236,7 +256,7 @@
     body.trainer-shell .availability-page .lead { color:#d4dbd5 !important; font-size:16px; margin-bottom:35px !important; }
     body.trainer-shell .availability-card {
         padding: 30px 34px 28px;
-        border: 1px solid #3e8b43;
+        border: none !important;
         border-radius: 12px;
         background: #5e5d63;
         box-shadow: 0 10px 24px rgba(0,0,0,.24);

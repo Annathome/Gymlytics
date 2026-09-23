@@ -8,6 +8,8 @@
     var totalPages = (int)(ViewBag.TotalPages ?? 1);
     var selectedStatus = ViewBag.Status as MemberStatus?;
     var selectedPlan = ViewBag.Plan as MembershipPlanType?;
+    var selectedYear = ViewBag.Year as int?;
+    var availableYears = ViewBag.Years as List<int> ?? new();
     var paidAmounts = ViewBag.PaidAmounts as Dictionary<int, decimal> ?? new();
     var dailyReminderMemberIds = ViewBag.DailyReminderMemberIds as HashSet<int> ?? new();
 }
@@ -27,7 +29,7 @@
     }
 
     .am-toolbar {
-        margin-bottom: 24px;
+        margin-bottom: 40px;
         display:flex;
         position: relative;
         gap: 10px;
@@ -608,9 +610,9 @@
                         <summary>↧ EXPORT</summary>
                         <div class="am-export-menu" id="memberExportMenu">
                             <button type="button" onclick="exportMemberReport('pdf')">PDF / Print</button>
-                            <a asp-action="ExportMembers" asp-route-format="doc" asp-route-searchTerm="@ViewBag.SearchTerm" asp-route-status="@selectedStatus" asp-route-plan="@selectedPlan">Word document</a>
-                            <a asp-action="ExportMembers" asp-route-format="csv" asp-route-searchTerm="@ViewBag.SearchTerm" asp-route-status="@selectedStatus" asp-route-plan="@selectedPlan">CSV / Excel</a>
-                            <a asp-action="ExportMembers" asp-route-format="txt" asp-route-searchTerm="@ViewBag.SearchTerm" asp-route-status="@selectedStatus" asp-route-plan="@selectedPlan">Text file</a>
+                            <a asp-action="ExportMembers" asp-route-format="doc" asp-route-searchTerm="@ViewBag.SearchTerm" asp-route-status="@selectedStatus" asp-route-plan="@selectedPlan" asp-route-year="@selectedYear">Word document</a>
+                            <a asp-action="ExportMembers" asp-route-format="csv" asp-route-searchTerm="@ViewBag.SearchTerm" asp-route-status="@selectedStatus" asp-route-plan="@selectedPlan" asp-route-year="@selectedYear">CSV / Excel</a>
+                            <a asp-action="ExportMembers" asp-route-format="txt" asp-route-searchTerm="@ViewBag.SearchTerm" asp-route-status="@selectedStatus" asp-route-plan="@selectedPlan" asp-route-year="@selectedYear">Text file</a>
                         </div>
                     </details>
                 </div>
@@ -618,11 +620,21 @@
 
             <div class="am-head">
                 <form class="am-search" method="get" asp-action="Members">
+                    <input type="hidden" name="status" value="@selectedStatus" />
+                    <input type="hidden" name="plan" value="@selectedPlan" />
+                    <input type="hidden" name="year" value="@selectedYear" />
                     <input name="searchTerm" value="@ViewBag.SearchTerm" placeholder="Search members, IDs, or emails..." />
                     <button type="submit" style="height:56px !important; box-sizing:border-box !important; font-size:15px !important;">SEARCH</button>
                 </form>
                 <form class="am-filters" method="get" asp-action="Members">
                     <input type="hidden" name="searchTerm" value="@ViewBag.SearchTerm" />
+                    <select name="year" aria-label="Joined year" onchange="this.form.submit()">
+                        <option value="">All years</option>
+                        @foreach (var year in availableYears)
+                        {
+                            <option value="@year" selected="@(selectedYear == year)">@year</option>
+                        }
+                    </select>
                     <select name="status" onchange="this.form.submit()">
                         <option value="">All Status</option>
                         @foreach (var item in Enum.GetValues<MemberStatus>())
@@ -672,6 +684,11 @@
                             paidAmounts.TryGetValue(member.UserId, out var paidAmount);
                             var planPrice = MembershipPlanPricing.GetPrice(member.MembershipPlan);
                             var remaining = Math.Max(0m, planPrice - paidAmount);
+                            var cancellationEnd = member.MembershipEndDate ?? member.MembershipStartDate.AddMonths(MembershipPlanPricing.GetDurationMonths(member.MembershipPlan));
+                            var cancellationDays = Math.Max(1, (cancellationEnd.Date - member.MembershipStartDate.Date).Days);
+                            var cancellationUsed = Math.Clamp((DateTime.Today - member.MembershipStartDate.Date).Days, 0, cancellationDays);
+                            var cancellationDeduction = decimal.Round(planPrice / cancellationDays * cancellationUsed, 2);
+                            var cancellationRefund = Math.Max(0m, paidAmount - cancellationDeduction);
                             <tr>
                                 <td>
                                     <div class="am-member">
@@ -693,13 +710,18 @@
                                         <summary aria-label="Member actions" title="Member actions">⋮</summary>
                                         <div class="am-actions-menu">
                                             <button class="am-menu-button" type="button"
+                                                    disabled="@(!MembershipRenewalRules.CanRenew(member.Status, member.MembershipEndDate, DateTime.Today))"
+                                                    title="Renewal opens 7 days before expiry; cancelled memberships can restart."
                                                     data-client-id="@member.UserId"
                                                     data-member-name="@fullName"
                                                     data-plan-name="@MembershipPlanPricing.GetName(member.MembershipPlan)"
                                                     data-plan-price="@planPrice.ToString(System.Globalization.CultureInfo.InvariantCulture)"
                                                     data-expired-date="@(member.MembershipEndDate?.ToString("MMM d, yyyy") ?? "No end date")"
                                                     onclick="openAdminRenewal(this)">Renew membership</button>
-                                            <form asp-controller="Admin" asp-action="CancelMember" method="post" onsubmit="return confirm('Cancel @fullName membership? Only attended gym dates will count as consumed days.');">
+                                            <form asp-controller="Admin" asp-action="CancelMember" method="post" data-member-name="@fullName"
+                                                  data-email="@member.Email" data-price="₱@planPrice.ToString("N2")" data-paid="₱@paidAmount.ToString("N2")"
+                                                  data-days="@cancellationDays" data-used="@cancellationUsed" data-deduction="₱@cancellationDeduction.ToString("N2")"
+                                                  data-refund="₱@cancellationRefund.ToString("N2")" onsubmit="return showCancellationMessage(this);">
                                                 @Html.AntiForgeryToken()
                                                 <input type="hidden" name="id" value="@member.UserId" />
                                                 <button class="am-menu-button" type="submit">Cancel membership</button>
@@ -724,8 +746,8 @@
                 <div class="am-pager">
                     <span class="am-page-info">Showing @Model.Count of @ViewBag.TotalCount members</span>
                     <div class="am-page-actions">
-                        <a class="am-page @(currentPage <= 1 ? "disabled" : "")" asp-action="Members" asp-route-searchTerm="@ViewBag.SearchTerm" asp-route-status="@selectedStatus" asp-route-plan="@selectedPlan" asp-route-page="@(currentPage - 1)">Previous</a>
-                        <a class="am-page @(currentPage >= totalPages ? "disabled" : "")" asp-action="Members" asp-route-searchTerm="@ViewBag.SearchTerm" asp-route-status="@selectedStatus" asp-route-plan="@selectedPlan" asp-route-page="@(currentPage + 1)">Next</a>
+                        <a class="am-page @(currentPage <= 1 ? "disabled" : "")" asp-action="Members" asp-route-searchTerm="@ViewBag.SearchTerm" asp-route-status="@selectedStatus" asp-route-plan="@selectedPlan" asp-route-year="@selectedYear" asp-route-page="@(currentPage - 1)">Previous</a>
+                        <a class="am-page @(currentPage >= totalPages ? "disabled" : "")" asp-action="Members" asp-route-searchTerm="@ViewBag.SearchTerm" asp-route-status="@selectedStatus" asp-route-plan="@selectedPlan" asp-route-year="@selectedYear" asp-route-page="@(currentPage + 1)">Next</a>
                     </div>
                 </div>
             </section>
@@ -777,6 +799,39 @@
         </div>
     </div>
 
+    <dialog id="cancelMemberDialog" aria-labelledby="cancelMemberTitle" style="width:min(480px,90vw);padding:28px;background:#1b201c;color:white;border:1px solid #3c443d;border-radius:12px;">
+        <h2 id="cancelMemberTitle">Review cancellation receipt</h2>
+        <p id="cancelMemberMessage"></p>
+        <section style="border:1px solid #3c443d;margin:18px 0;">
+            <h3 style="margin:0;padding:16px;background:#b7ff1b;color:#182000">Membership cancellation</h3>
+            <div style="padding:18px;line-height:1.7">
+                <p>Send to: <strong id="receiptEmail"></strong></p>
+                <div>Plan price: <span id="receiptPrice"></span></div>
+                <div>Plan duration: <span id="receiptDays"></span> days</div>
+                <div>Payment received: <span id="receiptPaid"></span></div>
+                <div>Days used: <span id="receiptUsed"></span></div>
+                <div>Deduction: <span id="receiptDeduction"></span></div>
+                <p id="receiptCalculation" style="color:#b7ff1b;font-size:20px"></p>
+            </div>
+        </section>
+        <p>Days used are counted from the day after the membership starts, whether the member attends or not. The refund is the amount paid minus the cost of elapsed membership days.</p>
+        <p>The refund breakdown will be emailed to the member. Management must process the refund separately.</p>
+        <div style="display:flex;justify-content:flex-end;gap:12px;margin-top:24px">
+            <button type="button" class="floating-cancel" onclick="document.getElementById('cancelMemberDialog').close()">Go back</button>
+            <button type="button" class="floating-confirm" id="confirmMemberCancellation" onclick="confirmCancellation()" style="background:#b7ff1b;color:#182000">Confirm and email receipt</button>
+        </div>
+    </dialog>
+    <style>
+        #cancelMemberDialog::backdrop { background:rgba(0,0,0,.65); }
+        #cancelMemberDialog {
+            position:fixed !important;
+            inset:0 !important;
+            margin:auto !important;
+            max-height:90vh;
+            overflow-y:auto;
+            box-sizing:border-box;
+        }
+    </style>
     <script>
             if (window.self !== window.top) {
                 window.top.location.href = window.location.href;
@@ -795,6 +850,23 @@
                 document.body.style.overflow = '';
             }
 
+            let pendingCancellationForm = null;
+            function showCancellationMessage(form) {
+                pendingCancellationForm = form;
+                document.getElementById('cancelMemberMessage').textContent = 'Cancel the membership of ' + form.dataset.memberName + '?';
+                for (const field of ['Email', 'Price', 'Days', 'Paid', 'Used', 'Deduction']) {
+                    document.getElementById('receipt' + field).textContent = form.dataset[field.toLowerCase()];
+                }
+                document.getElementById('receiptCalculation').textContent = 'Estimated refund: ' + form.dataset.refund;
+                document.getElementById('cancelMemberDialog').showModal();
+                return false;
+            }
+            function confirmCancellation() {
+                if (!pendingCancellationForm) return;
+                document.getElementById('confirmMemberCancellation').disabled = true;
+                HTMLFormElement.prototype.submit.call(pendingCancellationForm);
+                pendingCancellationForm = null;
+            }
             function exportMemberReport(format) {
                 const details = document.querySelector('.am-export');
                 if (details) details.open = false;

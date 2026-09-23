@@ -992,9 +992,10 @@ namespace Gym.Controllers
                 });
             }
 
+            Client registeredMember;
             try
             {
-                await _memberService.CreateClientAsync(form);
+                registeredMember = await _memberService.CreateClientAsync(form);
             }
             catch (InvalidOperationException ex)
             {
@@ -1013,8 +1014,17 @@ namespace Gym.Controllers
                 });
             }
 
-            TempData["SuccessMessage"] =
-                $"Member '{form.FullName}' registered and the cash payment was recorded successfully!";
+            var initialPayment = registeredMember.Payments.Single();
+            var (receiptSent, receiptError) = await _gmailService.SendMemberPaymentReceiptAsync(
+                registeredMember.Email, form.FullName, initialPayment.TransactionCode,
+                initialPayment.Amount, initialPayment.PaymentDate,
+                MembershipPlanPricing.GetName(registeredMember.MembershipPlan),
+                initialPayment.Amount, initialPayment.Amount, 0m);
+            await RecordEmailDeliveryAsync(receiptSent, "Payment receipt", form.FullName,
+                registeredMember.Email, receiptError);
+            TempData[receiptSent ? "SuccessMessage" : "ErrorMessage"] = receiptSent
+                ? $"Member '{form.FullName}' registered, payment recorded, and receipt emailed successfully."
+                : $"Member '{form.FullName}' registered and payment recorded, but the receipt could not be emailed. {receiptError}";
 
             return returnToAdmin
                 ? RedirectToAction("Members", "Admin", new { registrationComplete = true })
@@ -1077,9 +1087,9 @@ namespace Gym.Controllers
                 return RedirectToAction(nameof(Payment));
             }
 
-            if (!member.MembershipEndDate.HasValue || member.MembershipEndDate.Value.Date >= DateTime.Today)
+            if (!MembershipRenewalRules.CanRenew(member.Status, member.MembershipEndDate, DateTime.Today))
             {
-                TempData["ErrorMessage"] = "Renewal is available only after the current membership plan has ended.";
+                TempData["ErrorMessage"] = "Renewal opens 7 days before the membership ends. Cancelled memberships can restart at the full plan price.";
                 return RedirectToAction(nameof(Payment));
             }
 
@@ -1383,12 +1393,17 @@ namespace Gym.Controllers
                     : Math.Max(1, (membershipEnd.Date - member.MembershipStartDate.Date).Days);
                 var dailyRate = member == null ? 0m : MembershipPlanPricing.GetPrice(member.MembershipPlan) / membershipDays;
                 var estimatedRefund = Math.Max(0m, totalPaid - (dailyRate * consumedDays.Value));
+                var (sent, error) = await _gmailService.SendCancellationReceiptAsync(
+                    member!.Email, $"{member.FirstName} {member.LastName}".Trim(), MembershipPlanPricing.GetPrice(member.MembershipPlan),
+                    totalPaid, membershipDays, consumedDays.Value);
+                await RecordEmailDeliveryAsync(sent, "Cancellation refund breakdown", $"{member.FirstName} {member.LastName}".Trim(), member.Email, error);
                 await RecordAdminActivityAsync(
                     "Membership canceled",
                     member == null ? $"Member #{id}" : $"{member.FirstName} {member.LastName}".Trim(),
                     $"Membership canceled with {consumedDays.Value} elapsed membership day(s) consumed.");
                 TempData["SuccessMessage"] =
-                    $"Membership canceled successfully. {consumedDays.Value} calendar membership day(s) consumed after confirmation. Estimated refund: ₱{estimatedRefund:N2}.";
+                    $"Membership canceled successfully. {consumedDays.Value} calendar membership day(s) consumed after confirmation. Estimated refund: ₱{estimatedRefund:N2}. " +
+                    (sent ? "The refund breakdown was emailed." : error);
             }
 
             return RedirectToAction(nameof(Member));
