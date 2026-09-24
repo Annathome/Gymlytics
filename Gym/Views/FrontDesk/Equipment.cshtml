@@ -1,7 +1,7 @@
 @model Gym.Models.FrontDeskEquipmentViewModel
 @{
     Layout = "~/Views/Shared/_FrontDeskLayout.cshtml";
-    ViewData["Title"] = "Equipment Inventory";
+    ViewData["Title"] = "Equipment Report";
 }
 
 <style>
@@ -412,7 +412,7 @@
 
 <main class="eq-page">
     <header class="eq-head">
-        <h1 style="color:#fff !important;">Equipment Inventory</h1>
+        <h1 style="color:#fff !important;">Equipment Report</h1>
        
         <button class="eq-add" type="button" onclick="openEquipmentModal()">＋ Report Equipment Issue</button>
     </header>
@@ -430,6 +430,10 @@
         <div class="eq-stat">
             <span>TOTAL ASSETS</span>
             <strong>@Model.TotalAssets</strong>
+        </div>
+        <div class="eq-stat good">
+            <span>GOOD EQUIPMENT</span>
+            <strong>@Model.GoodQuantity</strong>
         </div>
         <div class="eq-stat maintenance">
             <span>IN MAINTENANCE</span>
@@ -455,7 +459,8 @@
                 <tr>
                     <th>ASSET NAME</th>
                     <th>CATEGORY</th>
-                    <th>QUANTITY</th>
+                    <th>REPORTED QUANTITY</th>
+                    <th>AVAILABLE QUANTITY</th>
                     <th>CONDITION</th>
                     <th>EVIDENCE</th>
                     <th>LAST MAINTENANCE</th>
@@ -466,7 +471,7 @@
                 @if (Model.Items.Count == 0)
                 {
                     <tr>
-                        <td colspan="7" style="text-align:center;color:#748078">No equipment found.</td>
+                        <td colspan="8" style="text-align:center;color:#748078">No equipment found.</td>
                     </tr>
                 }
                 @foreach (var item in Model.Items)
@@ -479,6 +484,7 @@
                         </td>
                         <td>@item.Category</td>
                         <td>@item.Quantity</td>
+                        <td>@Model.AvailableByEquipment.GetValueOrDefault(item.EquipmentName)</td>
                         <td><span class="condition @conditionClass">@item.Status</span></td>
                         <td>
                             @if (!string.IsNullOrWhiteSpace(item.EvidencePhotoPath))

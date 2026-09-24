@@ -74,12 +74,6 @@ namespace Gym.Services
                     trainer => $"{trainer.FirstName} {trainer.LastName}");
             var trainerOptions = await BuildTrainerOptionsAsync();
 
-            var paidTotals = await _context.Payments
-                .AsNoTracking()
-                .Where(payment => payment.Status == PaymentStatus.Paid)
-                .GroupBy(payment => payment.ClientId)
-                .Select(group => new { ClientId = group.Key, Total = group.Sum(payment => payment.Amount) })
-                .ToDictionaryAsync(item => item.ClientId, item => item.Total);
             var dailyReminderPrefix = $"DailyMemberReminder:%:{DateTime.Today:yyyyMMdd}";
             var dailyReminderKeys = await _context.FrontDeskEmailNotifications.AsNoTracking()
                 .Where(item => item.Status == "Sent" && EF.Functions.Like(item.DeliveryKey, dailyReminderPrefix))
@@ -114,8 +108,9 @@ namespace Gym.Services
                         client.PreferredDays,
                         client.PreferredTimeSlot);
                     var planPrice = MembershipPlanPricing.GetPrice(client.MembershipPlan);
-                    paidTotals.TryGetValue(client.UserId, out var paidAmount);
-                    var remainingBalance = Math.Max(0m, planPrice - paidAmount);
+                    // Fully paid memberships carry only their current plan value, never historical payments.
+                    var paidAmount = client.Status == MemberStatus.Canceled ? 0m : planPrice;
+                    var remainingBalance = 0m;
                     var membershipDays = Math.Max(1, (expirationDate.Date - client.MembershipStartDate.Date).Days);
                     // Refunds are prorated by elapsed calendar days, not gym attendance.
                     // The start/confirmation date consumes zero days; each following
@@ -415,6 +410,14 @@ namespace Gym.Services
         public async Task<Client> CreateClientAsync(
             AddMemberViewModel form)
         {
+            if (!RegistrationName.ValidFull(form.FullName))
+                throw new InvalidOperationException("Enter the member's complete first and last name. Initials and N/A are not accepted.");
+            form.FullName = RegistrationName.Normalize(form.FullName);
+            var registeredNames = await _context.Clients.AsNoTracking()
+                .Where(client => client.Role == UserRole.Client)
+                .Select(client => client.FirstName + " " + client.LastName).ToListAsync();
+            if (registeredNames.Any(name => RegistrationName.Same(name, form.FullName)))
+                throw new InvalidOperationException("A member with this full name is already registered. Use the existing member record.");
             if (!await _context.MembershipPlanSettings.AnyAsync(item => item.IsActive))
                 throw new InvalidOperationException("Member registration is unavailable. An administrator must add a membership plan first.");
 
@@ -759,7 +762,7 @@ namespace Gym.Services
         {
             var client = await FindClientAsync(id);
 
-            if (client == null)
+            if (client == null || client.Status == MemberStatus.Canceled)
             {
                 return null;
             }

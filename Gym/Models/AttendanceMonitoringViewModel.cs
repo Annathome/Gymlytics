@@ -5,7 +5,7 @@ public class AttendanceMonitoringViewModel
     public string SearchTerm { get; set; } = string.Empty;
     public List<AttendanceMemberItem> Members { get; set; } = new();
     public int Page { get; set; } = 1;
-    public int PageSize { get; set; } = 10;
+    public int PageSize { get; set; } = 7;
     public int TotalCount { get; set; }
     public int TotalPages => Math.Max(1, (int)Math.Ceiling(TotalCount / (double)PageSize));
 }
@@ -19,4 +19,5 @@ public class AttendanceMemberItem
     public DateTime? CheckInAt { get; set; }
     public string Status { get; set; } = "Not checked in";
     public bool CanCheckIn => !CheckInAt.HasValue;
+    public bool ReminderEmailFailed { get; set; }
 }

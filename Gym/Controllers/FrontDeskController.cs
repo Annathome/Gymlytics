@@ -50,7 +50,7 @@ namespace Gym.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Fdashboard()
+        public async Task<IActionResult> Fdashboard(int schedulePage = 1)
         {
             var weekStart = DateTime.Today.AddDays(-6);
             var weekEnd = DateTime.Today.AddDays(1);
@@ -194,9 +194,13 @@ namespace Gym.Controllers
                         DisplayStatus = response?.NotificationType.Split(':').LastOrDefault() ?? "Scheduled",
                         IsReminded = sentReminders.Contains($"TrainingReminderSent:{client.UserId}:{today:yyyyMMdd}:{timeSignature}")
                     };
-                }).OrderBy(item => item.StartTime).ThenBy(item => item.MemberName).ToList()
+                }).Where(item => item.EndTime > DateTime.Now)
+                  .OrderBy(item => item.StartTime).ThenBy(item => item.MemberName).ToList()
             };
 
+            model.ScheduleTotalCount = model.Schedule.Count;
+            model.SchedulePage = Math.Clamp(schedulePage, 1, model.ScheduleTotalPages);
+            model.Schedule = model.Schedule.Skip((model.SchedulePage - 1) * 5).Take(5).ToList();
             return View(model);
         }
 
@@ -220,7 +224,7 @@ namespace Gym.Controllers
                 await _context.SaveChangesAsync();
             }
 
-            const int pageSize = 5;
+            const int pageSize = 10;
             var notificationQuery = _context.FrontDeskEmailNotifications
                 .AsNoTracking()
                 .Where(item => item.StaffId == 0 || item.StaffId == userId)
@@ -644,7 +648,15 @@ namespace Gym.Controllers
                 SearchTerm = searchTerm ?? string.Empty,
                 Items = items,
                 EquipmentNames = equipmentNames,
+                AvailableByEquipment = allEquipment.GroupBy(item => item.EquipmentName, StringComparer.OrdinalIgnoreCase)
+                    .ToDictionary(group => group.Key,
+                        group => Math.Max(0, group.Where(EquipmentStock.IsInventory).Sum(item => item.Quantity)
+                            - group.Where(item => !EquipmentStock.IsInventory(item)).Sum(item => item.Quantity)),
+                        StringComparer.OrdinalIgnoreCase),
                 TotalAssets = allEquipment.Where(EquipmentStock.IsInventory).Sum(item => item.Quantity),
+                GoodQuantity = allEquipment.GroupBy(item => item.EquipmentName, StringComparer.OrdinalIgnoreCase)
+                    .Sum(group => Math.Max(0, group.Where(EquipmentStock.IsInventory).Sum(item => item.Quantity)
+                        - group.Where(item => !EquipmentStock.IsInventory(item)).Sum(item => item.Quantity))),
                 InMaintenance = allEquipment
                     .Where(item => item.Status == "Needs Maintenance")
                     .Sum(item => item.Quantity),
@@ -747,7 +759,7 @@ namespace Gym.Controllers
             string? searchTerm,
             int page = 1)
         {
-            const int pageSize = 10;
+            const int pageSize = 7;
             page = Math.Max(1, page);
             var today = DateTime.Today;
             var tomorrow = today.AddDays(1);
@@ -764,6 +776,15 @@ namespace Gym.Controllers
                 .OrderByDescending(log => log.CheckInAt)
                 .ToListAsync();
 
+            var reminderSuffix = $":{today:yyyyMMdd}";
+            var reminderAttempts = await _context.FrontDeskEmailNotifications.AsNoTracking()
+                .Where(item => item.DeliveryKey.StartsWith("DailyMemberReminder:") && item.DeliveryKey.EndsWith(reminderSuffix))
+                .OrderByDescending(item => item.CreatedDate).ThenByDescending(item => item.Id)
+                .Select(item => new { item.DeliveryKey, item.Status }).ToListAsync();
+            var failedReminderKeys = reminderAttempts.GroupBy(item => item.DeliveryKey)
+                .Where(group => group.First().Status == "Failed" && !group.Any(item => item.Status == "Sent"))
+                .Select(group => group.Key).ToHashSet();
+
             var items = clients.Select(client =>
             {
                 var log = logs.FirstOrDefault(item => item.ClientId == client.UserId);
@@ -778,9 +799,10 @@ namespace Gym.Controllers
                     Initials = initials.ToUpperInvariant(),
                     Membership = MembershipPlanPricing.GetName(client.MembershipPlan),
                     CheckInAt = log?.CheckInAt,
+                    ReminderEmailFailed = failedReminderKeys.Contains($"DailyMemberReminder:{client.UserId}:{today:yyyyMMdd}"),
                     Status = log == null ? "Not checked in" : "Checked in"
                 };
-            }).ToList();
+            }).OrderByDescending(item => item.ReminderEmailFailed).ToList();
 
             searchTerm = searchTerm?.Trim();
             if (!string.IsNullOrWhiteSpace(searchTerm))
@@ -806,17 +828,19 @@ namespace Gym.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> UpdateAttendance(int id, string attendanceAction)
+        public async Task<IActionResult> UpdateAttendance(int id, string attendanceAction, string? searchTerm, int page = 1)
         {
+            var today = DateTime.Today;
             var clientExists = await _context.Clients.AnyAsync(client =>
-                client.UserId == id && client.Role == UserRole.Client);
+                client.UserId == id && client.Role == UserRole.Client &&
+                client.IsActive && client.IsActiveMember &&
+                (!client.MembershipEndDate.HasValue || client.MembershipEndDate.Value >= today));
             if (!clientExists)
             {
                 TempData["ErrorMessage"] = "Member was not found.";
                 return RedirectToAction(nameof(AttendanceMonitoring));
             }
 
-            var today = DateTime.Today;
             var tomorrow = today.AddDays(1);
             if (!string.Equals(attendanceAction, "checkin", StringComparison.OrdinalIgnoreCase))
             {
@@ -841,7 +865,7 @@ namespace Gym.Controllers
             });
             await _context.SaveChangesAsync();
             TempData["SuccessMessage"] = "Member checked in successfully.";
-            return RedirectToAction(nameof(AttendanceMonitoring));
+            return RedirectToAction(nameof(AttendanceMonitoring), new { searchTerm, page });
         }
 
         [HttpGet]
@@ -876,8 +900,15 @@ namespace Gym.Controllers
                 return RedirectToAction(nameof(WalkInClient));
             }
 
-            var firstName = form.FirstName.Trim();
-            var lastName = form.LastName.Trim();
+            var firstName = RegistrationName.Normalize(form.FirstName);
+            var lastName = RegistrationName.Normalize(form.LastName);
+            var existingNames = await _context.WalkInClients.AsNoTracking()
+                .Select(item => item.FirstName + " " + item.LastName).ToListAsync();
+            if (existingNames.Any(name => RegistrationName.Same(name, firstName + " " + lastName)))
+            {
+                TempData["ErrorMessage"] = "A walk-in with this full name is already registered. Use the existing client's return-visit action.";
+                return RedirectToAction(nameof(WalkInClient));
+            }
             var contact = form.ContactNumber.Trim();
             var email = string.IsNullOrWhiteSpace(form.Email) ? null : form.Email.Trim();
             var today = DateTime.Today;
@@ -1075,7 +1106,7 @@ namespace Gym.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> RenewMembership(int id, decimal amount)
+        public async Task<IActionResult> RenewMembership(int id, decimal amount, bool returnToMember = false)
         {
             var member = await _context.Clients
                 .AsNoTracking()
@@ -1084,23 +1115,32 @@ namespace Gym.Controllers
             if (member == null || member.Status == MemberStatus.Terminated)
             {
                 TempData["ErrorMessage"] = "The member could not be renewed.";
-                return RedirectToAction(nameof(Payment));
+                return RedirectToAction(returnToMember ? nameof(Member) : nameof(Payment));
             }
 
             if (!MembershipRenewalRules.CanRenew(member.Status, member.MembershipEndDate, DateTime.Today))
             {
                 TempData["ErrorMessage"] = "Renewal opens 7 days before the membership ends. Cancelled memberships can restart at the full plan price.";
-                return RedirectToAction(nameof(Payment));
+                return RedirectToAction(returnToMember ? nameof(Member) : nameof(Payment));
             }
 
             var planPrice = MembershipPlanPricing.GetPrice(member.MembershipPlan);
             if (amount != planPrice)
             {
                 TempData["ErrorMessage"] = $"The full renewal payment of ₱{planPrice:N2} is required.";
-                return RedirectToAction(nameof(Payment));
+                return RedirectToAction(returnToMember ? nameof(Member) : nameof(Payment));
             }
 
             var paidAt = DateTime.Now;
+            var duplicateRenewal = await _context.Payments.AsNoTracking().AnyAsync(payment =>
+                payment.ClientId == id && payment.Status == PaymentStatus.Paid &&
+                payment.PaymentDate >= paidAt.Date && payment.PaymentDate < paidAt.Date.AddDays(1) &&
+                payment.Notes != null && payment.Notes.Contains("renewal"));
+            if (duplicateRenewal && member.Status != MemberStatus.Canceled)
+            {
+                TempData["ErrorMessage"] = "A membership renewal payment has already been recorded for this member today.";
+                return RedirectToAction(returnToMember ? nameof(Member) : nameof(Payment));
+            }
             var transactionCode = $"TXN-{paidAt:yyyyMMdd}-{Guid.NewGuid().ToString("N")[..6].ToUpperInvariant()}";
             _context.Payments.Add(new Payment
             {
@@ -1147,7 +1187,7 @@ namespace Gym.Controllers
                 }
             }
 
-            return RedirectToAction(nameof(Payment));
+            return RedirectToAction(returnToMember ? nameof(Member) : nameof(Payment));
         }
 
         [HttpPost]
@@ -1382,9 +1422,7 @@ namespace Gym.Controllers
             }
             else
             {
-                var totalPaid = await _context.Payments.AsNoTracking()
-                    .Where(payment => payment.ClientId == id && payment.Status == PaymentStatus.Paid)
-                    .SumAsync(payment => (decimal?)payment.Amount) ?? 0m;
+                var totalPaid = MembershipPlanPricing.GetPrice(member!.MembershipPlan);
                 var membershipEnd = member?.MembershipEndDate ?? (member == null
                     ? DateTime.Today
                     : member.MembershipStartDate.AddMonths(MembershipPlanPricing.GetDurationMonths(member.MembershipPlan)));

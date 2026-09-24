@@ -166,6 +166,13 @@ namespace Gym.Controllers
                 Items = items,
                 EquipmentNames = await _context.EquipmentNameCatalog.AsNoTracking().OrderBy(item => item.Name).ToListAsync(),
                 TotalAssets = allEquipment.Where(EquipmentStock.IsInventory).Sum(item => item.Quantity),
+                AvailableByEquipment = allEquipment.GroupBy(item => item.EquipmentName, StringComparer.OrdinalIgnoreCase)
+                    .ToDictionary(group => group.Key, group => Math.Max(0,
+                        group.Where(EquipmentStock.IsInventory).Sum(item => item.Quantity)
+                        - group.Where(item => !EquipmentStock.IsInventory(item)).Sum(item => item.Quantity)), StringComparer.OrdinalIgnoreCase),
+                GoodQuantity = allEquipment.GroupBy(item => item.EquipmentName, StringComparer.OrdinalIgnoreCase)
+                    .Sum(group => Math.Max(0, group.Where(EquipmentStock.IsInventory).Sum(item => item.Quantity)
+                        - group.Where(item => !EquipmentStock.IsInventory(item)).Sum(item => item.Quantity))),
                 InMaintenance = allEquipment.Where(item => item.Status == "Needs Maintenance").Sum(item => item.Quantity),
                 OutOfOrder = allEquipment.Where(item => item.Status == "Out of Order").Sum(item => item.Quantity),
                 Page = page,

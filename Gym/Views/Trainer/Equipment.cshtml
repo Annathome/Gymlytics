@@ -1,7 +1,7 @@
 @model Gym.Models.FrontDeskEquipmentViewModel
 @{
     Layout = "~/Views/Shared/_TrainerLayout.cshtml";
-    ViewData["Title"] = "Equipment";
+    ViewData["Title"] = "Equipment Report";
 }
 
 <style>
@@ -210,7 +210,7 @@
     @if (TempData["ErrorMessage"] is string error) { <div role="alert" style="color:#ffb4b4">@error</div> }
     @if (TempData["SuccessMessage"] is string success) { <div role="status" style="color:#b7ff1b">@success</div> }
     <header class="te-header">
-        <h1>Equipment</h1>
+        <h1>Equipment Report</h1>
         <button class="te-report-button" type="button" onclick="document.getElementById('trainerEquipmentReport').showModal()">＋ Report equipment issue</button>
     </header>
 
@@ -218,6 +218,10 @@
         <div class="te-stat">
             <span>TOTAL ASSETS</span>
             <strong>@Model.TotalAssets</strong>
+        </div>
+        <div class="te-stat good">
+            <span>GOOD EQUIPMENT</span>
+            <strong>@Model.GoodQuantity</strong>
         </div>
         <div class="te-stat maintenance">
             <span>IN MAINTENANCE</span>
@@ -241,16 +245,19 @@
                 <tr>
                     <th>ASSET NAME</th>
                     <th>CATEGORY</th>
-                    <th>QUANTITY</th>
+                    <th>REPORTED QUANTITY</th>
+                    <th>AVAILABLE QUANTITY</th>
                     <th>CONDITION</th>
+                    <th>EVIDENCE</th>
                     <th>LAST MAINTENANCE</th>
+                    <th>ADDED DATE</th>
                 </tr>
             </thead>
             <tbody>
                 @if (Model.Items.Count == 0)
                 {
                     <tr>
-                        <td colspan="5" style="text-align:center">No equipment found.</td>
+                        <td colspan="8" style="text-align:center">No equipment found.</td>
                     </tr>
                 }
                 @foreach (var item in Model.Items)
@@ -263,8 +270,17 @@
                         </td>
                         <td>@item.Category</td>
                         <td>@item.Quantity</td>
+                        <td>@Model.AvailableByEquipment.GetValueOrDefault(item.EquipmentName)</td>
                         <td><span class="te-condition @conditionClass">@item.Status</span></td>
+                        <td>
+                            @if (!string.IsNullOrWhiteSpace(item.EvidencePhotoPath))
+                            {
+                                <a href="@item.EvidencePhotoPath" target="_blank" rel="noopener">View photo</a>
+                            }
+                            else { <span>—</span> }
+                        </td>
                         <td>@(item.LastMaintenanceDate?.ToString("MMM d, yyyy") ?? "—")</td>
+                        <td>@item.AddedDate.ToString("MMM d, yyyy")</td>
                     </tr>
                 }
             </tbody>

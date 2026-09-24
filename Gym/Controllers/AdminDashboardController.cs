@@ -136,11 +136,6 @@ namespace Gym.Controllers
                     .Where(trainer => trainerIds.Contains(trainer.UserId))
                     .ToDictionaryAsync(trainer => trainer.UserId,
                         trainer => $"{trainer.FirstName} {trainer.LastName}");
-                var clientIds = clients.Select(client => client.UserId).ToList();
-                ViewBag.PaidAmounts = await _context.Payments.AsNoTracking()
-                    .Where(payment => clientIds.Contains(payment.ClientId) && payment.Status == PaymentStatus.Paid)
-                    .GroupBy(payment => payment.ClientId)
-                    .ToDictionaryAsync(group => group.Key, group => group.Sum(payment => payment.Amount));
                 var reminderSuffix = $":{DateTime.Today:yyyyMMdd}";
                 ViewBag.DailyReminderMemberIds = (await _context.FrontDeskEmailNotifications.AsNoTracking()
                     .Where(item => item.Status == "Sent" && item.EmailType == "Daily member reminder" && item.DeliveryKey.EndsWith(reminderSuffix))
@@ -304,12 +299,10 @@ namespace Gym.Controllers
             }
             TempData[consumedDays.HasValue ? "SuccessMessage" : "ErrorMessage"] = consumedDays.HasValue
                 ? $"Membership canceled. {consumedDays.Value} calendar membership day(s) consumed after confirmation."
-                : "The member could not be found.";
+                : "The member could not be found or the membership is already canceled.";
             if (consumedDays.HasValue && member != null)
             {
-                var totalPaid = await _context.Payments.AsNoTracking()
-                    .Where(payment => payment.ClientId == id && payment.Status == PaymentStatus.Paid)
-                    .SumAsync(payment => (decimal?)payment.Amount) ?? 0m;
+                var totalPaid = MembershipPlanPricing.GetPrice(member.MembershipPlan);
                 var end = member.MembershipEndDate ?? member.MembershipStartDate.AddMonths(MembershipPlanPricing.GetDurationMonths(member.MembershipPlan));
                 var days = Math.Max(1, (end.Date - member.MembershipStartDate.Date).Days);
                 var (sent, error) = await _gmailService.SendCancellationReceiptAsync(member.Email, memberName,
@@ -1419,8 +1412,15 @@ namespace Gym.Controllers
                 return RedirectToAction(nameof(WalkInClient));
             }
 
-            var firstName = form.FirstName.Trim();
-            var lastName = form.LastName.Trim();
+            var firstName = RegistrationName.Normalize(form.FirstName);
+            var lastName = RegistrationName.Normalize(form.LastName);
+            var existingNames = await _context.WalkInClients.AsNoTracking()
+                .Select(item => item.FirstName + " " + item.LastName).ToListAsync();
+            if (existingNames.Any(name => RegistrationName.Same(name, firstName + " " + lastName)))
+            {
+                TempData["ErrorMessage"] = "A walk-in with this full name is already registered. Use the existing client's return-visit action.";
+                return RedirectToAction(nameof(WalkInClient));
+            }
             var contact = form.ContactNumber.Trim();
             var email = string.IsNullOrWhiteSpace(form.Email) ? null : form.Email.Trim();
             var today = DateTime.Today;

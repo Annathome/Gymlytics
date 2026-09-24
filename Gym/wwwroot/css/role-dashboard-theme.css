@@ -1,3 +1,25 @@
+@layer trainerEquipmentReport {
+    body.trainer-shell .trainer-equipment .te-stats { grid-template-columns:repeat(4,minmax(0,1fr))!important; gap:14px!important; }
+    body.trainer-shell .trainer-equipment .te-stat.good strong { color:#b7ff1b!important; }
+    body.trainer-shell .trainer-equipment .te-card { overflow-x:auto!important; }
+    body.trainer-shell .trainer-equipment .te-table { min-width:980px; }
+    body.trainer-shell .trainer-equipment .te-report-button { font-size:15px!important; padding:10px 14px!important; min-height:42px!important; }
+    body.trainer-shell .trainer-equipment .te-report-button:is(:hover,:focus-visible) { background:transparent!important; color:#b7ff1b!important; border-color:#b7ff1b!important; }
+    @media(max-width:1000px) { body.trainer-shell .trainer-equipment .te-stats { grid-template-columns:repeat(2,minmax(0,1fr))!important; } }
+    @media(max-width:540px) { body.trainer-shell .trainer-equipment .te-stats { grid-template-columns:1fr!important; } }
+}
+@layer uniformTableInitials {
+    body.admin-shell td.walkin-empty-message { color:#aeb7b0!important; font-weight:400!important; }
+    body:is(.admin-shell,.frontdesk-shell,.trainer-shell) :is(.am-avatar,.aa-avatar,.tm-avatar,.pay-avatar,.avatar-circle,table .avatar,.wi-avatar) {
+        background:#27372b!important; color:#b7ff1b!important;
+        width:35px!important; height:35px!important; min-width:35px!important;
+        flex:0 0 35px!important; border-radius:50%!important;
+        display:inline-flex!important; align-items:center!important; justify-content:center!important;
+        font-family:"Inria Serif",serif!important; font-size:11px!important; font-weight:700!important;
+        line-height:1!important; border:0!important;
+    }
+    .wi-member-name { display:flex; align-items:center; gap:12px; }
+}
 @layer profilePopupTheme {
     body:is(.admin-shell, .trainer-shell, .frontdesk-shell) .admin-logout {
         background:#083d02 !important; color:#fff !important; padding:24px !important; border-radius:14px !important;
@@ -3776,7 +3798,7 @@ html body.admin-shell #equipmentNameModal .ae-modal-actions button[type="submit"
 }
 /* Shared pagination: equal-sized controls, including disabled states. */
 @layer dashboardPagers {
-    body :is(.am-page, .aa-page, .ae-page, .ap-page, .wi-page-button,
+    body :is(a.am-page, .aa-page, .ae-page, .ap-page, .wi-page-button,
         .ua-page-btn, .ad-trainer-page, .pager .btn-invite,
         .activity-pagination-buttons a, .tm-pager a, .te-pager a,
         .email-pagination a, .eq-pager a, .pay-pager a,
@@ -3809,14 +3831,16 @@ html body.admin-shell #equipmentNameModal .ae-modal-actions button[type="submit"
     }
 }
 @layer summaryCardSeverity {
-    body:is(.admin-shell, .frontdesk-shell, .trainer-shell) .summary-warning {
+    body:is(.admin-shell, .frontdesk-shell, .trainer-shell) :is(
+        .summary-warning, .ae-value.maintenance,
+        .te-stat.maintenance > strong, .eq-stat.maintenance > strong
+    ) {
         color: #ffad33 !important;
     }
 
     body:is(.admin-shell, .frontdesk-shell, .trainer-shell) :is(
-        .summary-danger, .ap-value.overdue, .ae-value.maintenance, .ae-value.out,
-        .te-stat.maintenance > strong, .te-stat.out > strong,
-        .eq-stat.maintenance > strong, .eq-stat.out > strong
+        .summary-danger, .ap-value.overdue, .ae-value.out,
+        .te-stat.out > strong, .eq-stat.out > strong
     ) {
         color: #ff6b6b !important;
     }

@@ -422,7 +422,7 @@
 
                     <tr>
 
-                        <td>
+                        <td class="pay-transaction-code">
                             @(string.IsNullOrWhiteSpace(item.TransactionCode)
                                 ? $"TXN-{item.PaymentId:D6}"
                                 : item.TransactionCode)
@@ -431,7 +431,7 @@
                         <td>
                             <div class="pay-member">
 
-                                <span class="pay-avatar">
+                                <span class="pay-avatar pay-avatar-color-0">
                                     @item.Initials
                                 </span>
 

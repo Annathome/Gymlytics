@@ -629,6 +629,7 @@ namespace Gym.Services
                     (@Id, 'Login', GETDATE());
 
                 IF EXISTS (SELECT 1 FROM dbo.Staff WHERE Id = @Id AND Role IN ('Staff', 'Trainer'))
+                   AND CAST(GETDATE() AS TIME) >= CAST('07:00:00' AS TIME)
                    AND NOT EXISTS
                    (
                        SELECT 1 FROM dbo.StaffAttendanceLogs

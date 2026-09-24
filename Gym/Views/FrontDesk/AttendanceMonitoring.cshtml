@@ -387,15 +387,21 @@
                                 @Html.AntiForgeryToken()
                                 <input type="hidden" name="id" value="@member.ClientId" />
                                 <input type="hidden" name="attendanceAction" value="checkin" />
+                                <input type="hidden" name="searchTerm" value="@Model.SearchTerm" />
+                                <input type="hidden" name="page" value="@Model.Page" />
                                 @if (member.CanCheckIn)
                                 {
-                                    <button type="submit">Check In</button>
+                                    <button type="submit" class="@(member.ReminderEmailFailed ? "email-failed-checkin" : "")">Check In</button>
                                 }
                                 else
                                 {
-                                    <button type="button" disabled>Checked In</button>
+                                    <button type="button" class="@(member.ReminderEmailFailed ? "email-failed-checkin" : "")" disabled>Checked In</button>
                                 }
                             </form>
+                            @if (member.ReminderEmailFailed)
+                            {
+                                <small class="attendance-email-failed">Reminder email failed</small>
+                            }
                         </td>
                     </tr>
                 }

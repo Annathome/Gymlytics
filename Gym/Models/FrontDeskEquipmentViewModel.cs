@@ -9,6 +9,8 @@ public class FrontDeskEquipmentViewModel
     public List<Equipment> Items { get; set; } = new();
     public List<EquipmentNameCatalog> EquipmentNames { get; set; } = new();
     public int TotalAssets { get; set; }
+    public int GoodQuantity { get; set; }
+    public Dictionary<string, int> AvailableByEquipment { get; set; } = new(StringComparer.OrdinalIgnoreCase);
     public int InMaintenance { get; set; }
     public int OutOfOrder { get; set; }
     public int Page { get; set; } = 1;

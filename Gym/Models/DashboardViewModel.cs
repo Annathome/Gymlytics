@@ -71,6 +71,9 @@ namespace Gym.Models
         public int EquipmentNeedingMaintenance { get; set; }
         public int UnreadNotificationsCount { get; set; }
         public List<FrontDeskScheduleItem> Schedule { get; set; } = new();
+        public int SchedulePage { get; set; } = 1;
+        public int ScheduleTotalCount { get; set; }
+        public int ScheduleTotalPages => Math.Max(1, (int)Math.Ceiling(ScheduleTotalCount / 5d));
         public List<FrontDeskWeeklyTrafficPoint> WeeklyTraffic { get; set; } = new();
         public List<FrontDeskTrainerAvailabilityItem> TrainerAvailability { get; set; } = new();
     }

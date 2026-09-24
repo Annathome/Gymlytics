@@ -10,7 +10,6 @@
     var selectedPlan = ViewBag.Plan as MembershipPlanType?;
     var selectedYear = ViewBag.Year as int?;
     var availableYears = ViewBag.Years as List<int> ?? new();
-    var paidAmounts = ViewBag.PaidAmounts as Dictionary<int, decimal> ?? new();
     var dailyReminderMemberIds = ViewBag.DailyReminderMemberIds as HashSet<int> ?? new();
 }
 
@@ -681,9 +680,9 @@
                             var days = string.Join(", ", (member.PreferredDays ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).Select(day => day.Length > 3 ? day[..3] : day));
                             var schedule = string.IsNullOrWhiteSpace(days) ? "—" : $"{days} · {member.PreferredTimeSlot ?? "Time not set"}";
                             var badgeClass = member.Status is MemberStatus.Expired or MemberStatus.Terminated ? "expired" : member.Status is MemberStatus.Inactive or MemberStatus.Canceled ? "inactive" : "";
-                            paidAmounts.TryGetValue(member.UserId, out var paidAmount);
                             var planPrice = MembershipPlanPricing.GetPrice(member.MembershipPlan);
-                            var remaining = Math.Max(0m, planPrice - paidAmount);
+                            var paidAmount = member.Status == MemberStatus.Canceled ? 0m : planPrice;
+                            var remaining = 0m;
                             var cancellationEnd = member.MembershipEndDate ?? member.MembershipStartDate.AddMonths(MembershipPlanPricing.GetDurationMonths(member.MembershipPlan));
                             var cancellationDays = Math.Max(1, (cancellationEnd.Date - member.MembershipStartDate.Date).Days);
                             var cancellationUsed = Math.Clamp((DateTime.Today - member.MembershipStartDate.Date).Days, 0, cancellationDays);
@@ -710,7 +709,9 @@
                                         <summary aria-label="Member actions" title="Member actions">⋮</summary>
                                         <div class="am-actions-menu">
                                             <button class="am-menu-button" type="button"
-                                                    disabled="@(!MembershipRenewalRules.CanRenew(member.Status, member.MembershipEndDate, DateTime.Today))"
+                                                    data-can-renew="@(MembershipRenewalRules.CanRenew(member.Status, member.MembershipEndDate, DateTime.Today) ? "true" : "false")"
+                                                    data-renewal-opens="@(member.MembershipEndDate?.AddDays(-7).ToString("MMM d, yyyy"))"
+                                                    data-terminated="@(member.Status == MemberStatus.Terminated ? "true" : "false")"
                                                     title="Renewal opens 7 days before expiry; cancelled memberships can restart."
                                                     data-client-id="@member.UserId"
                                                     data-member-name="@fullName"
@@ -901,6 +902,16 @@
 
             function openAdminRenewal(button) {
                 document.querySelectorAll('.am-actions[open]').forEach(function (menu) { menu.open = false; });
+                if (button.dataset.canRenew !== 'true') {
+                    document.getElementById('renewalNoticeText').textContent = button.dataset.terminated === 'true'
+                        ? 'Terminated memberships cannot be renewed.'
+                        : 'Active memberships can only be renewed during the last 7 days before their end date.';
+                    document.getElementById('renewalNoticeDate').textContent = button.dataset.terminated !== 'true' && button.dataset.renewalOpens
+                        ? `${button.dataset.memberName}'s membership ends on ${button.dataset.expiredDate}. Renewal opens on ${button.dataset.renewalOpens}.`
+                        : '';
+                    document.getElementById('renewalNotice').showModal();
+                    return;
+                }
                 document.getElementById('adminRenewalId').value = button.dataset.clientId;
                 document.getElementById('adminRenewalAmount').value = button.dataset.planPrice;
                 document.getElementById('adminRenewalMember').textContent = button.dataset.memberName;
@@ -922,3 +933,12 @@
             }
     </script>
 
+<dialog id="renewalNotice" aria-labelledby="renewalNoticeTitle" style="position:fixed;inset:0;margin:auto;width:min(460px,90vw);padding:28px;background:#1b201c;color:white;border:1px solid #3c443d;border-radius:12px;">
+    <h2 id="renewalNoticeTitle">Membership renewal</h2>
+    <p id="renewalNoticeText" style="margin:16px 0;line-height:1.6;"></p>
+    <p id="renewalNoticeDate" style="color:#b7ff1b;line-height:1.6;"></p>
+    <div style="display:flex;justify-content:flex-end;margin-top:24px;">
+        <button type="button" class="floating-cancel" onclick="document.getElementById('renewalNotice').close()">Close</button>
+    </div>
+</dialog>
+<style>#renewalNotice::backdrop { background:rgba(0,0,0,.65); }</style>

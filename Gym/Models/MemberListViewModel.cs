@@ -132,6 +132,7 @@ namespace Gym.Models
     public class AddMemberViewModel
     {
         [Required(ErrorMessage = "Full name is required.")]
+        [CompleteRegistrationName(FullName = true)]
         [Display(Name = "Full name")]
         public string FullName { get; set; } = string.Empty;
 

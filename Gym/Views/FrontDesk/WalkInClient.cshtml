@@ -266,7 +266,7 @@
                 @if (Model.Count == 0)
                 {
                     <tr>
-                        <td colspan="6" style="text-align: center; color: #77827b;">
+                        <td colspan="6" class="walkin-empty-message" style="text-align: center;">
                             No walk-in registrations yet.
                         </td>
                     </tr>
@@ -276,7 +276,10 @@
                 {
                     <tr>
                         <td>
-                            @item.FirstName @item.LastName
+                            <div class="wi-member-name">
+                                <span class="wi-avatar">@($"{item.FirstName?.FirstOrDefault()}{item.LastName?.FirstOrDefault()}".Trim().ToUpperInvariant())</span>
+                                <span>@item.FirstName @item.LastName</span>
+                            </div>
                         </td>
 
                         <td>

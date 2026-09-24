@@ -512,7 +512,7 @@
     <header class="role-dashboard-head">
         <div>
             <h1 class="fd-title">Front Desk Overview</h1>
-            <p>Live facility operations and member service activity.</p>
+            <p class="fd-subtitle">Live facility operations and member service activity.</p>
         </div>
         <a class="fd-notification-bell" asp-controller="FrontDesk" asp-action="Notifications"
            title="Front desk notifications" aria-label="Front desk notifications">
@@ -584,7 +584,7 @@
                                     @if (trainer.StartTime.HasValue && trainer.EndTime.HasValue)
                                     {
                                         <span class="fd-trainer-days">
-                                            @trainer.AvailableDays.Replace(",", ", ")<br />
+                                            @string.Join(", ", trainer.AvailableDays.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).Select(day => day.Length > 3 ? day[..3] : day))<br />
                                             @DateTime.Today.Add(trainer.StartTime.Value).ToString("h:mm tt")–@DateTime.Today.Add(trainer.EndTime.Value).ToString("h:mm tt")
                                         </span>
                                     }
@@ -597,7 +597,7 @@
                                 <td>
                                     @if (trainer.RemainingSlots.HasValue)
                                     {
-                                        <span class="fd-slot-count @(trainer.RemainingSlots == 0 ? "full" : "")">@trainer.RemainingSlots</span>
+                                        <span class="fd-slot-count @(trainer.RemainingSlots <= 5 ? "capacity-low" : trainer.RemainingSlots <= 10 ? "capacity-warning" : "capacity-ready")">@trainer.RemainingSlots</span>
                                     }
                                     else
                                     {
@@ -638,20 +638,20 @@
                         <th>DATE</th>
                         <th>TIME</th>
                         <th>STATUS</th>
-                        <th></th>
+
                     </tr>
                 </thead>
                 <tbody>
                     @if (Model.Schedule.Count == 0)
                     {
                         <tr>
-                            <td colspan="6" class="fd-not-set">No upcoming sessions found.</td>
+                            <td colspan="5" class="fd-not-set">No upcoming sessions found.</td>
                         </tr>
                     }
                     @foreach (var item in Model.Schedule)
                     {
                         var statusClass = item.DisplayStatus.ToLowerInvariant();
-                        var sessionPassed = item.StartTime <= DateTime.Now;
+
 
                         <tr>
                             <td>@item.TrainerName</td>
@@ -659,19 +659,7 @@
                             <td>@item.Date.ToString("yyyy-MM-dd")</td>
                             <td>@item.StartTime.ToString("h:mm tt") - @item.EndTime.ToString("h:mm tt")</td>
                             <td><span class="fd-badge @statusClass">@item.DisplayStatus</span></td>
-                            <td>
-                                <form class="fd-reminder-form" asp-action="SendSessionReminder" method="post">
-                                    @Html.AntiForgeryToken()
-                                    <input type="hidden" name="clientId" value="@item.ClientId" />
-                                    <input type="hidden" name="date" value="@item.Date.ToString("yyyy-MM-dd")" />
-                                    <button class="fd-action @((item.IsReminded || sessionPassed) ? "reminded" : "remind")"
-                                            type="submit"
-                                            disabled="@(item.IsReminded || sessionPassed)"
-                                            title="@(sessionPassed ? "This training session has already started or passed." : null)">
-                                        @(sessionPassed ? "Time passed" : item.IsReminded ? "Reminded" : "Remind")
-                                    </button>
-                                </form>
-                            </td>
+
                         </tr>
                     }
                 </tbody>
@@ -679,11 +667,11 @@
         </div>
 
         <div class="fd-table-foot">
-            <span>Showing @Model.Schedule.Count of @Model.Schedule.Count (page 1 of 1)</span>
-            <div class="fd-pager">
-                <button type="button" disabled>Previous</button>
-                <button type="button" disabled>Next</button>
-            </div>
+            <span>Showing @Model.Schedule.Count of @Model.ScheduleTotalCount (page @Model.SchedulePage of @Model.ScheduleTotalPages)</span>
+            <form class="fd-pager" method="get" asp-action="Fdashboard">
+                <button type="submit" name="schedulePage" value="@(Model.SchedulePage - 1)" disabled="@(Model.SchedulePage <= 1)">Previous</button>
+                <button type="submit" name="schedulePage" value="@(Model.SchedulePage + 1)" disabled="@(Model.SchedulePage >= Model.ScheduleTotalPages)">Next</button>
+            </form>
         </div>
 
     </section>
