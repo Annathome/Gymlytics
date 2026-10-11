@@ -1,4 +1,4 @@
-﻿@{
+@{
     ViewData["Title"] = "MainHomepage";
     Layout = "~/Views/Shared/_MainHomepageLayout.cshtml";
 }
@@ -15,7 +15,7 @@
         min-height: 100%;
         margin: 0;
         padding: 0;
-        overflow-x: hidden;
+        overflow-x: clip;
         background: #f4f4f4;
         font-family: "Inria Serif", serif;
     }
@@ -53,7 +53,7 @@
         .hero-content h1 {
             margin: 0 0 30px 0;
             font-family: "Inria Serif", serif;
-            font-size: clamp( 48px, 7vw, 100px );
+            
             line-height: 0.98;
             font-weight: 700;
             color: #202020;
@@ -65,7 +65,7 @@
             max-width: 650px;
             margin: 0;
             font-family: "Inria Serif", serif;
-            font-size: clamp( 16px, 1.6vw, 26px );
+            
             line-height: 1.55;
             color: #414141;
         }
@@ -88,7 +88,7 @@
         padding: 15px 28px;
         border-radius: 18px;
         font-family: "Inria Serif", serif;
-        font-size: clamp(16px, 1.4vw, 20px);
+        
         font-weight: 500;
         text-decoration: none;
         cursor: pointer;
@@ -96,27 +96,29 @@
     }
 
     .btn-green {
-        color: #ffffff;
-        background: #15c748;
-        border: 2px solid #15c748;
+        color: #000000;
+        background: #b7ff1b;
+        border: 2px solid #b7ff1b;
     }
 
-        .btn-green:hover {
-            color: #ffffff;
-            background: #0fa83a;
-            border-color: #0fa83a;
+        .btn-green:hover,
+        .btn-green:focus-visible {
+            color: #b7ff1b;
+            background: transparent;
+            border-color: #b7ff1b;
             transform: translateY(-3px);
         }
 
     .btn-outline {
-        color: #202020;
-        background: rgba(255,255,255,0.85);
-        border: 2px solid #15c748;
+        color: #b7ff1b;
+        background: transparent;
+        border: 2px solid #b7ff1b;
     }
 
-        .btn-outline:hover {
-            color: #ffffff;
-            background: #15c748;
+        .btn-outline:hover,
+        .btn-outline:focus-visible {
+            color: #000000;
+            background: #b7ff1b;
             transform: translateY(-3px);
         }
 
@@ -142,7 +144,7 @@
         height: min(900px, 70vw);
         border-radius: 50%;
         overflow: hidden;
-        border: 6px solid #15c748;
+        border: 6px solid #b7ff1b;
         box-shadow: 0 0 40px rgba(0,0,0,0.3);
         z-index: 1;
     }
@@ -191,23 +193,18 @@
         transition: border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
     }
 
-        .stat-card:hover {
-            border-color: #15c748;
-            transform: translateY(-8px);
-            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
-        }
 
         .stat-card h2 {
             margin: 0 0 10px 0;
             color: #15c748;
-            font-size: clamp( 36px, 4vw, 48px );
+            font-size:30px !important;
             font-weight: 700;
         }
 
         .stat-card p {
             margin: 0;
             color: #ffffff;
-            font-size: clamp( 14px, 1.3vw, 17px );
+            font-size: 30px !important;
             letter-spacing: 1px;
         }
 
@@ -229,14 +226,14 @@
         .services-title h2 {
             margin: 0;
             color: #222222;
-            font-size: clamp( 40px, 5vw, 65px );
+            
             font-weight: 700;
         }
 
         .services-title p {
             margin-top: 20px;
             color: #666666;
-            font-size: clamp( 16px, 1.5vw, 18px );
+            
             line-height: 1.6;
         }
 
@@ -285,31 +282,14 @@
         .service-content h3 {
             margin: 0 0 15px;
             color: #15c748;
-            font-size: clamp( 25px, 2.5vw, 30px );
+            
         }
 
         .service-content p {
             margin: 0;
             color: #555555;
-            font-size: clamp( 15px, 1.4vw, 17px );
+            
             line-height: 1.7;
-        }
-
-    .learn-btn {
-        display: inline-block;
-        margin-top: 25px;
-        padding: 12px 25px;
-        color: #ffffff;
-        background: #15c748;
-        border-radius: 10px;
-        text-decoration: none;
-        transition: background 0.3s ease, transform 0.3s ease;
-    }
-
-        .learn-btn:hover {
-            color: #ffffff;
-            background: #0da739;
-            transform: translateY(-2px);
         }
 
     /* PRICING  */
@@ -327,14 +307,14 @@
         .pricing-title h2 {
             margin: 0;
             color: #ffffff;
-            font-size: clamp( 40px, 5vw, 65px );
+            
             font-weight: 700;
         }
 
         .pricing-title p {
             margin-top: 15px;
             color: #bbbbbb;
-            font-size: clamp( 16px, 1.5vw, 18px );
+            
         }
 
     /* PRICE GRID */
@@ -374,19 +354,19 @@
         .price-card h3 {
             margin: 0 0 15px;
             color: #222222;
-            font-size: clamp( 25px, 2.5vw, 30px );
+            
         }
 
     .price {
         margin-bottom: 20px;
         color: #15c748;
-        font-size: clamp( 40px, 5vw, 55px );
+        
         font-weight: 700;
     }
 
         .price span {
             color: #666666;
-            font-size: 16px;
+            
             font-weight: 400;
         }
 
@@ -399,7 +379,7 @@
         .price-card ul li {
             padding: 9px 0;
             color: #555555;
-            font-size: 16px;
+            
             border-bottom: 1px solid #eeeeee;
         }
 
@@ -422,7 +402,7 @@
         .trainer-title h2 {
             margin: 0;
             color: #222222;
-            font-size: clamp( 40px, 5vw, 65px );
+            
             font-weight: 700;
         }
 
@@ -459,13 +439,13 @@
         .trainer-card h3 {
             margin: 25px 0 8px;
             color: #222222;
-            font-size: clamp( 22px, 2vw, 26px );
+            
         }
 
         .trainer-card p {
             margin: 0 0 25px;
             color: #15c748;
-            font-size: 17px;
+            
         }
 
     /*   CONTACT */
@@ -479,7 +459,7 @@
         .contact h2 {
             margin: 0;
             color: #ffffff;
-            font-size: clamp( 40px, 5vw, 65px );
+            
             font-weight: 700;
         }
 
@@ -488,7 +468,7 @@
             max-width: 700px;
             margin: 25px auto;
             color: #dddddd;
-            font-size: clamp( 16px, 1.6vw, 20px );
+            
             line-height: 1.7;
         }
 
@@ -500,7 +480,7 @@
         background: #15c748;
         border-radius: 12px;
         text-decoration: none;
-        font-size: 18px;
+        
         transition: background 0.3s ease, transform 0.3s ease;
     }
 
@@ -519,11 +499,11 @@
         }
 
             .hero-content h1 {
-                font-size: clamp( 55px, 6vw, 75px );
+                
             }
 
             .hero-content p {
-                font-size: 20px;
+                
             }
 
         .circle {
@@ -561,7 +541,7 @@
         }
 
             .hero-content h1 {
-                font-size: clamp( 50px, 8vw, 70px );
+                
             }
 
             .hero-content p {
@@ -618,12 +598,12 @@
         }
 
             .hero-content h1 {
-                font-size: 52px;
+                
                 line-height: 1.05;
             }
 
             .hero-content p {
-                font-size: 17px;
+                
                 line-height: 1.6;
             }
 
@@ -684,12 +664,12 @@
         }
 
             .hero-content h1 {
-                font-size: 42px;
+                
                 line-height: 1.05;
             }
 
             .hero-content p {
-                font-size: 16px;
+                
                 line-height: 1.6;
             }
 
@@ -756,7 +736,7 @@
         }
 
         .contact p {
-            font-size: 16px;
+            
         }
     }
 
@@ -765,7 +745,7 @@
     @@media (max-width: 400px) {
 
         .hero-content h1 {
-            font-size: 36px;
+            
         }
 
         .hero-image {
@@ -789,6 +769,172 @@
             padding-right: 15px;
         }
     }
+
+    /* Give service images enough vertical space to show the full subject. */
+    .service-card img {
+        height: 500px;
+        object-fit: cover;
+        object-position: center center;
+    }
+
+    @@media (max-width: 768px) {
+        .service-card img { height: 420px; }
+    }
+
+    @@media (max-width: 576px) {
+        .service-card img { height: 360px; }
+    }
+
+    /* Match the role dashboard visual system on the public homepage. */
+    body {
+        background: #343438 !important;
+        color: #fff;
+    }
+
+    .hero,
+    .services,
+    .pricing,
+    .trainers,
+    .contact,
+    .stats {
+        background: #343438 !important;
+    }
+
+    .hero {
+        background: linear-gradient(135deg, #343438 0%, #2b2b2e 62%, #202522 100%) !important;
+    }
+
+    .hero-content h1,
+    .hero-content p,
+    .services-title p,
+    .pricing-title p,
+    .trainers-title h2,
+    .trainers-title p,
+    .contact-title h2,
+    .contact-title p {
+        color: #fff !important;
+    }
+
+    .services-title h2,
+    .pricing-title h2 {
+        color: #b7ff1b !important;
+    }
+
+    .service-card,
+    .price-card,
+    .trainer-card,
+    .contact-card,
+    .stat-card {
+        background: #5e5d63 !important;
+        color: #fff !important;
+        border: 1px solid #535159;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, .42);
+    }
+
+    .service-content p,
+    .price-card li,
+    .trainer-card p,
+    .contact-card p,
+    .stat-card p {
+        color: #d0d5d1 !important;
+
+    }
+
+    .service-content h3,
+    .price-card h3,
+    .stat-card h2 {
+        color: #b7ff1b !important;
+
+    }
+
+    .stat-card h2 {
+        
+        line-height: 1;
+        font-size: 30px !important;
+
+    }
+
+
+    .stats {
+        width: min(1400px, 100%);
+        margin: 0 auto;
+        padding: 60px 6%;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 32px;
+    }
+
+    .stat-card {
+        min-height: 170px;
+        padding: 34px 28px;
+    }
+
+    .stat-card h2 {
+            font-size: 30px !important;
+        
+    }
+
+    .stat-card p {
+            font-size: 30px !important;
+        
+    }
+
+    .service-content h3 {
+        
+        text-align: center;
+    }
+
+    .price-card,
+    .price-card.featured {
+        border: 2px solid transparent !important;
+    }
+
+    .price-card:hover,
+    .price-card.featured:hover {
+        border-color: #b7ff1b !important;
+    }
+
+    .hero {
+        padding-top: 0 !important;
+    }
+
+    .hero-content {
+        padding-top: 0 !important;
+    }
+
+    .hero-image {
+        overflow: visible;
+    }
+
+    main[role="main"] .hero {
+        padding-top: 0 !important;
+        margin-top: 0 !important;
+    }
+
+    main[role="main"] .hero .hero-image {
+        overflow: visible !important;
+    }
+
+    main[role="main"] .hero .bodybuilder {
+        left: auto;
+        right: -8%;
+        bottom: 0;
+        height: 100%;
+        width: auto;
+        max-width: none;
+        transform: none;
+        z-index: 20 !important;
+    }
+
+    .hero-content h1,
+    .services-title h2,
+    .pricing-title h2 {
+        
+        text-transform: uppercase;
+    }
+
+    @@media (max-width: 768px) {
+        .stats { grid-template-columns: 1fr; gap: 20px; }
+    }
 </style>
 
 <!-- HERO SECTION -->
@@ -807,7 +953,7 @@
             Expert coaches.
             Modern equipment.
             A community that pushes you further.
-            Your dream body isn't a dream —
+            Your dream body isn't a dream —<br />
             it's a plan.
         </p>
 
@@ -830,44 +976,29 @@
 </section>
 
 <!--STATISTICS -->
-<section class="stats">
+<section class="stats" id="homepage-statistics">
 
     <div class="stat-card">
-        <h2>
-            250+
-        </h2>
+        <h2 data-count-to="@ViewBag.ActiveMembers">@ViewBag.ActiveMembers</h2>
         <p>
             ACTIVE MEMBERS
         </p>
     </div>
 
     <div class="stat-card">
-        <h2>
-            12
-        </h2>
+        <h2 data-count-to="@ViewBag.ActiveTrainers">@ViewBag.ActiveTrainers</h2>
         <p>
             PROFESSIONAL TRAINERS
         </p>
     </div>
 
     <div class="stat-card">
-
-        <h2>
-            500+
-        </h2>
+        <h2 data-count-to="@ViewBag.MonthlyVisits">@ViewBag.MonthlyVisits</h2>
         <p>
             MONTHLY VISITS
         </p>
     </div>
 
-    <div class="stat-card">
-        <h2>
-            8
-        </h2>
-        <p>
-            YEARS OF EXPERIENCE
-        </p>
-    </div>
 </section>
 
 <!-- SERVICES -->
@@ -903,7 +1034,6 @@
                     and customized workout plans.
                 </p>
 
-                <a href="#pricing" class="learn-btn"> Learn More </a>
             </div>
         </div>
         <!-- MUSCLE GAIN -->
@@ -922,7 +1052,6 @@
                     and expert coaching.
                 </p>
 
-                <a href="#pricing" class="learn-btn">  Learn More </a>
             </div>
         </div>
         <!-- ENDURANCE -->
@@ -942,7 +1071,6 @@
                     with structured programs.
                 </p>
 
-                <a href="#pricing" class="learn-btn"> Learn More </a>
             </div>
         </div>
     </div>
@@ -954,7 +1082,7 @@
 
     <div class="pricing-title">
         <h2>
-            MEMBERSHIP PLANS
+            PAYMENT TYPE
         </h2>
         <p>
             Choose the plan that fits
@@ -965,117 +1093,37 @@
 
 
     <div class="price-grid">
-        <!-- DAILY PASS -->
+        @foreach (var plan in (ViewBag.MembershipPlans as IReadOnlyList<(MembershipPlanType Plan, string Name, decimal Price)> ?? Array.Empty<(MembershipPlanType, string, decimal)>()))
+        {
+            <div class="price-card @(plan.Plan == MembershipPlanType.Monthly ? "featured" : "")">
+                <h3>@plan.Name</h3>
+                <div class="price">₱@plan.Price.ToString("N0")</div>
+                <ul>
+                    <li>✔ Gym Access</li>
+                    <li>✔ Equipment Use</li>
+                    @if (plan.Plan == MembershipPlanType.Monthly)
+                    {
+                        <li>✔ Personal Trainer</li>
+                    }
+                    else
+                    {
+                        <li>✔ Locker</li>
+                    }
+                </ul>
+            </div>
+        }
 
-        <div class="price-card">
-
-            <h3>
-                Daily Pass
-            </h3>
-
-            <div class="price"> ₱100 </div>
-
-            <ul>
-                <li>
-                    ✔ Gym Access
-                </li>
-
-                <li>
-                    ✔ Locker
-                </li>
-
-                <li>
-                    ✔ Equipment Use
-                </li>
-            </ul>
-        </div>
-        <!-- MONTHLY -->
-
-        <div class="price-card featured">
-
-            <h3>
-                Monthly
-            </h3>
-            <div class="price"> ₱800 </div>
-
-            <ul>
-                <li>
-                    ✔ Unlimited Access
-                </li>
-
-                <li>
-                    ✔ Free Coach Guide
-                </li>
-
-                <li>
-                    ✔ Locker
-                </li>
-
-                <li>
-                    ✔ Fitness Assessment
-                </li>
-            </ul>
-        </div>
-        <!-- ANNUAL -->
-
-        <div class="price-card">
-            <h3>
-                Annual
-            </h3>
-
-            <div class="price"> ₱8,000 </div>
-            <ul>
-                <li>
-                    ✔ Unlimited Access
-                </li>
-
-                <li>
-                    ✔ Personal Trainer
-                </li>
-
-                <li>
-                    ✔ Free Merchandise
-                </li>
-
-                <li>
-                    ✔ Priority Support
-                </li>
-
-            </ul>
-        </div>
-    </div>
-</section>
-<!--TRAINERS -->
-
-<section class="trainers" id="trainer">
-
-    <div class="trainer-title">
-        <h2>
-            OUR TRAINERS
-        </h2>
-    </div>
-
-    <div class="trainer-grid">
-        <!-- TRAINER 1 -->
-        <div class="trainer-card">
-            <img src="~/images/trainer1.jpg" alt="Trainer 1" />
-            <h3>
-                John Carter
-            </h3>
-            <p>
-                Strength Coach
-            </p>
-        </div>
-        <!-- TRAINER 2 -->
-        <div class="trainer-card">
-            <img src="~/images/trainer2.jpg" alt="Trainer 2" />
-            <h3>
-                James Wilson
-            </h3>
-            <p>
-                Fitness Trainer
-            </p>
-        </div>
+        @foreach (var paymentType in (ViewBag.WalkInPaymentTypes as List<WalkInPaymentType> ?? new List<WalkInPaymentType>()))
+        {
+            <div class="price-card walk-in-plan">
+                <h3>@paymentType.Name</h3>
+                <div class="price">₱@paymentType.Amount.ToString("N0")</div>
+                <ul>
+                    <li>✔ Walk-in gym access</li>
+                    <li>✔ Equipment use</li>
+                </ul>
+            </div>
+        }
     </div>
 </section>
 <!-- CONTACT -->
@@ -1090,3 +1138,42 @@
     </p>
     <a href="#home" class=" contact-btn"> JOIN NOW </a>
 </section>
+
+@section Scripts {
+    <script>
+        (() => {
+            // Keep server-rendered totals when animation is unavailable or unwanted.
+            if (!('IntersectionObserver' in window) ||
+                window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+            const animations = new WeakMap();
+            const observer = new IntersectionObserver(entries => {
+                for (const entry of entries) {
+                    const number = entry.target.querySelector('[data-count-to]');
+                    if (!entry.isIntersecting) {
+                        cancelAnimationFrame(animations.get(entry.target));
+                        animations.delete(entry.target);
+                        number.textContent = '0';
+                        continue;
+                    }
+                    if (entry.intersectionRatio < 0.35 || animations.has(entry.target)) continue;
+                    const total = Number(number.dataset.countTo);
+                    const started = performance.now();
+                    const tick = now => {
+                        const progress = Math.min((now - started) / 1200, 1);
+                        number.textContent = String(Math.floor(total * progress));
+                        if (progress < 1) animations.set(entry.target, requestAnimationFrame(tick));
+                    };
+                    animations.set(entry.target, requestAnimationFrame(tick));
+                }
+            }, { threshold: [0, 0.35] });
+
+            document.querySelectorAll('.stats .stat-card').forEach(card => {
+                const number = card.querySelector('[data-count-to]');
+                if (!number || !Number.isFinite(Number(number.dataset.countTo))) return;
+                number.textContent = '0';
+                observer.observe(card);
+            });
+        })();
+    </script>
+}

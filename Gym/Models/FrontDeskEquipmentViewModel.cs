@@ -5,6 +5,7 @@ namespace Gym.Models;
 
 public class FrontDeskEquipmentViewModel
 {
+
     public string SearchTerm { get; set; } = string.Empty;
     public List<Equipment> Items { get; set; } = new();
     public List<EquipmentNameCatalog> EquipmentNames { get; set; } = new();

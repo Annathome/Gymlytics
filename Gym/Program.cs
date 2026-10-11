@@ -55,6 +55,7 @@ builder.Services.AddScoped<JwtTokenService>();
 builder.Services.AddScoped<ITrainerService, TrainerService>();
 builder.Services.AddScoped<IAdminService, AdminService>();
 builder.Services.AddScoped<IMemberService, MemberService>();
+builder.Services.AddScoped<WalkInRegistrationService>();
 builder.Services.AddScoped<DailyMemberReminderSender>();
 builder.Services.AddScoped<EquipmentEvidenceService>();
 builder.Services.AddHostedService<MembershipExpirationReminderService>();

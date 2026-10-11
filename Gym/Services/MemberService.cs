@@ -1,5 +1,6 @@
 ﻿using Gym.Data;
 using Gym.Models;
+using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
@@ -62,8 +63,8 @@ namespace Gym.Services
             }
 
             var clients = await query
-                .OrderBy(client => client.LastName)
-                .ThenBy(client => client.FirstName)
+                .OrderByDescending(client => client.CreatedDate)
+                .ThenByDescending(client => client.UserId)
                 .ToListAsync();
 
             var trainerNames = await _context.Trainers
@@ -410,6 +411,16 @@ namespace Gym.Services
         public async Task<Client> CreateClientAsync(
             AddMemberViewModel form)
         {
+            // Validate at the save boundary before tracking a member or payment.
+            var errors = new List<ValidationResult>();
+            Validator.TryValidateObject(form, new ValidationContext(form), errors, true);
+            if (form.StartDate == default)
+                errors.Add(new ValidationResult("A valid membership start date is required."));
+            if (form.SelectedGymGoal.HasValue && !Enum.IsDefined(form.SelectedGymGoal.Value))
+                errors.Add(new ValidationResult("Select a valid gym goal."));
+            if (errors.Count > 0)
+                throw new InvalidOperationException(string.Join(" ", errors.Select(error => error.ErrorMessage)));
+
             if (!RegistrationName.ValidFull(form.FullName))
                 throw new InvalidOperationException("Enter the member's complete first and last name. Initials and N/A are not accepted.");
             form.FullName = RegistrationName.Normalize(form.FullName);
@@ -561,7 +572,6 @@ namespace Gym.Services
                     NullIfWhiteSpace(form.SelectedTimeSlot)
             };
 
-            _context.Clients.Add(client);
             var paidAt = DateTime.Now;
             client.Payments.Add(new Payment
             {
@@ -572,20 +582,28 @@ namespace Gym.Services
                 DueDate = paidAt,
                 Notes = "Initial cash membership payment recorded during registration."
             });
+            Notification? assignmentNotification = null;
             if (client.AssignedTrainerId.HasValue)
             {
-                _context.Notifications.Add(new Notification
+                assignmentNotification = new Notification
                 {
                     UserId = client.AssignedTrainerId.Value,
                     Title = "New member assigned",
                     Message = $"{client.FirstName} {client.LastName} has been assigned to you. Training schedule: {client.PreferredDays ?? "Days not set"} · {client.PreferredTimeSlot ?? "Time not set"}.",
                     NotificationType = "NewMemberAssigned",
                     CreatedDate = DateTime.Now
-                });
+                };
             }
+            var saved = false;
             try
             {
+                // Track the complete registration only at the save boundary. EF saves
+                // the member, payment and assignment notification in one transaction.
+                _context.Clients.Add(client);
+                if (assignmentNotification != null)
+                    _context.Notifications.Add(assignmentNotification);
                 await _context.SaveChangesAsync();
+                saved = true;
             }
             catch (DbUpdateException ex)
                 when (ex.InnerException is SqlException
@@ -595,6 +613,20 @@ namespace Gym.Services
             {
                 throw new InvalidOperationException(
                     "This Gmail address is already registered.", ex);
+            }
+            finally
+            {
+                if (!saved)
+                {
+                    // SaveChanges failure does not clear tracked inserts. Rendering
+                    // the validation response synchronizes trainers and saves again;
+                    // it must never retry this rejected registration implicitly.
+                    foreach (var payment in client.Payments.ToList())
+                        _context.Entry(payment).State = EntityState.Detached;
+                    if (assignmentNotification != null)
+                        _context.Entry(assignmentNotification).State = EntityState.Detached;
+                    _context.Entry(client).State = EntityState.Detached;
+                }
             }
             return client;
         }

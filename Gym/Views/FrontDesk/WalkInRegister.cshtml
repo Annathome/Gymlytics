@@ -4,7 +4,7 @@
 }
 <!DOCTYPE html>
 <html lang="en">
-<head>
+<head><link rel="stylesheet" href="~/css/system-typography.css" asp-append-version="true" />
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Walk-in Client Registration</title>
@@ -20,7 +20,7 @@
             body {
                 margin: 0;
                 background: #fff;
-                font: 15px Arial,sans-serif;
+                font-family:Arial,sans-serif;
                 color: #102630
             }
 
@@ -31,7 +31,7 @@
 
             .title h1 {
                 margin: 0 0 7px;
-                font-size: 28px
+                
             }
 
             .title p {
@@ -48,7 +48,7 @@
             }
 
             .section-title {
-                font-size: 19px;
+                
                 margin: 0 0 18px;
                 padding-bottom: 10px;
                 border-bottom: 1px solid #ccd5cf
@@ -61,7 +61,7 @@
                 .group label {
                     display: block;
                     margin-bottom: 6px;
-                    font-size: 12px;
+                    
                     font-weight: 700;
                     letter-spacing: .6px;
                     text-transform: uppercase
@@ -77,7 +77,7 @@
                 border: 1px solid #c8d3cd;
                 background: #f3f9fc;
                 padding: 0 14px;
-                font-size: 15px
+                
             }
 
                 .control[readonly] {
@@ -99,7 +99,7 @@
 
             .validation {
                 color: #b91c1c;
-                font-size: 12px;
+                
                 margin-top: 4px;
                 display: block
             }
@@ -122,7 +122,7 @@
                 border-radius: 3px;
                 font-weight: 700;
                 text-decoration: none;
-                font-size: 13px
+                
             }
 
             .cancel {
@@ -144,7 +144,7 @@
                 }
 
                 .title h1 {
-                    font-size: 23px
+                    
                 }
 
                 .actions {
@@ -161,11 +161,11 @@
 <body>
     <main class="page">
         <header class="title">
-            <h1>Walk-in Client Registration</h1>
+            <h1 style="font-weight:700!important;" class="form-dialog-title">Walk-in Client Registration</h1>
             <p>Quickly register temporary visitors, guests, and trial participants for facility access.</p>
         </header>
         <form asp-action="WalkInRegister" asp-controller="FrontDesk" method="post" class="form-card">
-            @Html.AntiForgeryToken()<div asp-validation-summary="ModelOnly" class="summary"></div>
+            @Html.AntiForgeryToken()<div asp-validation-summary="All" class="summary"></div>
             <h2 class="section-title">Guest Details</h2>
             <div class="group">
                 <label asp-for="FirstName">First Name <span class="required">*</span> </label>
@@ -215,3 +215,5 @@
     </main>
 </body>
 </html>
+
+<script src="~/js/site.js" asp-append-version="true"></script><script src="~/js/form-errors.js" asp-append-version="true"></script>

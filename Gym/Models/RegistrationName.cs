@@ -18,9 +18,14 @@ public static class RegistrationName
     public static bool Same(string? left, string? right) => string.Equals(Normalize(left), Normalize(right), StringComparison.OrdinalIgnoreCase);
 }
 
-public sealed class CompleteRegistrationNameAttribute : ValidationAttribute
+public sealed class CompleteRegistrationNameAttribute : ValidationAttribute, Microsoft.AspNetCore.Mvc.ModelBinding.Validation.IClientModelValidator
 {
     public bool FullName { get; set; }
     public CompleteRegistrationNameAttribute() : base("Enter a complete name using letters, not initials or placeholders such as N/A.") { }
     public override bool IsValid(object? value) => FullName ? RegistrationName.ValidFull(value as string) : RegistrationName.ValidPart(value as string);
+    public void AddValidation(Microsoft.AspNetCore.Mvc.ModelBinding.Validation.ClientModelValidationContext context)
+    {
+        context.Attributes["data-registration-name"] = FullName ? "full" : "part";
+        context.Attributes["data-registration-name-error"] = FormatErrorMessage(context.ModelMetadata.GetDisplayName());
+    }
 }

@@ -1,0 +1,15 @@
+@{ Layout = null; }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>@ViewData["Title"]</title>
+    <link rel="stylesheet" href="~/css/system-typography.css" asp-append-version="true" />
+</head>
+<body class="completion-page">
+    <partial name="_CompletionCard" />
+    <span hidden id="registration-draft-context" data-user="@User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value"></span>
+    <script src="~/js/registration-drafts.js" asp-append-version="true"></script>
+</body>
+</html>

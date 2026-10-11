@@ -30,16 +30,22 @@
 }
 <style>
 body{
-    background:#061b0b!important};.trainer-schedule{width:min(1100px,calc(100vw - 340px));margin:30px auto;color:#e8f6ea;font:15px Arial,sans-serif}.ts-title h1{margin:0;color:#83ff24;font-size:29px}.ts-title p{margin:7px 0 25px;color:#93a697}.ts-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:22px}.ts-stat{padding:18px;border:1px solid #205d1c;border-radius:8px;background:#08270f}.ts-stat span{font-size:12px;color:#91a393;font-weight:700}.ts-stat strong{display:block;margin-top:12px;color:#83ff24;font-size:31px}.ts-panel{margin-bottom:22px;border:1px solid #205d1c;border-radius:8px;background:#08270f;overflow:hidden}.ts-panel-head{display:flex;align-items:center;padding:17px 22px;border-bottom:1px solid #205d1c}.ts-panel-head h2{margin:0;color:#83ff24;font-size:20px}.ts-session-list{padding:14px 22px}.ts-session{display:grid;grid-template-columns:170px 1fr 150px;gap:18px;align-items:center;padding:14px 0;border-bottom:1px solid rgba(131,255,36,.13)}.ts-session:last-child{border:0}.ts-time{color:#83ff24;font-weight:700}.ts-member{font-size:17px;font-weight:700}.ts-goal{color:#9caf9f}.ts-empty{padding:48px 22px;text-align:center;color:#8fa092}.week-nav{margin-left:auto;display:flex;gap:8px}.week-nav a{width:34px;height:30px;display:grid;place-items:center;border:1px solid #2a6c25;border-radius:4px;color:#b9c8ba;text-decoration:none}.ts-week{display:grid;grid-template-columns:repeat(7,1fr);gap:9px;padding:20px}.ts-day{min-height:105px;padding:12px 8px;border:1px solid #143c17;border-radius:5px;background:#051809;color:#a9b7aa;text-decoration:none;text-align:center}.ts-day.selected{border-color:#83ff24;box-shadow:inset 0 4px #83ff24;color:#83ff24}.ts-day strong,.ts-day span{display:block}.ts-day strong{margin-bottom:5px;font-size:13px}.ts-count{margin:8px 0;color:#fff;font-size:21px;font-weight:700}.ts-preview{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px}@@media(max-width:900px){.trainer-schedule{width:calc(100vw - 320px)}.ts-week{grid-template-columns:repeat(2,1fr)}.ts-session{grid-template-columns:1fr}}@@media(max-width:700px){.trainer-schedule{width:calc(100vw - 36px)}.ts-stats{grid-template-columns:1fr}.ts-week{grid-template-columns:1fr}}
+    background:#061b0b!important};.trainer-schedule{width:min(1100px,calc(100vw - 340px));margin:30px auto;color:#e8f6ea;font-family:Arial,sans-serif}.ts-title h1{margin:0;color:#83ff24;}.ts-title p{margin:7px 0 25px;color:#93a697}.ts-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:22px}.ts-stat{padding:18px;border:1px solid #205d1c;border-radius:8px;background:#08270f}.ts-stat span{color:#91a393;font-weight:700}.ts-stat strong{display:block;margin-top:12px;color:#83ff24;}.ts-panel{margin-bottom:22px;border:1px solid #205d1c;border-radius:8px;background:#08270f;overflow:hidden}.ts-panel-head{display:flex;align-items:center;padding:17px 22px;border-bottom:1px solid #205d1c}.ts-panel-head h2{margin:0;color:#83ff24;}.ts-session-list{padding:14px 22px}.ts-session{display:grid;grid-template-columns:170px 1fr 150px;gap:18px;align-items:center;padding:14px 0;border-bottom:1px solid rgba(131,255,36,.13)}.ts-session:last-child{border:0}.ts-time{color:#83ff24;font-weight:700}.ts-member{font-weight:700}.ts-goal{color:#9caf9f}.ts-empty{padding:48px 22px;text-align:center;color:#8fa092}.week-nav{margin-left:auto;display:flex;gap:8px}.week-nav a{width:34px;height:30px;display:grid;place-items:center;border:1px solid #2a6c25;border-radius:4px;color:#b9c8ba;text-decoration:none}.ts-week{display:grid;grid-template-columns:repeat(7,1fr);gap:9px;padding:20px}.ts-day{min-height:105px;padding:12px 8px;border:1px solid #143c17;border-radius:5px;background:#051809;color:#a9b7aa;text-decoration:none;text-align:center}.ts-day.selected{border-color:#83ff24;box-shadow:inset 0 4px #83ff24;color:#83ff24}.ts-day strong,.ts-day span{display:block}.ts-day strong{margin-bottom:5px;}.ts-count{margin:8px 0;color:#fff;font-weight:700}.ts-preview{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}@@media(max-width:900px){.trainer-schedule{width:calc(100vw - 320px)}.ts-week{grid-template-columns:repeat(2,1fr)}.ts-session{grid-template-columns:1fr}}@@media(max-width:700px){.trainer-schedule{width:calc(100vw - 36px)}.ts-stats{grid-template-columns:1fr}.ts-week{grid-template-columns:1fr}}
 body{background:#05200d!important}.trainer-schedule{color:#f0f7f1}.ts-stat,.ts-panel{background:#083013;border-color:#287524}.ts-panel-head{border-color:#287524}.ts-title h1,.ts-stat strong,.ts-panel-head h2,.ts-time{color:#7cef72}.ts-title p,.ts-stat span,.ts-goal,.ts-empty{color:#b9cbbb}.ts-day{background:#061f0c;border-color:#205d1c}.ts-day.selected{border-color:#7cef72;box-shadow:inset 0 4px #7cef72;color:#7cef72}
-.ts-title{display:flex;align-items:flex-start;justify-content:space-between;gap:20px}.ts-title-copy p{margin-bottom:25px}.trainer-notification-bell{position:relative;display:grid;place-items:center;flex:0 0 48px;width:48px;height:48px;color:#b9ff20;text-decoration:none}.trainer-notification-bell i{font-size:28px!important}.trainer-notification-bell:hover,.trainer-notification-bell:focus{color:#fff}.trainer-notification-count{position:absolute;top:-4px;right:-4px;display:grid;place-items:center;min-width:19px;height:19px;padding:0 5px;border-radius:20px;background:#d92d20;color:#fff;font-size:10px;font-weight:700;line-height:1}
+.ts-title{display:flex;align-items:flex-start;justify-content:space-between;gap:20px}.ts-title-copy p{margin-bottom:25px}.trainer-notification-bell{position:relative;display:grid;place-items:center;flex:0 0 48px;width:48px;height:48px;color:#b9ff20;text-decoration:none}.trainer-notification-bell i{}.trainer-notification-bell:hover,.trainer-notification-bell:focus{color:#fff}.trainer-notification-count{position:absolute;top:-4px;right:-4px;display:grid;place-items:center;min-width:19px;height:19px;padding:0 5px;border-radius:20px;background:#d92d20;color:#fff;font-weight:700;line-height:1}
 </style>
-<main class="trainer-schedule"><header class="ts-title"><div class="ts-title-copy"><h1>Trainer Overview</h1><p>@Model.SelectedDate.ToString("dddd, MMMM d") · @(selectedDay?.MemberCount ?? 0) session(s)</p></div><a class="trainer-notification-bell" asp-controller="Trainer" asp-action="Notifications" title="Trainer notifications" aria-label="Trainer notifications"><i class="bi bi-bell-fill"></i>@if(Model.UnreadNotificationsCount > 0){<span class="trainer-notification-count">@Model.UnreadNotificationsCount</span>}</a></header>
-<section class="ts-stats"><div class="ts-stat"><span>SESSIONS SELECTED DAY</span><strong>@(selectedDay?.MemberCount ?? 0)</strong></div><div class="ts-stat"><span>MEMBERS THIS WEEK</span><strong>@Model.WeeklyMemberCount</strong></div><div class="ts-stat"><span>ACTIVE ASSIGNED MEMBERS</span><strong>@Model.TotalClients</strong></div></section>
+<main class="trainer-schedule">
+    <header class="ts-title">
+        <div class="ts-title-copy"><h1 style="font-weight:700!important;margin-bottom: 0px !important;">Trainer Overview</h1><p style="margin-top: 0px !important;">@Model.SelectedDate.ToString("dddd, MMMM d") · @(selectedDay?.MemberCount ?? 0) session(s)</p></div><a class="trainer-notification-bell" asp-controller="Trainer" asp-action="Notifications" title="Trainer notifications" aria-label="Trainer notifications">
+        <i class="bi bi-bell-fill"></i>@if(Model.UnreadNotificationsCount > 0){
+        <span class="trainer-notification-count">@Model.UnreadNotificationsCount</span>
+    }
+</a></header>
+<section class="ts-stats"><div class="ts-stat"><span>SESSIONS SELECTED DAY</span><strong style="">@(selectedDay?.MemberCount ?? 0)</strong></div><div class="ts-stat"><span>MEMBERS THIS WEEK</span><strong style="">@Model.WeeklyMemberCount</strong></div><div class="ts-stat"><span>ACTIVE ASSIGNED MEMBERS</span><strong style="">@Model.TotalClients</strong></div></section>
 <section class="ts-panel">
     <header class="ts-panel-head" style="gap:12px;flex-wrap:wrap">
         <h2>@Model.SelectedDate.ToString("dddd") sessions</h2>
-        <span style="margin-left:auto;font-size:14px">@(selectedDay?.Sessions.Count ?? 0) remaining @((selectedDay?.Sessions.Count ?? 0) == 1 ? "session" : "sessions")</span>
+        <span style="margin-left:auto;">@(selectedDay?.Sessions.Count ?? 0) remaining @((selectedDay?.Sessions.Count ?? 0) == 1 ? "session" : "sessions")</span>
     </header>
     @if (selectedDay == null || selectedDay.Sessions.Count == 0)
     {
@@ -57,32 +63,404 @@ body{background:#05200d!important}.trainer-schedule{color:#f0f7f1}.ts-stat,.ts-p
 </section>
 <section class="ts-panel"><header class="ts-panel-head"><h2>This week</h2><nav class="week-nav"><a asp-action="Schedule" asp-route-date="@Model.WeekStart.AddDays(-7).ToString("yyyy-MM-dd")">‹</a><a asp-action="Schedule" asp-route-date="@Model.WeekStart.AddDays(7).ToString("yyyy-MM-dd")">›</a></nav></header><div class="ts-week">@foreach(var day in Model.AssignedWeek){<a class="ts-day @(day.Date==Model.SelectedDate?"selected":"")" asp-action="Schedule" asp-route-date="@day.Date.ToString("yyyy-MM-dd")"><strong>@day.Date.ToString("ddd")</strong><span>@day.Date.ToString("MMM d")</span><span class="ts-count">@day.MemberCount @(day.MemberCount == 1 ? "session" : "sessions")</span></a>}</div></section></main>
 <style>
-    body.trainer-shell .trainer-schedule .ts-title { align-items:center; margin-bottom:28px; }
-    body.trainer-shell .trainer-schedule .ts-title-copy p { margin:8px 0 0; color:#c5cbc6 !important; }
-    body.trainer-shell .trainer-schedule .ts-stats { gap:20px; margin-bottom:28px; }
-    body.trainer-shell .trainer-schedule .ts-stat { padding:24px; border:1px solid #626268 !important; border-left:4px solid #b7ff1b !important; border-radius:10px; box-shadow:0 6px 18px #0002; }
-    body.trainer-shell .trainer-schedule .ts-stat span { font-size:12px !important; letter-spacing:.6px; color:#e0e4df !important; }
-    body.trainer-shell .trainer-schedule .ts-stat strong { margin-top:16px; font-size:36px !important; color:#b7ff1b !important; }
-    body.trainer-shell .trainer-schedule .ts-panel { border:1px solid #626268 !important; border-radius:10px; box-shadow:0 6px 18px #0002; margin-bottom:24px; }
-    body.trainer-shell .trainer-schedule .ts-panel-head { padding:20px 24px; }
-    body.trainer-shell .trainer-schedule .ts-session-list { padding:8px 24px; }
-    body.trainer-shell .trainer-schedule .ts-session { min-height:88px; grid-template-columns:190px minmax(0,1fr) auto; }
-    body.trainer-shell .trainer-schedule .ts-time { color:#b7ff1b !important; }
-    body.trainer-shell .trainer-schedule .ts-goal { padding:7px 12px; border:1px solid #73777a; border-radius:20px; font-size:13px !important; }
-    body.trainer-shell .trainer-schedule .ts-week { gap:12px; padding:22px; }
-    body.trainer-shell .trainer-schedule .ts-day { min-width:0; min-height:120px; padding:16px 8px; box-shadow:none !important; border:1px solid #737377 !important; transition:background .15s,border-color .15s; }
-    body.trainer-shell .trainer-schedule .ts-day.selected { background:#293520 !important; border-color:#b7ff1b !important; box-shadow:inset 0 3px #b7ff1b !important; }
-    body.trainer-shell .trainer-schedule .ts-day:hover { border-color:#b7ff1b !important; background:#35402c !important; }
-    body.trainer-shell .trainer-schedule .ts-count { font-size:21px !important; margin-top:14px; }
-    body.trainer-shell .trainer-schedule .week-nav a { width:36px; height:36px; border:1px solid #b7ff1b !important; color:#b7ff1b !important; }
-    body.trainer-shell .trainer-schedule .trainer-notification-bell { width:48px; height:48px; border:0 !important; border-radius:0; background:transparent !important; color:#b7ff1b !important; transition:background .15s,color .15s; }
-    body.trainer-shell .trainer-schedule .trainer-notification-bell i { color:inherit !important; }
-    body.trainer-shell .trainer-schedule .trainer-notification-bell:hover,
-    body.trainer-shell .trainer-schedule .trainer-notification-bell:focus-visible,
-    body.trainer-shell .trainer-schedule .week-nav a:hover { background:#b7ff1b !important; color:#1b201c !important; }
-    body.trainer-shell .trainer-schedule a:focus-visible { outline:2px solid #b7ff1b; outline-offset:3px; }
-    @@media(max-width:900px) {
-        body.trainer-shell .trainer-schedule .ts-session { grid-template-columns:1fr; gap:10px; padding:18px 0; }
-        body.trainer-shell .trainer-schedule .ts-goal { justify-self:start; }
+    /* ---------- Base layout ---------- */
+    body {
+        background: #05200d !important;
+    }
+
+    .trainer-schedule {
+        width: min(1100px, calc(100vw - 340px));
+        margin: 30px auto;
+        color: #f0f7f1;
+        font-family: Arial, sans-serif;
+    }
+
+    .ts-title {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 20px;
+    }
+
+        .ts-title h1 {
+            margin: 0;
+            color: #7cef72;
+        }
+
+        .ts-title p {
+            margin: 7px 0 25px;
+            color: #b9cbbb;
+        }
+
+    .ts-title-copy p {
+        margin-bottom: 25px;
+    }
+
+    .ts-stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+        margin-bottom: 22px;
+    }
+
+    .ts-stat {
+        padding: 18px;
+        border: 1px solid #287524;
+        border-radius: 8px;
+        background: #083013;
+    }
+
+        .ts-stat span {
+            color: #b9cbbb;
+            font-weight: 700;
+        }
+
+        .ts-stat strong {
+            display: block;
+            margin-top: 12px;
+            color: #7cef72;
+        }
+
+    .ts-panel {
+        margin-bottom: 22px;
+        border: 1px solid #287524;
+        border-radius: 8px;
+        background: #083013;
+        overflow: hidden;
+    }
+
+    .ts-panel-head {
+        display: flex;
+        align-items: center;
+        padding: 17px 22px;
+        border-bottom: 1px solid #287524;
+    }
+
+        .ts-panel-head h2 {
+            margin: 0;
+            color: #7cef72;
+        }
+
+    .ts-session-list {
+        padding: 14px 22px;
+    }
+
+    .ts-session {
+        display: grid;
+        grid-template-columns: 170px 1fr 150px;
+        gap: 18px;
+        align-items: center;
+        padding: 14px 0;
+        border-bottom: 1px solid rgba(131, 255, 36, .13);
+    }
+
+        .ts-session:last-child {
+            border: 0;
+        }
+
+    .ts-time {
+        color: #7cef72;
+        font-weight: 700;
+    }
+
+    .ts-member {
+        font-weight: 700;
+    }
+
+    .ts-goal {
+        color: #b9cbbb;
+    }
+
+    .ts-empty {
+        padding: 48px 22px;
+        text-align: center;
+        color: #b9cbbb;
+    }
+
+    .week-nav {
+        margin-left: auto;
+        display: flex;
+        gap: 8px;
+    }
+
+        .week-nav a {
+            width: 34px;
+            height: 30px;
+            display: grid;
+            place-items: center;
+            border: 1px solid #2a6c25;
+            border-radius: 4px;
+            color: #b9c8ba;
+            text-decoration: none;
+        }
+
+    .ts-week {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 9px;
+        padding: 20px;
+    }
+
+    .ts-day {
+        min-height: 105px;
+        padding: 12px 8px;
+        border: 1px solid #205d1c;
+        border-radius: 5px;
+        background: #061f0c;
+        color: #a9b7aa;
+        text-decoration: none;
+        text-align: center;
+    }
+
+        .ts-day.selected {
+            border-color: #7cef72;
+            box-shadow: inset 0 4px #7cef72;
+            color: #7cef72;
+        }
+
+        .ts-day strong, .ts-day span {
+            display: block;
+        }
+
+        .ts-day strong {
+            margin-bottom: 5px;
+        }
+
+    .ts-count {
+        margin: 8px 0;
+        color: #fff;
+        font-weight: 700;
+    }
+
+    .ts-preview {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .trainer-notification-bell {
+        position: relative;
+        display: grid;
+        place-items: center;
+        flex: 0 0 48px;
+        width: 48px;
+        height: 48px;
+        color: #b9ff20;
+        text-decoration: none;
+    }
+
+        .trainer-notification-bell:hover,
+        .trainer-notification-bell:focus {
+            color: #fff;
+        }
+
+    .trainer-notification-count {
+        position: absolute;
+        top: -4px;
+        right: -4px;
+        display: grid;
+        place-items: center;
+        min-width: 19px;
+        height: 19px;
+        padding: 0 5px;
+        border-radius: 20px;
+        background: #d92d20;
+        color: #fff;
+        font-weight: 700;
+        line-height: 1;
+    }
+
+    @@media (max-width: 900px) {
+        .trainer-schedule {
+            width: calc(100vw - 320px);
+        }
+
+        .ts-week {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .ts-session {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @@media (max-width: 700px) {
+        .trainer-schedule {
+            width: calc(100vw - 36px);
+        }
+
+        .ts-stats {
+            grid-template-columns: 1fr;
+        }
+
+        .ts-week {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* ---------- Trainer theme overrides ---------- */
+    body.trainer-shell .trainer-schedule .ts-title {
+        align-items: center;
+        margin-bottom: 30px;
+    }
+
+    body.trainer-shell .trainer-schedule .ts-title-copy p {
+        margin: 8px 0 0;
+        color: #c5cbc6 !important;
+    }
+
+    /* Summary cards: compact, no stretching */
+    body.trainer-shell .trainer-schedule .ts-stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        grid-auto-rows: auto !important;
+        align-items: start !important;
+        gap: 20px;
+        margin-bottom: 28px;
+        height: auto !important;
+        min-height: 0 !important;
+    }
+
+    body.trainer-shell .trainer-schedule .ts-stat {
+        display: block !important;
+        align-self: start !important;
+        height: auto !important;
+        min-height: 0 !important;
+        max-height: none !important;
+        aspect-ratio: auto !important;
+        padding: 14px 18px !important;
+        border: 1px solid #626268 !important;
+        border-left: 4px solid #b7ff1b !important;
+        border-radius: 10px;
+        box-shadow: 0 6px 18px #0002;
+    }
+
+        body.trainer-shell .trainer-schedule .ts-stat span {
+            display: block;
+            margin: 0;
+            letter-spacing: .6px;
+            color: #e0e4df !important;
+        }
+
+        body.trainer-shell .trainer-schedule .ts-stat strong {
+            display: block;
+            margin: 6px 0 0 !important;
+            line-height: 1.1;
+            color: #b7ff1b !important;
+        }
+
+    body.trainer-shell .trainer-schedule .ts-panel {
+        border: 1px solid #626268 !important;
+        border-radius: 10px;
+        box-shadow: 0 6px 18px #0002;
+        margin-bottom: 24px;
+    }
+
+    body.trainer-shell .trainer-schedule .ts-panel-head {
+        padding: 20px 24px;
+    }
+
+    body.trainer-shell .trainer-schedule .ts-session-list {
+        padding: 8px 24px;
+    }
+
+    body.trainer-shell .trainer-schedule .ts-session {
+        min-height: 48px;
+        padding: 10px 0;
+        grid-template-columns: 190px minmax(0, 1fr) auto;
+    }
+
+    body.trainer-shell .trainer-schedule .ts-time {
+        color: #b7ff1b !important;
+    }
+
+    body.trainer-shell .trainer-schedule .ts-goal {
+        padding: 7px 12px;
+        border: 1px solid #73777a;
+        border-radius: 20px;
+    }
+
+    body.trainer-shell .trainer-schedule .ts-week {
+        gap: 12px;
+        padding: 22px;
+    }
+
+    body.trainer-shell .trainer-schedule .ts-day {
+        min-width: 0;
+        min-height: 120px;
+        padding: 16px 8px;
+        box-shadow: none !important;
+        border: 1px solid #737377 !important;
+        transition: background .15s, border-color .15s;
+    }
+
+        body.trainer-shell .trainer-schedule .ts-day.selected {
+            background: #293520 !important;
+            border-color: #b7ff1b !important;
+            box-shadow: inset 0 3px #b7ff1b !important;
+        }
+
+        body.trainer-shell .trainer-schedule .ts-day:hover {
+            border-color: #b7ff1b !important;
+            background: #35402c !important;
+        }
+
+    body.trainer-shell .trainer-schedule .ts-count {
+        margin-top: 14px;
+    }
+
+    body.trainer-shell .trainer-schedule .week-nav a {
+        width: 36px;
+        height: 36px;
+        border: 1px solid #b7ff1b !important;
+        color: #b7ff1b !important;
+    }
+
+    body.trainer-shell .trainer-schedule .trainer-notification-bell {
+        width: 48px;
+        height: 48px;
+        border: 0 !important;
+        border-radius: 0;
+        background: transparent !important;
+        color: #b7ff1b !important;
+        transition: background .15s, color .15s;
+    }
+
+        body.trainer-shell .trainer-schedule .trainer-notification-bell i {
+            color: inherit !important;
+        }
+
+        body.trainer-shell .trainer-schedule .trainer-notification-bell:hover,
+        body.trainer-shell .trainer-schedule .trainer-notification-bell:focus-visible,
+        body.trainer-shell .trainer-schedule .week-nav a:hover {
+            background: #b7ff1b !important;
+            color: #1b201c !important;
+        }
+
+    body.trainer-shell .trainer-schedule a:focus-visible {
+        outline: 2px solid #b7ff1b;
+        outline-offset: 3px;
+    }
+
+    @@media (max-width: 900px) {
+        body.trainer-shell .trainer-schedule .ts-session {
+            grid-template-columns: 1fr;
+            gap: 10px;
+            padding: 12px 0;
+        }
+
+        body.trainer-shell .trainer-schedule .ts-goal {
+            justify-self: start;
+        }
+
+        body.trainer-shell .trainer-schedule .ts-stats {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @@media (max-width: 700px) {
+        body.trainer-shell .trainer-schedule .ts-stats {
+            grid-template-columns: 1fr;
+        }
     }
 </style>

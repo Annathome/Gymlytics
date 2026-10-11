@@ -1,6 +1,7 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
+    <link rel="stylesheet" href="~/css/system-typography.css" asp-append-version="true" />
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Gymlytics</title>
@@ -33,7 +34,7 @@
 
         .navbar-brand {
             font-family: "Inria Serif", serif;
-            font-size: 20px;
+            
             padding: 10px;
             align-self: center;
             font-weight: 100;
@@ -41,12 +42,22 @@
 
         .navbar-nav {
             margin-left: 40%;
-            font-size: 20px;
+            
             font-family: "Inria Serif", serif;
         }
 
         .nav-link {
             color: rgb(0,0,0) !important;
+        }
+        .nav-header {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        /* keep anchor targets from hiding under the sticky bar */
+        html {
+            scroll-padding-top: 90px;
         }
 
             .nav-link:hover {
@@ -59,7 +70,7 @@
             border-radius: 3px;
             padding: 10px 20px;
             background-color: transparent;
-            font-size: 20px;
+            
             color: rgb(0, 0, 0) !important;
             text-decoration: none;
             display: inline-block;
@@ -67,40 +78,217 @@
             white-space: nowrap;
         }
 
-            .btn-log:hover {
+        .btn-log:hover {
                 background: rgba(14, 197, 45, 0.2);
                 color: rgb(0, 0, 0) !important;
                 transform: scale(1.05);
             }
+
+        /* Public homepage navigation */
+        .homepage-nav {
+            min-height: 86px;
+            padding: 16px 42px !important;
+            background: rgba(24, 29, 26, .96) !important;
+            border-bottom: 1px solid rgba(183, 255, 27, .28) !important;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, .18);
+        }
+
+        .homepage-nav .container-fluid {
+            max-width: 1440px;
+            min-height: 54px;
+            gap: 16px;
+        }
+
+        .homepage-nav .navbar-logo {
+            width: 52px;
+            height: 52px;
+            border: 2px solid #b7ff1b;
+        }
+
+        .homepage-nav .navbar-brand {
+            padding: 0 12px 0 0;
+            color: #fff;
+            
+            font-weight: 700;
+            letter-spacing: .08em;
+        }
+
+        .homepage-nav .navbar-collapse {
+            align-items: center;
+        }
+
+        .homepage-nav .navbar-nav {
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin: 0 auto;
+            
+            font-weight: 500;
+        }
+
+
+        .homepage-nav .navbar-nav .nav-link {
+            position: relative;
+            padding: 12px 16px !important;
+            font-size: 20px !important;
+            color: #dce4de !important;
+            border-radius: 6px;
+            transition: color .2s ease, background .2s ease;
+        }
+
+        .homepage-nav .nav-link::after {
+            content: '';
+            position: absolute;
+            left: 16px;
+            right: 16px;
+            bottom: 5px;
+            height: 2px;
+            background: #b7ff1b;
+            transform: scaleX(0);
+            transition: transform .2s ease;
+        }
+
+        .homepage-nav .nav-link:hover,
+        .homepage-nav .nav-link:focus-visible {
+            color: #b7ff1b !important;
+            background: rgba(183, 255, 27, .08);
+            transform: none;
+        }
+
+        .homepage-nav .nav-link:hover::after,
+        .homepage-nav .nav-link:focus-visible::after {
+            transform: scaleX(1);
+        }
+
+        .homepage-nav .btn-log {
+            min-width: 112px;
+            min-height: 44px;
+            padding: 10px 20px;
+            border: 1px solid #b7ff1b;
+            border-radius: 6px;
+            color: #b7ff1b !important;
+            background: transparent;
+            
+            font-weight: 600;
+            letter-spacing: .04em;
+            transition: background .2s ease, color .2s ease, transform .2s ease;
+        }
+
+        .homepage-nav .btn-log:hover,
+        .homepage-nav .btn-log:focus-visible {
+            color: #151a16 !important;
+            background: #b7ff1b;
+            transform: translateY(-1px);
+        }
+
+        @@media (max-width: 767.98px) {
+            .homepage-nav { padding: 12px 20px !important; }
+            .homepage-nav .navbar-collapse {
+                margin-top: 12px;
+                padding: 10px 0 4px;
+                border-top: 1px solid rgba(183, 255, 27, .2);
+            }
+            .homepage-nav .navbar-nav { align-items: stretch; gap: 2px; }
+            .homepage-nav .nav-link { padding: 10px 12px !important; }
+            .homepage-nav .btn-log { margin-top: 8px; width: 100%; }
+        }
+
+        .homepage-footer {
+            padding: 30px 42px;
+            background: #252729;
+            border-top: 1px solid rgba(183, 255, 27, .28);
+            color: #cfd7d1;
+        }
+
+        .homepage-footer-inner {
+            max-width: 1440px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
+        }
+
+        .homepage-footer strong {
+            display: block;
+            color: #b7ff1b;
+            
+            letter-spacing: .1em;
+        }
+
+        .homepage-footer span,
+        .homepage-footer small {
+            color: #aeb7b0;
+            
+        }
+
+        .homepage-footer nav {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 18px;
+        }
+
+        .homepage-footer a {
+            color: #e4ebe5;
+            
+            text-decoration: none;
+            transition: color .2s ease;
+        }
+
+        .homepage-footer a:hover,
+        .homepage-footer a:focus-visible { color: #b7ff1b; }
+
+        @@media (max-width: 767.98px) {
+            .homepage-footer { padding: 26px 20px; }
+            .homepage-footer-inner { flex-direction: column; text-align: center; }
+        }
     </style>
 </head>
 
 <body>
     <header class="nav-header">
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm border-bottom box-shadow mb-3">
+        <nav class="homepage-nav navbar navbar-expand-sm navbar-toggleable-sm border-bottom box-shadow">
             <div class="container-fluid">
                 <img src="/images/Yokok.jpg" alt="Yokok Gym" class="navbar-logo" />
-                <h1 class="navbar-brand">YOKOKS</h1>
+                <h1 class="navbar-brand" style="font-size: 20px !important;">YOKOKS</h1>
 
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="MainHomepage" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Privacy">Services</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Privacy">Pricing</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Privacy">Trainer</a>
-                        </li>
-                    </ul>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between ">
+                   <ul class="navbar-nav flex-grow-1">
+                    <li class="nav-item">
+                        <a class="nav-link"
+                           style="font-size: 16px !important;"
+                           asp-area=""
+                           asp-controller="MainHomepage"
+                           asp-action="Index">
+                            Home
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link"
+                           style="font-size: 16px !important;"
+                           asp-area=""
+                           asp-controller="MainHomepage"
+                           asp-action="Services">
+                            Services
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link"
+                           style="font-size: 16px !important;"
+                           asp-area=""
+                           asp-controller="MainHomepage"
+                           asp-action="Pricing">
+                            Pricing
+                        </a>
+                    </li>
+                </ul>
 
                     @if (User.Identity?.IsAuthenticated == true)
                     {
@@ -118,18 +306,29 @@
     </header>
     <div class="container-fluid px-0">
         <main role="main" class="pb-3">
+            <partial name="_FormConfirmation" />
             @RenderBody()
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - Gymlytics - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+    <footer class="homepage-footer">
+        <div class="homepage-footer-inner">
+            <div>
+                <strong>YOKOKS</strong>
+                <span>Build strength. Build confidence.</span>
+            </div>
+            <nav aria-label="Footer navigation">
+                <a href="#home">HOME</a>
+                <a href="#services">SERVICES</a>
+                <a href="#pricing">PAYMENT TYPE</a>
+                <a asp-area="" asp-controller="Home" asp-action="Privacy">PRIVACY</a>
+            </nav>
+            <small>&copy; 2026 Yokoks Gym</small>
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script><script src="~/js/form-errors.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

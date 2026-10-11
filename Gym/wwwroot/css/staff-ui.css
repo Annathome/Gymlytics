@@ -2,18 +2,18 @@
 @layer staffCancellationReceipt {
     body.frontdesk-shell #cancelMembershipModal { position:fixed!important; inset:0!important; padding:20px!important; align-items:center!important; justify-content:center!important; background:#000a!important; z-index:10000!important; }
     body.frontdesk-shell #cancelMembershipModal .modal-card { width:480px!important; max-width:100%!important; max-height:90vh!important; overflow:auto!important; padding:28px!important; background:#1b201c!important; color:#fff!important; border:1px solid #3c443d!important; border-radius:12px!important; }
-    body.frontdesk-shell #cancelMembershipTitle { font-size:20px!important; font-weight:700!important; line-height:1.3!important; margin:0 0 8px!important; }
+    body.frontdesk-shell #cancelMembershipTitle {  font-weight:700!important; line-height:1.3!important; margin:0 0 8px!important; }
     body.frontdesk-shell #cancelMembershipModal #cancelMembershipMessage { margin:0 0 18px!important; }
     body.frontdesk-shell #cancelMembershipModal .modal-buttons .btn-cancel { background:#efefef!important; color:#182000!important; border:1px solid transparent!important; border-radius:0!important; }
     body.frontdesk-shell #cancelMembershipModal .modal-buttons .btn-confirm-delete { background:#b7ff1b!important; color:#182000!important; border:1px solid #b7ff1b!important; border-radius:0!important; }
     body.frontdesk-shell #cancelMembershipModal .modal-buttons button:not(:disabled):is(:hover,:focus-visible) { background:transparent!important; color:#b7ff1b!important; border-color:#b7ff1b!important; }
-    body.frontdesk-shell #cancelMembershipModal p { background:transparent!important; color:#fff!important; font-size:15px!important; font-weight:400!important; line-height:1.6!important; margin:14px 0!important; }
+    body.frontdesk-shell #cancelMembershipModal p { background:transparent!important; color:#fff!important;  font-weight:400!important; line-height:1.6!important; margin:14px 0!important; }
     body.frontdesk-shell #cancelMembershipModal .cancellation-receipt { border:1px solid #3c443d; margin:18px 0; }
-    body.frontdesk-shell #cancelMembershipModal .cancellation-receipt-heading { background:#b7ff1b!important; color:#182000!important; padding:16px!important; margin:0!important; font-size:20px!important; font-weight:400!important; }
-    body.frontdesk-shell #cancelMembershipModal .cancellation-receipt-body { padding:18px; line-height:1.7; font-size:15px; overflow-wrap:anywhere; }
+    body.frontdesk-shell #cancelMembershipModal .cancellation-receipt-heading { background:#b7ff1b!important; color:#182000!important; padding:16px!important; margin:0!important;  font-weight:400!important; }
+    body.frontdesk-shell #cancelMembershipModal .cancellation-receipt-body { padding:18px; line-height:1.7;  overflow-wrap:anywhere; }
     body.frontdesk-shell #cancelMembershipModal .modal-buttons { display:flex!important; flex-wrap:wrap!important; justify-content:flex-end!important; gap:12px!important; margin-top:24px!important; }
     body.frontdesk-shell #cancelMembershipModal .modal-buttons form { margin:0!important; width:auto!important; }
-    body.frontdesk-shell #cancelMembershipModal .modal-buttons button { width:auto!important; flex:0 0 auto!important; white-space:normal!important; padding:10px 14px!important; font-size:15px!important; }
+    body.frontdesk-shell #cancelMembershipModal .modal-buttons button { width:auto!important; flex:0 0 auto!important; white-space:normal!important; padding:10px 14px!important;  }
 }
 @layer staffDropdowns {
     body.frontdesk-shell .action-menu {
@@ -24,7 +24,7 @@
         display:flex!important; width:100%!important; justify-content:flex-start!important;
         background:#1b201c!important; color:#fff!important; border:1px solid transparent!important;
         border-radius:0!important; padding:10px 14px!important; min-height:42px!important;
-        font-size:15px!important; font-weight:500!important; text-align:left!important;
+         font-weight:500!important; text-align:left!important;
     }
     body.frontdesk-shell :is(.action-menu .menu-item,.styled-filter-options button):not(:disabled):is(:hover,:focus-visible) {
         background:transparent!important; color:#b7ff1b!important; border-color:#b7ff1b!important;
@@ -36,7 +36,7 @@
     body.frontdesk-shell .pagination-arrows a::after { content:none!important; display:none!important; }
     body.frontdesk-shell .pagination-arrows a {
         display:inline-flex!important; align-items:center!important; justify-content:center!important;
-        font-size:14px!important; line-height:1.3!important; text-decoration:none!important;
+         line-height:1.3!important; text-decoration:none!important;
     }
     body.frontdesk-shell .frontdesk-main .am-table button.email-failed-checkin {
         background:#a92332!important; border-color:#ff6b6b!important; color:#fff!important; opacity:1!important;
@@ -44,45 +44,44 @@
     body.frontdesk-shell .frontdesk-main .am-table button.email-failed-checkin:not(:disabled):is(:hover,:focus-visible) {
         background:transparent!important; border-color:#ff6b6b!important; color:#ff8585!important;
     }
-    body.frontdesk-shell .attendance-email-failed { display:block; margin-top:5px; font-size:12px!important; color:#ffb0b0!important; }
     body.frontdesk-shell .frontdesk-main table td button:not(.member-name-btn) {
         min-height:32px!important; height:auto!important; padding:6px 10px!important;
-        font-size:13px!important; line-height:1.3!important;
+         line-height:1.3!important;
     }
     body.frontdesk-shell .am-page > .role-page-header { margin-bottom:16px!important; padding-bottom:14px!important; }
     body.frontdesk-shell .am-page .am-title { margin-bottom:0!important; }
-    body.frontdesk-shell .am-page .atten-searchbar { margin-top:16px!important; margin-bottom:16px!important; }
+    body.frontdesk-shell .am-page .atten-searchbar {  margin-bottom:15px!important; }
     body.frontdesk-shell .eq-stats { display:grid!important; grid-template-columns:repeat(4,minmax(0,1fr))!important; }
     body.frontdesk-shell .eq-stat.good strong { color:#b7ff1b!important; }
     @media(max-width:1000px) { body.frontdesk-shell .eq-stats { grid-template-columns:repeat(2,minmax(0,1fr))!important; } }
     @media(max-width:540px) { body.frontdesk-shell .eq-stats { grid-template-columns:1fr!important; } }
     body.frontdesk-shell .frontdesk-main .fd-subtitle {
         color:#aeb7b0!important; font-family:"Inria Serif",serif!important;
-        font-size:14px!important; font-weight:400!important; line-height:1.4!important;
+         font-weight:400!important; line-height:1.4!important;
     }
     body.frontdesk-shell .fd-availability { padding:18px 20px 20px!important; }
     body.frontdesk-shell .fd-availability > h2 { margin:0 0 16px!important; padding:0!important; }
     body.frontdesk-shell .fd-availability-wrap { border:0!important; scrollbar-width:thin; scrollbar-color:#899184 #45464a; }
-    body.frontdesk-shell .fd-availability-table th { padding:10px 12px!important; font-size:12px!important; letter-spacing:.04em; }
+    body.frontdesk-shell .fd-availability-table th { padding:10px 12px!important;  letter-spacing:.04em; }
     body.frontdesk-shell .fd-availability-table td { padding:14px 12px!important; vertical-align:top; }
     body.frontdesk-shell .fd-availability-table :is(th,td):not(:first-child) { text-align:center!important; white-space:nowrap; }
-    body.frontdesk-shell .fd-trainer-name { display:block; font-size:16px!important; font-weight:700!important; margin-bottom:5px; }
-    body.frontdesk-shell .fd-trainer-days { display:block; font-size:13px!important; line-height:1.6!important; color:#c4ccc6!important; }
-    body.frontdesk-shell .fd-slot-count { display:inline-flex!important; align-items:center; justify-content:center; min-width:32px; height:32px; padding:4px 9px!important; border-radius:8px!important; font-size:15px!important; font-weight:700!important; }
+    body.frontdesk-shell .fd-trainer-name { display:block;  font-weight:700!important; margin-bottom:5px; }
+    body.frontdesk-shell .fd-trainer-days { display:block;  line-height:1.6!important; color:#c4ccc6!important; }
+    body.frontdesk-shell .fd-slot-count { display:inline-flex!important; align-items:center; justify-content:center; min-width:32px; height:32px; padding:4px 9px!important; border-radius:8px!important;  font-weight:700!important; }
     body.frontdesk-shell .fd-slot-count.capacity-ready { background:#35491e!important; color:#b7ff1b!important; }
     body.frontdesk-shell .fd-slot-count.capacity-warning { background:#51391e!important; color:#ffad33!important; }
     body.frontdesk-shell .fd-slot-count.capacity-low { background:#512c30!important; color:#ff6b6b!important; }
     body.frontdesk-shell .frontdesk-main td.pay-transaction-code { color:#b7ff1b!important; }
     body.frontdesk-shell .frontdesk-main { color:#fff!important; font-family:"Inria Serif",serif!important; }
     body.frontdesk-shell .frontdesk-main :is(h1,.header-title,.fd-title,.am-title) {
-        font-family:"Inria Serif",serif!important; font-size:30px!important; line-height:1.25!important; font-weight:400!important; color:#fff!important;
+        font-family:"Inria Serif",serif!important;  line-height:1.25!important; font-weight:400!important; color:#fff!important;
     }
-    body.frontdesk-shell .frontdesk-main :is(h2,h3) { font-family:"Inria Serif",serif!important; font-size:22px!important; color:#fff!important; }
+    body.frontdesk-shell .frontdesk-main :is(h2,h3) { font-family:"Inria Serif",serif!important;  color:#fff!important; }
     body.frontdesk-shell .frontdesk-main :is(label,input,select,textarea,td,th,.member-name-btn) {
-        font-family:"Inria Serif",serif!important; font-size:15px!important; line-height:1.4!important;
+        font-family:"Inria Serif",serif!important;  line-height:1.4!important;
     }
     body.frontdesk-shell .frontdesk-main :is(td,th,label,.member-name-btn) { color:#fff!important; }
-    body.frontdesk-shell .frontdesk-main :is(.header-subtitle,.subtitle,.add-member-subtitle) { color:#aeb7b0!important; font-size:14px!important; }
+    body.frontdesk-shell .frontdesk-main :is(.header-subtitle,.subtitle,.add-member-subtitle) { color:#aeb7b0!important;  }
     body.frontdesk-shell .frontdesk-main :is(
         button[type=submit],.btn-add,.eq-add,.wi-add,.btn-cancel,.eq-cancel,.wi-cancel,
         .pay-modal-cancel,.pay-modal-save,.eq-save,.btn-save-details,.btn-confirm-delete,
@@ -91,7 +90,7 @@
         display:inline-flex!important; align-items:center!important; justify-content:center!important;
         width:max-content!important; max-width:100%!important; min-width:0!important;
         height:auto!important; min-height:42px!important; padding:10px 14px!important;
-        font-family:"Inria Serif",serif!important; font-size:15px!important; font-weight:500!important;
+        font-family:"Inria Serif",serif!important;  font-weight:500!important;
         line-height:1.35!important; letter-spacing:.01em!important; text-transform:none!important;
         border:1px solid transparent!important; border-radius:0!important; box-shadow:none!important;
         background:#b7ff1b!important; color:#182000!important; text-decoration:none!important;
@@ -118,5 +117,5 @@
     body.frontdesk-shell .frontdesk-main :is(.modal-card,.pay-modal-card,.eq-modal-card) {
         background:#1b201c!important; color:#fff!important; border:1px solid #59635c!important;
     }
-    body.frontdesk-shell .frontdesk-main :is(.modal-card,.pay-modal-card,.eq-modal-card) :is(p,small) { color:#c4ccc6!important; font-size:15px!important; }
+    body.frontdesk-shell .frontdesk-main :is(.modal-card,.pay-modal-card,.eq-modal-card) :is(p,small) { color:#c4ccc6!important;  }
 }

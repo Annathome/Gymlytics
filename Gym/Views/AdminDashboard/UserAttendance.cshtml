@@ -5,12 +5,12 @@
 }
 
 <style>
-    .ua-page{width:100%;max-width:none;margin:0;padding:0;color:#9ba49d}.ua-head{display:flex;justify-content:space-between;align-items:flex-start;margin:0 0 25px;padding:0 0 25px;border-bottom:1px solid #303430;background:transparent}.ua-head h1{font-size:30px;margin:0}.ua-head p{margin:5px 0 0;color:#9ba49d}.ua-back{display:inline-flex;align-items:center;justify-content:center;min-width:160px;height:48px;padding:0 18px;border:1px solid #9ba49d;color:#293029;background:#9ba49d;text-decoration:none;font-weight:700}.ua-card{background:#5E5D63;border:1px solid #293029;border-radius:0;overflow:hidden}.ua-table{width:100%;border-collapse:collapse}.ua-table th,.ua-table td{padding:15px 18px;text-align:left;border-bottom:1px solid #293029}.ua-table th{background:#293029;font-size:10px;text-transform:uppercase;color:#9ba49d}.ua-name{font-weight:700}.ua-role{color:#9ba49d;font-size:15px}.ua-badge{display:inline-block;border-radius:0;padding:5px 11px;font-size:10px;font-weight:700}.ua-present{background:#283913;color:#b9ff20}.ua-absent{background:#432525;color:#ff9a9a}.ua-empty{text-align:center!important;color:#9ba49d;padding:36px!important}.ua-foot{display:flex;justify-content:space-between;align-items:center;padding:15px 18px}.ua-pages{display:flex;gap:8px}.ua-page-btn{display:inline-grid;place-items:center;min-width:90px;height:40px;border:1px solid #66831c;border-radius:0;padding:0 14px;background:#b9ff20;color:#293029;text-decoration:none;font-weight:700}.ua-page-btn.disabled{pointer-events:none;opacity:.4}
+    .ua-page{width:100%;max-width:none;margin:0;padding:0;color:#9ba49d}.ua-head{display:flex;justify-content:space-between;align-items:flex-start;margin:0 0 25px;padding:0 0 25px;border-bottom:1px solid #303430;background:transparent}.ua-head h1{margin:0}.ua-head p{margin:5px 0 0;color:#9ba49d}.ua-back{display:inline-flex;align-items:center;justify-content:center;min-width:160px;height:48px;padding:0 18px;border:1px solid #9ba49d;color:#293029;background:#9ba49d;text-decoration:none;font-weight:700}.ua-card{background:#5E5D63;border:1px solid #293029;border-radius:0;overflow:hidden}.ua-table{width:100%;border-collapse:collapse}.ua-table th,.ua-table td{padding:15px 18px;text-align:left;border-bottom:1px solid #293029}.ua-table th{background:#293029;text-transform:uppercase;color:#9ba49d}.ua-name{font-weight:700}.ua-role{color:#9ba49d;}.ua-badge{display:inline-block;border-radius:0;padding:5px 11px;font-weight:700}.ua-present{background:#283913;color:#b9ff20}.ua-absent{background:#432525;color:#ff9a9a}.ua-empty{text-align:center!important;color:#9ba49d;padding:36px!important}.ua-foot{display:flex;justify-content:space-between;align-items:center;padding:15px 18px}.ua-pages{display:flex;gap:8px}.ua-page-btn{display:inline-grid;place-items:center;min-width:90px;height:40px;border:1px solid #66831c;border-radius:0;padding:0 14px;background:#b9ff20;color:#293029;text-decoration:none;font-weight:700}.ua-page-btn.disabled{pointer-events:none;opacity:.4}
 </style>
 
 <main class="ua-page">
     <header class="ua-head">
-        <div><h1>User Attendance History</h1><p class="dashboard-caption" style="font-family:'Inria Serif',serif!important;font-size:14px!important;font-weight:400!important;color:#aeb7b0!important;line-height:1.4!important;">Daily login and absence records for Staff and Trainers.</p></div>
+        <div><h1 style="font-weight:700!important;margin-bottom: 0px !important;">User Attendance History</h1><p class="dashboard-caption" style="color:#aeb7b0!important;line-height:1.4!important;">Daily login and absence records for Staff and Trainers.</p></div>
        
     </header>
     <section class="ua-card">
@@ -19,26 +19,26 @@
             <tbody>
             @if (Model.Items.Count == 0)
             {
-                <tr><td colspan="6" class="ua-empty">No user attendance records yet.</td></tr>
+                <tr><td colspan="6" class="ua-empty" style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;">No user attendance records yet.</td></tr>
             }
             else
             {
                 @foreach (var item in Model.Items)
                 {
                     <tr>
-                        <td><span class="ua-name">@item.FullName</span></td>
-                        <td><span class="ua-role">@item.Role</span></td>
-                        <td>@item.AttendanceDate.ToString("MMM d, yyyy")</td>
-                        <td><span class="ua-badge @(item.AttendanceStatus == "Absent" ? "ua-absent" : "ua-present")">@item.AttendanceStatus</span></td>
-                        <td>@(item.CheckedInAt?.ToString("MMM d, yyyy · hh:mm tt") ?? "—")</td>
-                        <td>@(item.MarkedAbsentAt?.ToString("MMM d, yyyy") ?? "—")</td>
+                        <td style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;"><span class="ua-name" style="">@item.FullName</span></td>
+                        <td style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;"><span class="ua-role" style="">@item.Role</span></td>
+                        <td style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;">@item.AttendanceDate.ToString("MMM d, yyyy")</td>
+                        <td style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;"><span class="ua-badge @(item.AttendanceStatus == "Absent" ? "ua-absent" : "ua-present")" style="background:transparent!important;padding:0!important;border:0!important;border-radius:0!important;box-shadow:none!important;">@item.AttendanceStatus</span></td>
+                        <td style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;">@(item.CheckedInAt?.ToString("MMM d, yyyy · hh:mm tt") ?? "—")</td>
+                        <td style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;">@(item.MarkedAbsentAt?.ToString("MMM d, yyyy") ?? "—")</td>
                     </tr>
                 }
             }
             </tbody>
         </table>
         <footer class="ua-foot">
-            <span>Page @Model.Page of @Model.TotalPages · @Model.TotalCount record(s)</span>
+            <span class="pagination-summary">Page @Model.Page of @Model.TotalPages · @Model.TotalCount record(s)</span>
             <nav class="ua-pages">
                 <a class="ua-page-btn @(!Model.HasPrevious ? "disabled" : "")" asp-action="UserAttendance" asp-route-page="@(Model.Page - 1)">Previous</a>
                 <a class="ua-page-btn @(!Model.HasNext ? "disabled" : "")" asp-action="UserAttendance" asp-route-page="@(Model.Page + 1)">Next</a>

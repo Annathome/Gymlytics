@@ -9,19 +9,19 @@
         width: min(1100px, calc(100vw - 340px));
         margin: 30px auto;
         color: #102630;
-        font-size: 15px;
+        
     }
 
     .te-header {
         display: flex;
         align-items: center;
         gap: 16px;
-        margin-bottom: 22px;
+        margin-bottom: 30px;
     }
 
         .te-header h1 {
             margin: 0 auto 0 0;
-            font-size: 28px;
+            
         }
 
     .te-search {
@@ -73,14 +73,14 @@
 
         .te-stat span {
             color: #fff;
-            font-size: 13px;
+            
             font-weight: 700;
         }
 
         .te-stat strong {
             display: block;
             margin-top: 12px;
-            font-size: 30px;
+            
         }
 
     .te-card {
@@ -94,7 +94,7 @@
         .te-card h2 {
             margin: 0;
             padding: 17px 18px;
-            font-size: 21px;
+            
         }
 
     .te-table {
@@ -107,7 +107,7 @@
             background: #394c55;
             color: #fff;
             text-align: left;
-            font-size: 12px;
+            
         }
 
         .te-table td {
@@ -129,7 +129,7 @@
         padding: 5px 10px;
         border-radius: 999px;
         background: #e8efe9;
-        font-size: 11px;
+        
         font-weight: 700;
     }
 
@@ -210,26 +210,26 @@
     @if (TempData["ErrorMessage"] is string error) { <div role="alert" style="color:#ffb4b4">@error</div> }
     @if (TempData["SuccessMessage"] is string success) { <div role="status" style="color:#b7ff1b">@success</div> }
     <header class="te-header">
-        <h1>Equipment Report</h1>
+        <h1 style="font-weight:700!important;margin-bottom: 0px !important;">Equipment Report</h1>
         <button class="te-report-button" type="button" onclick="document.getElementById('trainerEquipmentReport').showModal()">＋ Report equipment issue</button>
     </header>
 
     <section class="te-stats">
         <div class="te-stat">
             <span>TOTAL ASSETS</span>
-            <strong>@Model.TotalAssets</strong>
+            <strong style="">@Model.TotalAssets</strong>
         </div>
         <div class="te-stat good">
             <span>GOOD EQUIPMENT</span>
-            <strong>@Model.GoodQuantity</strong>
+            <strong style="">@Model.GoodQuantity</strong>
         </div>
         <div class="te-stat maintenance">
             <span>IN MAINTENANCE</span>
-            <strong>@Model.InMaintenance</strong>
+            <strong style="">@Model.InMaintenance</strong>
         </div>
         <div class="te-stat out">
             <span>OUT OF ORDER</span>
-            <strong>@Model.OutOfOrder</strong>
+            <strong style="">@Model.OutOfOrder</strong>
         </div>
     </section>
 
@@ -257,37 +257,37 @@
                 @if (Model.Items.Count == 0)
                 {
                     <tr>
-                        <td colspan="8" style="text-align:center">No equipment found.</td>
+                        <td colspan="8" style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;text-align:center">No equipment found.</td>
                     </tr>
                 }
                 @foreach (var item in Model.Items)
                 {
                     var conditionClass = item.Status.ToLowerInvariant().Replace(' ', '-');
                     <tr>
-                        <td class="te-name">
-                            <strong>@item.EquipmentName</strong>
-                            <small>ID: EQ-@item.EquipmentId.ToString("D4")</small>
+                        <td class="te-name" style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;">
+                            <strong style="">@item.EquipmentName</strong>
+                            <small style="">ID: EQ-@item.EquipmentId.ToString("D4")</small>
                         </td>
-                        <td>@item.Category</td>
-                        <td>@item.Quantity</td>
-                        <td>@Model.AvailableByEquipment.GetValueOrDefault(item.EquipmentName)</td>
-                        <td><span class="te-condition @conditionClass">@item.Status</span></td>
-                        <td>
+                        <td style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;">@item.Category</td>
+                        <td style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;">@item.Quantity</td>
+                        <td style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;">@Model.AvailableByEquipment.GetValueOrDefault(item.EquipmentName)</td>
+                        <td style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;"><span class="te-condition @conditionClass" style="background:transparent!important;padding:0!important;border:0!important;border-radius:0!important;box-shadow:none!important;">@item.Status</span></td>
+                        <td style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;">
                             @if (!string.IsNullOrWhiteSpace(item.EvidencePhotoPath))
                             {
-                                <a href="@item.EvidencePhotoPath" target="_blank" rel="noopener">View photo</a>
+                                <a href="@item.EvidencePhotoPath" target="_blank" rel="noopener" style="">View photo</a>
                             }
-                            else { <span>—</span> }
+                            else { <span style="">—</span> }
                         </td>
-                        <td>@(item.LastMaintenanceDate?.ToString("MMM d, yyyy") ?? "—")</td>
-                        <td>@item.AddedDate.ToString("MMM d, yyyy")</td>
+                        <td style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;">@(item.LastMaintenanceDate?.ToString("MMM d, yyyy") ?? "—")</td>
+                        <td style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;">@item.AddedDate.ToString("MMM d, yyyy")</td>
                     </tr>
                 }
             </tbody>
         </table>
 
         <footer class="te-footer">
-            <span>Showing @Model.Items.Count of @Model.TotalCount assets</span>
+            <span class="pagination-summary">Showing @Model.Items.Count of @Model.TotalCount assets</span>
             <nav class="te-pager">
                 <a asp-action="Equipment"
                    asp-route-searchTerm="@Model.SearchTerm"
@@ -331,7 +331,7 @@
     #trainerEquipmentReport .te-report-cancel:hover { border-color:#b7ff1b; color:#b7ff1b; }
 </style>
 <dialog id="trainerEquipmentReport" aria-labelledby="trainerReportTitle">
-    <h2 id="trainerReportTitle">Report equipment issue</h2>
+    <h2 id="trainerReportTitle" class="form-dialog-title">Report equipment issue</h2>
     <form asp-controller="Trainer" asp-action="AddEquipment" method="post" enctype="multipart/form-data">
         @Html.AntiForgeryToken()
         <label for="trainerReportName">Equipment name</label>
@@ -356,3 +356,5 @@
         </div>
     </form>
 </dialog>
+
+

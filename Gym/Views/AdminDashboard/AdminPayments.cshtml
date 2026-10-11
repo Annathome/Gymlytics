@@ -58,7 +58,7 @@
             border: 0;
             background: #b7ff1b;
             color: #101510;
-            font-size: 10px;
+            
             font-weight: 800;
         }
 
@@ -73,7 +73,7 @@
             border: 1px solid #7fae1b;
             color: #b7ff1b;
             padding: 12px 16px;
-            font-size: 10px;
+            
             font-weight: 800;
         }
 
@@ -102,7 +102,7 @@
             color: #dce3dd;
             text-align: left;
             text-decoration: none;
-            font: 11px Arial;
+            font-family:Arial;
         }
 
             .ap-export-menu a:hover,
@@ -120,13 +120,13 @@
 
         .ap-heading h1 {
             margin: 0 0 5px;
-            font-size: 25px;
+            
         }
 
         .ap-heading p {
             margin: 0;
             color: #b7ff1b;
-            font-size: 10px;
+            
         }
 
     .ap-heading-actions {
@@ -141,7 +141,7 @@
         padding: 0 15px;
         background: #8bc518;
         color: #000000;
-        font-size: 10px;
+        
         font-weight: 800;
         text-transform: uppercase;
     }
@@ -152,7 +152,7 @@
         background: #292d2a;
         border: 1px solid #3a403b;
         color: #fff;
-        font-size: 11px;
+        
     }
 
     .ap-stats {
@@ -183,7 +183,7 @@
 
     .ap-label {
         color: #aeb6b0;
-        font-size: 9px;
+        
         font-weight: 800;
         letter-spacing: 0.08em;
         text-transform: uppercase;
@@ -191,7 +191,7 @@
 
     .ap-value {
         margin-top: 10px;
-        font-size: 27px;
+        
         font-weight: 800;
     }
 
@@ -203,7 +203,7 @@
     .ap-stat-note {
         margin-top: 5px;
         color: #aeb6b0;
-        font-size: 9px;
+        
     }
 
     .ap-value.overdue {
@@ -221,7 +221,7 @@
             margin: 0;
             padding: 14px;
             background: transparent;
-            font-size: 13px;
+            
         }
 
     .ap-table-wrap {
@@ -244,13 +244,13 @@
 
         .ap-table th {
             color: #cbd1cc;
-            font-size: 9px;
+            
             letter-spacing: 0.08em;
             text-transform: uppercase;
         }
 
         .ap-table td {
-            font-size: 12px;
+            
         }
 
     .ap-member {
@@ -265,7 +265,7 @@
         padding: 4px 8px;
         background: #293226;
         color: #b7ff1b;
-        font-size: 9px;
+        
         font-weight: 800;
         text-transform: uppercase;
     }
@@ -294,9 +294,28 @@
         padding: 17px 13px;
     }
 
+    .ap-member-name {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .ap-avatar {
+        flex: 0 0 44px;
+        width: 44px;
+        height: 44px;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        background: #26332a;
+        color: #b7ff1b;
+        font-weight: 400;
+        text-transform: uppercase;
+    }
+
     .ap-page-info {
         color: #aeb6b0;
-        font-size: 10px;
+        
     }
 
     .ap-page-buttons {
@@ -313,7 +332,7 @@
         background: #b7ff1b;
         color: #101510;
         text-decoration: none;
-        font-size: 9px;
+        
         font-weight: 800;
         text-transform: uppercase;
     }
@@ -392,7 +411,7 @@
 
         .ap-dialog > p {
             color: #fff;
-            font-size: 12px;
+            
             margin: 0 0 20px;
         }
 
@@ -464,7 +483,7 @@
 
         .ap-confirm-dialog > p {
             margin-bottom: 0;
-            font-size: 15px;
+            
             line-height: 1.5;
         }
 
@@ -610,6 +629,10 @@
             margin: 10mm;
         }
 
+        .ap-avatar {
+            display: none !important;
+        }
+
         html,
         body,
         body > .container,
@@ -626,6 +649,8 @@
             overflow: visible !important;
         }
 
+
+
         .ap-table {
             width: 100% !important;
             min-width: 0 !important;
@@ -635,7 +660,7 @@
             .ap-table th,
             .ap-table td {
                 padding: 8px 6px !important;
-                font-size: 9px !important;
+                
                 white-space: normal !important;
                 overflow-wrap: anywhere;
             }
@@ -678,8 +703,8 @@
 
     <div class="ap-heading">
         <div>
-            <h1>Payments</h1>
-            <p class="dashboard-caption" style="font-family:'Inria Serif',serif!important;font-size:14px!important;font-weight:400!important;color:#aeb7b0!important;line-height:1.4!important;">Membership fees and session payments</p>
+            <h1 style="font-weight:700!important;margin-bottom: 0px !important;">Payments</h1>
+            <p class="dashboard-caption" style="color:#aeb7b0!important;line-height:1.4!important;">Membership fees and session payments</p>
         </div>
         <div class="ap-heading-actions">
             <details class="ap-export">
@@ -707,15 +732,15 @@
     <div class="ap-stats">
         <div class="ap-stat">
             <div class="ap-label">Member revenue this month</div>
-            <div class="ap-value paid">₱@Model.MemberRevenueThisMonth.ToString("N2")</div>
+            <div class="ap-value paid" style="">₱@Model.MemberRevenueThisMonth.ToString("N2")</div>
         </div>
         <div class="ap-stat">
             <div class="ap-label">Walk-in revenue this month</div>
-            <div class="ap-value paid">₱@Model.WalkInRevenueThisMonth.ToString("N2")</div>
+            <div class="ap-value paid" style="">₱@Model.WalkInRevenueThisMonth.ToString("N2")</div>
         </div>
         <div class="ap-stat">
             <div class="ap-label">Overdue accounts</div>
-            <div class="ap-value overdue">@Model.OverdueAccounts</div>
+            <div class="ap-value overdue" style="">@Model.OverdueAccounts</div>
         </div>
     </div>
 
@@ -723,7 +748,7 @@
 
         <form class="ap-search" method="get" asp-controller="Admin" asp-action="Payments">
             <input name="searchTerm" value="@Model.SearchTerm" placeholder="Search member or transaction code..." />
-            <button type="submit" style="height:56px !important; box-sizing:border-box !important; font-size:15px !important;">SEARCH</button>
+            <button type="submit" style="height:56px !important; box-sizing:border-box !important; ">SEARCH</button>
         </form>
 
         <form class="ap-filter" method="get" asp-controller="Admin" asp-action="Payments">
@@ -760,22 +785,34 @@
                     @if (Model.Payments.Count == 0)
                     {
                         <tr>
-                            <td colspan="6" class="ap-empty">No payment transactions found.</td>
+                            <td colspan="6" class="ap-empty" style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;">No payment transactions found.</td>
                         </tr>
                     }
 
                     @foreach (var payment in Model.Payments)
                     {
+                        var nameParts = (payment.Name ?? string.Empty).Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                        var initials = nameParts.Length switch
+                        {
+                            0 => "?",
+                            1 => nameParts[0][..1].ToUpperInvariant(),
+                            _ => $"{nameParts[0][0]}{nameParts[^1][0]}".ToUpperInvariant()
+                        };
                         var statusClass = payment.Status.ToString().ToLowerInvariant();
 
                         <tr>
-                            <td class="ap-member">@payment.Name</td>
-                            <td class="ap-code">@payment.TransactionCode</td>
-                            <td class="ap-type">@payment.Type</td>
-                            <td class="ap-amount">₱@payment.Amount.ToString("N2")</td>
-                            <td class="ap-date">@payment.Date.ToString("MMM d, yyyy")</td>
-                            <td>
-                                <span class="ap-badge @statusClass">@payment.Status</span>
+                            <td class="ap-member" style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;">
+                                <div class="ap-member-name">
+                                    <span class="ap-avatar" aria-hidden="true">@initials</span>
+                                    <span>@payment.Name</span>
+                                </div>
+                            </td>
+                            <td class="ap-code" style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;">@payment.TransactionCode</td>
+                            <td class="ap-type" style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;">@payment.Type</td>
+                            <td class="ap-amount" style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;">₱@payment.Amount.ToString("N2")</td>
+                            <td class="ap-date" style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;">@payment.Date.ToString("MMM d, yyyy")</td>
+                            <td style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;">
+                                <span class="ap-badge @statusClass" style="background:transparent!important;padding:0!important;border:0!important;border-radius:0!important;box-shadow:none!important;">@payment.Status</span>
                             </td>
                         </tr>
                     }
@@ -786,7 +823,7 @@
         </div>
 
         <div class="ap-pager">
-            <span class="ap-page-info">Page @Model.Page of @Model.TotalPages · @Model.TotalCount transaction(s)</span>
+            <span class="pagination-summary ap-page-info">Page @Model.Page of @Model.TotalPages · @Model.TotalCount transaction(s)</span>
             <div class="ap-page-buttons">
                 <a class="ap-page @(Model.Page <= 1 ? "disabled" : "")"
                    asp-action="Payments"
@@ -813,7 +850,7 @@
 </style>
 <div class="ap-modal" id="walkInTypesModal" role="dialog" aria-modal="true" aria-labelledby="walkInTypesTitle">
     <div class="ap-dialog" style="max-height:90vh;overflow:auto">
-        <h2 id="walkInTypesTitle">Manage walk-in payment types</h2>
+        <h2 id="walkInTypesTitle" class="form-dialog-title">Manage walk-in payment types</h2>
         <p>Set the names and prices available during walk-in registration and repeat visits.</p>
         <form asp-controller="Admin" asp-action="SaveWalkInPaymentType" method="post">
             @Html.AntiForgeryToken()
@@ -843,7 +880,7 @@
 <div class="ap-modal" id="planEditor" role="dialog" aria-modal="true" aria-labelledby="planEditorTitle">
     <div class="ap-dialog" style="max-height:90vh;overflow:auto">
         <div class="ap-dialog-heading">
-            <h2 id="planEditorTitle">Manage membership plans</h2>
+            <h2 id="planEditorTitle" class="form-dialog-title">Manage membership plans</h2>
         </div>
         <p>Add a plan or edit its name, price, and membership duration.</p>
 
@@ -870,7 +907,7 @@
             </div>
         </form>
 
-        <h3 style="font-size:18px;color:#fff;margin:24px 0 12px">Saved membership plans</h3>
+        <h3 style="color:#fff;margin:24px 0 12px">Saved membership plans</h3>
         @if (!Model.PlanSettings.Any(item => item.IsActive))
         {
             <p>No membership plans added yet.</p>

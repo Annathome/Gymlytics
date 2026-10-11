@@ -49,18 +49,18 @@
             color: #101510;
             border: 0;
             padding: 0 18px;
-            font-size: 10px;
+            
             font-weight: 800;
         }
 
     .atm h1 {
-        font-size: 25px;
+        
         margin: 22px 0 4px;
     }
 
     .atm-sub {
         color: #b7ff1b;
-        font-size: 10px;
+        
     }
 
     .atm-stats {
@@ -78,14 +78,14 @@
     }
 
     .atm-label {
-        font-size: 9px;
+        
         color: #adb5af;
         text-transform: uppercase;
         letter-spacing: 0.07em;
     }
 
     .atm-value {
-        font-size: 29px;
+        
         font-weight: 800;
         margin-top: 10px;
     }
@@ -95,7 +95,7 @@
         }
 
     .atm-note {
-        font-size: 10px;
+        
         color: #b7beb8;
         display: block;
         margin-top: 6px;
@@ -131,7 +131,7 @@
             z-index: 3;
             background: #343735;
             color: #d6dcd7;
-            font-size: 9px;
+            
             text-transform: uppercase;
         }
 
@@ -147,7 +147,7 @@
 
     .atm-time {
         color: #d9dfda;
-        font-size: 10px;
+        
         font-weight: 700;
     }
 
@@ -157,7 +157,7 @@
 
     .atm-open {
         color: #7e8980;
-        font-size: 9px;
+        
         font-style: italic;
     }
 
@@ -168,17 +168,17 @@
         background: #213b2b;
         border: 1px solid #326044;
         color: #dfffe7;
-        font-size: 10px;
+        
     }
 
     .atm-member-schedule {
         display: block;
         margin-bottom: 5px;
         padding: 7px;
-        background: #31421f;
-        border: 1px solid #b7ff1b;
+        background: transparent;
+        border: 1px solid rgba(183, 255, 27, .45);
         color: #fff;
-        font-size: 10px;
+        
     }
 
     .atm-member-schedule small {
@@ -194,7 +194,7 @@
         }
 
     .atm-cap {
-        font-size: 8px;
+        
         color: #b9c5bc;
     }
 
@@ -203,7 +203,7 @@
         left: 0;
         padding: 12px;
         color: #aeb7b0;
-        font-size: 9px;
+        
         background: #171a18;
         border-top: 1px solid #343a35;
     }
@@ -235,25 +235,25 @@
     }
 
     <div class="atm-heading">
-        <h1>Trainer Management</h1>
-        <div class="atm-sub dashboard-caption" style="font-family:'Inria Serif',serif!important;font-size:14px!important;font-weight:400!important;color:#aeb7b0!important;line-height:1.4!important;">Capacity enforced per time slot · zero conflicts</div>
+        <h1 style="font-weight:700!important;margin-bottom: 0px !important;">Trainer Management</h1>
+        <div class="atm-sub dashboard-caption" style="color:#aeb7b0!important;line-height:1.4!important;">Capacity enforced per time slot · zero conflicts</div>
     </div>
 
     <div class="atm-stats">
         <div class="atm-stat">
             <div class="atm-label">Available trainer member capacity</div>
-            <div class="atm-value">
-                <strong class="@(Model.AvailableMemberCapacity <= 5 ? "summary-danger" : Model.AvailableMemberCapacity <= 10 ? "summary-warning" : "")">@Model.AvailableMemberCapacity</strong>
+            <div class="atm-value" style="">
+                <strong class="@(Model.AvailableMemberCapacity <= 5 ? "summary-danger" : Model.AvailableMemberCapacity <= 10 ? "summary-warning" : "")" style="">@Model.AvailableMemberCapacity</strong>
                 <span class="atm-note">Remaining member slots out of @Model.TotalCapacity slots</span>
             </div>
         </div>
         <div class="atm-stat">
             <div class="atm-label">Total sessions today</div>
-            <div class="atm-value">@Model.SessionsToday</div>
+            <div class="atm-value" style="">@Model.SessionsToday</div>
         </div>
         <div class="atm-stat">
             <div class="atm-label">Active bookings</div>
-            <div class="atm-value">
+            <div class="atm-value" style="">
                 @Model.ActiveBookings
             </div>
         </div>
@@ -279,7 +279,7 @@
                     var slot = new TimeSpan(hour, 0, 0);
 
                     <tr>
-                        <td class="atm-time">
+                        <td class="atm-time" style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;">
                             @DateTime.Today.Add(slot).ToString("h tt") – @DateTime.Today.AddHours(hour + 1).ToString("h tt")
                         </td>
 
@@ -287,24 +287,24 @@
                         {
                             var scheduledMembers = Model.GetScheduledMembers(day, slot);
 
-                            <td class="atm-slot">
+                            <td class="atm-slot" style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;">
                                 @if (scheduledMembers.Count > 0)
                                 {
                                     @foreach (var trainerGroup in scheduledMembers.GroupBy(member => member.TrainerId))
                                     {
                                         var firstMember = trainerGroup.First();
-                                        <span class="atm-member-schedule" data-trainer-name="@firstMember.TrainerName.ToLowerInvariant()">
+                                        <span class="atm-member-schedule" data-trainer-name="@firstMember.TrainerName.ToLowerInvariant()" style="">
                                             @foreach (var member in trainerGroup)
                                             {
                                                 <strong style="display:block;margin-bottom:4px">@member.MemberName</strong>
                                             }
-                                            <small>@(firstMember.TrainerId.HasValue ? $"Trainer: {firstMember.TrainerName}" : "Self-guided")</small>
+                                            <small style="">@(firstMember.TrainerId.HasValue ? $"Trainer: {firstMember.TrainerName}" : "Self-guided")</small>
                                         </span>
                                     }
                                 }
                                 else
                                 {
-                                    <span class="atm-open">Open</span>
+                                    <span class="atm-open" style="">Open</span>
                                 }
                             </td>
                         }

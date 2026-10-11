@@ -11,47 +11,70 @@
 
 <style>
     .email-notifications {
-        width: min(1180px, calc(100vw - 380px));
-        margin: 24px auto;
+        width: min(1460px, calc(100vw - 380px));
+        margin: 30px auto;
         transform: translateX(10px);
         color: #102630;
-        font: 15px Arial, Helvetica, sans-serif;
+        font-family:Arial, Helvetica, sans-serif;
     }
-    .email-notifications h1 { margin: 0 0 6px; font-size: 25px; }
-    .email-notifications .subtitle { margin: 0 0 22px; color: #68756e; }
-    .email-log { overflow: hidden; border: 1px solid #d8e3dd; border-radius: 9px; background: #fff; }
-    .email-log-header, .email-log-row {
+    .email-notifications h1 { margin: 0 0 6px; }
+    .email-notifications .subtitle { margin: 0 0 34px; color: #aeb7b0; }
+    .email-log { overflow: hidden; border: 0; border-radius: 10px; background: #5e5d63; }
+    .email-log-header { display:none; }
+    .email-log-row {
         display: grid;
-        grid-template-columns: minmax(175px, .65fr) minmax(480px, 1.9fr) minmax(210px, .8fr);
-        gap: 20px;
-        align-items: center;
-        padding: 16px 20px;
+        grid-template-columns: 48px minmax(0, 1fr) auto;
+        gap: 22px;
+        align-items: start;
+        padding: 22px 26px;
+        min-height: 74px;
+        color: #fff;
+        border-bottom: 1px solid rgba(183,255,27,.2);
     }
-    .email-log-header { background: #394f59; color: #fff; font-weight: 700; font-size: 13px; }
-    .email-log-row { border-top: 1px solid #e5ebe7; }
-    .email-status { width: fit-content; padding: 5px 12px; border-radius: 999px; font-size: 12px; font-weight: 700; }
-    .email-status.sent { background: #dcf5df; color: #08752a; }
-    .email-status.failed { background: #fde2e2; color: #a71919; }
-    .email-title { font-weight: 700; }
-    .email-message { color: #536159; line-height: 1.45; overflow-wrap: anywhere; }
-    .email-date { color: #68756e; font-size: 13px; }
-    .email-empty { padding: 54px 20px; color: #68756e; text-align: center; }
+    .email-log-row:last-of-type { border-bottom: 0; }
+    .email-icon { width:48px; height:48px; display:grid; place-items:center; border-radius:50%; background:rgba(124,239,114,.18); color:#7cef72; font-size:20px; font-weight:700; }
+    .email-copy { min-width:0; }
+    .email-status { display:none; }
+    .email-title { display:block; margin-bottom:6px; color:#aeb7b0; font-weight:400; }
+    .email-message { display:block; color:#fff; line-height:1.45; overflow-wrap:anywhere; }
+    .email-date { color:#aeb7b0; white-space:nowrap; }
+    .email-empty { padding:54px 20px; color:#aeb7b0; text-align:center; }
     .email-pagination { display:flex; align-items:center; justify-content:space-between; min-height:80px; padding:14px 20px; border-top:1px solid #313632; }
     .email-pagination nav { display:flex; gap:12px; }
-    .email-pagination a { min-width:102px; height:50px; display:inline-flex; align-items:center; justify-content:center; border:1px solid #59635c; border-radius:5px; color:#fff; text-decoration:none; font-size:10px; font-weight:700; text-transform:uppercase; }
+    .email-pagination a { min-width:102px; height:50px; display:inline-flex; align-items:center; justify-content:center; border:1px solid #59635c; border-radius:5px; color:#fff; text-decoration:none;  font-weight:700; text-transform:uppercase; }
     .email-pagination a.disabled { opacity:.4; pointer-events:none; }
+    /* Match the shared dashboard content rhythm on staff and admin views. */
+    main.email-notifications {
+        width: min(1460px, calc(100vw - 380px)) !important;
+        margin: 30px auto !important;
+        padding: 0 !important;
+    }
+    main.email-notifications > header {
+        margin: 0 0 34px !important;
+        padding: 0 !important;
+    }
+    main.email-notifications .email-log-row {
+        padding: 16px 26px !important;
+        min-height: 0 !important;
+    }
+    main.email-notifications .email-icon {
+        width: 48px !important;
+        height: 48px !important;
+    }
     @@media (max-width: 900px) {
         .email-notifications { width: calc(100vw - 48px); transform: none; }
         .email-log { overflow-x: auto; }
-        .email-log-header, .email-log-row { min-width: 900px; }
+        .email-log-row { grid-template-columns:40px minmax(0,1fr); }
+        .email-icon { width:40px; height:40px; }
+        .email-date { grid-column:2; }
     }
 </style>
 
 <main class="email-notifications">
-    <header class="role-page-header">
+    <header class="role-page-header" style="border-bottom:0!important;">
         <div>
-            <h1 style="color:#fff !important;">@(isAdmin ? "Admin Notifications" : "Email Notifications")</h1>
-            <p class="subtitle @(isAdmin ? "dashboard-caption" : "")" style="@(isAdmin ? "font-family:'Inria Serif',serif!important;font-size:14px!important;font-weight:400!important;color:#aeb7b0!important;line-height:1.4!important;" : "")">@(isAdmin ? "Security, reminders, trainer availability, and membership activity." : "Delivery activity for emails sent by the Front Desk.")</p>
+            <h1 style="font-weight:700!important;color:#fff !important;margin-bottom: 0px !important;">@(isAdmin ? "Admin Notifications" : "Email Notifications")</h1>
+            <p class="subtitle @(isAdmin ? "dashboard-caption" : "")" style="@(isAdmin ? "font-family:'Inria Serif',serif!important;font-weight:400!important;color:#aeb7b0!important;line-height:1.4!important;" : "")">@(isAdmin ? "Security, reminders, trainer availability, and membership activity." : "Delivery activity for emails sent by the Front Desk.")</p>
         </div>
     </header>
 
@@ -66,16 +89,18 @@
         {
             @foreach (var item in Model)
             {
-                var sent = item.Status.Equals("Sent", StringComparison.OrdinalIgnoreCase);
                 <article class="email-log-row">
-                    <span class="email-title">@item.EmailType</span>
-                    <span class="email-message">@item.Message</span>
+                    <span class="email-icon" aria-hidden="true">✓</span>
+                    <div class="email-copy">
+                        <span class="email-title">@item.EmailType</span>
+                        <span class="email-message">@item.Message</span>
+                    </div>
                     <time class="email-date">@item.CreatedDate.ToString("MMM d, yyyy · h:mm tt")</time>
                 </article>
             }
         }
         <footer class="email-pagination">
-            <span>Showing @Model.Count of @totalCount (page @currentPageNumber of @totalPages)</span>
+            <span class="pagination-summary">Showing @Model.Count of @totalCount (page @currentPageNumber of @totalPages)</span>
             <nav aria-label="Email notification pages">
                 <a asp-action="Notifications" asp-route-page="@(currentPageNumber - 1)" class="@(currentPageNumber <= 1 ? "disabled" : "")">Previous</a>
                 <a asp-action="Notifications" asp-route-page="@(currentPageNumber + 1)" class="@(currentPageNumber >= totalPages ? "disabled" : "")">Next</a>

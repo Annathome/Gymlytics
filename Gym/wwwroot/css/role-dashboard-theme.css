@@ -3,7 +3,7 @@
     body.trainer-shell .trainer-equipment .te-stat.good strong { color:#b7ff1b!important; }
     body.trainer-shell .trainer-equipment .te-card { overflow-x:auto!important; }
     body.trainer-shell .trainer-equipment .te-table { min-width:980px; }
-    body.trainer-shell .trainer-equipment .te-report-button { font-size:15px!important; padding:10px 14px!important; min-height:42px!important; }
+    body.trainer-shell .trainer-equipment .te-report-button {  padding:10px 14px!important; min-height:42px!important; }
     body.trainer-shell .trainer-equipment .te-report-button:is(:hover,:focus-visible) { background:transparent!important; color:#b7ff1b!important; border-color:#b7ff1b!important; }
     @media(max-width:1000px) { body.trainer-shell .trainer-equipment .te-stats { grid-template-columns:repeat(2,minmax(0,1fr))!important; } }
     @media(max-width:540px) { body.trainer-shell .trainer-equipment .te-stats { grid-template-columns:1fr!important; } }
@@ -15,7 +15,7 @@
         width:35px!important; height:35px!important; min-width:35px!important;
         flex:0 0 35px!important; border-radius:50%!important;
         display:inline-flex!important; align-items:center!important; justify-content:center!important;
-        font-family:"Inria Serif",serif!important; font-size:11px!important; font-weight:700!important;
+        font-family:"Inria Serif",serif!important;  font-weight:700!important;
         line-height:1!important; border:0!important;
     }
     .wi-member-name { display:flex; align-items:center; gap:12px; }
@@ -29,18 +29,18 @@
         width:60px !important; height:60px !important; flex:0 0 60px;
         display:flex; align-items:center; justify-content:center;
         border-radius:50% !important; background:#b7ff1b !important; color:#182000 !important;
-        font-size:16px !important; font-weight:700 !important;
+         font-weight:700 !important;
     }
-    body .admin-logout .top h3 { color:#fff !important; font-size:22px !important; margin:0; }
+    body .admin-logout .top h3 { color:#fff !important;  margin:0; }
     body .admin-logout .top-log { display:flex; flex-direction:column; gap:15px; }
-    body .admin-logout .top-log label { color:#d3d3d3 !important; font-size:16px !important; }
+    body .admin-logout .top-log label { color:#d3d3d3 !important;  }
     body .admin-logout .top-log label span { color:#fff !important; font-weight:700; }
     body .admin-logout .btn-log {
         width:100% !important; min-height:42px !important; margin-top:20px;
         background:#b7ff1b !important; color:#182000 !important; border:1px solid #b7ff1b !important;
-        font-size:16px !important; font-weight:700 !important;
+         font-weight:700 !important;
     }
-    body .admin-logout .btn-log span { color:inherit !important; font-size:inherit !important; }
+    body .admin-logout .btn-log span { color:inherit !important;  }
     body .admin-logout .btn-log:is(:hover, :focus-visible) { background:transparent !important; color:#b7ff1b !important; }
 }
 
@@ -66,7 +66,7 @@
         box-shadow:inset 3px 0 0 #b7ff1b !important;
     }
     body:is(.trainer-shell, .frontdesk-shell) .navbar-nav :is(.nav-link, .icon) {
-        color:#fff !important; font-size:15px !important;
+        color:#fff !important; 
     }
     body:is(.trainer-shell, .frontdesk-shell) .navbar-nav .nav-link {
         font-family:"Inria Serif",serif !important; font-weight:400 !important;
@@ -108,14 +108,14 @@
         overflow-y: auto;
         box-shadow: 0 20px 60px #0008 !important;
     }
-    #userDetailsModal h3 { color: #fff !important; font-size: 26px !important; }
-    #userDetailsModal .details-field label { color: #fff !important; font-size: 15px !important; margin-bottom: 7px; }
+    #userDetailsModal h3 { color: #fff !important;  }
+    #userDetailsModal .details-field label { color: #fff !important;  margin-bottom: 7px; }
     #userDetailsModal :is(.details-value, .password-input) {
         background: #252b26 !important;
         color: #fff !important;
         border: 1px solid #59635c !important;
         border-radius: 6px !important;
-        font-size: 15px !important;
+        
         box-sizing: border-box;
     }
     #userDetailsModal .password-input { background: #1b201c !important; }
@@ -144,7 +144,7 @@
         display: flex !important; align-items: center !important; justify-content: space-between !important; gap: 20px;
         height: 56px !important; min-height: 56px !important; padding: 0 20px !important; box-sizing: border-box !important;
         border: 1px solid #59635c !important; background: #1b201c !important; cursor: pointer; list-style: none !important;
-        font: 500 15px/1.35 "Inria Serif", serif !important;
+        font-family:"Inria Serif", serif !important;font-weight:500 !important;line-height:1.35 !important;
         color: #fff !important; text-transform: none !important;
     }
     body .styled-filter > summary::-webkit-details-marker { display: none; }
@@ -168,7 +168,7 @@
         min-height: 42px !important; padding: 10px 14px !important;
         border: 1px solid transparent !important; border-radius: 0 !important;
         background: transparent !important; color: #fff !important;
-        text-align: left !important; font: 500 15px/1.35 "Inria Serif", serif !important; white-space: nowrap;
+        text-align: left !important; font-family:"Inria Serif", serif !important;font-weight:500 !important;line-height:1.35 !important; white-space: nowrap;
         letter-spacing: .01em !important; text-transform: none !important;
         box-sizing: border-box !important;
     }
@@ -248,7 +248,7 @@ body.admin-shell .navbar-nav .nav-item:is(:hover, :focus-visible, .active) {
 
 .role-shell .navbar-brand {
     color: #d7ddd8 !important;
-    font-size: 25px !important;
+    
     font-weight: 700 !important;
 }
 
@@ -282,7 +282,7 @@ body.admin-shell .navbar-nav .nav-item:is(:hover, :focus-visible, .active) {
 .role-shell .nav-link,
 .role-shell .icon {
     color: #d7ddd8 !important;
-    font-size: 15px !important;
+    
 }
 
 .role-shell .nav-link {
@@ -339,7 +339,7 @@ body.admin-shell .navbar-nav .nav-item:is(:hover, :focus-visible, .active) {
     background: #194d29 !important;
     color: #b8e8c2 !important;
     font-family: "Inria Serif", serif !important;
-    font-size: 18px !important;
+    
     font-weight: 700 !important;
 }
 
@@ -355,14 +355,14 @@ body.admin-shell .navbar-nav .nav-item:is(:hover, :focus-visible, .active) {
 .admin-shell .btn-admin-inner .admin-link,
 .role-shell .btn-admin-inner .admin-link {
     color: #b8e8c2 !important;
-    font-size: 18px !important;
+    
     line-height: 1.2 !important;
 }
 
 .admin-shell .btn-admin-inner .admin-role-subtitle,
 .role-shell .btn-admin-inner .admin-role-subtitle {
     color: #9fd3aa !important;
-    font-size: 15px !important;
+    
     line-height: 1.2 !important;
 }
 
@@ -475,7 +475,7 @@ body.admin-shell .navbar-nav .nav-item:is(:hover, :focus-visible, .active) {
 
 .role-shell h1 {
     color: #d7ddd8 !important;
-    font-size: 30px !important;
+    
     font-weight: 700 !important;
     line-height: 1.2 !important;
 }
@@ -483,20 +483,20 @@ body.admin-shell .navbar-nav .nav-item:is(:hover, :focus-visible, .active) {
 .role-shell h2,
 .role-shell h3 {
     color: #d7ddd8 !important;
-    font-size: 20px !important;
+    
 }
 
 .role-shell p,
 .role-shell td,
 .role-shell label {
     color: #9ba49d !important;
-    font-size: 15px !important;
+    
 }
 
 .role-shell th,
 .role-shell small {
     color: #9ba49d !important;
-    font-size: 10px !important;
+    
 }
 
 .role-shell table {
@@ -593,18 +593,29 @@ body.admin-shell .navbar-nav .nav-item:is(:hover, :focus-visible, .active) {
 
 .frontdesk-shell .fd-summary-value,
 .trainer-shell .ts-stat strong {
-    font-size: 30px !important;
+    
 }
 
 .frontdesk-shell .fd-insights-grid {
     gap: 22px !important;
-    margin-top: 28px !important;
+    margin-top: 34px !important;
 }
 
 .frontdesk-shell .fd-chart,
 .frontdesk-shell .fd-availability,
 .frontdesk-shell .fd-schedule {
     padding: 22px !important;
+}
+
+/* The schedule table sits flush beneath its header; keep its status accent
+   aligned with the lime dashboard action color. */
+body.frontdesk-shell .fd-dashboard .fd-schedule {
+    padding: 0 !important;
+}
+body.frontdesk-shell .fd-dashboard .fd-badge.scheduled {
+    color: #b7ff1b !important;
+    background: transparent !important;
+    border-color: transparent !important;
 }
 
 /* Trainer dashboard and menu pages use the same content grid. */
@@ -787,7 +798,7 @@ body.trainer-shell .tm-head p {
 .admin-shell .am-pager > span,
 .admin-shell .page-wrap > .card > .pager > span {
     color: #aab3ac !important;
-    font-size: 15px !important;
+    
     font-weight: 400 !important;
 }
 
@@ -843,7 +854,7 @@ body.trainer-shell .tm-head p {
     color: #fff !important;
     box-shadow: none !important;
     font-family: Arial, sans-serif !important;
-    font-size: 10px !important;
+    
     font-weight: 700 !important;
     line-height: 1 !important;
     text-align: center !important;
@@ -883,7 +894,7 @@ body.frontdesk-shell .pay-action .pay-search button,
 body.frontdesk-shell .pay-action .pay-status {
     height: 56px !important;
     box-sizing: border-box !important;
-    font-size: 15px !important;
+    
     color: #fff !important;
 }
 
@@ -923,7 +934,7 @@ body.frontdesk-shell .pay-card .pay-foot {
 
 body.frontdesk-shell .pay-table th {
     color: #fff !important;
-    font-size: 15px !important;
+    
 }
 
 body.frontdesk-shell main[role="main"] .pay-head h1 {
@@ -936,7 +947,7 @@ body.frontdesk-shell main[role="main"] .pay-head h1 {
 .frontdesk-shell .pay-action .pay-status {
     height: 56px !important;
     box-sizing: border-box !important;
-    font-size: 15px !important;
+    
     color: #fff !important;
 }
 
@@ -968,7 +979,7 @@ body.trainer-shell main[role="main"] h1 {
     margin-bottom: 5px !important;
     color: #9ba49d !important;
     font-family: "Inria Serif", serif !important;
-    font-size: 30px !important;
+    
     font-weight: 700 !important;
     line-height: 1.2 !important;
     letter-spacing: 0 !important;
@@ -980,7 +991,7 @@ body.trainer-shell main[role="main"] :is(.header-subtitle, .page-subtitle, .role
     margin-top: 0 !important;
     color: #ffffff !important;
     font-family: "Inria Serif", serif !important;
-    font-size: 15px !important;
+    
     font-weight: 400 !important;
     line-height: 1.4 !important;
     letter-spacing: 0 !important;
@@ -994,7 +1005,7 @@ body.trainer-shell main[role="main"] h1 {
     margin-bottom: 5px !important;
     color: #9ba49d !important;
     font-family: "Inria Serif", serif !important;
-    font-size: 30px !important;
+    
     font-weight: 700 !important;
     line-height: 1.2 !important;
     letter-spacing: 0 !important;
@@ -1021,7 +1032,7 @@ body.trainer-shell main[role="main"] :is(
     margin-top: 0 !important;
     color: #ffffff !important;
     font-family: "Inria Serif", serif !important;
-    font-size: 15px !important;
+    
     font-weight: 400 !important;
     line-height: 1.4 !important;
     letter-spacing: 0 !important;
@@ -1039,7 +1050,7 @@ body.trainer-shell main[role="main"] :is(
 .frontdesk-shell .page-container .header-title h1 {
     margin: 0 0 5px !important;
     color: #9ba49d !important;
-    font-size: 30px !important;
+    
     font-weight: 700 !important;
     line-height: 1.2 !important;
 }
@@ -1057,7 +1068,7 @@ body.trainer-shell main[role="main"] :is(
     margin: 0 0 5px !important;
     color: #9ba49d !important;
     font-family: "Inria Serif", serif !important;
-    font-size: 30px !important;
+    
     font-weight: 700 !important;
     line-height: 1.2 !important;
     letter-spacing: 0 !important;
@@ -1076,7 +1087,7 @@ body.trainer-shell main[role="main"] :is(
     margin: 0 !important;
     color: #ffffff !important;
     font-family: "Inria Serif", serif !important;
-    font-size: 15px !important;
+    
     font-weight: 400 !important;
     line-height: 1.4 !important;
     letter-spacing: 0 !important;
@@ -1116,12 +1127,12 @@ body.frontdesk-shell .am-page .am-search input,
 body.frontdesk-shell .am-page .am-search .attendance-search-button {
     height: 56px !important;
     box-sizing: border-box !important;
-    font-size: 15px !important;
+    
 }
 
 body.frontdesk-shell .am-page .am-table th {
     color: #fff !important;
-    font-size: 15px !important;
+    
 }
 
 /* Keep Payment aligned with Members after all legacy rules. */
@@ -1212,12 +1223,12 @@ body.frontdesk-shell .wi-page .wi-search input,
 body.frontdesk-shell .wi-page .wi-search .walkin-search-button {
     height: 56px !important;
     box-sizing: border-box !important;
-    font-size: 15px !important;
+    
 }
 
 body.frontdesk-shell .wi-page .wi-table th {
     color: #fff !important;
-    font-size: 15px !important;
+    
 }
 
 body.frontdesk-shell .wi-page .wi-table tbody td {
@@ -1243,7 +1254,7 @@ body.frontdesk-shell .wi-page .wi-table tbody td {
     border-radius: 0 !important;
     background: #a8df32 !important;
     color: #293029 !important;
-    font-size: 15px !important;
+    
     font-weight: 800 !important;
 }
 
@@ -1263,7 +1274,7 @@ body.frontdesk-shell .wi-page .wi-table tbody td {
     padding: 18px !important;
     background: transparent !important;
     color: #ffffff !important;
-    font-size: 20px !important;
+    font-size: 16px !important;
     font-weight: 700 !important;
     line-height: 1.2 !important;
 }
@@ -1358,12 +1369,12 @@ body.frontdesk-shell .wi-page .wi-table tbody td {
 .frontdesk-shell,
 .trainer-shell {
     color: #9ba49d !important;
-    font-size: 15px !important;
+    
 }
 
 .frontdesk-shell .navbar-brand,
 .trainer-shell .navbar-brand {
-    font-size: 20px !important;
+    
 }
 
 .frontdesk-shell main h1,
@@ -1372,7 +1383,7 @@ body.frontdesk-shell .wi-page .wi-table tbody td {
 .trainer-shell .ts-title h1 {
     margin-top: 0 !important;
     color: #9ba49d !important;
-    font-size: 30px !important;
+    
     font-weight: 700 !important;
     line-height: 1.2 !important;
 }
@@ -1382,7 +1393,7 @@ body.frontdesk-shell .wi-page .wi-table tbody td {
 .trainer-shell main h2,
 .trainer-shell main h3 {
     color: #9ba49d !important;
-    font-size: 20px !important;
+    
     font-weight: 700 !important;
 }
 
@@ -1399,7 +1410,7 @@ body.frontdesk-shell .wi-page .wi-table tbody td {
 .trainer-shell main select,
 .trainer-shell main textarea {
     color: #9ba49d !important;
-    font-size: 15px !important;
+    
 }
 
 .frontdesk-shell main th,
@@ -1409,7 +1420,7 @@ body.frontdesk-shell .wi-page .wi-table tbody td {
 .frontdesk-shell .fd-summary-label,
 .trainer-shell .ts-stat > span {
     color: #9ba49d !important;
-    font-size: 10px !important;
+    
 }
 
 .frontdesk-shell main button,
@@ -1418,7 +1429,7 @@ body.frontdesk-shell .wi-page .wi-table tbody td {
 .trainer-shell main .btn,
 .frontdesk-shell main [class*="btn-"],
 .trainer-shell main [class*="btn-"] {
-    font-size: 15px !important;
+    
 }
 
 .frontdesk-shell main button[type="submit"],
@@ -1466,7 +1477,7 @@ body.frontdesk-shell .wi-page .wi-table tbody td {
 .frontdesk-shell .fd-summary-value,
 .trainer-shell .ts-stat strong,
 .trainer-shell .te-stat strong {
-    font-size: 30px !important;
+    
     font-weight: 700 !important;
 }
 
@@ -1483,7 +1494,7 @@ body.frontdesk-shell .wi-page .wi-table tbody td {
     transform: none !important;
     background: transparent !important;
     color: #c4ccc6 !important;
-    font: 15px Arial, sans-serif !important;
+    font-family:Arial, sans-serif !important;
 }
 
 /* Admin Walk-ins and Notifications mirror their Front Desk counterparts. */
@@ -1495,7 +1506,7 @@ body.frontdesk-shell .wi-page .wi-table tbody td {
     transform: none !important;
     background: transparent !important;
     color: #c4ccc6 !important;
-    font: 15px Arial, sans-serif !important;
+    font-family:Arial, sans-serif !important;
 }
 
 .admin-shell .wi-head,
@@ -1505,7 +1516,6 @@ body.frontdesk-shell .wi-page .wi-table tbody td {
     justify-content: space-between !important;
     width: 100% !important;
     min-height: 76px !important;
-    margin: 0 0 28px !important;
     padding: 0 0 20px !important;
     border-bottom: 1px solid #303430 !important;
     background: transparent !important;
@@ -1516,7 +1526,7 @@ body.frontdesk-shell .wi-page .wi-table tbody td {
     margin: 0 0 5px !important;
     color: #9ba49d !important;
     font-family: "Inria Serif", serif !important;
-    font-size: 30px !important;
+    
     font-weight: 700 !important;
 }
 
@@ -1525,7 +1535,7 @@ body.frontdesk-shell .wi-page .wi-table tbody td {
     margin: 0 !important;
     color: #ffffff !important;
     font-family: "Inria Serif", serif !important;
-    font-size: 15px !important;
+    
 }
 
 .admin-shell .wi-search {
@@ -1546,7 +1556,7 @@ body.frontdesk-shell .wi-page .wi-table tbody td {
     border-radius: 0 !important;
     background: #1b1e1c !important;
     color: #ffffff !important;
-    font-size: 15px !important;
+    
 }
 
 .admin-shell .wi-search button,
@@ -1562,7 +1572,7 @@ body.frontdesk-shell .wi-page .wi-table tbody td {
     border-radius: 0 !important;
     background: #a8df32 !important;
     color: #20271f !important;
-    font-size: 10px !important;
+    
     font-weight: 800 !important;
     text-transform: uppercase !important;
 }
@@ -1582,7 +1592,7 @@ body.frontdesk-shell .wi-page .wi-table tbody td {
     padding: 18px 16px !important;
     background: #5E5D63 !important;
     color: #ffffff !important;
-    font-size: 20px !important;
+    
     font-weight: 700 !important;
 }
 
@@ -1596,7 +1606,7 @@ body.frontdesk-shell .wi-page .wi-table tbody td {
 .admin-shell .email-log-header {
     background: #343735 !important;
     color: #9ba49d !important;
-    font-size: 10px !important;
+    
     text-transform: uppercase !important;
 }
 
@@ -1605,7 +1615,7 @@ body.frontdesk-shell .wi-page .wi-table tbody td {
     border-color: #313632 !important;
     background: #5E5D63 !important;
     color: #ffffff !important;
-    font-size: 15px !important;
+    
 }
 
 .admin-shell .wi-table .reason,
@@ -1724,7 +1734,7 @@ body.frontdesk-shell .wi-page .wi-table tbody td {
 
 .frontdesk-shell #cancelMembershipModal .modal-card h3 {
     color: #ffffff !important;
-    font-size: 20px !important;
+    
 }
 
 .frontdesk-shell #cancelMembershipModal .modal-buttons {
@@ -1766,7 +1776,7 @@ body.frontdesk-shell .wi-page .wi-table tbody td {
 
 .frontdesk-shell #terminateModal .modal-card h3 {
     color: #ffffff !important;
-    font-size: 20px !important;
+    
 }
 
 .frontdesk-shell #terminateModal .modal-buttons {
@@ -1805,7 +1815,7 @@ body.frontdesk-shell .wi-page .wi-table tbody td {
 .frontdesk-shell .email-notifications h1 {
     margin-bottom: 5px !important;
     color: #d7ddd8 !important;
-    font-size: 30px !important;
+    
     font-weight: 700 !important;
 }
 
@@ -1831,7 +1841,7 @@ body.frontdesk-shell .wi-page .wi-table tbody td {
     background: #1b1e1c !important;
     border: 1px solid #8d958f !important;
     color: #d7ddd8 !important;
-    font-size: 15px !important;
+    
 }
 
 .frontdesk-shell .search-btn,
@@ -1853,7 +1863,7 @@ body.frontdesk-shell .wi-page .wi-table tbody td {
     border-radius: 0 !important;
     background: #a8df32 !important;
     color: #20271f !important;
-    font-size: 10px !important;
+    
     font-weight: 800 !important;
     text-transform: uppercase;
 }
@@ -1877,7 +1887,7 @@ body.frontdesk-shell .wi-page .wi-table tbody td {
     padding: 14px !important;
     background: transparent !important;
     color: #d7ddd8 !important;
-    font-size: 15px !important;
+    
 }
 
 .frontdesk-shell .eq-stats {
@@ -1937,7 +1947,7 @@ body.frontdesk-shell .wi-page .wi-table tbody td {
     border-radius: 4px !important;
     background: #a8df32 !important;
     color: #20271f !important;
-    font-size: 10px !important;
+    
     font-weight: 800 !important;
     text-transform: uppercase;
 }
@@ -1961,7 +1971,7 @@ body.frontdesk-shell .wi-page .wi-table tbody td {
 .frontdesk-shell .email-log-header {
     background: #343735 !important;
     color: #9ba49d !important;
-    font-size: 10px !important;
+    
     text-transform: uppercase;
 }
 
@@ -1978,8 +1988,27 @@ body.frontdesk-shell .email-notifications .email-empty {
     color: #fff !important;
 }
 
+/* Keep the staff email feed visually aligned with Admin Notifications. */
+body.frontdesk-shell .email-notifications .subtitle {
+    color: #aeb7b0 !important;
+    font-family: "Inria Serif", serif !important;
+}
+
+body.frontdesk-shell .email-notifications .email-log-row {
+    border-color: #313632 !important;
+}
+
+body.frontdesk-shell .email-notifications .email-title {
+    color: #fff !important;
+}
+
+body.frontdesk-shell .email-notifications .email-message,
+body.frontdesk-shell .email-notifications .email-date {
+    color: #9ba49d !important;
+}
+
 body.frontdesk-shell .email-notifications .email-log-header {
-    font-size: 15px !important;
+    
 }
 
 body.frontdesk-shell .email-notifications .email-log,
@@ -2008,7 +2037,7 @@ body.admin-shell .email-notifications .email-pagination {
 body.frontdesk-shell .email-notifications .email-pagination > span,
 body.admin-shell .email-notifications .email-pagination > span {
     color: #aab3ac !important;
-    font-size: 15px !important;
+    
 }
 
 body.frontdesk-shell .email-notifications .email-pagination nav,
@@ -2031,7 +2060,7 @@ body.admin-shell .email-notifications .email-pagination nav a {
     background: transparent !important;
     color: rgba(255, 255, 255, .4) !important;
     box-shadow: none !important;
-    font-size: 10px !important;
+    
     font-weight: 700 !important;
     line-height: 1 !important;
     text-align: center !important;
@@ -2056,11 +2085,11 @@ body.frontdesk-shell .am-page .am-card {
 
 body.frontdesk-shell .am-page .am-table tbody td:nth-child(4),
 body.frontdesk-shell .am-page .am-table .badge {
-    font-size: 15px !important;
+    
 }
 
 body.frontdesk-shell .am-page .am-table .action-cell button {
-    font-size: 15px !important;
+    
 }
 
 /* Final Front Desk dashboard heading and chart typography. */
@@ -2074,12 +2103,12 @@ body.frontdesk-shell .fd-dashboard .fd-availability > h2 {
 
 body.frontdesk-shell .fd-dashboard .fd-summary-label {
     color: #e2dfd5 !important;
-    font-size: 12px !important;
+    
 }
 
 body.frontdesk-shell .fd-dashboard .fd-availability-table th {
     color: #fff !important;
-    font-size: 15px !important;
+    
     height: auto !important;
     padding: 7px 13px !important;
     line-height: 1.1 !important;
@@ -2090,7 +2119,7 @@ body.frontdesk-shell .fd-dashboard .fd-trainer-name,
 body.frontdesk-shell .fd-dashboard .fd-trainer-days,
 body.frontdesk-shell .fd-dashboard .fd-slot-count,
 body.frontdesk-shell .fd-dashboard .fd-not-set {
-    font-size: 15px !important;
+    
 }
 
 body.frontdesk-shell .fd-dashboard .fd-schedule-head h2,
@@ -2101,12 +2130,12 @@ body.frontdesk-shell .fd-dashboard .fd-table th {
 body.frontdesk-shell .fd-dashboard .fd-table th,
 body.frontdesk-shell .fd-dashboard .fd-badge,
 body.frontdesk-shell .fd-dashboard .fd-action {
-    font-size: 15px !important;
+    
 }
 
 body.frontdesk-shell main.fd-dashboard .fd-schedule .fd-reminder-form button.fd-action.remind,
 body.frontdesk-shell main.fd-dashboard .fd-schedule .fd-reminder-form button.fd-action.reminded {
-    font-size: 15px !important;
+    
 }
 
 @media (max-width: 900px) {
@@ -2127,7 +2156,7 @@ body.frontdesk-shell main.fd-dashboard .fd-schedule .fd-reminder-form button.fd-
 .trainer-shell main .ts-title h1 {
     margin-top: 0 !important;
     color: #9ba49d !important;
-    font-size: 30px !important;
+    
     font-weight: 700 !important;
 }
 
@@ -2136,7 +2165,7 @@ body.frontdesk-shell main.fd-dashboard .fd-schedule .fd-reminder-form button.fd-
 .trainer-shell main h2,
 .trainer-shell main h3 {
     color: #9ba49d !important;
-    font-size: 20px !important;
+    
 }
 
 .frontdesk-shell main,
@@ -2148,7 +2177,7 @@ body.frontdesk-shell main.fd-dashboard .fd-schedule .fd-reminder-form button.fd-
 .trainer-shell main td,
 .trainer-shell main label {
     color: #9ba49d !important;
-    font-size: 15px !important;
+    
 }
 
 .frontdesk-shell main th,
@@ -2156,7 +2185,7 @@ body.frontdesk-shell main.fd-dashboard .fd-schedule .fd-reminder-form button.fd-
 .trainer-shell main th,
 .trainer-shell main small {
     color: #9ba49d !important;
-    font-size: 10px !important;
+    
 }
 
 .frontdesk-shell .fd-summary-card,
@@ -2196,7 +2225,7 @@ body.frontdesk-shell main.fd-dashboard .fd-schedule .fd-reminder-form button.fd-
 .frontdesk-shell main .btn,
 .trainer-shell main button,
 .trainer-shell main .btn {
-    font-size: 15px !important;
+    
 }
 
 .frontdesk-shell main button[type="submit"],
@@ -2268,7 +2297,7 @@ body.frontdesk-shell main.fd-dashboard .fd-schedule .fd-reminder-form button.fd-
     border-radius: 4px !important;
     background: transparent !important;
     color: #ffffff !important;
-    font-size: 10px !important;
+    
     font-weight: 700 !important;
     line-height: 1 !important;
     text-decoration: none !important;
@@ -2276,19 +2305,19 @@ body.frontdesk-shell main.fd-dashboard .fd-schedule .fd-reminder-form button.fd-
 }
 
 .frontdesk-shell .pagination-arrows a {
-    font-size: 0 !important;
+    
 }
 
 .frontdesk-shell .pagination-arrows a:first-child::after {
     content: "Previous" !important;
     color: #ffffff !important;
-    font-size: 10px !important;
+    
 }
 
 .frontdesk-shell .pagination-arrows a:last-child::after {
     content: "Next" !important;
     color: #ffffff !important;
-    font-size: 10px !important;
+    
 }
 
 .frontdesk-shell .pager .disabled,
@@ -2312,7 +2341,7 @@ body.frontdesk-shell main.fd-dashboard .fd-schedule .fd-reminder-form button.fd-
     border: 1px solid currentColor !important;
     background: #293640 !important;
     color: #9ed2ff !important;
-    font-size: 10px !important;
+    
     font-weight: 800 !important;
     text-transform: uppercase !important;
 }
@@ -2395,7 +2424,7 @@ body.frontdesk-shell main.fd-dashboard .fd-schedule .fd-reminder-form button.fd-
     border-radius: 0 0 6px 6px !important;
     background: #5E5D63 !important;
     color: #9ba49d !important;
-    font-size: 15px !important;
+    
 }
 
 .frontdesk-shell .am-footer > span,
@@ -2409,7 +2438,7 @@ body.frontdesk-shell main.fd-dashboard .fd-schedule .fd-reminder-form button.fd-
 .trainer-shell .table-footer > span,
 .trainer-shell .pagination-footer > span {
     color: #9ba49d !important;
-    font-size: 15px !important;
+    
 }
 
 .frontdesk-shell .pager a,
@@ -2495,7 +2524,7 @@ body.trainer-shell main[role="main"] h1 {
     margin-bottom: 5px !important;
     color: #9ba49d !important;
     font-family: "Inria Serif", serif !important;
-    font-size: 30px !important;
+    
     font-weight: 700 !important;
     line-height: 1.2 !important;
     letter-spacing: 0 !important;
@@ -2515,7 +2544,6 @@ body.frontdesk-shell main[role="main"] :is(
     justify-content: space-between !important;
     width: 100% !important;
     min-height: 70px !important;
-    margin: 0 0 35px !important;
     padding: 0 0 25px !important;
     border-bottom: 1px solid #303530 !important;
 }
@@ -2530,7 +2558,7 @@ body.frontdesk-shell main[role="main"] :is(
     margin: 0 0 5px !important;
     color: #9ba49d !important;
     font-family: "Inria Serif", serif !important;
-    font-size: 30px !important;
+    
     font-weight: 700 !important;
     line-height: 1.2 !important;
     letter-spacing: 0 !important;
@@ -2545,7 +2573,7 @@ body.frontdesk-shell main[role="main"] :is(
     margin: 0 !important;
     color: #ffffff !important;
     font-family: "Inria Serif", serif !important;
-    font-size: 15px !important;
+    
     font-weight: 400 !important;
     line-height: 1.4 !important;
     text-transform: none !important;
@@ -2553,10 +2581,9 @@ body.frontdesk-shell main[role="main"] :is(
 
 body.frontdesk-shell main[role="main"] :is(.header-subtitle, .page-subtitle, .role-page-subtitle, .pay-head > p, .wi-head p, .eq-head p),
 body.trainer-shell main[role="main"] :is(.header-subtitle, .page-subtitle, .role-page-subtitle, .tm-head > p, .te-header > p, .ts-title > p, .lead) {
-    margin-top: 0 !important;
     color: #ffffff !important;
     font-family: "Inria Serif", serif !important;
-    font-size: 15px !important;
+    
     font-weight: 400 !important;
     line-height: 1.4 !important;
     letter-spacing: 0 !important;
@@ -2596,22 +2623,22 @@ body.frontdesk-shell .eq-page .eq-search input,
 body.frontdesk-shell .eq-page .eq-search .equipment-search-button {
     height: 56px !important;
     box-sizing: border-box !important;
-    font-size: 15px !important;
+    
 }
 
 body.frontdesk-shell .eq-page .eq-table th {
     color: #fff !important;
-    font-size: 15px !important;
+    
 }
 
 body.frontdesk-shell .eq-page .eq-stat > span {
     color: #fff !important;
-    font-size: 15px !important;
+    
 }
 
 body.frontdesk-shell .eq-page .eq-add {
     height: 44px !important;
-    font-size: 15px !important;
+    
 }
 
 .frontdesk-shell .eq-add {
@@ -2711,12 +2738,12 @@ body.frontdesk-shell .page-container .table-card .pagination-arrows a::after {
 
 body.frontdesk-shell .page-container .members-table th {
     color: #fff !important;
-    font-size: 15px !important;
+    
 }
 
 body.frontdesk-shell .page-container .member-name-btn {
     color: #fff !important;
-    font-size: 15px !important;
+    
 }
 
 body.frontdesk-shell .page-container .top-member-search .search-box,
@@ -2725,13 +2752,13 @@ body.frontdesk-shell .page-container .top-member-search .search-btn,
 body.frontdesk-shell .page-container .member-filter-form .filter-select {
     height: 56px !important;
     box-sizing: border-box !important;
-    font-size: 15px !important;
+    
 }
 
 body.frontdesk-shell .page-container .btn-add {
     height: 44px !important;
     box-sizing: border-box !important;
-    font-size: 15px !important;
+    
 }
 
 @media (max-width: 900px) {
@@ -2798,7 +2825,7 @@ html body.admin-shell :is(.am-pager,.page-wrap > .card > .pager) {
 
 html body:is(.frontdesk-shell,.trainer-shell,.admin-shell) :is(.pagination-bar,.am-footer,.eq-foot,.pay-foot,.fd-table-foot,.wi-footer,.email-pagination,.tm-foot,.te-footer,.aa-pager,.ae-pager,.ap-pager,.ua-foot,.activity-pagination) > span,
 html body.admin-shell :is(.am-pager,.page-wrap > .card > .pager) > span {
-    color:#aab3ac !important; font:400 15px Arial,sans-serif !important;
+    color:#aab3ac !important; font-family:Arial,sans-serif !important;font-weight:400 !important;
 }
 
 html body:is(.frontdesk-shell,.trainer-shell,.admin-shell) :is(.pagination-arrows,.pager,.eq-pager,.pay-pager,.fd-pager,.wi-pages,.email-pagination nav,.tm-pager,.te-pager,.aa-pages,.ae-pages,.ap-page-buttons,.am-page-actions,.ua-pages,.activity-pagination-buttons) {
@@ -2809,7 +2836,7 @@ html body:is(.frontdesk-shell,.trainer-shell,.admin-shell) :is(.pagination-arrow
     display:inline-flex !important; align-items:center !important; justify-content:center !important;
     width:102px !important; min-width:102px !important; height:50px !important; padding:0 !important;
     border:1px solid #74777a !important; border-radius:5px !important; background:transparent !important;
-    color:#fff !important; box-shadow:none !important; font:700 10px/1 Arial,sans-serif !important;
+    color:#fff !important; box-shadow:none !important; font-family:Arial,sans-serif !important;font-weight:700 !important;line-height:1 !important;
     text-align:center !important; text-decoration:none !important; text-transform:uppercase !important;
     box-sizing:border-box !important;
 }
@@ -2842,7 +2869,7 @@ body.trainer-shell :is(.tm-search, .te-search) input {
     border: 1px solid #8d958f !important;
     border-radius: 0 !important;
     color: #fff !important;
-    font-size: 15px !important;
+    
 }
 
 
@@ -2862,7 +2889,7 @@ body.trainer-shell :is(.tm-search, .te-search) button {
     border-radius: 0 !important;
     background: #a8df32 !important;
     color: #20271f !important;
-    font-size: 15px !important;
+    
     font-weight: 400 !important;
     text-align: center !important;
     text-transform: uppercase !important;
@@ -2878,7 +2905,7 @@ body.frontdesk-shell :is(.member-filter-form, .pay-filter) select {
     border: 1px solid #535b55 !important;
     border-radius: 0 !important;
     color: #d7ddd8 !important;
-    font-size: 15px !important;
+    
 }
 
 /* Keep every Front Desk trainer reachable inside the availability card. */
@@ -2941,7 +2968,7 @@ body.frontdesk-shell button.action-btn {
     border-radius: 5px !important;
     background: transparent !important;
     color: #f2f2f2 !important;
-    font-size: 15px !important;
+    
     font-weight: 400 !important;
     line-height: 1 !important;
     text-align: center !important;
@@ -3015,7 +3042,7 @@ body:is(.admin-shell, .frontdesk-shell, .trainer-shell) :is(.export-btn, .export
     border-radius: 0 !important;
     background: transparent !important;
     color: #a8df32 !important;
-    font-size: 10px !important;
+    
     font-weight: 700 !important;
     line-height: 1 !important;
     text-align: center !important;
@@ -3118,7 +3145,7 @@ body.admin-shell .aa .aa-search button {
 
 body.admin-shell .aa .aa-card > h2 {
     color: #ffffff !important;
-    font-size: 20px !important;
+    
 }
 
 body.admin-shell .aa .aa-table thead,
@@ -3134,7 +3161,7 @@ body.admin-shell .ae .ae-table th
 body.admin-shell .aa .aa-table th,
 body.admin-shell .ae .ae-table th {
     color: #ffffff !important;
-    font-size: 15px !important;
+    
 }
 
 body.admin-shell .aa .aa-table tbody td,
@@ -3178,7 +3205,7 @@ body.admin-shell #equipmentModal .ae-dialog > h2 {
     background: transparent !important;
     border-bottom: 1px solid #535159 !important;
     color: #ffffff !important;
-    font-size: 20px !important;
+    
 }
 
 body.admin-shell #equipmentModal .ae-form {
@@ -3192,7 +3219,7 @@ body.admin-shell #equipmentModal .ae-grid {
 
 body.admin-shell #equipmentModal .ae-form label {
     color: #ffffff !important;
-    font-size: 15px !important;
+    
     text-transform: none !important;
 }
 
@@ -3201,7 +3228,7 @@ body.admin-shell #equipmentModal .ae-form :is(input, select) {
     background: #5E5D63 !important;
     border: 1px solid #b8bdbc !important;
     color: #ffffff !important;
-    font-size: 15px !important;
+    
 }
 
 body.admin-shell #equipmentModal .ae-conditions {
@@ -3213,7 +3240,7 @@ body.admin-shell #equipmentModal .ae-condition span {
     border: 1px solid #b8bdbc !important;
     border-radius: 5px !important;
     color: #ffffff !important;
-    font-size: 13px !important;
+    
 }
 
 body.admin-shell #equipmentModal .ae-condition input:checked + span {
@@ -3237,7 +3264,7 @@ body.admin-shell #equipmentModal .ae-modal-actions button {
 body.admin-shell #equipmentModal .ae-form small,
 body.frontdesk-shell #equipmentModal .eq-form small {
     color: #8d978f !important;
-    font-size: 10px !important;
+    
 }
 
 body.admin-shell #equipmentModal .ae-modal-actions button,
@@ -3247,7 +3274,7 @@ body.frontdesk-shell #equipmentModal .eq-modal-actions button {
     justify-content: flex-start !important;
     padding: 0 16px !important;
     text-align: left !important;
-    font-size: 10px !important;
+    
 }
 
 body.admin-shell #equipmentModal .ae-modal-actions button[type="button"],
@@ -3275,7 +3302,7 @@ body.admin-shell .ae-heading .equipbtn .ae-add {
     min-width: 190px !important;
     height: 44px !important;
     padding: 0 18px !important;
-    font-size: 15px !important;
+    
     font-weight: 400 !important;
     white-space: nowrap !important;
 
@@ -3298,7 +3325,7 @@ body.admin-shell .ae .ae-search .equipment-search-button {
 body.admin-shell .ae .ae-table th, .page-wrap .card-table th,
 .ap-wrap .ap-table th {
     color: #ffffff !important;
-    font-size: 15px !important;
+    
 }
 
 body.admin-shell .atm .atm-stats .atm-stat:nth-child(1) {
@@ -3343,7 +3370,7 @@ html body:is(.admin-shell, .frontdesk-shell, .trainer-shell) main[role="main"] t
     box-sizing: border-box !important;
     background: #303430 !important;
     color: #ffffff !important;
-    font-size: 15px !important;
+    
     font-weight: 700 !important;
     line-height: 1.2 !important;
     letter-spacing: .04em !important;
@@ -3360,7 +3387,7 @@ html body:is(.admin-shell, .frontdesk-shell) .email-notifications .email-log-hea
     box-sizing: border-box !important;
     background: #303430 !important;
     color: #ffffff !important;
-    font-size: 15px !important;
+    
     font-weight: 700 !important;
     line-height: 1.2 !important;
     letter-spacing: .04em !important;
@@ -3388,12 +3415,12 @@ body.admin-shell .page-wrap .footer-note-item {
 }
 
 body.admin-shell .page-wrap .footer-note strong {
-    font-size: 20px !important;
+    
     line-height: 1.25 !important;
 }
 
 body.admin-shell .page-wrap .footer-note-item {
-    font-size: 15px !important;
+    
     line-height: 1.4 !important;
 }
 
@@ -3411,7 +3438,7 @@ body.admin-shell .page-wrap .page-header .btn-invite {
     border: 1px solid #a8df32 !important;
     border-radius: 0 !important;
     color: #101510 !important;
-    font-size: 24px !important;
+    
     font-weight: 800 !important;
     line-height: 1 !important;
     text-align: center !important;
@@ -3442,7 +3469,7 @@ body.admin-shell .page-wrap .actions-cell .action-menu .action-menu-item.danger 
     border: 0 !important;
     border-radius: 0 !important;
     color: #ffffff !important;
-    font-size: 15px !important;
+    
     font-weight: 400 !important;
     line-height: 1.2 !important;
     text-align: left !important;
@@ -3651,18 +3678,18 @@ body.admin-shell .admin-renewal-grid strong {
 body.admin-shell .admin-renewal-grid small {
     margin-bottom: 6px !important;
     color: #b9c1bb !important;
-    font-size: 10px !important;
+    
     text-transform: uppercase !important;
 }
 
 body.admin-shell .admin-renewal-grid strong {
     color: #ffffff !important;
-    font-size: 15px !important;
+    
 }
 
 body.admin-shell .admin-renewal-grid > div:last-child strong {
     color: #b7ff1b !important;
-    font-size: 20px !important;
+    
 }
 
 /* Align Equipment, Trainer Schedule/Management, and User Roles with Members. */
@@ -3731,7 +3758,7 @@ html body.trainer-shell main .trainer-schedule .ts-day.selected {
 html body.admin-shell main[role="main"] .dashboard-caption,
 html body.frontdesk-shell main[role="main"] .dashboard-caption {
     color: #aeb7b0 !important;
-    font-size: 14px !important;
+    
 }
 
 /* Equipment modal actions match the member registration form. */
@@ -3753,7 +3780,7 @@ html body.admin-shell #equipmentNameModal .ae-modal-actions button {
     justify-content: center !important;
     height: 38px !important;
     text-align: center !important;
-    font-size: 13px !important;
+    
 }
 
 html body.admin-shell #equipmentModal .ae-modal-actions button[type="button"],
@@ -3766,6 +3793,29 @@ html body.admin-shell #equipmentNameModal .ae-modal-actions button[type="button"
     color: #ffffff !important;
     font-weight: 500 !important;
     text-transform: none !important;
+}
+
+/* Keep page title and subtitle spacing consistent across every role layout. */
+body:is(.admin-shell, .frontdesk-shell, .trainer-shell) main[role="main"] h1,
+body:is(.admin-shell, .frontdesk-shell, .trainer-shell) main[role="main"] :is(
+    .subtitle,
+    .header-subtitle,
+    .page-subtitle,
+    .role-page-subtitle,
+    .fd-subtitle,
+    .dashboard-caption,
+    .add-member-subtitle,
+    .atm-sub,
+    .ts-title-copy > p,
+    .tm-head > p,
+    .pay-head > p,
+    .wi-head p,
+    .eq-head p,
+    .te-header > p,
+    .ts-title > p,
+    .lead
+) {
+    margin-bottom: 15px !important;
 }
 
 html body.admin-shell #equipmentModal .ae-modal-actions button[type="button"]:hover,
@@ -3818,7 +3868,7 @@ html body.admin-shell #equipmentNameModal .ae-modal-actions button[type="submit"
         background:transparent !important;
         color:#b7ff1b !important;
         text-decoration:none !important;
-        font-size:15px !important;
+        
         font-weight:500 !important;
         text-transform:none !important;
     }
@@ -3853,6 +3903,14 @@ html body.admin-shell #equipmentNameModal .ae-modal-actions button[type="submit"
     ) {
         color: #fff !important;
     }
+}
+
+/* Tighten excess space below the Front Desk summary card content. */
+body.frontdesk-shell .fd-dashboard .fd-summary-card {
+    height: auto !important;
+    min-height: 0 !important;
+    padding: 18px 22px 6px !important;
+    box-sizing: border-box !important;
 }
 
 @layer dashboardFilters {

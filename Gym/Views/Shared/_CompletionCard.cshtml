@@ -1,0 +1,116 @@
+<style>
+    html, body {
+        height: 100%;
+        margin: 0;
+        background: #1b201c;
+        color: #fff;
+        font-family: "Inria Serif", serif;
+    }
+
+    body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+        box-sizing: border-box;
+    }
+
+    .completion-card {
+        width: 100%;
+        max-width: 440px;
+        margin: 0 auto;
+        padding: 32px 28px;
+        text-align: center;
+        background: #222a24;
+        border: 1px solid #3c443d;
+        border-radius: 16px;
+        box-sizing: border-box;
+    }
+
+    .confirmation-icon {
+        width: 72px;
+        height: 72px;
+        margin: 0 auto 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        border: 1px solid #b7ff1b;
+        background: #2f3a26;
+        color: #b7ff1b;
+    }
+
+        .confirmation-icon svg {
+            width: 34px;
+            height: 34px;
+        }
+
+    .completion-eyebrow {
+        display: block;
+        color: #b7ff1b;
+        text-transform: uppercase;
+        margin-bottom: 8px;
+    }
+
+    .completion-card h1 {
+        margin: 0 0 8px;
+        font-size: 1.1rem;
+    }
+
+    .completion-message {
+        margin: 0 0 20px;
+    }
+
+    .completion-warning {
+        margin-bottom: 20px;
+        padding: 12px;
+        border: 1px solid #586058;
+        text-align: left;
+    }
+
+    .completion-actions {
+        padding-top: 20px;
+        border-top: 1px solid #3c443d;
+    }
+
+    .completion-return {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        min-height: 42px;
+        padding: 0 24px;
+        background: #b7ff1b;
+        color: #000;
+        border-radius: 8px;
+        text-decoration: none;
+    }
+
+        .completion-return:hover {
+            background: #171a18;
+            color: #b7ff1b;
+        }
+</style>
+
+<main class="completion-card" data-registration-succeeded aria-labelledby="completion-title">
+    <div class="confirmation-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none"><path d="m6 12 4 4 8-8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+    </div>
+    <span class="completion-eyebrow">All set</span>
+    <h1 id="completion-title">@ViewData["Title"]</h1>
+    <p class="completion-message">@ViewData["Message"]</p>
+    @if (ViewData["Warning"] is string warning)
+    {
+        <div class="completion-warning" role="status">
+            <strong>One more thing</strong>
+            <p>@warning</p>
+        </div>
+    }
+    <div class="completion-actions">
+        <a class="completion-return" href="@ViewData["ReturnUrl"]" target="_top">
+            @(ViewData["ReturnLabel"] as string ?? "Done — return to list")
+            <span aria-hidden="true">&rarr;</span>
+        </a>
+    </div>
+</main>
+<script src="~/js/completion-layout.js" asp-append-version="true"></script>

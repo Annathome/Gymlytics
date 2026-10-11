@@ -159,7 +159,6 @@ namespace Gym.Controllers
             var items = await query.OrderBy(item => item.EquipmentName)
                 .Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
             var allEquipment = await _context.Equipments.AsNoTracking().ToListAsync();
-
             return View(new FrontDeskEquipmentViewModel
             {
                 SearchTerm = searchTerm ?? string.Empty,
@@ -169,10 +168,10 @@ namespace Gym.Controllers
                 AvailableByEquipment = allEquipment.GroupBy(item => item.EquipmentName, StringComparer.OrdinalIgnoreCase)
                     .ToDictionary(group => group.Key, group => Math.Max(0,
                         group.Where(EquipmentStock.IsInventory).Sum(item => item.Quantity)
-                        - group.Where(item => !EquipmentStock.IsInventory(item)).Sum(item => item.Quantity)), StringComparer.OrdinalIgnoreCase),
+                        - group.Where(item => EquipmentStock.IsActiveReport(item)).Sum(item => item.Quantity)), StringComparer.OrdinalIgnoreCase),
                 GoodQuantity = allEquipment.GroupBy(item => item.EquipmentName, StringComparer.OrdinalIgnoreCase)
                     .Sum(group => Math.Max(0, group.Where(EquipmentStock.IsInventory).Sum(item => item.Quantity)
-                        - group.Where(item => !EquipmentStock.IsInventory(item)).Sum(item => item.Quantity))),
+                        - group.Where(item => EquipmentStock.IsActiveReport(item)).Sum(item => item.Quantity))),
                 InMaintenance = allEquipment.Where(item => item.Status == "Needs Maintenance").Sum(item => item.Quantity),
                 OutOfOrder = allEquipment.Where(item => item.Status == "Out of Order").Sum(item => item.Quantity),
                 Page = page,
@@ -227,6 +226,11 @@ namespace Gym.Controllers
 
             if (!ModelState.IsValid)
             {
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                    return UnprocessableEntity(new { errors = ModelState.Values
+                        .SelectMany(value => value.Errors).Select(error => error.ErrorMessage)
+                        .Where(message => !string.IsNullOrWhiteSpace(message))
+                        .DefaultIfEmpty("Complete all required equipment fields.").ToArray() });
                 TempData["ErrorMessage"] = string.Join(" ", ModelState.Values
                     .SelectMany(value => value.Errors)
                     .Select(error => error.ErrorMessage)
@@ -242,7 +246,7 @@ namespace Gym.Controllers
             var equipment = new Equipment
             {
                 EquipmentName = catalogItem!.Name,
-                Category = "General",
+                Category = "Report",
                 Quantity = form.Quantity,
                 AvailableQuantity = 0,
                 Status = form.Condition,
@@ -262,7 +266,11 @@ namespace Gym.Controllers
                 _equipmentEvidence.Delete(evidencePhotoPath);
                 throw;
             }
-            TempData["SuccessMessage"] = "Equipment issue report submitted successfully.";
+            TempData["FormConfirmationMessage"] = "Equipment issue report submitted successfully.";
+            TempData["FormConfirmationTitle"] = "Report submitted";
+            TempData["FormConfirmationAction"] = "AddEquipment";
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                return Json(new { redirectUrl = Url.Action(nameof(Equipment)) });
             return RedirectToAction(nameof(Equipment));
         }
 

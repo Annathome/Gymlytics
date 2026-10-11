@@ -1,4 +1,4 @@
-﻿@model Gym.Models.LoginViewModel
+@model Gym.Models.LoginViewModel
 @{
     ViewData["Title"] = "Login Page";
     Layout = "~/Views/Shared/_LoginLayout.cshtml";
@@ -52,7 +52,7 @@
         max-height: calc(100vh - 40px);
         background-color: #171b18;
         color: #fff;
-        font-size: 15px;
+        
         display: flex;
         flex-direction: column;
         padding: 30px;
@@ -97,7 +97,7 @@
         align-items: center;
         justify-content: center;
         text-transform: uppercase;
-        font-size: 1.1rem;
+        
         font-style: italic;
         font-weight: 300;
         color: #fff;
@@ -106,7 +106,7 @@
 
         .role h1 {
             margin: 0;
-            font-size: 30px !important;
+            
         }
 
         .role::before,
@@ -123,7 +123,7 @@
     }
 
         html body #login-access .reminder h2 {
-            font-size: 16px !important;
+            
             color: #fff;
             letter-spacing: 0.5px;
             line-height: 1.4;
@@ -143,41 +143,40 @@
     }
 
     html body #login-access .form-group label {
-        color: rgb(14, 160, 38);
+        color: #b7ff1b;
         font-weight: 700;
-        font-size: 16px !important;
+        
         margin-bottom: 6px;
         display: block;
     }
 
     html body #login-access .form-group input.form-control {
-        border: 1.5px solid rgb(14, 197, 45) !important;
+        border: 1.5px solid #b7ff1b !important;
         padding: 10px 14px;
         width: 100%;
         border-radius: 8px;
-        font-size: 16px !important;
+        
         outline: none;
         background: #fff;
         transition: all 0.2s ease-in-out;
     }
 
         html body #login-access .form-group input::placeholder {
-            color: rgba(14, 160, 38, 0.5);
-            font-size: 14px !important;
+            color: #000;
+            opacity: 1;
+            
         }
 
         html body #login-access .form-group input.form-control:focus {
-            border-color: rgb(14, 197, 45) !important;
+        border-color: #b7ff1b !important;
             box-shadow: 0 0 0 3px rgba(14, 197, 45, 0.2);
         }
 
     .btn-submit {
         width: 100%;
         height: 45px;
-        background: rgb(178, 233, 197);
-        color: #000;
+        color: #b7ff1b;
         border: none;
-        font-size: 20px;
         font-weight: 700;
         border-radius: 8px;
         cursor: pointer;
@@ -189,8 +188,8 @@
     }
 
         .btn-submit:hover {
-            background: rgb(14, 197, 45);
-            color: #fff;
+            background: #b7ff1b;
+            color: #000;
         }
 
     .divider {
@@ -198,7 +197,7 @@
         align-items: center;
         text-align: center;
         color: #fff;
-        font-size: 15px;
+        
         font-weight: 600;
         margin: 2px 0;
     }
@@ -216,7 +215,7 @@
 
     .login-form .small,
     .login-form small {
-        font-size: 15px !important;
+        
     }
 
     html body #loginForm .login-action {
@@ -233,7 +232,7 @@
         background: rgb(178, 233, 197) !important;
         color: #000 !important;
         font-family: "Inria Serif", serif !important;
-        font-size: 16px !important;
+        
         font-weight: 700 !important;
         line-height: 1 !important;
         letter-spacing: 0 !important;
@@ -245,8 +244,8 @@
 
     html body #loginForm .login-action:hover,
     html body #loginForm .login-action:focus {
-        background: rgb(14, 197, 45) !important;
-        color: #fff !important;
+        background: #b7ff1b !important;
+        color: #000 !important;
     }
 </style>
 
@@ -262,8 +261,8 @@
         </div>
 
         <div class="reminder">
-            <h2>
-                To access your role account, please sign in with your <span class="highlight">verified Username and Password</span>.
+            <h2 class="login-instruction">
+                To access your role account, please sign in with your verified <span class="login-credential-highlight">Username</span> and <span class="login-credential-highlight">Password</span>.
                 <br /><br />
                 <span>Access is restricted to authorized Yokoks staff.</span>
             </h2>
@@ -279,23 +278,23 @@
         <form id="loginForm" asp-controller="Account" asp-action="Login" method="post">
             @Html.AntiForgeryToken()
 
-            <div asp-validation-summary="ModelOnly" class="text-danger mb-2 small text-center"></div>
+            <div asp-validation-summary="All" class="text-danger mb-2 small text-center"></div>
 
             <div class="form-group">
-                <label asp-for="Username" class="form-label">Username</label>
+                <label asp-for="Username" class="form-label" style="color:#b7ff1b!important;">Username</label>
                 <input asp-for="Username" class="form-control" placeholder="Enter Username" required />
                 <span asp-validation-for="Username" class="text-danger small"></span>
             </div>
 
             <div class="form-group">
-                <label asp-for="Password" class="form-label">Password</label>
+                <label asp-for="Password" class="form-label" style="color:#b7ff1b!important;">Password</label>
                 <input asp-for="Password" type="password" class="form-control" placeholder="Enter Password" required />
                 <span asp-validation-for="Password" class="text-danger small"></span>
             </div>
 
             <a asp-controller="PasswordRecovery" asp-action="Index" style="display:block;text-align:right;margin:12px 0;color:#b7ff1b;">Forgot password?</a>
             <button type="submit" class="btn-submit login-action mt-2"
-                    style="height:45px!important;min-height:45px!important;padding:0 14px!important;font-family:'Inria Serif',serif!important;font-size:16px!important;font-weight:700!important;line-height:1!important;">
+                    style="height:45px!important;min-height:45px!important;padding:0 14px!important;line-height:1!important;">
                 Login
             </button>
 
@@ -304,7 +303,7 @@
             </div>
 
             <a asp-controller="MainHomepage" asp-action="Index" class="btn-submit login-action"
-               style="height:45px!important;min-height:45px!important;padding:0 14px!important;font-family:'Inria Serif',serif!important;font-size:16px!important;font-weight:700!important;line-height:1!important;">
+               style="height:45px!important;min-height:45px!important;padding:0 14px!important;line-height:1!important;">
                 Back to Home Page
             </a>
         </form>

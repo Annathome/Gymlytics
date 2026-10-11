@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -132,12 +132,13 @@ namespace Gym.Models
     public class AddMemberViewModel
     {
         [Required(ErrorMessage = "Full name is required.")]
-        [CompleteRegistrationName(FullName = true)]
+        [CompleteRegistrationName(FullName = true)][StringLength(100)]
         [Display(Name = "Full name")]
         public string FullName { get; set; } = string.Empty;
 
 
         [Required(ErrorMessage = "Date of birth is required.")]
+        [MinimumRegistrationAge]
         [DataType(DataType.Date)]
         [Display(Name = "Date of birth")]
         public DateTime? DateOfBirth { get; set; }
@@ -145,17 +146,17 @@ namespace Gym.Models
 
         [Required(ErrorMessage = "Contact number is required.")]
         [Display(Name = "Contact number")]
-        [Phone]
+        [RegularExpression(@"^[0-9]{11}$", ErrorMessage = "Enter exactly 11 digits (0-9). Letters, spaces, and symbols are not allowed.")]
         public string ContactNumber { get; set; } = string.Empty;
 
 
         [Required(ErrorMessage = "Email is required.")]
-        [EmailAddress]
+        [EmailAddress, StringLength(100)]
         [Display(Name = "Email")]
         public string Email { get; set; } = string.Empty;
 
 
-        [Display(Name = "Emergency contact")]
+        [RegularExpression(@"^[0-9]{11}$", ErrorMessage = "Enter exactly 11 digits (0-9). Letters, spaces, and symbols are not allowed.")][Display(Name = "Emergency contact")]
         public string? EmergencyContact { get; set; }
 
 

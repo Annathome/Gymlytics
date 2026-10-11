@@ -1,549 +1,277 @@
-﻿@model Gym.Models.MembersPageViewModel
+@model Gym.Models.MembersPageViewModel
 
 @{
     ViewData["Title"] = "Members";
     Layout = "~/Views/Shared/_FrontDeskLayout.cshtml";
+
+    var resultSuccess = TempData["SuccessMessage"] as string;
+    var resultWarning = TempData["WarningMessage"] as string;
+    var resultError = TempData["ErrorMessage"] as string;
+
+    // Dialog button styles. Inline + !important so global layout CSS can't stretch or recolor them.
+    var btnBase = "flex:0 0 auto!important;width:auto!important;height:38px!important;min-height:0!important;padding:0 18px!important;white-space:nowrap!important;line-height:1!important;font-size:14px!important;font-family:Arial,sans-serif!important;text-transform:uppercase!important;border-radius:0!important;outline:none!important;box-shadow:none!important;cursor:pointer;";
+    var btnGhost = btnBase + "background:#292d2a!important;border:1px solid #586058!important;color:#fff!important;";
+    var btnPrimary = btnBase + "background:#b7ff1b!important;border:1px solid #b7ff1b!important;color:#101510!important;";
+    var btnDanger = btnBase + "background:#ef2b2b!important;border:1px solid #ef2b2b!important;color:#1a0a0a!important;";
+    var btnOk = "height:34px!important;min-width:80px!important;padding:0 24px!important;";
 }
 
 <style>
-    .page-container {
-        width: 80vw;
-        margin: 24px 0;
-        padding: 0 32px;
-        box-sizing: border-box;
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-        color: #1a1a1a;
-    }
+    /* ===== Base (light defaults, overridden by the dark theme below) ===== */
+    .page-container { width: 80vw; margin: 24px 0; padding: 0 32px; box-sizing: border-box; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: #1a1a1a; }
+    .header-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+    .header-title h1 { font-weight: 700; margin: 0; }
+    .header-subtitle { color: #666; margin-top: 4px; }
+    .btn-add { background-color: #fff; border: 1px solid #d0d5dd; color: #344054; padding: 8px 16px; font-weight: 600; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 1px 2px rgba(16,24,40,.05); }
+    .btn-add:hover { background-color: #f9fafb; }
 
-    .header-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        margin-bottom: 16px;
-    }
+    .search-box { position: relative; flex: 1; max-width: 700px; }
+    .search-box input { width: 100%; padding: 8px 12px 8px 36px; border: 1px solid #e4e4e7; border-radius: 8px; outline: none; box-sizing: border-box; }
+    .search-box input:focus { border-color: #a1a1aa; }
+    .search-box svg { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: #71717a; pointer-events: none; }
+    .dropdown-filters { display: flex; gap: 12px; }
+    .filter-select { padding: 8px 12px; border: 1px solid #e4e4e7; border-radius: 8px; background-color: #fff; color: #18181b; cursor: pointer; min-width: 140px; }
+    .filter-select:focus { outline: none; border-color: #a1a1aa; }
+    .search-btn { padding: 8px 10px; border: 1px solid #18181b; border-radius: 8px; background-color: #18181b; color: #fff; font-weight: 400; cursor: pointer; max-width: 100px; text-align: center; position: relative; z-index: 1; }
 
-    .header-title h1 {
-        font-size: 28px;
-        font-weight: 700;
-        margin: 0;
-    }
+    .table-card { border: 1px solid #e4e4e7; border-radius: 12px; background-color: #fff; overflow: visible; }
+    .members-table { width: 100%; border-collapse: collapse; text-align: left; }
+    .members-table th { color: #71717a; font-weight: 500; padding: 12px 16px; border-bottom: 1px solid #f4f4f5; }
+    .members-table td { padding: 14px 16px; border-bottom: 1px solid #f4f4f5; vertical-align: middle; }
+    .members-table tr:last-child td { border-bottom: none; }
 
-    .header-subtitle {
-        font-size: 14px;
-        color: #666;
-        margin-top: 4px;
-    }
+    .member-cell { display: flex; align-items: center; gap: 12px; font-weight: 600; }
+    .member-name-btn { border: none !important; outline: none !important; box-shadow: none !important; appearance: none; background: none; color: #2563eb; font: inherit; font-weight: 600; padding: 0; cursor: pointer; display: flex; align-items: center; gap: 12px; }
+    .member-name-btn:hover { text-decoration: none; color: #1d4ed8; }
+    .member-name-btn:focus, .member-name-btn:focus-visible { border: none !important; outline: none !important; box-shadow: none !important; }
+    .avatar-circle { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; flex-shrink: 0; }
 
-    .btn-add {
-        background-color: #ffffff;
-        border: 1px solid #d0d5dd;
-        color: #344054;
-        padding: 8px 16px;
-        font-weight: 600;
-        font-size: 14px;
-        border-radius: 8px;
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
-    }
+    .status-badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-weight: 600; }
+    .badge-active { background-color: #dcfce7; color: #15803d; }
+    .badge-overdue { background-color: #fef3c7; color: #b45309; }
+    .badge-expiringsoon { background-color: #ffedd5; color: #c2410c; }
+    .badge-expired { background-color: #fee2e2; color: #b91c1c; }
+    .badge-inactive { background-color: #f4f4f5; color: #52525b; }
+    .badge-canceled { background-color: #f3e8ff; color: #7e22ce; }
+    .badge-terminated { background-color: #fecaca; color: #7f1d1d; }
 
-        .btn-add:hover {
-            background-color: #f9fafb;
-        }
+    .action-cell { position: relative; text-align: center; }
+    .action-heading { text-align: center !important; width: 76px; }
+    .schedule-cell { white-space: nowrap; }
+    .action-btn { background: none; border: none; color: #a1a1aa; cursor: pointer; padding: 4px 8px; border-radius: 6px; }
+    .action-btn:hover { color: #52525b;  background:  rgba(0, 0, 0, .65);}
+    .action-menu { display: none; position: absolute; right: 16px; top: calc(100% - 4px); background: #fffef8; border: 1px solid #e4e4e7; border-radius: 8px; box-shadow: 0 4px 12px rgba(16,24,40,.1); min-width: 170px; z-index: 20; overflow: hidden; }
+    .action-menu.open { display: block; }
+    .action-menu form { margin: 0; }
+    .menu-item { width: 100%; text-align: left; background: none; border: none; padding: 10px 14px; color: #27272a; cursor: pointer; }
+    .menu-item:hover { background-color: #f4f4f5; }
+    .menu-item-danger { color: #b91c1c; }
+    .menu-item-danger:hover { background-color: #fee2e2; }
 
-    /* SUCCESS BANNER */
-    .success-banner {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        background-color: #dcfce7;
-        border: 1px solid #86efac;
-        color: #166534;
-        padding: 12px 16px;
-        border-radius: 8px;
-        font-size: 14px;
-        font-weight: 500;
-        margin-bottom: 16px;
-    }
+    .pagination-bar { display: flex; justify-content: space-between; align-items: center; margin-top: 0; min-height: 76px; padding: 16px 20px; background: #e8f6fc; color: #111; }
+    .pagination-arrows { display: flex; gap: 8px; }
+    .pagination-arrows a { width: 55px; height: 43px; display: grid; place-items: center; border: 1px solid #d5e1e5; padding: 0; border-radius: 6px; background: #f7fbfc; color: #879397; text-decoration: none; font-weight: 400; }
+    .pagination-arrows a:hover:not(.disabled) { background-color: #f4f4f5; color: #18181b; }
+    .pagination-arrows a.disabled { opacity: .4; pointer-events: none; background-color: #fafafa; }
 
-    .error-banner {
-        background: #fef2f2;
-        border: 1px solid #fecaca;
-        color: #b91c1c;
-    }
-
-        .error-banner button {
-            color: #b91c1c;
-        }
-
-        .success-banner button {
-            background: none;
-            border: none;
-            color: #166534;
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-            line-height: 1;
-            padding: 0 0 0 12px;
-        }
-
-    /* FILTER BAR */
-    .filter-bar {
-        display: flex;
-        justify-content: space-between;
-        gap: 16px;
-        margin-bottom: 16px;
-        align-items: center;
-    }
-
-    .search-box {
-        position: relative;
-        flex: 1;
-        max-width: 700px;
-    }
-
-        .search-box input {
-            width: 100%;
-            padding: 8px 12px 8px 36px;
-            border: 1px solid #e4e4e7;
-            border-radius: 8px;
-            font-size: 14px;
-            outline: none;
-            box-sizing: border-box;
-        }
-
-            .search-box input:focus {
-                border-color: #a1a1aa;
-            }
-
-        .search-box svg {
-            position: absolute;
-            left: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #71717a;
-            pointer-events: none;
-        }
-
-    .dropdown-filters {
-        display: flex;
-        gap: 12px;
-    }
-
-    .filter-select {
-        padding: 8px 12px;
-        border: 1px solid #e4e4e7;
-        border-radius: 8px;
-        font-size: 14px;
-        background-color: #fff;
-        color: #18181b;
-        cursor: pointer;
-        min-width: 140px;
-    }
-
-        .filter-select:focus {
-            outline: none;
-            border-color: #a1a1aa;
-        }
-
-    .search-btn {
-        padding: 8px 10px;
-        border: 1px solid #18181b;
-        border-radius: 8px;
-        background-color: #18181b;
-        color: white;
-        font-size: 14px;
-        font-weight: 400;
-        cursor: pointer;
-        max-width: 100px;
-        text-align: center;
-        position: relative;
-        z-index: 1;
-    }
-
-        .search-btn:hover {
-            background-color: #27272a;
-        }
-
-    /* TABLE */
-    .table-card {
-        border: 1px solid #e4e4e7;
-        border-radius: 12px;
-        background-color: #fff;
-        overflow: visible;
-    }
-
-    .members-table {
-        width: 100%;
-        border-collapse: collapse;
-        text-align: left;
-        font-size: 14px;
-    }
-
-        .members-table th {
-            color: #71717a;
-            font-weight: 500;
-            padding: 12px 16px;
-            border-bottom: 1px solid #f4f4f5;
-        }
-
-        .members-table td {
-            padding: 14px 16px;
-            border-bottom: 1px solid #f4f4f5;
-            vertical-align: middle;
-        }
-
-        .members-table tr:last-child td {
-            border-bottom: none;
-        }
-
-    .member-cell {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        font-weight: 600;
-    }
-
-    .member-name-btn {
-        border: none !important;
-        outline: none !important;
-        box-shadow: none !important;
-        appearance: none;
-        background: none;
-        color: #2563eb;
-        font: inherit;
-        font-weight: 600;
-        padding: 0;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-    }
-
-        .member-name-btn:hover { text-decoration: none; color: #1d4ed8; }
-        .member-name-btn:focus, .member-name-btn:focus-visible { border: none !important; outline: none !important; box-shadow: none !important; }
-
-    .avatar-circle {
-        width: 32px;
-        height: 32px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 12px;
-        font-weight: 600;
-        flex-shrink: 0;
-    }
-
-    /* STATUS */
-    .status-badge {
-        display: inline-block;
-        padding: 3px 10px;
-        border-radius: 12px;
-        font-size: 12px;
-        font-weight: 600;
-    }
-
-    .badge-active {
-        background-color: #dcfce7;
-        color: #15803d;
-    }
-
-    .badge-overdue {
-        background-color: #fef3c7;
-        color: #b45309;
-    }
-
-    .badge-expiringsoon {
-        background-color: #ffedd5;
-        color: #c2410c;
-    }
-
-    .badge-expired {
-        background-color: #fee2e2;
-        color: #b91c1c;
-    }
-
-    .badge-inactive {
-        background-color: #f4f4f5;
-        color: #52525b;
-    }
-
-    .badge-canceled {
-        background-color: #f3e8ff;
-        color: #7e22ce;
-    }
-
-    .badge-terminated {
-        background-color: #fecaca;
-        color: #7f1d1d;
-    }
-
-    /* ACTION MENU */
-    .action-cell {
-        position: relative;
-        text-align: center;
-    }
-
-    .action-heading {
-        text-align: center !important;
-        width: 76px;
-    }
-
-    .schedule-cell {
-        white-space: nowrap;
-    }
-
-    .action-btn {
-        background: none;
-        border: none;
-        color: #a1a1aa;
-        cursor: pointer;
-        font-size: 16px;
-        padding: 4px 8px;
-        border-radius: 6px;
-    }
-
-        .action-btn:hover {
-            color: #52525b;
-            background-color: #f4f4f5;
-        }
-
-    .action-menu {
-        display: none;
-        position: absolute;
-        right: 16px;
-        top: calc(100% - 4px);
-        background: #fffef8;
-        border: 1px solid #e4e4e7;
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(16, 24, 40, 0.1);
-        min-width: 170px;
-        z-index: 20;
-        overflow: hidden;
-    }
-
-        .action-menu.open {
-            display: block;
-        }
-
-        .action-menu form {
-            margin: 0;
-        }
-
-    .menu-item {
-        width: 100%;
-        text-align: left;
-        background: none;
-        border: none;
-        padding: 10px 14px;
-        font-size: 13px;
-        color: #27272a;
-        cursor: pointer;
-    }
-
-        .menu-item:hover {
-            background-color: #f4f4f5;
-        }
-
-    .menu-item-danger {
-        color: #b91c1c;
-    }
-
-        .menu-item-danger:hover {
-            background-color: #fee2e2;
-        }
-
-    /* PAGINATION */
-    .pagination-bar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-top: 0;
-        min-height: 76px;
-        padding: 16px 20px;
-        background: #e8f6fc;
-        font-size: 15px;
-        color: #111;
-    }
-
-    .pagination-arrows {
-        display: flex;
-        gap: 8px;
-    }
-
-        .pagination-arrows a {
-            width: 55px;
-            height: 43px;
-            display: grid;
-            place-items: center;
-            border: 1px solid #d5e1e5;
-            padding: 0;
-            border-radius: 6px;
-            background: #f7fbfc;
-            color: #879397;
-            text-decoration: none;
-            font-size: 13px;
-            font-weight: 400;
-        }
-
-            .pagination-arrows a:hover:not(.disabled) {
-                background-color: #f4f4f5;
-                color: #18181b;
-            }
-
-            .pagination-arrows a.disabled {
-                opacity: 0.4;
-                pointer-events: none;
-                background-color: #fafafa;
-            }
-
-    /* CUSTOM MODAL STYLES */
-    .modal-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        background-color: rgba(0, 0, 0, 0.5);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 1000;
-    }
-
-    .modal-card {
-        background: #fff;
-        padding: 24px;
-        border-radius: 12px;
-        width: 400px;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-        font-family: "Inria Serif", serif;
-    }
-
-        .modal-card h3 {
-            margin-top: 0;
-            font-size: 18px;
-            font-weight: 700;
-            color: #1a1a1a;
-        }
-
-        .modal-card p {
-            font-size: 14px;
-            color: #52525b;
-            margin-bottom: 24px;
-        }
-
-    .modal-buttons {
-        display: flex;
-        justify-content: flex-end;
-        gap: 12px;
-    }
+    /* ===== Modal base (member details + payment) ===== */
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(0,0,0,.5); display: flex; justify-content: center; align-items: center; z-index: 1000; }
+    .modal-card { background: #fff; padding: 24px; border-radius: 12px; width: 400px; box-shadow: 0 10px 25px rgba(0,0,0,.1); font-family: "Inria Serif", serif; }
+    .modal-card h3 { margin-top: 0; font-weight: 700; color: #1a1a1a; }
+    .modal-card p { color: #52525b; margin-bottom: 24px; }
+    .modal-buttons { display: flex; justify-content: flex-end; gap: 12px; }
 
     .member-detail-card { width: min(620px, calc(100vw - 32px)); max-height: 90vh; overflow-y: auto; }
-    .member-detail-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 20px; margin-bottom: 20px; }
-    .detail-label { display: block; color: #71717a; font-size: 12px; margin-bottom: 3px; }
-    .detail-value { color: #18181b; font-size: 14px; overflow-wrap: anywhere; }
+    .member-detail-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px 20px; margin-bottom: 20px; }
+    .detail-label { display: block; color: #71717a; margin-bottom: 3px; }
+    .detail-value { color: #18181b; overflow-wrap: anywhere; }
     .member-edit-fields { border-top: 1px solid #e4e4e7; padding-top: 18px; }
-    .member-edit-fields label { display: block; font-size: 13px; font-weight: 600; margin: 0 0 6px; }
-    .member-edit-fields select, .member-edit-fields input { width: 100%; box-sizing: border-box; border: 1px solid #d4d4d8; border-radius: 7px; padding: 9px 10px; margin-bottom: 14px; background: white; }
+    .member-edit-fields label { display: block; font-weight: 600; margin: 0 0 6px; }
+    .member-edit-fields select, .member-edit-fields input { width: 100%; box-sizing: border-box; border: 1px solid #d4d4d8; border-radius: 7px; padding: 9px 10px; margin-bottom: 14px; background: #fff; }
     .edit-days { display: flex; flex-wrap: wrap; gap: 8px 14px; margin-bottom: 14px; }
     .edit-days label { display: inline-flex; align-items: center; gap: 5px; font-weight: 400; margin: 0; }
     .edit-days input { width: auto; margin: 0; }
-    .btn-save-details { background: rgb(8,61,2); border: 1px solid rgb(8,61,2); color: #d8c38a; padding: 8px 16px; border-radius: 8px; font-family: "Inria Serif",serif; font-weight: 700; cursor: pointer; }
 
-    .btn-cancel {
-        background-color: #eef7ec;
-        border: 1px solid #8aac80;
-        color: rgb(8,61,2);
-        padding: 8px 16px;
-        font-size: 14px;
-        font-weight: 600;
-        border-radius: 8px;
-        cursor: pointer;
+    .btn-save-details { background: rgb(8,61,2); border: 1px solid rgb(8,61,2); color: #d8c38a; padding: 8px 16px; border-radius: 8px; font-family: "Inria Serif",serif; cursor: pointer; }
+    .btn-cancel { background-color: #eef7ec; border: 1px solid #8aac80; color: rgb(8,61,2); padding: 8px 16px; border-radius: 8px; cursor: pointer; }
+    .btn-cancel:hover { background-color: #dcefd8; }
+    .btn-confirm-delete { background-color: rgb(8,61,2); border: 1px solid rgb(8,61,2); color: #d8c38a; padding: 8px 16px; border-radius: 8px; cursor: pointer; }
+
+    /* ===== Compact dark Front Desk member directory ===== */
+    body > .container { max-width: none !important; width: 100% !important; padding: 0 !important; }
+    .page-container { width: 100%; min-height: 100vh; margin: 0; padding: 22px 28px 60px; background: #101311; color: #f4f6f4; font-family: Arial,sans-serif; }
+    .top-member-bar { display: flex; align-items: center; gap: 10px; padding-bottom: 17px; border-bottom: 1px solid #303530; }
+    .top-member-search { display: flex; flex: 1; gap: 10px; max-width: 804px; }
+    .top-member-search .search-box { flex: 1; max-width: none; height: 45px; border: 1px solid #8d958f; outline: 0; box-shadow: none; border-radius: 0; background: #1b1e1c; color: #929a94; }
+    .top-member-search .search-box svg { display: none; }
+    .top-member-search .search-box input { border: 0; outline: 0; box-shadow: none; background: transparent; color: #fff; padding: 0 15px; }
+    .top-member-search .search-box input:focus { outline: 0; box-shadow: none; }
+    .top-member-search .search-box input::placeholder { color: #838b85; }
+    .top-member-search .search-btn { width: 92px; min-width: 92px; height: 45px; padding: 0 18px; border: 0; border-radius: 0; background: #b7ff1b; color: #101510; font-weight: 800; text-transform: uppercase; justify-content: center; box-shadow: none; }
+    .page-container .btn-add { width: auto; min-width: 92px; height: 45px; padding: 0 18px; border: 0; border-radius: 0; background: #b7ff1b; color: #101510; font-weight: 800; text-transform: uppercase; justify-content: center; box-shadow: none; }
+    .page-container .header-row { align-items: flex-end; margin: 22px 0 18px; }
+    .page-container .header-title h1 { color: #fff; }
+    .page-container .header-subtitle { color: #b8ff28; text-transform: uppercase; letter-spacing: .04em; }
+    .member-filter-form .dropdown-filters { display: flex; gap: 10px; }
+    .member-filter-form .filter-select { min-width: 145px; height: 38px; border: 1px solid #3a403b; border-radius: 2px; background: #292d2a; color: #fff; }
+    .page-container .table-card { border: 1px solid #303630; border-radius: 2px; background: #1c1f1d; overflow: visible; }
+    .page-container .members-table { color: #f3f5f3; }
+    .page-container .members-table th { padding: 12px 13px; background: #343735; border-color: #3a3f3b; color: #cbd1cc; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }
+    .page-container .members-table td { padding: 13px; border-color: #343934; }
+    .page-container .member-name-btn { color: #fff; }
+    .page-container .member-name-btn:hover { color: #b7ff1b; }
+    .page-container .avatar-circle { background: #29352c !important; color: #b7ff1b !important; }
+    .page-container .status-badge { border-radius: 2px; padding: 4px 8px; text-transform: uppercase; }
+    .page-container .badge-active { background: #293226; color: #b7ff1b; }
+    .page-container .action-btn { border: 1px solid #394039; color: #d8ddd9; border-radius: 2px; }
+    .page-container .action-btn:hover { background: #2d322e; color: #b7ff1b; }
+    .page-container .action-menu { background: #202421; border-color: #414841; color: #fff; }
+    .page-container .menu-item { color: #edf1ed; }
+    .page-container .menu-item:hover { background: #303630; }
+    .page-container .pagination-bar { margin-top: 0; padding: 18px 12px; color: #aeb6b0; background: #101311; }
+    .page-container .pagination-arrows a { min-width: 82px; height: 32px; border: 0; border-radius: 4px; background: #b7ff1b; color: #101510; font-weight: 800; }
+    .page-container .pagination-arrows a.disabled { opacity: .35; }
+
+    @@media(max-width:900px) {
+        .page-container { padding: 18px }
+        .top-member-bar, .header-row { gap: 12px }
+        .table-card { overflow-x: auto !important }
+        .members-table { min-width: 950px }
+        .header-row { align-items: flex-start !important }
+        .member-filter-form .dropdown-filters { flex-wrap: wrap }
     }
 
-        .btn-cancel:hover {
-            background-color: #dcefd8;
-        }
-
-    .btn-confirm-delete {
-        background-color: rgb(8,61,2);
-        border: 1px solid rgb(8,61,2);
-        color: #d8c38a;
-        padding: 8px 16px;
-        font-size: 14px;
-        font-weight: 600;
-        border-radius: 8px;
-        cursor: pointer;
+    .registration-modal { position: fixed; inset: 0; z-index: 2500; display: none; align-items: center; justify-content: center; padding: 32px; background: rgba(0,0,0,.76); backdrop-filter: blur(3px); }
+    .registration-modal.open { display: flex; }
+    .registration-shell { position: relative; width: min(920px,92vw); height: min(760px,86vh); overflow: hidden; border: 1px solid #000; border-radius: 14px; background: #242824; box-shadow: 0 28px 80px rgba(0,0,0,.65); }
+    .registration-frame { width: 100%; height: 100%; border: 0; background: #242824; }
+    .registration-close { position: absolute; top: 14px; right: 18px; z-index: 2; width: 38px; height: 38px; border: 1px solid #6f786f; border-radius: 50%; background: #171a18; color: #fff; line-height: 1; cursor: pointer; }
+    .registration-close:hover { border-color: #b7ff1b; color: #b7ff1b; }
+    @@media(max-width:700px) {
+        .registration-modal { padding: 12px }
+        .registration-shell { width: 100%; height: 94vh; border-radius: 10px }
+        .registration-close { top: 10px; right: 10px }
     }
 
-    .btn-confirm-delete:hover {
-            background-color: rgb(5,45,1);
-        }
+    /* Keep the member subtitle-to-search spacing at exactly 5px. */
+    .page-container > .top-member-bar { margin: 0 !important; min-height: 0 !important; height: auto !important; padding-top: 0 !important; padding-bottom: 0 !important; border-bottom: 0 !important; }
+    .page-container > .header-row { margin: 5px 0 18px !important; padding-top: 0 !important; border-top: 0 !important; }
+    .page-container > .top-member-bar .header-subtitle { margin-bottom: 0 !important; }
+    .page-container > .header-row,
+    .page-container > .header-row .top-member-search,
+    .page-container > .header-row #memberFilterForm { transform: none !important; }
+    .page-container > .header-row { margin-top: 5px !important; }
+    body.frontdesk-shell .page-container > .top-member-bar { margin-bottom: 0 !important; padding-bottom: 0 !important; min-height: 0 !important; }
+    body.frontdesk-shell .page-container > .header-row { margin-top: 0 !important; padding-top: 0 !important; }
 
-    /* Compact dark Front Desk member directory */
-    body > .container { max-width:none!important; width:100%!important; padding:0!important; }
-    .page-container { width:100%; min-height:100vh; margin:0; padding:22px 28px 60px; background:#101311; color:#f4f6f4; font-family:Arial,sans-serif; }
-    .top-member-bar { display:flex; align-items:center; gap:10px; padding-bottom:17px; border-bottom:1px solid #303530; }
-    .top-member-search { display:flex; flex:1; gap:10px; max-width:804px; }
-    .top-member-search .search-box { flex:1; max-width:none; height:45px; border:1px solid #8d958f; outline:0; box-shadow:none; border-radius:0; background:#1b1e1c; color:#929a94; }
-    .top-member-search .search-box svg { display:none; }
-    .top-member-search .search-box input { border:0; outline:0; box-shadow:none; background:transparent; color:#fff; font-size:13px; padding:0 15px; }
-    .top-member-search .search-box input:focus { outline:0; box-shadow:none; }
-    .top-member-search .search-box input::placeholder { color:#838b85; }
-    .top-member-search .search-btn { width:92px; min-width:92px; height:45px; padding:0 18px; border:0; border-radius:0; background:#b7ff1b; color:#101510; font-size:10px; font-weight:800; text-transform:uppercase; justify-content:center; box-shadow:none; }
-    .page-container .btn-add { width:auto; min-width:92px; height:45px; padding:0 18px; border:0; border-radius:0; background:#b7ff1b; color:#101510; font-size:10px; font-weight:800; text-transform:uppercase; justify-content:center; box-shadow:none; }
-    .page-container .header-row { align-items:flex-end; margin:22px 0 18px; }
-    .page-container .header-title h1 { color:#fff; font-size:24px; }
-    .page-container .header-subtitle { color:#b8ff28; font-size:10px; text-transform:uppercase; letter-spacing:.04em; }
-    .member-filter-form .dropdown-filters { display:flex; gap:10px; }
-    .member-filter-form .filter-select { min-width:145px; height:38px; border:1px solid #3a403b; border-radius:2px; background:#292d2a; color:#fff; font-size:11px; }
-    .page-container .table-card { border:1px solid #303630; border-radius:2px; background:#1c1f1d; overflow:visible; }
-    .page-container .members-table { color:#f3f5f3; font-size:12px; }
-    .page-container .members-table th { padding:12px 13px; background:#343735; border-color:#3a3f3b; color:#cbd1cc; font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; }
-    .page-container .members-table td { padding:13px; border-color:#343934; }
-    .page-container .member-name-btn { color:#fff; font-size:12px; }
-    .page-container .member-name-btn:hover { color:#b7ff1b; }
-    .page-container .avatar-circle { background:#29352c!important; color:#b7ff1b!important; }
-    .page-container .status-badge { border-radius:2px; padding:4px 8px; font-size:9px; text-transform:uppercase; }
-    .page-container .badge-active { background:#293226; color:#b7ff1b; }
-    .page-container .action-btn { border:1px solid #394039; color:#d8ddd9; border-radius:2px; }
-    .page-container .action-btn:hover { background:#2d322e; color:#b7ff1b; }
-    .page-container .action-menu { background:#202421; border-color:#414841; color:#fff; }
-    .page-container .menu-item { color:#edf1ed; }
-    .page-container .menu-item:hover { background:#303630; }
-    .page-container .pagination-bar { margin-top:0; padding:18px 12px; color:#aeb6b0; background:#101311; font-size:10px; }
-    .page-container .pagination-arrows a { min-width:82px; height:32px; border:0; border-radius:4px; background:#b7ff1b; color:#101510; font-size:0; font-weight:800; }
-    .page-container .pagination-arrows a.disabled { opacity:.35; }
-    @@media(max-width:900px){ .page-container{padding:18px}.top-member-bar,.header-row{gap:12px}.table-card{overflow-x:auto!important}.members-table{min-width:950px}.header-row{align-items:flex-start!important}.member-filter-form .dropdown-filters{flex-wrap:wrap} }
-    .registration-modal { position:fixed; inset:0; z-index:2500; display:none; align-items:center; justify-content:center; padding:32px; background:rgba(0,0,0,.76); backdrop-filter:blur(3px); }
-    .registration-modal.open { display:flex; }
-    .registration-shell { position:relative; width:min(920px,92vw); height:min(760px,86vh); overflow:hidden; border:1px solid #000; border-radius:14px; background:#242824; box-shadow:0 28px 80px rgba(0,0,0,.65); }
-    .registration-frame { width:100%; height:100%; border:0; background:#242824; }
-    .registration-close { position:absolute; top:14px; right:18px; z-index:2; width:38px; height:38px; border:1px solid #6f786f; border-radius:50%; background:#171a18; color:#fff; font-size:24px; line-height:1; cursor:pointer; }
-    .registration-close:hover { border-color:#b7ff1b; color:#b7ff1b; }
-    @@media(max-width:700px) { .registration-modal{padding:12px}.registration-shell{width:100%;height:94vh;border-radius:10px}.registration-close{top:10px;right:10px} }
-    .member-renewal-card { display:flex; align-items:center; gap:14px; min-width:210px; padding:12px 16px; border:1px solid #343a35; border-radius:4px; background:#1d201e; }
-    .member-renewal-count { color:#b7ff1b; font-size:27px; font-weight:800; line-height:1; }
-    .member-renewal-label { display:block; color:#f4f6f4; font-size:10px; font-weight:800; text-transform:uppercase; }
-    .member-renewal-period { display:block; margin-top:4px; color:#aeb6b0; font-size:9px; }
+    /* ===== Dark styling for member details + payment modals ===== */
+    .modal-overlay { background: rgba(0,0,0,.72); }
+    .modal-card { background: #1b201c; color: #fff; border: 1px solid #3a403b; border-radius: 14px; padding: 28px; width: 460px; max-width: calc(100vw - 32px); font-family: Arial, sans-serif; box-shadow: 0 24px 70px rgba(0,0,0,.6); }
+    .modal-card h3 { margin: 0 0 16px; font-size: 15px; font-weight: 600; color: #b7ff1b; }
+    .modal-card p { margin: 0 0 24px; font-size: 15px; line-height: 1.5; color: #f4f6f4; }
+    .modal-buttons { display: flex; justify-content: flex-end; gap: 12px; margin-top: 8px; }
+    .btn-cancel, .btn-confirm-delete, .btn-save-details { height: 52px; padding: 0 22px; border-radius: 0; font-family: Arial, sans-serif; font-size: 15px; text-transform: uppercase; cursor: pointer; }
+    .btn-cancel { background: #292d2a; border: 1px solid #3a403b; color: #fff; }
+    .btn-cancel:hover { background: #343935; }
+    .btn-confirm-delete { background: #f02b2b; border: 1px solid #f02b2b; color: #1a0a0a; }
+    .btn-save-details { background: #b7ff1b; border: 1px solid #b7ff1b; color: #101510; }
+    .btn-save-details:hover { background: #c6ff45; }
+    .btn-save-details:disabled { opacity: .5; cursor: not-allowed; }
+    .member-detail-card { width: min(620px, calc(100vw - 32px)); }
+    .detail-label { color: #9aa39c; }
+    .detail-value { color: #fff; }
+    .member-edit-fields { border-top: 1px solid #3a403b; }
+    .member-edit-fields select, .member-edit-fields input[type="date"] { background: #292d2a; border: 1px solid #3a403b; border-radius: 0; color: #fff; height: 42px; }
+    .payment-summary { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 16px; padding: 14px; margin-bottom: 18px; background: #242824; border: 1px solid #3a403b; }
+    .payment-summary small { display: block; color: #9aa39c; }
+    .payment-input { width: 100%; height: 44px; padding: 0 12px; border: 1px solid #3a403b; border-radius: 0; background: #292d2a; color: #fff; margin-bottom: 14px; box-sizing: border-box; }
+
+    /* =====================================================
+       Admin-style dialogs: result, cancel membership,
+       terminate confirmation, renewal receipt
+       ===================================================== */
+    .am-dialog {
+        position: fixed !important; inset: 0 !important; margin: auto !important;
+        width: min(440px, 90vw); max-height: 90vh; padding: 26px;
+        background: #1b201c; color: #fff; border: 1px solid #3c443d; border-radius: 12px;
+        box-sizing: border-box; overflow-y: auto; font-family: Arial, sans-serif;
+    }
+    .am-dialog.wide { width: min(480px, 90vw); }
+    .am-dialog::backdrop { background: rgba(0,0,0,.65); }
+    .am-dialog h2 { margin: 0 0 12px; font-size: 22px; color: #b7ff1b; }
+    .am-dialog p { margin: 0 0 14px; line-height: 1.6; color: #d0d5d1; }
+    .am-dialog form { margin: 0; }
+
+    .am-dialog-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px; }
+    .am-dialog-actions button {
+        min-height: 42px; padding: 0 18px; border: 1px solid #586058; border-radius: 0;
+        background: #292d2a; color: #fff; cursor: pointer; font-family: Arial, sans-serif;
+        transition: background .15s, border-color .15s, color .15s;
+    }
+    .am-dialog-actions button:hover { border-color: #b7ff1b; color: #b7ff1b; }
+    .am-dialog-actions .am-dialog-confirm { background: #b7ff1b !important; border-color: #b7ff1b !important; color: #101510 !important; font-weight: 800; }
+    .am-dialog-actions .am-dialog-confirm:hover { background: #1b201c !important; color: #b7ff1b !important; }
+    .am-dialog-actions .am-dialog-confirm.danger { background: #ef2b2b !important; border-color: #ef2b2b !important; color: #000 !important; }
+    .am-dialog-actions .am-dialog-confirm.danger:hover { background: #1b201c !important; color: #ff8e8e !important; }
+    .am-dialog-actions .am-dialog-confirm:disabled { opacity: .5; cursor: not-allowed; }
+
+    /* Result dialog */
+    .am-result { text-align: center; }
+    .am-result h2 { color: #fff; }
+    .am-result p { margin: 0; }
+    .am-result-icon { width: 64px; height: 64px; margin: 0 auto 16px; display: grid; place-items: center; border-radius: 50%; font-size: 30px; font-weight: 800; }
+    .am-result.success .am-result-icon { background: #26332a; border: 1px solid #b7ff1b; color: #b7ff1b; }
+    .am-result.warning .am-result-icon { background: #3a3422; border: 1px solid #ffd47a; color: #ffd47a; }
+    .am-result.error .am-result-icon { background: #3a2222; border: 1px solid #ef2b2b; color: #ff8e8e; }
+    .am-result.error .am-dialog-confirm { background: #ef2b2b !important; border-color: #ef2b2b !important; color: #000 !important; }
+
+    /* Cancellation receipt */
+    .am-receipt { border: 1px solid #3c443d; margin: 18px 0; }
+    .am-receipt h3 { margin: 0; padding: 16px; background: #b7ff1b; color: #182000; font-size: 16px; }
+    .am-receipt-body { padding: 18px; line-height: 1.7; }
+    .am-receipt-body p { margin: 0 0 8px; }
+    .am-receipt-refund { color: #b7ff1b; margin: 8px 0 0 !important; }
+
+    /* ===== Button fixes (override any global button styles from the layout) ===== */
+    .am-dialog .am-dialog-actions { align-items: center; }
+    .am-dialog .am-dialog-actions button {
+        flex: 0 0 auto !important;
+        width: auto !important;
+        height: 42px !important;
+        min-height: 0 !important;
+        padding: 0 20px !important;
+        white-space: nowrap;
+        line-height: 1;
+        text-transform: uppercase;
+        outline: none !important;
+        box-shadow: none !important;
+    }
+
+    /* Result dialog: compact, centered OK button */
+    .am-result .am-dialog-actions { justify-content: center; margin-top: 22px; }
+    .am-result .am-dialog-actions button {
+        height: 36px !important;
+        min-width: 84px !important;
+        padding: 0 26px !important;
+    }
+
+    .am-dialog-actions button:hover { filter: brightness(1.15); }
+
+    /* Receipt header text stays dark on the lime bar */
+    .am-dialog .am-receipt h3 { color: #182000 !important; background: #b7ff1b !important; font-weight: 600; }
 </style>
 
 <div class="page-container">
 
-   
-    <div class="top-member-bar">
-        <div class="header-title"><h1 style="color:#fff !important;">Members</h1><div class="header-subtitle">@Model.ListViewModel.ActiveCount active member(s)</div></div>
+    <div class="top-member-bar" style="margin-bottom:calc(50px - 100px); gap:0;column-gap:0;padding:0">
+        <div class="header-title"><h1 style="font-weight:700!important;color:#fff !important;margin-bottom: 0px !important;">Members</h1><div class="header-subtitle">@Model.ListViewModel.ActiveCount active member(s)</div></div>
         <button type="button" class="btn-add" onclick="openAddMemberModal()">
             <span>+</span> Add member
         </button>
     </div>
 
-    <div class="header-row">
-      
+    <div class="header-row" style="margin-top:calc(50px - 100px); gap:0;column-gap:0;padding:0;">
+
         <form class="top-member-search" method="get" asp-action="Member" asp-controller="FrontDesk">
             <div class="search-box">
                 <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
@@ -552,7 +280,7 @@
             <button type="submit" class="search-btn">Search</button>
         </form>
         <form method="get" asp-action="Member" asp-controller="FrontDesk" id="memberFilterForm" class="member-filter-form">
-        <input type="hidden" name="page" value="1" />
+            <input type="hidden" name="page" value="1" />
             <input type="hidden" name="searchTerm" value="@Model.ListViewModel.SearchTerm" />
             <div class="dropdown-filters">
                 <!-- STATUS -->
@@ -602,7 +330,7 @@
                     <th>Joined</th>
                     <th>Expires</th>
                     <th>Status</th>
-                    <th class="action-heading">Action</th>
+                    <th class="action-heading" aria-label="Actions"></th>
                 </tr>
             </thead>
             <tbody>
@@ -661,8 +389,8 @@
 
                         <tr>
                             <!-- MEMBER -->
-                            <td>
-                                <div class="member-cell">
+                            <td style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;">
+                                <div class="member-cell" style="">
                                     <button type="button" class="member-name-btn"
                                             data-id="@member.Id" data-name="@member.FullName"
                                             data-email="@member.Email" data-phone="@member.PhoneNumber"
@@ -675,29 +403,29 @@
                                             data-follow-up-purpose="@(member.FollowUpPurpose ?? "")"
                                             data-preferred-days="@(member.PreferredDays ?? "")"
                                             data-preferred-time="@(member.PreferredTimeSlot ?? "")"
-                                            onclick="openMemberDetails(this)">
+                                            onclick="openMemberDetails(this)" style="">
                                         <span class="avatar-circle" style="background-color: @color.Bg; color: @color.Text;">
                                             @member.Initials
                                         </span>
-                                        <span>@member.FullName</span>
+                                        <span style="">@member.FullName</span>
                                     </button>
                                 </div>
                             </td>
 
                             <!-- PLAN -->
-                            <td>@MembershipPlanPricing.GetName(member.Plan)</td>
+                            <td style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;">@MembershipPlanPricing.GetName(member.Plan)</td>
 
                             <!-- TRAINER -->
-                            <td>@(member.TrainerName ?? "—")</td>
+                            <td style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;">@(member.TrainerName ?? "—")</td>
 
                             <!-- SCHEDULE -->
-                            <td class="schedule-cell" title="@(member.Schedule ?? compactSchedule)">@compactSchedule</td>
+                            <td class="schedule-cell" title="@(member.Schedule ?? compactSchedule)" style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;">@compactSchedule</td>
 
                             <!-- JOINED -->
-                            <td>@member.JoinedDate.ToString("MMM d, yyyy")</td>
+                            <td style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;">@member.JoinedDate.ToString("MMM d, yyyy")</td>
 
                             <!-- EXPIRATION -->
-                            <td>
+                            <td style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;">
                                 @if (member.ExpirationDate != DateTime.MinValue)
                                 {
                                     @member.ExpirationDate.ToString("MMM d, yyyy")
@@ -709,16 +437,18 @@
                             </td>
 
                             <!-- STATUS -->
-                            <td>
-                                <span class="status-badge @statusClass">
+                            <td style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;">
+                                <span class="status-badge @statusClass" style="background:transparent!important;padding:0!important;border:0!important;border-radius:0!important;box-shadow:none!important;">
                                     @statusText
                                 </span>
                             </td>
 
-                            <td class="action-cell">
+                            <td class="action-cell" style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;">
                                 <button type="button" class="action-btn" aria-label="Actions for @member.FullName"
-                                        onclick="toggleActionMenu(event, this)">⋮</button>
-                                <div class="action-menu" onclick="event.stopPropagation()">
+                                        onclick="toggleActionMenu(event, this)" style="">
+                                    ⋮
+                                </button>
+                                <div class="action-menu" onclick="event.stopPropagation()" style="">
                                     @if (member.Status != Gym.Models.MemberStatus.Canceled &&
                                          member.Status != Gym.Models.MemberStatus.Terminated)
                                     {
@@ -731,14 +461,14 @@
                                                 data-paid-amount="@member.PaidAmount.ToString(System.Globalization.CultureInfo.InvariantCulture)"
                                                 data-consumed-days="@member.ConsumedTrainingDays"
                                                 data-estimated-refund="@member.EstimatedRefund.ToString(System.Globalization.CultureInfo.InvariantCulture)"
-                                                onclick="openCancelMembershipModal(this)">
+                                                onclick="openCancelMembershipModal(this)" style="">
                                             Cancel membership
                                         </button>
                                     }
                                     @if (member.Status != Gym.Models.MemberStatus.Terminated)
                                     {
                                         <button type="button" class="menu-item menu-item-danger"
-                                                onclick="openTerminateModal(@member.Id, '@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(member.FullName))')">
+                                                onclick="openTerminateModal(@member.Id, '@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(member.FullName))')" style="">
                                             Terminate
                                         </button>
                                     }
@@ -751,7 +481,7 @@
                 else
                 {
                     <tr>
-                        <td colspan="8" style="text-align: center; color: #71717a; padding: 24px;">
+                        <td colspan="8" style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;text-align: center; color: #71717a; ">
                             No members found.
                         </td>
                     </tr>
@@ -759,57 +489,37 @@
             </tbody>
         </table>
 
-    <!-- PAGINATION -->
-    <div class="pagination-bar">
-        <span>
-            Showing @Model.ListViewModel.Members.Count of @Model.ListViewModel.TotalCount
-            (page @Model.ListViewModel.Page of @Model.ListViewModel.TotalPages)
-        </span>
+        <!-- PAGINATION -->
+        <div class="pagination-bar">
+            <span class="pagination-summary">
+                Showing @Model.ListViewModel.Members.Count of @Model.ListViewModel.TotalCount
+                (page @Model.ListViewModel.Page of @Model.ListViewModel.TotalPages)
+            </span>
 
-        <div class="pagination-arrows">
-            <a asp-action="Member"
-               asp-route-searchTerm="@Model.ListViewModel.SearchTerm"
-               asp-route-selectedStatus="@Model.ListViewModel.SelectedStatus"
-               asp-route-selectedPlan="@Model.ListViewModel.SelectedPlan"
-               asp-route-page="@(Model.ListViewModel.Page - 1)"
-               class="@(!Model.ListViewModel.HasPrevious ? "disabled" : "")">Previous</a>
+            <div class="pagination-arrows">
+                <a asp-action="Member"
+                   asp-route-searchTerm="@Model.ListViewModel.SearchTerm"
+                   asp-route-selectedStatus="@Model.ListViewModel.SelectedStatus"
+                   asp-route-selectedPlan="@Model.ListViewModel.SelectedPlan"
+                   asp-route-page="@(Model.ListViewModel.Page - 1)"
+                   class="@(!Model.ListViewModel.HasPrevious ? "disabled" : "")">Previous</a>
 
-            <a asp-action="Member"
-               asp-route-searchTerm="@Model.ListViewModel.SearchTerm"
-               asp-route-selectedStatus="@Model.ListViewModel.SelectedStatus"
-               asp-route-selectedPlan="@Model.ListViewModel.SelectedPlan"
-               asp-route-page="@(Model.ListViewModel.Page + 1)"
-               class="@(!Model.ListViewModel.HasNext ? "disabled" : "")">Next</a>
+                <a asp-action="Member"
+                   asp-route-searchTerm="@Model.ListViewModel.SearchTerm"
+                   asp-route-selectedStatus="@Model.ListViewModel.SelectedStatus"
+                   asp-route-selectedPlan="@Model.ListViewModel.SelectedPlan"
+                   asp-route-page="@(Model.ListViewModel.Page + 1)"
+                   class="@(!Model.ListViewModel.HasNext ? "disabled" : "")">Next</a>
+            </div>
         </div>
-    </div>
-</div>
+    </div> <!-- /table-card -->
+</div> <!-- /page-container -->
 
 <div id="addMemberModal" class="registration-modal" role="dialog" aria-modal="true" aria-label="Register member">
     <div class="registration-shell">
         <iframe id="addMemberFrame" class="registration-frame" title="Member registration form"></iframe>
     </div>
 </div>
-
-@if (TempData["SuccessMessage"] is string successMessage)
-{
-    <div id="processResultModal" class="modal-overlay" style="display:flex;">
-        <div class="modal-card" role="alertdialog" aria-modal="true">
-            <h3 style="color:#166534;">Process successful</h3>
-            <p>@successMessage</p>
-            <div class="modal-buttons"><button type="button" class="btn-save-details" onclick="closeProcessResultModal()">OK</button></div>
-        </div>
-    </div>
-}
-else if (TempData["ErrorMessage"] is string errorMessage)
-{
-    <div id="processResultModal" class="modal-overlay" style="display:flex;">
-        <div class="modal-card" role="alertdialog" aria-modal="true">
-            <h3 style="color:#b91c1c;">Action unsuccessful</h3>
-            <p>@errorMessage</p>
-            <div class="modal-buttons"><button type="button" class="btn-confirm-delete" onclick="closeProcessResultModal()">Close</button></div>
-        </div>
-    </div>
-}
 
 <!-- MEMBER DETAILS AND EDITABLE ASSIGNMENT/FOLLOW-UP -->
 <div id="memberDetailsModal" class="modal-overlay" style="display: none;">
@@ -865,7 +575,7 @@ else if (TempData["ErrorMessage"] is string errorMessage)
                 <option value="Fitness Assessment">Fitness Assessment</option>
                 <option value="Payment Follow-up">Payment Follow-up</option>
             </select>
-            <small style="display:block;margin-top:8px;color:#66736b;line-height:1.4;">
+            <small style="display:block;margin-top:8px;color:#9aa39c;line-height:1.4;">
                 Saving a follow-up date and purpose sends a generated letter to the member's email. The member can reply directly to the gym.
             </small>
             <div class="modal-buttons">
@@ -880,25 +590,23 @@ else if (TempData["ErrorMessage"] is string errorMessage)
 <div id="paymentModal" class="modal-overlay" style="display: none;">
     <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="paymentModalTitle">
         <h3 id="paymentModalTitle">Record member payment</h3>
-        <p style="margin-bottom:14px;color:#68736d;">Review the client information and record the cash received.</p>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px 16px;padding:14px;margin-bottom:18px;background:#f2f8f4;border:1px solid #dce8df;border-radius:7px;">
-            <div><small style="display:block;color:#6c7871;">Client</small><strong id="paymentMemberName"></strong></div>
-            <div><small style="display:block;color:#6c7871;">Membership ID</small><strong id="paymentMemberNumber"></strong></div>
-            <div><small style="display:block;color:#6c7871;">Email</small><strong id="paymentMemberEmail" style="overflow-wrap:anywhere;"></strong></div>
-            <div><small style="display:block;color:#6c7871;">Plan</small><strong id="paymentMemberPlan"></strong></div>
-            <div><small style="display:block;color:#6c7871;">Plan price</small><strong id="paymentPlanPrice"></strong></div>
-            <div><small style="display:block;color:#6c7871;">Total paid</small><strong id="paymentTotalPaid"></strong></div>
-            <div><small style="display:block;color:#6c7871;">Remaining balance</small><strong id="paymentRemainingBalance" style="color:#b45309;"></strong></div>
+        <p style="margin-bottom:14px;color:#9aa39c;">Review the client information and record the cash received.</p>
+        <div class="payment-summary">
+            <div><small>Client</small><strong id="paymentMemberName"></strong></div>
+            <div><small>Membership ID</small><strong id="paymentMemberNumber"></strong></div>
+            <div><small>Email</small><strong id="paymentMemberEmail" style="overflow-wrap:anywhere;"></strong></div>
+            <div><small>Plan</small><strong id="paymentMemberPlan"></strong></div>
+            <div><small>Plan price</small><strong id="paymentPlanPrice"></strong></div>
+            <div><small>Total paid</small><strong id="paymentTotalPaid"></strong></div>
+            <div><small>Remaining balance</small><strong id="paymentRemainingBalance" style="color:#f5b83d;"></strong></div>
         </div>
         <form asp-action="RecordMemberPayment" asp-controller="FrontDesk" method="post" onsubmit="lockPaymentSubmit(this)">
             @Html.AntiForgeryToken()
             <input type="hidden" id="paymentMemberId" name="id" />
-            <label for="paymentMethod" style="display:block;margin-bottom:6px;font-weight:700;">Payment method</label>
-            <input id="paymentMethod" type="text" value="Cash" readonly
-                   style="width:100%;height:44px;padding:0 12px;border:1px solid #d1dad5;border-radius:6px;background:#f5f8f6;margin-bottom:14px;" />
-            <label for="paymentAmount" style="display:block;margin-bottom:6px;font-weight:700;">Amount (₱)</label>
-            <input id="paymentAmount" name="amount" type="number" min="0.01" step="0.01" required placeholder="0.00"
-                   style="width:100%;height:44px;padding:0 12px;border:1px solid #d1dad5;border-radius:6px;margin-bottom:18px;" />
+            <label for="paymentMethod" style="display:block;margin-bottom:6px;">Payment method</label>
+            <input id="paymentMethod" class="payment-input" type="text" value="Cash" readonly />
+            <label for="paymentAmount" style="display:block;margin-bottom:6px;">Amount (₱)</label>
+            <input id="paymentAmount" class="payment-input" name="amount" type="number" min="0.01" step="0.01" required placeholder="0.00" style="margin-bottom:18px;" />
             <div class="modal-buttons">
                 <button type="button" class="btn-cancel" onclick="closePaymentModal()">Cancel</button>
                 <button type="submit" class="btn-save-details">Record payment</button>
@@ -907,52 +615,94 @@ else if (TempData["ErrorMessage"] is string errorMessage)
     </div>
 </div>
 
-<!-- FLOATING MEMBERSHIP CANCELLATION RESTRICTION -->
-<div id="cancelMembershipModal" class="modal-overlay" style="display: none;">
-    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="cancelMembershipTitle">
-        <h3 id="cancelMembershipTitle">Review cancellation receipt</h3>
+@* =====================================================
+   Admin-style dialogs (native <dialog>)
+   ===================================================== *@
+
+<!-- CANCEL MEMBERSHIP: receipt review -->
+<dialog id="cancelMembershipDialog" class="am-dialog wide" aria-labelledby="cancelMembershipTitle">
+    <form asp-action="CancelMembership" asp-controller="FrontDesk" method="post" onsubmit="return lockPaymentSubmit(this)">
+        @Html.AntiForgeryToken()
+        <input type="hidden" id="cancelMembershipId" name="id" />
+        <h2 id="cancelMembershipTitle">Review cancellation receipt</h2>
         <p id="cancelMembershipMessage"></p>
-        <section class="cancellation-receipt">
-        <h3 class="cancellation-receipt-heading">Membership cancellation</h3>
-        <div class="cancellation-receipt-body">
-            <p>Send to: <strong id="cancelReceiptEmail"></strong></p>
-            <div>Plan price: <strong id="cancelPlanAmount"></strong></div>
-            <div>Plan duration: <strong id="cancelDuration"></strong> days</div>
-            <div>Payment received: <strong id="cancelPaidAmount"></strong></div>
-            <div>Days used: <strong id="cancelConsumedDays"></strong></div>
-            <div>Deduction: <strong id="cancelDeduction"></strong></div>
-            <div>Estimated refund: <strong id="cancelRefundAmount" style="color:#b7ff1b;"></strong></div>
-        </div>
+        <section class="am-receipt">
+            <h3>Membership cancellation</h3>
+            <div class="am-receipt-body">
+                <p>Send to: <strong id="cancelReceiptEmail"></strong></p>
+                <div>Plan price: <span id="cancelPlanAmount"></span></div>
+                <div>Plan duration: <span id="cancelDuration"></span> days</div>
+                <div>Payment received: <span id="cancelPaidAmount"></span></div>
+                <div>Days used: <span id="cancelConsumedDays"></span></div>
+                <div>Deduction: <span id="cancelDeduction"></span></div>
+                <p class="am-receipt-refund">Estimated refund: <span id="cancelRefundAmount"></span></p>
+            </div>
         </section>
         <p>Days used are counted from the day after the membership starts, whether the member attends or not. The refund is the amount paid minus the cost of elapsed membership days.</p>
         <p>The refund breakdown will be emailed to the member. Management must process the refund separately.</p>
-        <div class="modal-buttons">
-            <button type="button" class="btn-cancel" onclick="closeCancelMembershipModal()">Go back</button>
-            <form asp-action="CancelMembership" asp-controller="FrontDesk" method="post" onsubmit="return lockPaymentSubmit(this)">
-                @Html.AntiForgeryToken()
-                <input type="hidden" id="cancelMembershipId" name="id" />
-                <button type="submit" class="btn-confirm-delete">Confirm and email receipt</button>
-            </form>
+        <div class="am-dialog-actions">
+            <button type="button" style="@btnGhost" onclick="closeCancelMembershipModal()">Go back</button>
+            <button type="submit" class="am-dialog-confirm" style="@btnPrimary" id="cancelMembershipSubmit">Confirm and email receipt</button>
         </div>
-    </div>
-    </div>
-</div>
+    </form>
+</dialog>
 
-<!-- CUSTOM TERMINATE CONFIRMATION MODAL -->
-<div id="terminateModal" class="modal-overlay" style="display: none;">
-    <div class="modal-card">
-        <h3>Confirm Termination</h3>
-        <p id="terminateModalMessage">Are you sure you want to terminate this member's membership?</p>
-        <div class="modal-buttons">
-            <button type="button" class="btn-cancel" onclick="closeTerminateModal()">Cancel</button>
-            <form id="terminateForm" asp-action="TerminateMembership" asp-controller="FrontDesk" method="post" style="display:inline;">
-                @Html.AntiForgeryToken()
-                <input type="hidden" id="terminateMemberId" name="id" />
-                <button type="submit" class="btn-confirm-delete">OK</button>
-            </form>
+<!-- TERMINATE: confirmation -->
+<dialog id="terminateDialog" class="am-dialog" aria-labelledby="terminateTitle">
+    <form id="terminateForm" asp-action="TerminateMembership" asp-controller="FrontDesk" method="post" onsubmit="return lockPaymentSubmit(this)">
+        @Html.AntiForgeryToken()
+        <input type="hidden" id="terminateMemberId" name="id" />
+        <h2 id="terminateTitle">Terminate membership?</h2>
+        <p id="terminateModalMessage"></p>
+        <div class="am-dialog-actions">
+            <button type="button" style="@btnGhost" onclick="closeTerminateModal()">Cancel</button>
+            <button type="submit" class="am-dialog-confirm danger" style="@btnDanger" id="terminateSubmit">Terminate</button>
         </div>
-    </div>
-</div>
+    </form>
+</dialog>
+
+<!-- RENEWAL: payment receipt -->
+<dialog id="renewalReceipt" class="am-dialog wide" aria-labelledby="renewalReceiptTitle">
+    <form asp-action="RenewMembership" asp-controller="FrontDesk" method="post" onsubmit="return lockPaymentSubmit(this)">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="id" id="renewId" />
+        <input type="hidden" name="amount" id="renewAmount" />
+        <input type="hidden" name="returnToMember" value="true" />
+        <h2 id="renewalReceiptTitle">Review renewal payment receipt</h2>
+        <p>Member: <strong id="renewName"></strong></p>
+        <p>Send to: <strong id="renewEmail"></strong></p>
+        <p>Membership plan: <strong id="renewPlan"></strong></p>
+        <p>Payment method: Cash</p>
+        <p style="color:#b7ff1b;">Amount paid: <strong id="renewPrice"></strong></p>
+        <p>Confirm only after receiving the full plan payment. Cancelled memberships restart with a new term; previous payments are not carried forward. Renewal opens 7 days before expiry for existing memberships.</p>
+        <div class="am-dialog-actions">
+            <button type="button" style="@btnGhost" onclick="document.getElementById('renewalReceipt').close()">Go back</button>
+            <button type="submit" class="am-dialog-confirm" style="@btnPrimary">Confirm payment and email receipt</button>
+        </div>
+    </form>
+</dialog>
+
+<!-- RESULT: success / warning / error -->
+@if (resultSuccess != null || resultWarning != null || resultError != null)
+{
+    var kind = resultSuccess != null ? "success" : resultWarning != null ? "warning" : "error";
+    var title = kind == "success" ? "Success" : kind == "warning" ? "Completed with a note" : "Something went wrong";
+    var icon = kind == "success" ? "✓" : kind == "warning" ? "!" : "✕";
+    <dialog id="resultDialog" class="am-dialog am-result @kind" aria-labelledby="resultTitle">
+        <div class="am-result-icon" aria-hidden="true">@icon</div>
+        <h2 id="resultTitle">@title</h2>
+        <p>@(resultSuccess ?? resultWarning ?? resultError)</p>
+        <div class="am-dialog-actions" style="justify-content:center">
+            <button type="button" class="am-dialog-confirm" style="@((kind == "error" ? btnDanger : btnPrimary) + btnOk)" onclick="document.getElementById('resultDialog').close()">OK</button>
+        </div>
+    </dialog>
+    <script>
+        (() => {
+            const dialog = document.getElementById('resultDialog');
+            dialog.showModal();
+        })();
+    </script>
+}
 
 <script>
     if (window.self !== window.top) {
@@ -972,11 +722,6 @@ else if (TempData["ErrorMessage"] is string errorMessage)
         document.body.style.overflow = '';
     }
 
-    function closeProcessResultModal() {
-        const modal = document.getElementById('processResultModal');
-        if (modal) modal.style.display = 'none';
-    }
-
     function openMemberDetails(button) {
         const data = button.dataset;
         document.getElementById('detailMemberId').value = data.id;
@@ -993,7 +738,7 @@ else if (TempData["ErrorMessage"] is string errorMessage)
         document.getElementById('detailFollowUpDate').value = data.followUpDate || '';
         document.getElementById('detailFollowUpPurpose').value = data.followUpPurpose || 'Welcome & orientation';
         const selectedDays = (data.preferredDays || '').split(',').map(day => day.trim());
-        document.querySelectorAll('#detailDays input[type="checkbox"]').forEach(function (checkbox) {
+        document.querySelectorAll('#detailDays input[type="checkbox"]').forEach(function(checkbox) {
             checkbox.checked = selectedDays.includes(checkbox.value);
         });
         document.getElementById('detailPreferredTime').value = data.preferredTime || '';
@@ -1038,8 +783,14 @@ else if (TempData["ErrorMessage"] is string errorMessage)
         return true;
     }
 
+    function resetSubmit(id, label) {
+        const button = document.getElementById(id);
+        button.disabled = false;
+        button.textContent = label;
+    }
+
     function closeAllActionMenus(except) {
-        document.querySelectorAll('.action-menu.open').forEach(function (menu) {
+        document.querySelectorAll('.action-menu.open').forEach(function(menu) {
             if (menu !== except) menu.classList.remove('open');
         });
     }
@@ -1052,16 +803,16 @@ else if (TempData["ErrorMessage"] is string errorMessage)
         menu.classList.toggle('open', !isOpen);
     }
 
-    document.addEventListener('click', function () {
+    document.addEventListener('click', function() {
         closeAllActionMenus(null);
     });
 
-    document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', function() {
         var searchInput = document.getElementById('searchTermInput');
         var searchForm = document.getElementById('memberFilterForm');
 
         if (searchInput && searchForm) {
-            searchInput.addEventListener('keydown', function (e) {
+            searchInput.addEventListener('keydown', function(e) {
                 if (e.key === 'Enter') {
                     e.preventDefault();
                     searchForm.submit();
@@ -1070,67 +821,61 @@ else if (TempData["ErrorMessage"] is string errorMessage)
         }
     });
 
+    /* ---------- Terminate ---------- */
     function openTerminateModal(memberId, memberName) {
+        closeAllActionMenus(null);
+        resetSubmit('terminateSubmit', 'Terminate');
         document.getElementById('terminateMemberId').value = memberId;
-        document.getElementById('terminateModalMessage').innerText = `Terminate ${memberName}'s membership? They can be reactivated later if needed.`;
-        document.getElementById('terminateModal').style.display = 'flex';
-    }
-
-    function openCancelMembershipModal(button) {
-        document.getElementById('cancelPaidAmount').textContent = Number(button.dataset.paidAmount).toLocaleString('en-PH', {style:'currency', currency:'PHP'});
-        document.getElementById('cancelReceiptEmail').textContent = button.dataset.email;
-        document.getElementById('cancelDuration').textContent = button.dataset.duration;
-        document.getElementById('cancelDeduction').textContent = '₱' + (Number(button.dataset.planPrice) - Number(button.dataset.estimatedRefund)).toFixed(2);
-        const memberId = button.dataset.memberId;
-        const memberName = button.dataset.memberName;
-        const planPrice = Number(button.dataset.planPrice || 0);
-        const consumedDays = Number(button.dataset.consumedDays || 0);
-        const estimatedRefund = Number(button.dataset.estimatedRefund || 0);
-        const peso = value => '₱' + value.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        document.getElementById('cancelMembershipId').value = memberId;
-        document.getElementById('cancelMembershipMessage').textContent =
-            `Cancel the membership of ${memberName}?`;
-        document.getElementById('cancelPlanAmount').textContent = peso(planPrice);
-        document.getElementById('cancelConsumedDays').textContent = consumedDays;
-        document.getElementById('cancelRefundAmount').textContent = peso(estimatedRefund);
-        document.getElementById('cancelMembershipModal').style.display = 'flex';
-    }
-
-    function closeCancelMembershipModal() {
-        document.getElementById('cancelMembershipModal').style.display = 'none';
+        document.getElementById('terminateModalMessage').textContent =
+            `This will terminate ${memberName}'s membership. Terminated memberships cannot be renewed.`;
+        document.getElementById('terminateDialog').showModal();
     }
 
     function closeTerminateModal() {
-        document.getElementById('terminateModal').style.display = 'none';
+        document.getElementById('terminateDialog').close();
     }
 
-</script>
-<dialog id="renewalReceipt" style="position:fixed;inset:0;margin:auto;max-width:540px;width:calc(100% - 32px);max-height:90vh;overflow:auto;padding:28px;background:#1b201c;color:white;border:1px solid #59635c;border-radius:14px;">
-    <h3>Review renewal payment receipt</h3>
-    <p>Member: <strong id="renewName"></strong></p>
-    <p>Send to: <strong id="renewEmail"></strong></p>
-    <p>Membership plan: <strong id="renewPlan"></strong></p>
-    <p>Payment method: Cash</p>
-    <p style="color:#b7ff1b;">Amount paid: <strong id="renewPrice"></strong></p>
-    <p>Confirm only after receiving the full plan payment. Cancelled memberships restart with a new term; previous payments are not carried forward. Renewal opens 7 days before expiry for existing memberships.</p>
-    <form asp-action="RenewMembership" asp-controller="FrontDesk" method="post" onsubmit="return lockPaymentSubmit(this)">
-        @Html.AntiForgeryToken()
-        <input type="hidden" name="id" id="renewId" />
-        <input type="hidden" name="amount" id="renewAmount" />
-        <input type="hidden" name="returnToMember" value="true" />
-        <button type="button" onclick="document.getElementById('renewalReceipt').close()">Go back</button>
-        <button type="submit">Confirm payment and email receipt</button>
-    </form>
-</dialog>
-<script>
-function openRenewalReceipt(button) {
-    document.getElementById('renewId').value = button.dataset.memberId;
-    document.getElementById('renewAmount').value = button.dataset.price;
-    document.getElementById('renewName').textContent = button.dataset.memberName;
-    document.getElementById('renewEmail').textContent = button.dataset.email;
-    document.getElementById('renewPlan').textContent = button.dataset.plan;
-    document.getElementById('renewPrice').textContent = Number(button.dataset.price).toLocaleString('en-PH', {style:'currency', currency:'PHP'});
-    closeAllActionMenus();
-    document.getElementById('renewalReceipt').showModal();
-}
+    /* ---------- Cancel membership ---------- */
+    function openCancelMembershipModal(button) {
+        closeAllActionMenus(null);
+        resetSubmit('cancelMembershipSubmit', 'Confirm and email receipt');
+        const peso = value => '₱' + Number(value).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        const planPrice = Number(button.dataset.planPrice || 0);
+        const paidAmount = Number(button.dataset.paidAmount || 0);
+        const estimatedRefund = Number(button.dataset.estimatedRefund || 0);
+
+        document.getElementById('cancelMembershipId').value = button.dataset.memberId;
+        document.getElementById('cancelMembershipMessage').textContent =
+            `Cancel the membership of ${button.dataset.memberName}?`;
+        document.getElementById('cancelReceiptEmail').textContent = button.dataset.email;
+        document.getElementById('cancelPlanAmount').textContent = peso(planPrice);
+        document.getElementById('cancelDuration').textContent = button.dataset.duration;
+        document.getElementById('cancelPaidAmount').textContent = peso(paidAmount);
+        document.getElementById('cancelConsumedDays').textContent = button.dataset.consumedDays || 0;
+        document.getElementById('cancelDeduction').textContent = peso(planPrice - estimatedRefund);
+        document.getElementById('cancelRefundAmount').textContent = peso(estimatedRefund);
+        document.getElementById('cancelMembershipDialog').showModal();
+    }
+
+    function closeCancelMembershipModal() {
+        document.getElementById('cancelMembershipDialog').close();
+    }
+
+    /* ---------- Renewal ---------- */
+    function openRenewalReceipt(button) {
+        document.getElementById('renewId').value = button.dataset.memberId;
+        document.getElementById('renewAmount').value = button.dataset.price;
+        document.getElementById('renewName').textContent = button.dataset.memberName;
+        document.getElementById('renewEmail').textContent = button.dataset.email;
+        document.getElementById('renewPlan').textContent = button.dataset.plan;
+        document.getElementById('renewPrice').textContent = Number(button.dataset.price).toLocaleString('en-PH', { style: 'currency', currency: 'PHP' });
+        closeAllActionMenus();
+        document.getElementById('renewalReceipt').showModal();
+    }
+
+    // Clicking the dark backdrop closes these dialogs.
+    ['resultDialog', 'cancelMembershipDialog', 'terminateDialog', 'renewalReceipt'].forEach(function(id) {
+        const dialog = document.getElementById(id);
+        if (dialog) dialog.addEventListener('click', function(e) { if (e.target === dialog) dialog.close(); });
+    });
 </script>

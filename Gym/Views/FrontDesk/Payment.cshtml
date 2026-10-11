@@ -3,6 +3,10 @@
 @{
     Layout = "~/Views/Shared/_FrontDeskLayout.cshtml";
     ViewData["Title"] = "Payments";
+
+    var resultSuccess = TempData["SuccessMessage"] as string;
+    var resultWarning = TempData["WarningMessage"] as string;
+    var resultError = TempData["ErrorMessage"] as string;
 }
 
 <style>
@@ -15,14 +19,13 @@
     .pay-page {
         width: min(1160px, calc(100vw - 370px));
         margin: 24px auto;
-        font: 15px Arial, sans-serif;
+        font-family: Arial, sans-serif;
         color: #102630;
     }
 
     /* Header */
     .pay-head h1 {
         margin: 0 0 5px;
-        font-size: 26px;
     }
 
     .pay-head p {
@@ -30,12 +33,11 @@
         color: #5e6963;
     }
 
-    .pay-action
-    {
-        display:flex;
+    .pay-action {
+        display: flex;
         justify-content: space-between;
         flex-direction: row;
-        position:relative;
+        position: relative;
     }
 
     /* Renewal Card */
@@ -46,7 +48,7 @@
         background: #fff;
         border: 1px solid #dce5e1;
         border-radius: 8px;
-        box-shadow: 0 5px 14px rgba(24, 50, 61, 0.08);
+        box-shadow: 0 5px 14px rgba(24,50,61,.08);
     }
 
     .renew-top {
@@ -63,7 +65,6 @@
         border-radius: 5px;
         background: #e9f4eb;
         color: #18712c;
-        font-size: 23px;
     }
 
     .renew-period {
@@ -71,15 +72,13 @@
         border-radius: 999px;
         background: #dff1f8;
         color: #48636c;
-        font-size: 12px;
     }
 
     .renew-label {
         margin: 16px 0 5px;
         color: #526058;
-        font-size: 12px;
         font-weight: 700;
-        letter-spacing: 0.5px;
+        letter-spacing: .5px;
     }
 
     .renew-bottom {
@@ -89,14 +88,12 @@
     }
 
     .renew-count {
-        font-size: 34px;
         font-weight: 700;
     }
 
     .renew-link {
         color: #07551a;
         text-decoration: none;
-        font-size: 13px;
         font-weight: 700;
     }
 
@@ -108,10 +105,6 @@
         border-radius: 8px;
     }
 
-        .pay-card h2{
-            font-size: 15px;
-
-        }
     /* Toolbar */
     .pay-toolbar {
         display: flex;
@@ -123,7 +116,6 @@
 
         .pay-toolbar h2 {
             margin: 0 auto 0 0;
-            font-size: 19px;
         }
 
     .pay-search {
@@ -137,7 +129,6 @@
             padding: 0 13px;
             border: 1px solid #c7d3cd;
             border-radius: 5px;
-            font-size: 14px;
             box-sizing: border-box;
         }
 
@@ -170,8 +161,7 @@
             background: #394c55;
             color: #fff;
             text-align: left;
-            font-size: 12px;
-            letter-spacing: 0.6px;
+            letter-spacing: .6px;
         }
 
         .pay-table td {
@@ -193,7 +183,6 @@
         border-radius: 50%;
         background: #e6f2e8;
         color: #126726;
-        font-size: 12px;
         font-weight: 700;
         flex-shrink: 0;
     }
@@ -206,7 +195,6 @@
         display: inline-block;
         padding: 5px 10px;
         border-radius: 999px;
-        font-size: 11px;
         font-weight: 700;
     }
 
@@ -220,8 +208,7 @@
         color: #3d626e;
     }
 
-    .overdue,
-    .unpaid {
+    .overdue, .unpaid {
         background: #fde4e4;
         color: #aa2020;
     }
@@ -235,23 +222,56 @@
         color: #748078;
     }
 
-    .pay-row-action { position:relative; text-align:center; }
-    .pay-row-action details { position:relative; display:inline-block; }
-    .pay-row-action summary { list-style:none; width:34px; height:34px; display:grid; place-items:center; cursor:pointer; border:1px solid #ccd6d0; border-radius:5px; }
-    .pay-row-action summary::-webkit-details-marker { display:none; }
-    .pay-action-menu { position:absolute; right:0; top:39px; z-index:20; width:170px; padding:5px 0; background:#fff; border:1px solid #d8e0db; border-radius:6px; box-shadow:0 8px 22px rgba(0,0,0,.14); }
-    .pay-action-menu button { width:100%; padding:11px 14px; border:0; background:#fff; text-align:left; cursor:pointer; }
-    .pay-action-menu button:hover { background:#edf6ef; }
-    .pay-action-menu button:disabled { color:#9ba59f; cursor:not-allowed; }
-    .pay-modal { position:fixed; inset:0; z-index:2400; display:none; align-items:center; justify-content:center; padding:20px; background:rgba(0,0,0,.58); }
-    .pay-modal-card { width:min(520px,94vw); padding:24px; border-radius:8px; background:#fff; box-shadow:0 20px 60px rgba(0,0,0,.25); }
-    .pay-modal-card h3 { margin:0 0 8px; }
-    .pay-modal-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px 16px; margin:16px 0; padding:14px; background:#f2f8f4; border:1px solid #dce8df; border-radius:7px; }
-    .pay-modal-grid small { display:block; color:#6c7871; }
-    .pay-modal-actions { display:flex; justify-content:flex-end; gap:10px; margin-top:18px; }
-    .pay-modal-actions button { min-height:40px; padding:0 16px; border-radius:5px; cursor:pointer; }
-    .pay-modal-cancel { border:1px solid #ccd5d0; background:#fff; }
-    .pay-modal-save { border:0; background:#084b0b; color:#fff; font-weight:700; }
+    .pay-row-action {
+        position: relative;
+        text-align: center;
+    }
+
+        .pay-row-action details {
+            position: relative;
+            display: inline-block;
+        }
+
+        .pay-row-action summary {
+            list-style: none;
+            width: 34px;
+            height: 34px;
+            display: grid;
+            place-items: center;
+            cursor: pointer;
+            border: 1px solid #ccd6d0;
+            border-radius: 5px;
+        }
+
+            .pay-row-action summary::-webkit-details-marker {
+                display: none;
+            }
+
+    .pay-action-menu {
+        position: absolute;
+        right: 0;
+        top: 39px;
+        z-index: 20;
+        width: 170px;
+        padding: 5px 0;
+        background: #fff;
+        border: 1px solid #d8e0db;
+        border-radius: 6px;
+        box-shadow: 0 8px 22px rgba(0,0,0,.14);
+    }
+
+        .pay-action-menu button {
+            width: 100%;
+            padding: 11px 14px;
+            border: 0;
+            background: #fff;
+            text-align: left;
+            cursor: pointer;
+        }
+
+            .pay-action-menu button:hover {
+                background: #edf6ef;
+            }
 
     /* Footer / Pagination */
     .pay-foot {
@@ -261,7 +281,6 @@
         padding: 16px 20px;
         background: #e8f6fc;
         color: #111;
-        font-size: 15px;
     }
 
     .pay-pager {
@@ -280,12 +299,11 @@
             background: #f7fbfc;
             color: #879397;
             text-decoration: none;
-            font-size: 13px;
         }
 
             .pay-pager a.disabled {
                 pointer-events: none;
-                opacity: 0.5;
+                opacity: .5;
             }
 
     /* Responsive */
@@ -325,81 +343,324 @@
             box-sizing: border-box;
         }
     }
+
+    /* Keep the payment subtitle and search controls exactly 5px apart. */
+    main.pay-page > header.pay-head {
+        min-height: 0 !important;
+        height: auto !important;
+        margin: 0 0 5px !important;
+        padding: 0 !important;
+        border: 0 !important;
+    }
+
+        main.pay-page > header.pay-head h1,
+        main.pay-page > header.pay-head p {
+            margin-top: 0 !important;
+            margin-bottom: 0 !important;
+        }
+
+    main.pay-page > .pay-action {
+        margin-top: 0 !important;
+    }
+
+    /* =====================================================
+           Admin-style dialogs: renewal confirmation, renewal
+           notice, and result message
+           ===================================================== */
+    .am-dialog {
+        position: fixed !important;
+        inset: 0 !important;
+        margin: auto !important;
+        width: min(460px, 90vw);
+        max-height: 90vh;
+        padding: 26px;
+        background: #1b201c;
+        color: #fff;
+        border: 1px solid #3c443d;
+        border-radius: 12px;
+        box-sizing: border-box;
+        overflow-y: auto;
+        font-family: Arial, sans-serif;
+    }
+
+        .am-dialog::backdrop {
+            background: rgba(0,0,0,.65);
+        }
+
+        .am-dialog h2 {
+            margin: 0 0 12px;
+            font-size: 22px;
+            color: #b7ff1b;
+        }
+
+        .am-dialog p {
+            margin: 0;
+            line-height: 1.6;
+            color: #d0d5d1;
+        }
+
+        .am-dialog form {
+            margin: 0;
+        }
+
+    .am-dialog-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 24px;
+    }
+
+        .am-dialog-actions button {
+            min-height: 42px;
+            padding: 0 18px;
+            border: 1px solid #586058;
+            border-radius: 0;
+            background: #292d2a;
+            color: #fff;
+            cursor: pointer;
+            font-family: Arial, sans-serif;
+            transition: background .15s, border-color .15s, color .15s;
+        }
+
+            .am-dialog-actions button:hover {
+                border-color: #b7ff1b;
+                color: #b7ff1b;
+            }
+
+        .am-dialog-actions .am-dialog-confirm {
+            background: #b7ff1b !important;
+            border-color: #b7ff1b !important;
+            color: #101510 !important;
+            font-weight: 800;
+        }
+
+            .am-dialog-actions .am-dialog-confirm:hover {
+                background: #1b201c !important;
+                color: #b7ff1b !important;
+            }
+
+            .am-dialog-actions .am-dialog-confirm:disabled {
+                opacity: .5;
+                cursor: not-allowed;
+            }
+
+    /* Renewal summary */
+    .am-renewal-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+        margin: 16px 0;
+        padding: 14px;
+        border: 1px solid #3c443d;
+    }
+
+        .am-renewal-grid small {
+            display: block;
+            color: #aab3ac;
+            margin-bottom: 4px;
+        }
+
+        .am-renewal-grid strong {
+            color: #fff;
+        }
+
+    .am-notice-date {
+        margin-top: 14px !important;
+        color: #b7ff1b !important;
+    }
+
+    /* Result dialog */
+    .am-result {
+        text-align: center;
+    }
+
+        .am-result h2 {
+            color: #fff;
+        }
+
+    .am-result-icon {
+        width: 64px;
+        height: 64px;
+        margin: 0 auto 16px;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        font-size: 30px;
+        font-weight: 800;
+    }
+
+    .am-result.success .am-result-icon {
+        background: #26332a;
+        border: 1px solid #b7ff1b;
+        color: #b7ff1b;
+    }
+
+    .am-result.warning .am-result-icon {
+        background: #3a3422;
+        border: 1px solid #ffd47a;
+        color: #ffd47a;
+    }
+
+    .am-result.error .am-result-icon {
+        background: #3a2222;
+        border: 1px solid #ef2b2b;
+        color: #ff8e8e;
+    }
+
+    .am-result.error .am-dialog-confirm {
+        background: #ef2b2b !important;
+        border-color: #ef2b2b !important;
+        color: #000 !important;
+    }
+
+    /* ===== Renewal dialog: boxed info cells ===== */
+    .am-renewal-grid {
+        gap: 14px;
+        padding: 14px;
+        margin: 18px 0 6px;
+        border: 1px solid #3c443d;
+    }
+
+        .am-renewal-grid > div {
+            padding: 14px 16px;
+            border: 1px solid #3c443d;
+            background: #171a18;
+        }
+
+        .am-renewal-grid small {
+            margin-bottom: 8px;
+            font-size: 15px;
+            letter-spacing: .02em;
+            text-transform: uppercase;
+            color: #aab3ac;
+        }
+
+        .am-renewal-grid strong {
+            font-size: 15px;
+            color: #fff;
+        }
+
+        .am-renewal-grid #renewalPlanPrice {
+            color: #b7ff1b;
+        }
+
+    /* ===== Compact buttons (override any global button styles from the layout) ===== */
+    .am-dialog .am-dialog-actions {
+        align-items: center;
+    }
+
+        .am-dialog .am-dialog-actions button {
+            flex: 0 0 auto !important;
+            width: auto !important;
+            height: 42px !important;
+            min-height: 0 !important;
+            padding: 0 20px !important;
+            white-space: nowrap;
+            line-height: 1;
+            text-transform: uppercase;
+            outline: none !important;
+            box-shadow: none !important;
+        }
+
+    /* Renewal confirm: lime outline, fills lime on hover */
+    #renewalActionDialog .am-dialog-confirm {
+        background: #1b201c !important;
+        border: 1px solid #b7ff1b !important;
+        color: #b7ff1b !important;
+        font-weight: 400;
+    }
+
+        #renewalActionDialog .am-dialog-confirm:hover {
+            background: #b7ff1b !important;
+            color: #101510 !important;
+        }
+
+    /* Result message: short, centered OK button */
+    .am-result .am-dialog-actions {
+        justify-content: center;
+        margin-top: 22px;
+    }
+
+        .am-result .am-dialog-actions button {
+            height: 36px !important;
+            min-width: 84px !important;
+            padding: 0 26px !important;
+        }
 </style>
 
 <main class="pay-page">
 
     <header class="pay-head">
-        <h1>Payments</h1>
+        <h1 style="font-weight:700!important;margin-bottom: 0px !important;">Payments</h1>
 
         <p>
             Monitor member and walk-in payment transactions.
         </p>
     </header>
     <div class="pay-action">
-            <form class="pay-search"
-                        method="get"
-                        asp-action="Payment">
+        <form class="pay-search"
+              method="get"
+              asp-action="Payment">
 
-                    <input name="searchTerm"
-                            value="@Model.SearchTerm"
-                            placeholder="Search transactions..." />
+            <input name="searchTerm"
+                   value="@Model.SearchTerm"
+                   placeholder="Search transactions..." />
 
-                    <input type="hidden"
-                            name="selectedStatus"
-                            value="@Model.SelectedStatus" />
+            <input type="hidden"
+                   name="selectedStatus"
+                   value="@Model.SelectedStatus" />
 
-                    <button type="submit" class="pay-search-button">
-                        Search
-                    </button>
+            <button type="submit" class="pay-search-button">
+                Search
+            </button>
 
-            </form>
+        </form>
 
-             <form method="get"
-                  asp-action="Payment">
+        <form method="get"
+              asp-action="Payment">
 
-                <input type="hidden"
-                       name="searchTerm"
-                       value="@Model.SearchTerm" />
+            <input type="hidden"
+                   name="searchTerm"
+                   value="@Model.SearchTerm" />
 
-                <select class="pay-status"
-                        name="selectedStatus"
-                        onchange="this.form.submit()">
+            <select class="pay-status"
+                    name="selectedStatus"
+                    onchange="this.form.submit()">
 
-                    <option value="">
-                        Status Filter: All
+                <option value="">
+                    Status Filter: All
+                </option>
+
+                @foreach (var status in Enum.GetValues<Gym.Models.PaymentStatus>())
+                {
+                    <option value="@status"
+                            selected="@(Model.SelectedStatus == status)">
+                        @status
                     </option>
+                }
 
-                    @foreach (var status in Enum.GetValues<Gym.Models.PaymentStatus>())
-                    {
-                        <option value="@status"
-                                selected="@(Model.SelectedStatus == status)">
-                            @status
-                        </option>
-                    }
+            </select>
 
-                </select>
-
-            </form>
+        </form>
     </div>
 
     <section class="pay-card">
 
-            <h2>
-                Recent Transactions
-            </h2>
+        <h2>
+            Recent Transactions
+        </h2>
 
         <!-- Payment Table -->
         <table class="pay-table">
 
             <thead>
                 <tr>
-                    <th>TRANSACTION CODE</th>
                     <th>MEMBER NAME</th>
+                    <th>TRANSACTION CODE</th>
                     <th>DATE</th>
                     <th>AMOUNT</th>
                     <th>STATUS</th>
-                    <th>ACTION</th>
+                    <th aria-label="Actions"></th>
                 </tr>
             </thead>
 
@@ -408,7 +669,7 @@
                 @if (Model.Payments.Count == 0)
                 {
                     <tr>
-                        <td class="pay-empty" colspan="6">
+                        <td class="pay-empty" colspan="6" style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;">
                             No payment transactions found.
                         </td>
                     </tr>
@@ -420,60 +681,62 @@
                         .ToString()
                         .ToLowerInvariant();
 
+                    var canRenew = MembershipRenewalRules.CanRenew(item.MemberStatus, item.MembershipEndDate, DateTime.Today);
+                    var isTerminated = item.MemberStatus == Gym.Models.MemberStatus.Terminated;
+
                     <tr>
 
-                        <td class="pay-transaction-code">
-                            @(string.IsNullOrWhiteSpace(item.TransactionCode)
-                                ? $"TXN-{item.PaymentId:D6}"
-                                : item.TransactionCode)
-                        </td>
+                        <td style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;">
+                            <div class="pay-member" style="">
 
-                        <td>
-                            <div class="pay-member">
-
-                                <span class="pay-avatar pay-avatar-color-0">
+                                <span class="pay-avatar pay-avatar-color-0" style="">
                                     @item.Initials
                                 </span>
 
-                                <strong>
+                                <strong style="">
                                     @item.MemberName
                                 </strong>
 
                             </div>
                         </td>
 
-                        <td>
+                        <td class="pay-transaction-code" style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;">
+                            @(string.IsNullOrWhiteSpace(item.TransactionCode)
+                                ? $"TXN-{item.PaymentId:D6}"
+                                : item.TransactionCode)
+                        </td>
+
+                        <td style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;">
                             @item.PaymentDate.ToString("MMM d, yyyy")
                         </td>
 
-                        <td class="pay-amount">
+                        <td class="pay-amount" style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;">
                             ₱@item.Amount.ToString("N2")
                         </td>
 
-                        <td>
-                            <span class="pay-badge @statusClass">
+                        <td style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;">
+                            <span class="pay-badge @statusClass" style="background:transparent!important;padding:0!important;border:0!important;border-radius:0!important;box-shadow:none!important;">
                                 @item.Status
                             </span>
                         </td>
 
-                        <td class="pay-row-action">
+                        <td class="pay-row-action" style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;">
                             <details>
                                 <summary aria-label="Payment actions">⋮</summary>
-                                <div class="pay-action-menu">
-                                    @if (MembershipRenewalRules.CanRenew(item.MemberStatus, item.MembershipEndDate, DateTime.Today))
-                                    {
-                                        <button type="button"
-                                                data-client-id="@item.ClientId"
-                                                data-member-name="@item.MemberName"
-                                                data-plan-name="@MembershipPlanPricing.GetName(item.Plan)"
-                                                data-plan-price="@item.PlanPrice.ToString(System.Globalization.CultureInfo.InvariantCulture)"
-                                                data-expired-date="@item.MembershipEndDate.Value.ToString("MMM d, yyyy")"
-                                                onclick="openRenewalAction(this)">Renew membership</button>
-                                    }
-                                    else
-                                    {
-                                        <button type="button" disabled>Renew membership</button>
-                                    }
+                                <div class="pay-action-menu" style="">
+                                    <button type="button"
+                                            data-can-renew="@(canRenew ? "true" : "false")"
+                                            data-terminated="@(isTerminated ? "true" : "false")"
+                                            data-renewal-opens="@(item.MembershipEndDate?.AddDays(-7).ToString("MMM d, yyyy"))"
+                                            data-client-id="@item.ClientId"
+                                            data-member-name="@item.MemberName"
+                                            data-plan-name="@MembershipPlanPricing.GetName(item.Plan)"
+                                            data-plan-price="@item.PlanPrice.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+                                            data-expired-date="@(item.MembershipEndDate?.ToString("MMM d, yyyy") ?? "No end date")"
+                                            title="Renewal opens 7 days before expiry; cancelled memberships can restart."
+                                            onclick="openRenewalAction(this)" style="">
+                                        Renew membership
+                                    </button>
                                 </div>
                             </details>
                         </td>
@@ -488,7 +751,7 @@
         <!-- Pagination -->
         <footer class="pay-foot">
 
-            <span>
+            <span class="pagination-summary">
                 Showing @Model.Payments.Count of @Model.TotalCount
                 (page @Model.Page of @Model.TotalPages)
             </span>
@@ -519,48 +782,110 @@
 
 </main>
 
-<div id="renewalActionModal" class="pay-modal">
-    <div class="pay-modal-card" role="dialog" aria-modal="true" aria-labelledby="renewalActionTitle">
-        <h3 id="renewalActionTitle">Confirm membership renewal</h3>
-        <p>The current membership has ended. Confirm the full cash payment to start the next membership period. A digital receipt will be emailed after renewal.</p>
-        <div class="pay-modal-grid">
+<!-- RENEWAL: confirmation -->
+<dialog id="renewalActionDialog" class="am-dialog" aria-labelledby="renewalActionTitle">
+    <form asp-action="RenewMembership" asp-controller="FrontDesk" method="post" onsubmit="return lockRenewalAction(this)">
+        @Html.AntiForgeryToken()
+        <input type="hidden" id="renewalClientId" name="id" />
+        <input type="hidden" id="renewalAmount" name="amount" />
+        <h2 id="renewalActionTitle">Renew membership payment</h2>
+        <p>Confirm the full cash renewal payment. A digital receipt will be sent to the member after renewal.</p>
+        <div class="am-renewal-grid">
             <div><small>Member</small><strong id="renewalMemberName"></strong></div>
             <div><small>Plan</small><strong id="renewalPlanName"></strong></div>
-            <div><small>Previous plan ended</small><strong id="renewalExpiredDate"></strong></div>
-            <div><small>Renewal payment</small><strong id="renewalPlanPrice"></strong></div>
+            <div><small>Current plan ends</small><strong id="renewalExpiredDate"></strong></div>
+            <div><small>Payment required</small><strong id="renewalPlanPrice"></strong></div>
         </div>
-        <form asp-action="RenewMembership" asp-controller="FrontDesk" method="post" onsubmit="return lockRenewalAction(this)">
-            @Html.AntiForgeryToken()
-            <input type="hidden" id="renewalClientId" name="id" />
-            <input type="hidden" id="renewalAmount" name="amount" />
-            <div class="pay-modal-actions">
-                <button type="button" class="pay-modal-cancel" onclick="closeRenewalAction()">Cancel</button>
-                <button type="submit" class="pay-modal-save">Pay and renew</button>
-            </div>
-        </form>
+        <div class="am-dialog-actions">
+            <button type="button" onclick="closeRenewalAction()">Cancel</button>
+            <button type="submit" class="am-dialog-confirm" id="renewalSubmit">Pay and renew</button>
+        </div>
+    </form>
+</dialog>
+
+<!-- RENEWAL: not allowed yet / terminated -->
+<dialog id="renewalNotice" class="am-dialog" aria-labelledby="renewalNoticeTitle">
+    <h2 id="renewalNoticeTitle">Membership renewal</h2>
+    <p id="renewalNoticeText"></p>
+    <p id="renewalNoticeDate" class="am-notice-date"></p>
+    <div class="am-dialog-actions">
+        <button type="button" onclick="document.getElementById('renewalNotice').close()">Close</button>
     </div>
-</div>
+</dialog>
+
+<!-- RESULT: success / warning / error -->
+@if (resultSuccess != null || resultWarning != null || resultError != null)
+{
+    var kind = resultSuccess != null ? "success" : resultWarning != null ? "warning" : "error";
+    var title = kind == "success" ? "Success" : kind == "warning" ? "Completed with a note" : "Something went wrong";
+    var icon = kind == "success" ? "✓" : kind == "warning" ? "!" : "✕";
+    <dialog id="resultDialog" class="am-dialog am-result @kind" aria-labelledby="resultTitle">
+        <div class="am-result-icon" aria-hidden="true">@icon</div>
+        <h2 id="resultTitle">@title</h2>
+        <p>@(resultSuccess ?? resultWarning ?? resultError)</p>
+        <div class="am-dialog-actions" style="justify-content:center">
+            <button type="button" class="am-dialog-confirm" onclick="document.getElementById('resultDialog').close()">OK</button>
+        </div>
+    </dialog>
+}
 
 <script>
     function peso(value) {
         return '₱' + Number(value).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
+
+    function closeRowMenus() {
+        document.querySelectorAll('.pay-row-action details[open]').forEach(function(d) { d.open = false; });
+    }
+
     function openRenewalAction(button) {
+        closeRowMenus();
+
+        // Not renewable yet (or terminated): explain why instead of opening the payment dialog.
+        if (button.dataset.canRenew !== 'true') {
+            const terminated = button.dataset.terminated === 'true';
+            document.getElementById('renewalNoticeText').textContent = terminated
+                ? 'Terminated memberships cannot be renewed.'
+                : 'Active memberships can only be renewed during the last 7 days before their end date.';
+            document.getElementById('renewalNoticeDate').textContent = !terminated && button.dataset.renewalOpens
+                ? `${button.dataset.memberName}'s membership ends on ${button.dataset.expiredDate}. Renewal opens on ${button.dataset.renewalOpens}.`
+                : '';
+            document.getElementById('renewalNotice').showModal();
+            return;
+        }
+
+        const submit = document.getElementById('renewalSubmit');
+        submit.disabled = false;
+        submit.textContent = 'Pay and renew';
+
         document.getElementById('renewalClientId').value = button.dataset.clientId;
         document.getElementById('renewalAmount').value = button.dataset.planPrice;
         document.getElementById('renewalMemberName').textContent = button.dataset.memberName;
         document.getElementById('renewalPlanName').textContent = button.dataset.planName;
         document.getElementById('renewalExpiredDate').textContent = button.dataset.expiredDate;
         document.getElementById('renewalPlanPrice').textContent = peso(button.dataset.planPrice);
-        document.getElementById('renewalActionModal').style.display = 'flex';
+        document.getElementById('renewalActionDialog').showModal();
     }
+
     function closeRenewalAction() {
-        document.getElementById('renewalActionModal').style.display = 'none';
+        document.getElementById('renewalActionDialog').close();
     }
+
     function lockRenewalAction(form) {
         const submit = form.querySelector('button[type="submit"]');
+        if (submit.disabled) return false;
         submit.disabled = true;
         submit.textContent = 'Processing...';
         return true;
     }
+
+    // Clicking the dark backdrop closes these dialogs.
+    ['renewalActionDialog', 'renewalNotice', 'resultDialog'].forEach(function(id) {
+        const dialog = document.getElementById(id);
+        if (dialog) dialog.addEventListener('click', function(e) { if (e.target === dialog) dialog.close(); });
+    });
+
+    // Show the result popup after a renewal redirect (only exists when there is a message).
+    const resultDialog = document.getElementById('resultDialog');
+    if (resultDialog) resultDialog.showModal();
 </script>

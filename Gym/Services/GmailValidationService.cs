@@ -19,6 +19,7 @@ namespace Gym.Services
         // Sends the "click to confirm" registration email with a button link
         public async Task<(bool Success, string? ErrorMessage)> SendConfirmationEmailAsync(string recipientEmail, string confirmationUrl)
         {
+            using var timeout = new System.Threading.CancellationTokenSource(TimeSpan.FromSeconds(30));
             try
             {
                 var email = new MimeMessage();
@@ -52,16 +53,23 @@ namespace Gym.Services
                 await smtp.ConnectAsync(
                     _config["SmtpSettings:Server"],
                     int.Parse(_config["SmtpSettings:Port"]!),
-                    SecureSocketOptions.StartTls);
+                    SecureSocketOptions.StartTls, timeout.Token);
 
                 await smtp.AuthenticateAsync(
                     _config["SmtpSettings:SenderEmail"],
-                    _config["SmtpSettings:Password"]);
+                    _config["SmtpSettings:Password"], timeout.Token);
 
-                await smtp.SendAsync(email);
-                await smtp.DisconnectAsync(true);
+                await smtp.SendAsync(email, timeout.Token);
+                // Once the server accepts the invitation, a disconnect failure
+                // must not turn success into an error and delete the pending staff.
+                try { await smtp.DisconnectAsync(true, timeout.Token); }
+                catch (Exception) { /* Delivery succeeded; disposal closes the connection. */ }
 
                 return (true, null);
+            }
+            catch (OperationCanceledException)
+            {
+                return (false, "The invitation email could not be confirmed within 30 seconds. Staff registration was not completed. Please try again.");
             }
             catch (Exception ex)
             {
@@ -102,6 +110,7 @@ namespace Gym.Services
             DateTime transactionDate,
             string paymentMethod)
         {
+            using var timeout = new System.Threading.CancellationTokenSource(TimeSpan.FromSeconds(30));
             try
             {
                 var safeName = System.Net.WebUtility.HtmlEncode(clientName);
@@ -133,13 +142,19 @@ namespace Gym.Services
                 await smtp.ConnectAsync(
                     _config["SmtpSettings:Server"],
                     int.Parse(_config["SmtpSettings:Port"]!),
-                    SecureSocketOptions.StartTls);
+                    SecureSocketOptions.StartTls, timeout.Token);
                 await smtp.AuthenticateAsync(
                     _config["SmtpSettings:SenderEmail"],
-                    _config["SmtpSettings:Password"]);
-                await smtp.SendAsync(email);
-                await smtp.DisconnectAsync(true);
+                    _config["SmtpSettings:Password"], timeout.Token);
+                await smtp.SendAsync(email, timeout.Token);
+                // A disconnect failure cannot undo an accepted receipt.
+                try { await smtp.DisconnectAsync(true, timeout.Token); }
+                catch (Exception) { /* Disposal closes the connection. */ }
                 return (true, null);
+            }
+            catch (OperationCanceledException)
+            {
+                return (false, "Registration and payment were saved, but receipt delivery could not be confirmed within 30 seconds. Do not register again.");
             }
             catch (Exception ex)
             {
@@ -228,6 +243,7 @@ namespace Gym.Services
             decimal totalPaid,
             decimal remainingBalance)
         {
+            using var timeout = new System.Threading.CancellationTokenSource(TimeSpan.FromSeconds(30));
             try
             {
                 var safeName = System.Net.WebUtility.HtmlEncode(memberName);
@@ -264,13 +280,19 @@ namespace Gym.Services
                 await smtp.ConnectAsync(
                     _config["SmtpSettings:Server"],
                     int.Parse(_config["SmtpSettings:Port"]!),
-                    SecureSocketOptions.StartTls);
+                    SecureSocketOptions.StartTls, timeout.Token);
                 await smtp.AuthenticateAsync(
                     _config["SmtpSettings:SenderEmail"],
-                    _config["SmtpSettings:Password"]);
-                await smtp.SendAsync(email);
-                await smtp.DisconnectAsync(true);
+                    _config["SmtpSettings:Password"], timeout.Token);
+                await smtp.SendAsync(email, timeout.Token);
+                // A disconnect failure cannot undo an accepted receipt.
+                try { await smtp.DisconnectAsync(true, timeout.Token); }
+                catch (Exception) { /* Disposal closes the connection. */ }
                 return (true, null);
+            }
+            catch (OperationCanceledException)
+            {
+                return (false, "Registration and payment were saved, but receipt delivery could not be confirmed within 30 seconds. Do not register again.");
             }
             catch (Exception ex)
             {

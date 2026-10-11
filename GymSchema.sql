@@ -359,6 +359,7 @@ SET QUOTED_IDENTIFIER ON
 GO
 CREATE TABLE [dbo].[WalkInClients](
 	[WalkInClientId] [int] IDENTITY(1,1) NOT NULL,
+	[PaymentTypeName] [nvarchar](100) NULL,
 	[FirstName] [nvarchar](100) NOT NULL,
 	[LastName] [nvarchar](100) NOT NULL,
 	[ContactNumber] [nvarchar](20) NOT NULL,
@@ -375,6 +376,16 @@ PRIMARY KEY CLUSTERED
 	[WalkInClientId] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
 ) ON [PRIMARY]
+GO
+CREATE TABLE [dbo].[WalkInPaymentTypes](
+	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[Name] [nvarchar](100) NOT NULL,
+	[Amount] [decimal](18, 2) NOT NULL,
+	[IsActive] [bit] NOT NULL CONSTRAINT [DF_WalkInPaymentTypes_IsActive] DEFAULT ((1)),
+PRIMARY KEY CLUSTERED ([Id] ASC),
+ CONSTRAINT [CK_WalkInPaymentTypes_Amount] CHECK ([Amount] > 0 AND [Amount] <= 1000000),
+ CONSTRAINT [UQ_WalkInPaymentTypes_Name] UNIQUE NONCLUSTERED ([Name] ASC)
+)
 GO
 /****** Object:  Index [IX_ClientPrograms_ClientId]    Script Date: 29/08/2026 1:31:27 am ******/
 CREATE NONCLUSTERED INDEX [IX_ClientPrograms_ClientId] ON [dbo].[ClientPrograms]

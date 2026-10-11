@@ -1,5 +1,31 @@
 using Gym.Models;
 
+var ageCheckToday = new DateTime(2026, 9, 29);
+foreach (var (birthDate, expected) in new[]
+{
+    (new DateTime(2013, 9, 29), true),
+    (new DateTime(2013, 9, 30), false),
+    (new DateTime(2013, 9, 28), true),
+    (new DateTime(2014, 1, 1), false),
+    (new DateTime(2000, 1, 1), true),
+    (new DateTime(2027, 1, 1), false),
+    (default(DateTime), false)
+})
+{
+    if (MinimumRegistrationAgeAttribute.IsEligible(birthDate, ageCheckToday) != expected)
+        throw new Exception($"Incorrect age eligibility for {birthDate:yyyy-MM-dd}.");
+}
+if (MinimumRegistrationAgeAttribute.IsEligible(new DateTime(2012, 2, 29), new DateTime(2025, 2, 28)) ||
+    !MinimumRegistrationAgeAttribute.IsEligible(new DateTime(2012, 2, 29), new DateTime(2025, 3, 1)))
+    throw new Exception("Leap-day age boundary failed.");
+var missingBirthDate = new AddMemberViewModel();
+var birthDateErrors = new List<System.ComponentModel.DataAnnotations.ValidationResult>();
+System.ComponentModel.DataAnnotations.Validator.TryValidateObject(missingBirthDate,
+    new System.ComponentModel.DataAnnotations.ValidationContext(missingBirthDate), birthDateErrors, true);
+if (!birthDateErrors.Any(error => error.MemberNames.Contains(nameof(AddMemberViewModel.DateOfBirth))))
+    throw new Exception("Missing birth date was accepted.");
+Console.WriteLine("PASS: age 13 boundary, underage, adult, future, missing, and leap-day birth dates.");
+
 var catalog = new[] { new EquipmentNameCatalog { Name = "Treadmill" }, new EquipmentNameCatalog { Name = "Bike" } };
 var records = new List<Equipment>
 {

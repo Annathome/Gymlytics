@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace Gym.Models
 {
@@ -10,11 +10,11 @@ namespace Gym.Models
         public string FullName { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Email is required.")]
-        [EmailAddress(ErrorMessage = "Invalid Email Address")]
+        [EmailAddress(ErrorMessage = "Invalid Email Address")][StringLength(100)]
         public string Email { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Phone number is required.")]
-        [Phone(ErrorMessage = "Invalid Phone Number")]
+        [RegularExpression(@"^[0-9]{11}$", ErrorMessage = "Enter exactly 11 digits (0-9). Letters, spaces, and symbols are not allowed.")]
         public string PhoneNumber { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Username is required.")]
@@ -55,14 +55,15 @@ namespace Gym.Models
         public string ConfirmPassword { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Phone number is required.")]
-        [Phone(ErrorMessage = "Invalid Phone Number")]
+        [RegularExpression(@"^[0-9]{11}$", ErrorMessage = "Enter exactly 11 digits (0-9). Letters, spaces, and symbols are not allowed.")]
         public string PhoneNumber { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Email is required.")]
-        [EmailAddress(ErrorMessage = "Invalid Email Address")]
+        [EmailAddress(ErrorMessage = "Invalid Email Address")][StringLength(100)]
         public string Email { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Birthday is required.")]
+        [MinimumRegistrationAge]
         [DataType(DataType.Date)]
         public DateTime Birthday { get; set; }
 
@@ -89,11 +90,11 @@ namespace Gym.Models
         public string FullName { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Email is required.")]
-        [EmailAddress(ErrorMessage = "Invalid Email Address.")]
+        [EmailAddress(ErrorMessage = "Invalid Email Address.")][StringLength(100)]
         public string Email { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Phone number is required.")]
-        [Phone(ErrorMessage = "Invalid Phone Number.")]
+        [RegularExpression(@"^[0-9]{11}$", ErrorMessage = "Enter exactly 11 digits (0-9). Letters, spaces, and symbols are not allowed.")]
         public string PhoneNumber { get; set; } = string.Empty;
 
         [StringLength(500, ErrorMessage = "Bio cannot exceed 500 characters.")]

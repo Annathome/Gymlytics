@@ -1,0 +1,8 @@
+@if (TempData["FormConfirmationMessage"] is string message)
+{
+    <div class="registration-notice form-confirmation" role="status" tabindex="-1" data-confirmation-action="@TempData["FormConfirmationAction"]">
+        <span class="confirmation-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="m6 12 4 4 8-8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg></span>
+        <div><strong>@(TempData["FormConfirmationTitle"] as string ?? "Saved successfully")</strong><p>@message</p></div>
+    </div>
+    <script src="~/js/form-confirmation.js" asp-append-version="true"></script>
+}

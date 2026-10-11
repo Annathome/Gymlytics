@@ -1,0 +1,10 @@
+@model List<Gym.Models.Equipment>
+@{
+    ViewData["Title"] = "Equipment Report History";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+<div class="atm-heading">
+    <h1 style="color:#f4f6f4; margin-top:0; font-weight:700!important;margin-bottom: 0px !important;">Equipment Report History</h1>
+    <div class="atm-sub dashboard-caption" style="color:#aeb7b0!important;line-height:1.4!important;">Review submitted equipment reports and resolved issues.</div>
+</div>
+<partial name="_EquipmentReportHistory" model="Model" />

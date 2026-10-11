@@ -29,6 +29,7 @@ namespace Gym.Controllers
         private readonly GymDbContext _context;
         private readonly ILogger<AdminController> _logger;
         private readonly EquipmentEvidenceService _equipmentEvidence;
+        private readonly WalkInRegistrationService _walkInRegistration;
 
         public AdminController(
             IAdminService adminService,
@@ -39,7 +40,8 @@ namespace Gym.Controllers
             DailyMemberReminderSender dailyReminderSender,
             GymDbContext context,
             ILogger<AdminController> logger,
-            EquipmentEvidenceService equipmentEvidence)
+            EquipmentEvidenceService equipmentEvidence,
+            WalkInRegistrationService walkInRegistration)
         {
             _adminService = adminService;
             _setupService = setupService;
@@ -50,6 +52,7 @@ namespace Gym.Controllers
             _context = context;
             _logger = logger;
             _equipmentEvidence = equipmentEvidence;
+            _walkInRegistration = walkInRegistration;
         }
 
         [HttpGet("/Admin")]
@@ -126,7 +129,10 @@ namespace Gym.Controllers
             try
             {
                 const int pageSize = 5;
-                var clients = (await _adminService.GetAllClientsAsync()).ToList();
+                var clients = (await _adminService.GetAllClientsAsync())
+                    .OrderByDescending(client => client.CreatedDate)
+                    .ThenByDescending(client => client.UserId)
+                    .ToList();
                 ViewBag.Years = clients.Select(client => client.MembershipStartDate.Year)
                     .Distinct().OrderByDescending(value => value).ToList();
                 ViewBag.Year = year;
@@ -318,20 +324,11 @@ namespace Gym.Controllers
         [HttpGet]
         public async Task<IActionResult> Notifications(int page = 1)
         {
-            var unreadNotifications = await _context.FrontDeskEmailNotifications
-                .Where(item => item.Status == "New")
-                .ToListAsync();
-            foreach (var notification in unreadNotifications)
-            {
-                notification.Status = "Read";
-            }
-            if (unreadNotifications.Count > 0)
-            {
-                await _context.SaveChangesAsync();
-            }
-
+            // Admin notifications are operational activity records. Delivery
+            // receipts belong on the staff email log, not this admin feed.
             const int pageSize = 10;
             var notificationQuery = _context.FrontDeskEmailNotifications.AsNoTracking()
+                .Where(item => item.Status == "Activity")
                 .OrderByDescending(item => item.CreatedDate);
             var totalCount = await notificationQuery.CountAsync();
             var totalPages = Math.Max(1, (int)Math.Ceiling(totalCount / (double)pageSize));
@@ -517,6 +514,7 @@ namespace Gym.Controllers
                 var allPayments = await _context.Payments.AsNoTracking()
                     .Include(payment => payment.Client)
                     .OrderByDescending(payment => payment.PaymentDate)
+                    .ThenByDescending(payment => payment.PaymentId)
                     .ToListAsync();
                 var walkInPayments = await _context.WalkInClients.AsNoTracking()
                     .Where(walkIn => walkIn.AmountPaid > 0)
@@ -614,9 +612,12 @@ namespace Gym.Controllers
             setting.UpdatedAt = DateTime.Now;
 
             await _context.SaveChangesAsync();
+
             MembershipPlanPricing.Configure(setting.Plan, setting.Name, setting.Price, setting.DurationMonths, true);
 
-            TempData["SuccessMessage"] = planId.HasValue ? "Membership plan updated." : "Membership plan added.";
+            TempData["FormConfirmationMessage"] = planId.HasValue ? "Membership plan updated." : "Membership plan added.";
+            TempData["FormConfirmationTitle"] = "Membership plan saved";
+            TempData["FormConfirmationAction"] = "SaveMembershipPlan";
             return RedirectToAction(nameof(Payments));
         }
 
@@ -644,6 +645,7 @@ namespace Gym.Controllers
             var payments = await _context.Payments.AsNoTracking()
                 .Include(payment => payment.Client)
                 .OrderByDescending(payment => payment.PaymentDate)
+                .ThenByDescending(payment => payment.PaymentId)
                 .ToListAsync();
             var walkIns = await _context.WalkInClients.AsNoTracking()
                 .Where(walkIn => walkIn.AmountPaid > 0)
@@ -881,6 +883,15 @@ namespace Gym.Controllers
             }
         }
 
+        [HttpGet("/Admin/Equipment/History")]
+        public async Task<IActionResult> EquipmentHistory()
+        {
+            var equipment = await _context.Equipments.AsNoTracking().ToListAsync();
+            var history = equipment.Where(EquipmentStock.IsReport)
+                .OrderByDescending(item => item.AddedDate).ToList();
+            return View("~/Views/AdminDashboard/EquipmentHistory.cshtml", history);
+        }
+
         // GET: /Admin/Equipment
         [HttpGet("/Admin/Equipment")]
         public async Task<IActionResult> Equipment(string? searchTerm, int page = 1, string tab = "equipment")
@@ -893,7 +904,7 @@ namespace Gym.Controllers
                 var all = await _context.Equipments.AsNoTracking().ToListAsync();
                 var equipmentNames = await _context.EquipmentNameCatalog.AsNoTracking().OrderBy(item => item.Name).ToListAsync();
                 var inventory = EquipmentStock.Summarize(equipmentNames, all);
-                var reports = all.Where(item => !EquipmentStock.IsInventory(item));
+                var reports = all.Where(item => EquipmentStock.IsActiveReport(item));
                 var filteredInventory = inventory.Where(item => string.IsNullOrEmpty(searchTerm) || item.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)).ToList();
                 var filteredReports = reports.Where(item => string.IsNullOrEmpty(searchTerm) || item.EquipmentName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) || item.Status.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)).OrderByDescending(item => item.AddedDate).ToList();
                 var totalCount = tab == "reports" ? filteredReports.Count : filteredInventory.Count;
@@ -902,6 +913,7 @@ namespace Gym.Controllers
                 {
                     Tab = tab,
                     Inventory = filteredInventory.Skip((page - 1) * pageSize).Take(pageSize).ToList(),
+                    AvailableByEquipment = inventory.ToDictionary(item => item.Name, item => item.Available, StringComparer.OrdinalIgnoreCase),
                     Items = filteredReports.Skip((page - 1) * pageSize).Take(pageSize).ToList(),
                     EquipmentNames = equipmentNames,
                     SearchTerm = searchTerm ?? string.Empty,
@@ -944,7 +956,9 @@ namespace Gym.Controllers
             rate.Amount = amount;
             rate.IsActive = isActive;
             await _context.SaveChangesAsync();
-            TempData["SuccessMessage"] = "Walk-in payment type saved.";
+            TempData["FormConfirmationMessage"] = "Walk-in payment type saved.";
+            TempData["FormConfirmationTitle"] = "Payment type saved";
+            TempData["FormConfirmationAction"] = "SaveWalkInPaymentType";
             return RedirectToAction(nameof(Payments));
         }
 
@@ -976,6 +990,11 @@ namespace Gym.Controllers
             }
             if (!allowed.Contains(form.Condition) || !ModelState.IsValid)
             {
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                    return UnprocessableEntity(new { errors = ModelState.Values
+                        .SelectMany(value => value.Errors).Select(error => error.ErrorMessage)
+                        .Where(message => !string.IsNullOrWhiteSpace(message))
+                        .DefaultIfEmpty("Complete all required equipment fields.").ToArray() });
                 TempData["EquipmentFormError"] = string.Join(" ", ModelState.Values
                     .SelectMany(value => value.Errors)
                     .Select(error => error.ErrorMessage)
@@ -989,7 +1008,7 @@ namespace Gym.Controllers
                 evidencePhotoPath = await _equipmentEvidence.SaveAsync(form.EvidencePhoto);
             _context.Equipments.Add(new Equipment
             {
-                EquipmentName = catalogItem!.Name, Category = "General", Quantity = form.Quantity,
+                EquipmentName = catalogItem!.Name, Category = "Report", Quantity = form.Quantity,
                 AvailableQuantity = 0,
                 Status = form.Condition, AddedDate = DateTime.Now,
                 PurchaseDate = catalogItem.PurchaseDate,
@@ -998,7 +1017,11 @@ namespace Gym.Controllers
             });
             try { await _context.SaveChangesAsync(); await stockTransaction.CommitAsync(); }
             catch { _equipmentEvidence.Delete(evidencePhotoPath); throw; }
-            TempData["SuccessMessage"] = "Equipment issue report submitted successfully.";
+            TempData["FormConfirmationMessage"] = "Equipment issue report submitted successfully.";
+            TempData["FormConfirmationTitle"] = "Report submitted";
+            TempData["FormConfirmationAction"] = "AddEquipment";
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                return Json(new { redirectUrl = Url.Action(nameof(Equipment), new { tab = "reports" }) });
             return RedirectToAction(nameof(Equipment), new { tab = "reports" });
         }
 
@@ -1030,8 +1053,10 @@ namespace Gym.Controllers
                 AddedDate = DateTime.Now
             });
             await _context.SaveChangesAsync();
-            TempData["SuccessMessage"] = "Equipment quantity added successfully.";
-            return RedirectToAction(nameof(Equipment));
+            TempData["FormConfirmationMessage"] = "Equipment quantity added successfully.";
+            TempData["FormConfirmationTitle"] = "Equipment added";
+            TempData["FormConfirmationAction"] = "AddEquipmentName";
+            return RedirectToAction(nameof(Equipment), new { tab = "reports" });
         }
 
         [HttpGet("/Admin/Equipment/Export")]
@@ -1039,12 +1064,12 @@ namespace Gym.Controllers
         {
             var query = _context.Equipments.AsNoTracking().AsQueryable();
             if (!string.IsNullOrWhiteSpace(searchTerm)) query = query.Where(item => item.EquipmentName.Contains(searchTerm) || item.Category.Contains(searchTerm) || item.Status.Contains(searchTerm));
-            var items = (await query.OrderBy(item => item.EquipmentName).ToListAsync()).Where(item => !EquipmentStock.IsInventory(item)).ToList();
+            var items = (await query.OrderBy(item => item.EquipmentName).ToListAsync()).Where(item => EquipmentStock.IsActiveReport(item)).ToList();
             static string Csv(string value) => $"\"{value.Replace("\"", "\"\"")}\"";
-            var headers = new[] { "Equipment", "Quantity affected", "Brought in", "Condition", "Last serviced", "Added" };
+            var headers = new[] { "Equipment", "Quantity affected", "Brought in", "Condition", "Added" };
             var rows = items.Select(item => new[] { item.EquipmentName, item.Quantity.ToString(),
                 item.GymArrivalDate?.ToString("yyyy-MM-dd") ?? string.Empty,
-                item.Status, item.LastMaintenanceDate?.ToString("yyyy-MM-dd") ?? string.Empty, item.AddedDate.ToString("yyyy-MM-dd") }).ToList();
+                item.Status, item.AddedDate.ToString("yyyy-MM-dd") }).ToList();
             var fileBase = $"YOKOKS-Equipment-{DateTime.Today:yyyy-MM-dd}";
             if (string.Equals(format, "csv", StringComparison.OrdinalIgnoreCase))
             {
@@ -1066,7 +1091,7 @@ namespace Gym.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateEquipmentStatus(int equipmentId, string status)
         {
-            if (status is not ("Needs Maintenance" or "Out of Order"))
+            if (status is not ("Good" or "Out of Order"))
                 return BadRequest("Select a valid equipment issue status.");
             try
             {
@@ -1392,68 +1417,43 @@ namespace Gym.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> WalkInRegister(WalkInRegistrationViewModel form)
         {
-            if (!await _context.WalkInPaymentTypes.AnyAsync(item => item.IsActive))
-            {
-                TempData["ErrorMessage"] = "Walk-in registration is unavailable. An administrator must add an active walk-in payment type first.";
-                return RedirectToAction(nameof(WalkInClient));
-            }
-            var rate = await _context.WalkInPaymentTypes.AsNoTracking().FirstOrDefaultAsync(item => item.Id == form.PaymentTypeId && item.IsActive);
-            if (rate == null)
-            {
-                TempData["ErrorMessage"] = "Select an active walk-in payment type.";
-                return RedirectToAction(nameof(WalkInClient));
-            }
-            form.AmountPaid = rate.Amount;
+            // Amount and receipt selection are server-controlled. Required inputs
+            // must pass validation before the shared service can save anything.
             ModelState.Remove(nameof(form.AmountPaid));
             ModelState.Remove(nameof(form.IssueDigitalReceipt));
             if (!ModelState.IsValid)
             {
-                TempData["ErrorMessage"] = "Please complete all required walk-in registration fields.";
+                TempData["WalkInRegistrationError"] = "Please complete all required walk-in registration fields.";
                 return RedirectToAction(nameof(WalkInClient));
             }
-
-            var firstName = RegistrationName.Normalize(form.FirstName);
-            var lastName = RegistrationName.Normalize(form.LastName);
-            var existingNames = await _context.WalkInClients.AsNoTracking()
-                .Select(item => item.FirstName + " " + item.LastName).ToListAsync();
-            if (existingNames.Any(name => RegistrationName.Same(name, firstName + " " + lastName)))
+            WalkInClient registered;
+            try
             {
-                TempData["ErrorMessage"] = "A walk-in with this full name is already registered. Use the existing client's return-visit action.";
+                registered = await _walkInRegistration.RegisterAsync(form);
+            }
+            catch (InvalidOperationException ex)
+            {
+                TempData["WalkInRegistrationError"] = ex.Message;
                 return RedirectToAction(nameof(WalkInClient));
             }
-            var contact = form.ContactNumber.Trim();
-            var email = string.IsNullOrWhiteSpace(form.Email) ? null : form.Email.Trim();
-            var today = DateTime.Today;
-            var tomorrow = today.AddDays(1);
-            var alreadyRegisteredToday = await _context.WalkInClients.AsNoTracking()
-                .AnyAsync(item => item.RegisteredAt >= today && item.RegisteredAt < tomorrow &&
-                    ((!string.IsNullOrWhiteSpace(email) && item.Email == email) ||
-                     item.ContactNumber == contact ||
-                     (item.FirstName == firstName && item.LastName == lastName)));
-            if (alreadyRegisteredToday)
+            catch (DbUpdateException)
             {
-                TempData["ErrorMessage"] = "This walk-in client has already been registered today. Registration is available again tomorrow.";
+                TempData["WalkInRegistrationError"] = "Registration could not be saved. No walk-in payment was recorded. Please try again.";
                 return RedirectToAction(nameof(WalkInClient));
             }
+            var firstName = registered.FirstName;
+            var lastName = registered.LastName;
+            var email = registered.Email;
+            var registeredAt = registered.RegisteredAt;
 
-            var registeredAt = DateTime.Now;
-            _context.WalkInClients.Add(new WalkInClient
-            {
-                FirstName = firstName,
-                LastName = lastName,
-                ContactNumber = contact,
-                Email = email,
-                PaymentTypeName = rate.Name, ReasonForVisit = form.ReasonForVisit,
-                PaymentMethod = "Cash",
-                AmountPaid = form.AmountPaid,
-                IssueDigitalReceipt = email != null,
-                LiabilityAccepted = false,
-                Status = "Checked-in",
-                RegisteredAt = registeredAt
-            });
-            await _context.SaveChangesAsync();
-
-            await SendAdminWalkInReceiptAsync(email, $"{firstName} {lastName}".Trim(), form.AmountPaid, registeredAt, true);
+            TempData["RegistrationSuccess"] = "Walk-in registration succeeded. Payment recorded.";
+            try { await SendAdminWalkInReceiptAsync(email, $"{firstName} {lastName}".Trim(), form.AmountPaid, registeredAt, true); }
+            catch (Exception) { TempData["ErrorMessage"] = "Registration succeeded, but the receipt could not be delivered. Do not register again."; }
+            TempData["WalkInRegistrationSuccess"] = TempData["RegistrationSuccess"];
+            TempData.Remove("RegistrationSuccess");
+            TempData["WalkInReceiptWarning"] = TempData["ErrorMessage"];
+            TempData.Remove("ErrorMessage");
+            TempData.Remove("SuccessMessage");
             return RedirectToAction(nameof(WalkInClient));
         }
 

@@ -1,10 +1,10 @@
 html {
-  font-size: 14px;
+  
 }
 
 @media (min-width: 768px) {
   html {
-    font-size: 16px;
+    
   }
 }
 
@@ -23,10 +23,10 @@ body {
 
 /* System typography scale */
 html,
-body { font-size: 15px !important; }
+body {  }
 
 html body h1,
-html body .h1 { font-size: 30px !important; }
+html body .h1 {  }
 
 html body h2,
 html body .h2,
@@ -42,7 +42,7 @@ html body .fs-1,
 html body .fs-2,
 html body .fs-3,
 html body .fs-4,
-html body .fs-5 { font-size: 20px !important; }
+html body .fs-5 {  }
 
 html body p,
 html body a,
@@ -53,7 +53,7 @@ html body textarea,
 html body label,
 html body td,
 html body .btn,
-html body .fs-6 { font-size: 15px !important; }
+html body .fs-6 {  }
 
 html body small,
 html body .small,
@@ -62,7 +62,7 @@ html body .badge,
 html body [class*="-badge"],
 html body [class*="-label"],
 html body [class*="-note"],
-html body [class*="-meta"] { font-size: 10px !important; }
+html body [class*="-meta"] {  }
 
 /* Compact system button scale. */
 html body button:not(.nav-admin):not(.menu-dots-btn):not(.registration-close):not(.floating-close):not(.pay-search-button):not(.attendance-search-button):not(.equipment-search-button):not(.walkin-search-button):not(.search-btn):not(.btn-add):not(.eq-add):not(.ae-add):not(.member-name-btn),
@@ -74,7 +74,7 @@ html body details > summary {
   min-height: 42px !important;
   height: 42px !important;
   padding: 0 14px !important;
-  font-size: 10px !important;
+  
   line-height: 1 !important;
   white-space: nowrap;
 }

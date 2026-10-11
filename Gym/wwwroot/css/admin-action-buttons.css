@@ -33,7 +33,7 @@
         padding: 10px 14px !important;
         box-sizing: border-box !important;
         font-family: "Inria Serif", serif !important;
-        font-size: 15px !important;
+        
         font-weight: 500 !important;
         line-height: 1.35 !important;
         letter-spacing: .01em !important;
@@ -67,5 +67,16 @@
         border-color: #b7ff1b !important;
         color: #b7ff1b !important;
         box-shadow: none !important;
+    }
+
+    body.admin-shell .wi-card .wi-pay:disabled,
+    body.admin-shell .wi-card .wi-pay[disabled] {
+        padding: 0 !important;
+        min-height: 0 !important;
+        height: auto !important;
+        border: 0 !important;
+        background: transparent !important;
+        color: #9ba49d !important;
+        cursor: default;
     }
 }

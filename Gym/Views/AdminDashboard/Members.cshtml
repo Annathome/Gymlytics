@@ -11,13 +11,16 @@
     var selectedYear = ViewBag.Year as int?;
     var availableYears = ViewBag.Years as List<int> ?? new();
     var dailyReminderMemberIds = ViewBag.DailyReminderMemberIds as HashSet<int> ?? new();
+
+    var resultSuccess = TempData["SuccessMessage"] as string;
+    var resultWarning = TempData["WarningMessage"] as string;
+    var resultError = TempData["ErrorMessage"] as string;
 }
 
 <style>
-    body{
+    body {
         background: #0D0F0D;
         padding: 0 !important;
-  
     }
 
     .container {
@@ -28,8 +31,8 @@
     }
 
     .am-toolbar {
-        margin-bottom: 40px;
-        display:flex;
+        margin-bottom: 20px;
+        display: flex;
         position: relative;
         gap: 10px;
         align-items: center;
@@ -37,21 +40,14 @@
         justify-content: space-between;
     }
 
-        .am-toolbar h1{
-            font-size: 20px;
+        .am-toolbar h1 {
             font-weight: 600;
-
-        }
-
-        .am-toolbar p {
-            font-size: 15px;
-            
         }
 
     .mtop-tool {
         flex-direction: row;
         gap: 20px;
-        display:flex;
+        display: flex;
     }
 
     .am-search {
@@ -68,7 +64,6 @@
             border: 1px solid #8d958f;
             color: #fff;
             padding: 0 15px;
-            font-size: 13px;
             outline: none !important;
             box-shadow: none !important;
         }
@@ -87,7 +82,6 @@
             color: #101510;
             border: 0;
             padding: 0 18px;
-            font-size: 10px;
             font-weight: 800;
         }
 
@@ -100,7 +94,6 @@
         color: #101510;
         border: 0;
         padding: 0 18px;
-        font-size: 12px;
         font-weight: 800;
         text-decoration: none;
         box-sizing: border-box;
@@ -108,14 +101,70 @@
         cursor: pointer;
     }
 
-    .admin-registration-modal { position:fixed; inset:0; z-index:7000; display:none; align-items:center; justify-content:center; padding:32px; background:rgba(0,0,0,.76); backdrop-filter:blur(3px); }
-    .admin-registration-modal.open { display:flex; }
-    .admin-registration-shell { position:relative; width:min(920px,92vw); height:min(760px,86vh); overflow:hidden; border:1px solid #000; border-radius:14px; background:#242824; box-shadow:0 28px 80px rgba(0,0,0,.65); }
-    .admin-registration-frame { width:100%; height:100%; border:0; background:#242824; }
-    .admin-registration-close { position:absolute; top:14px; right:18px; z-index:2; width:38px; height:38px; border:1px solid #000; border-radius:50%; background:#171a18; color:#fff; font-size:24px; line-height:1; cursor:pointer; }
-    .admin-registration-close:hover { color:#b7ff1b; }
+    .admin-registration-modal {
+        position: fixed;
+        inset: 0;
+        z-index: 7000;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 32px;
+        background: rgba(0,0,0,.76);
+        backdrop-filter: blur(3px);
+    }
 
-    @@media(max-width:700px) { .admin-registration-modal{padding:12px}.admin-registration-shell{width:100%;height:94vh;border-radius:10px} }
+        .admin-registration-modal.open {
+            display: flex;
+        }
+
+    .admin-registration-shell {
+        position: relative;
+        width: min(920px,92vw);
+        height: min(760px,86vh);
+        overflow: hidden;
+        border: 1px solid #000;
+        border-radius: 14px;
+        background: #242824;
+        box-shadow: 0 28px 80px rgba(0,0,0,.65);
+    }
+
+    .admin-registration-frame {
+        width: 100%;
+        height: 100%;
+        border: 0;
+        background: #242824;
+    }
+
+    .admin-registration-close {
+        position: absolute;
+        top: 14px;
+        right: 18px;
+        z-index: 2;
+        width: 38px;
+        height: 38px;
+        border: 1px solid #000;
+        border-radius: 50%;
+        background: #171a18;
+        color: #fff;
+        line-height: 1;
+        cursor: pointer;
+    }
+
+        .admin-registration-close:hover {
+            color: #b7ff1b;
+        }
+
+    @@media (max-width: 700px) {
+        .admin-registration-modal {
+            padding: 12px;
+        }
+
+        .admin-registration-shell {
+            width: 100%;
+            height: 94vh;
+            border-radius: 10px;
+        }
+    }
 
     .am-export {
         position: relative;
@@ -132,7 +181,6 @@
             background: transparent;
             color: #b7ff1b;
             padding: 15px 20px;
-            font-size: 11px;
             font-weight: 800;
             text-align: center;
         }
@@ -166,7 +214,7 @@
             background: transparent !important;
             color: #dce3dd !important;
             text-align: left;
-            font: 11px Arial;
+            font-family: Arial;
             text-decoration: none;
         }
 
@@ -180,17 +228,17 @@
         display: flex;
         justify-content: space-between;
         align-items: end;
-        margin: 22px 0;
+        margin: 0 0 30px;
+        position: relative;
+        top: 0;
     }
 
         .am-head h1 {
-            font-size: 15px;
             margin: 0 0 5px;
             font-weight: 600;
         }
 
         .am-head p {
-            font-size: 11px;
             margin: 0;
             color: #adb5af;
         }
@@ -205,7 +253,6 @@
             color: #aab3ac;
             border: 1px solid #59635c;
             padding: 10px 13px;
-            font-size: 12px;
         }
 
     .am-card {
@@ -224,7 +271,6 @@
         .am-table th {
             background: #343735;
             color: #ccd2cd;
-            font-size: 10px;
             letter-spacing: .08em;
             text-transform: uppercase;
         }
@@ -234,10 +280,6 @@
             padding: 14px 13px;
             text-align: left;
             border-bottom: 1px solid #313632;
-        }
-
-        .am-table td {
-            font-size: 13px;
         }
 
     .am-member {
@@ -254,7 +296,6 @@
         place-items: center;
         background: #27372b;
         color: #b7ff1b;
-        font-size: 11px;
         font-weight: 800;
     }
 
@@ -263,7 +304,6 @@
     }
 
     .am-id {
-        font-size: 9px;
         color: #a5ada7;
         margin-top: 3px;
     }
@@ -275,7 +315,6 @@
     .am-badge {
         display: inline-block;
         padding: 5px 9px;
-        font-size: 9px;
         font-weight: 800;
         text-transform: uppercase;
         background: #293226;
@@ -296,6 +335,7 @@
 
     .am-action {
         text-align: center;
+        position: relative;
     }
 
     .am-dots {
@@ -332,7 +372,6 @@
     }
 
     .am-page-info {
-        font-size: 15px;
         color: #aab3ac;
     }
 
@@ -351,7 +390,6 @@
         background: transparent;
         color: #fff;
         text-decoration: none;
-        font-size: 10px;
         font-weight: 700;
         border-radius: 5px;
         text-transform: uppercase;
@@ -363,10 +401,172 @@
             pointer-events: none;
         }
 
-    .am-action {
-        position: relative;
+    /* ---------- Shared dialogs ---------- */
+    .am-dialog,
+    #cancelMemberDialog,
+    #renewalNotice {
+        position: fixed !important;
+        inset: 0 !important;
+        margin: auto !important;
+        width: min(440px, 90vw);
+        max-height: 90vh;
+        padding: 26px;
+        background: #1b201c;
+        color: #fff;
+        border: 1px solid #3c443d;
+        border-radius: 12px;
+        box-sizing: border-box;
+        overflow-y: auto;
     }
 
+    #cancelMemberDialog {
+        width: min(480px, 90vw);
+    }
+
+        .am-dialog::backdrop,
+        #cancelMemberDialog::backdrop,
+        #renewalNotice::backdrop {
+            background: rgba(0, 0, 0, .65);
+        }
+
+    .am-dialog h2 {
+        margin: 0 0 12px;
+        color: #b7ff1b;
+    }
+
+    .am-dialog p {
+        margin: 0;
+        line-height: 1.6;
+        color: #d0d5d1;
+    }
+
+    .am-dialog-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 24px;
+    }
+
+        .am-dialog-actions button,
+        #cancelMemberDialog .floating-cancel,
+        #cancelMemberDialog .floating-confirm,
+        #renewalNotice .floating-cancel,
+        .admin-member-dialog .admin-modal-actions button {
+            min-height: 42px;
+            padding: 0 18px;
+            border: 1px solid #586058;
+            border-radius: 0;
+            background: #292d2a;
+            color: #fff;
+            cursor: pointer;
+            transition: background .15s, border-color .15s, color .15s;
+        }
+
+            .am-dialog-actions button:hover,
+            #cancelMemberDialog .floating-cancel:hover,
+            #renewalNotice .floating-cancel:hover,
+            .admin-member-dialog .admin-modal-actions button:hover {
+                border-color: #b7ff1b;
+                color: #b7ff1b;
+            }
+
+            .am-dialog-confirm,
+            #cancelMemberDialog .floating-confirm,
+            .admin-member-dialog .admin-modal-actions button[type=submit] {
+                background: #b7ff1b !important;
+                border-color: #b7ff1b !important;
+                color: #101510 !important;
+                font-weight: 800;
+            }
+
+                .am-dialog-confirm:hover,
+                #cancelMemberDialog .floating-confirm:hover,
+                .admin-member-dialog .admin-modal-actions button[type=submit]:hover {
+                    background: #1b201c !important;
+                    color: #b7ff1b !important;
+                }
+
+                .am-dialog-confirm.danger {
+                    background: #ef2b2b !important;
+                    border-color: #ef2b2b !important;
+                    color: #000 !important;
+                }
+
+                    .am-dialog-confirm.danger:hover {
+                        background: #1b201c !important;
+                        color: #ff8e8e !important;
+                    }
+
+                .am-dialog-confirm:disabled {
+                    opacity: .5;
+                    cursor: not-allowed;
+                }
+
+    /* ---------- Result dialog ---------- */
+    .am-result {
+        text-align: center;
+    }
+
+        .am-result h2 {
+            color: #fff;
+        }
+
+    .am-result-icon {
+        width: 64px;
+        height: 64px;
+        margin: 0 auto 16px;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        font-size: 30px;
+        font-weight: 800;
+    }
+
+    .am-result.success .am-result-icon {
+        background: #26332a;
+        border: 1px solid #b7ff1b;
+        color: #b7ff1b;
+    }
+
+    .am-result.warning .am-result-icon {
+        background: #3a3422;
+        border: 1px solid #ffd47a;
+        color: #ffd47a;
+    }
+
+    .am-result.error .am-result-icon {
+        background: #3a2222;
+        border: 1px solid #ef2b2b;
+        color: #ff8e8e;
+    }
+
+    .am-result.error .am-dialog-confirm {
+        background: #ef2b2b !important;
+        border-color: #ef2b2b !important;
+        color: #000 !important;
+    }
+
+    /* ---------- Renewal summary ---------- */
+    .admin-renewal-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+        margin: 16px 0;
+        padding: 14px;
+        border: 1px solid #3c443d;
+    }
+
+        .admin-renewal-grid small {
+            display: block;
+            color: #aab3ac;
+            margin-bottom: 4px;
+        }
+
+        .admin-renewal-grid strong {
+            color: #fff;
+        }
+
+    /* ---------- Row action menu ---------- */
     .am-actions {
         position: relative;
         display: inline-block;
@@ -406,7 +606,6 @@
         background: transparent;
         color: #edf1ed;
         text-align: left;
-        font-size: 11px;
     }
 
         .am-menu-button:hover {
@@ -447,19 +646,16 @@
 
         .admin-member-dialog h3 {
             margin: 0 0 9px;
-            font-size: 19px;
         }
 
         .admin-member-dialog p {
             color: #b9c1bb;
-            font-size: 12px;
             line-height: 1.5;
         }
 
         .admin-member-dialog label {
             display: block;
             margin: 15px 0 6px;
-            font-size: 11px;
             font-weight: 700;
         }
 
@@ -494,7 +690,7 @@
                 font-weight: 800;
             }
 
-    @@media(max-width:900px) {
+    @@media (max-width: 900px) {
         .am-wrap {
             padding: 20px;
         }
@@ -506,7 +702,7 @@
         }
 
         .am-table-wrap {
-            overflow-x: auto
+            overflow-x: auto;
         }
 
         .am-table {
@@ -547,7 +743,6 @@
 
             .am-head h1 {
                 color: #111 !important;
-                font-size: 24px !important;
             }
 
             .am-head p {
@@ -596,342 +791,232 @@
 </style>
 
 <section class="container">
-        <div class="am-top">
-            <div class="am-toolbar">
-                <div>
-                    <h1>Members</h1>
-                    <p class="dashboard-caption" style="font-family:'Inria Serif',serif!important;font-size:14px!important;font-weight:400!important;color:#aeb7b0!important;line-height:1.4!important;">@ViewBag.ActiveCount ACTIVE · @ViewBag.ExpiringCount EXPIRING MEMBERSHIP</p>
-                </div>
-                <div class="mtop-tool">
-                    <a class="am-add" asp-action="Payments" asp-route-managePlans="true" style="text-decoration:none">＋ Add membership plan</a>
-                    <button class="am-add" type="button" onclick="openAdminAddMemberModal()">＋ Register member</button>
-                    <details class="am-export">
-                        <summary>↧ EXPORT</summary>
-                        <div class="am-export-menu" id="memberExportMenu">
-                            <button type="button" onclick="exportMemberReport('pdf')">PDF / Print</button>
-                            <a asp-action="ExportMembers" asp-route-format="doc" asp-route-searchTerm="@ViewBag.SearchTerm" asp-route-status="@selectedStatus" asp-route-plan="@selectedPlan" asp-route-year="@selectedYear">Word document</a>
-                            <a asp-action="ExportMembers" asp-route-format="csv" asp-route-searchTerm="@ViewBag.SearchTerm" asp-route-status="@selectedStatus" asp-route-plan="@selectedPlan" asp-route-year="@selectedYear">CSV / Excel</a>
-                            <a asp-action="ExportMembers" asp-route-format="txt" asp-route-searchTerm="@ViewBag.SearchTerm" asp-route-status="@selectedStatus" asp-route-plan="@selectedPlan" asp-route-year="@selectedYear">Text file</a>
-                        </div>
-                    </details>
-                </div>
+    <div class="am-top">
+        <div class="am-toolbar">
+            <div>
+                <h1 style="font-weight:700!important;margin-bottom: 0px !important;">Members</h1>
+                <p class="dashboard-caption" style="color:#aeb7b0!important;line-height:1.4!important;">@ViewBag.ActiveCount ACTIVE · @ViewBag.ExpiringCount EXPIRING MEMBERSHIP</p>
             </div>
-
-            <div class="am-head">
-                <form class="am-search" method="get" asp-action="Members">
-                    <input type="hidden" name="status" value="@selectedStatus" />
-                    <input type="hidden" name="plan" value="@selectedPlan" />
-                    <input type="hidden" name="year" value="@selectedYear" />
-                    <input name="searchTerm" value="@ViewBag.SearchTerm" placeholder="Search members, IDs, or emails..." />
-                    <button type="submit" style="height:56px !important; box-sizing:border-box !important; font-size:15px !important;">SEARCH</button>
-                </form>
-                <form class="am-filters" method="get" asp-action="Members">
-                    <input type="hidden" name="searchTerm" value="@ViewBag.SearchTerm" />
-                    <select name="year" aria-label="Joined year" onchange="this.form.submit()">
-                        <option value="">All years</option>
-                        @foreach (var year in availableYears)
-                        {
-                            <option value="@year" selected="@(selectedYear == year)">@year</option>
-                        }
-                    </select>
-                    <select name="status" onchange="this.form.submit()">
-                        <option value="">All Status</option>
-                        @foreach (var item in Enum.GetValues<MemberStatus>())
-                        {
-                            <option value="@item" selected="@(selectedStatus == item)">@item</option>
-                        }
-                    </select>
-                    <select name="plan" onchange="this.form.submit()">
-                        <option value="">All Plans</option>
-                        @foreach (var item in MembershipPlanPricing.GetActivePlans())
-                        {
-                            <option value="@((int)item.Plan)" selected="@(selectedPlan == item.Plan)">@item.Name</option>
-                        }
-                    </select>
-                </form>
-            </div>
-
-            <section class="am-card am-table-wrap">
-                <table class="am-table">
-                    <thead>
-                        <tr>
-                            <th>Member</th>
-                            <th>Plan</th>
-                            <th>Trainer</th>
-                            <th>Schedule</th>
-                            <th>Joined</th>
-                            <th>Expires</th>
-                            <th>Status</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @if (Model.Count == 0)
-                        {
-                            <tr>
-                                <td colspan="8" class="am-empty">No members found.</td>
-                            </tr>
-                        }
-                        @foreach (var member in Model)
-                        {
-                            var fullName = $"{member.FirstName} {member.LastName}";
-                            var initials = $"{member.FirstName.FirstOrDefault()}{member.LastName.FirstOrDefault()}";
-                            var trainer = member.AssignedTrainerId.HasValue && trainers.TryGetValue(member.AssignedTrainerId.Value, out var trainerName) ? trainerName : "—";
-                            var days = string.Join(", ", (member.PreferredDays ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).Select(day => day.Length > 3 ? day[..3] : day));
-                            var schedule = string.IsNullOrWhiteSpace(days) ? "—" : $"{days} · {member.PreferredTimeSlot ?? "Time not set"}";
-                            var badgeClass = member.Status is MemberStatus.Expired or MemberStatus.Terminated ? "expired" : member.Status is MemberStatus.Inactive or MemberStatus.Canceled ? "inactive" : "";
-                            var planPrice = MembershipPlanPricing.GetPrice(member.MembershipPlan);
-                            var paidAmount = member.Status == MemberStatus.Canceled ? 0m : planPrice;
-                            var remaining = 0m;
-                            var cancellationEnd = member.MembershipEndDate ?? member.MembershipStartDate.AddMonths(MembershipPlanPricing.GetDurationMonths(member.MembershipPlan));
-                            var cancellationDays = Math.Max(1, (cancellationEnd.Date - member.MembershipStartDate.Date).Days);
-                            var cancellationUsed = Math.Clamp((DateTime.Today - member.MembershipStartDate.Date).Days, 0, cancellationDays);
-                            var cancellationDeduction = decimal.Round(planPrice / cancellationDays * cancellationUsed, 2);
-                            var cancellationRefund = Math.Max(0m, paidAmount - cancellationDeduction);
-                            <tr>
-                                <td>
-                                    <div class="am-member">
-                                        <span class="am-avatar">@initials</span>
-                                        <div>
-                                            <div class="am-name">@fullName</div>
-                                            <div class="am-id">ID: @member.MembershipNumber</div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>@MembershipPlanPricing.GetName(member.MembershipPlan)</td>
-                                <td>@trainer</td>
-                                <td class="am-schedule">@schedule</td>
-                                <td>@member.MembershipStartDate.ToString("MMM dd, yyyy")</td>
-                                <td>@(member.MembershipEndDate?.ToString("MMM dd, yyyy") ?? "—")</td>
-                                <td><span class="am-badge @badgeClass">@member.Status</span></td>
-                                <td class="am-action">
-                                    <details class="am-actions">
-                                        <summary aria-label="Member actions" title="Member actions">⋮</summary>
-                                        <div class="am-actions-menu">
-                                            <button class="am-menu-button" type="button"
-                                                    data-can-renew="@(MembershipRenewalRules.CanRenew(member.Status, member.MembershipEndDate, DateTime.Today) ? "true" : "false")"
-                                                    data-renewal-opens="@(member.MembershipEndDate?.AddDays(-7).ToString("MMM d, yyyy"))"
-                                                    data-terminated="@(member.Status == MemberStatus.Terminated ? "true" : "false")"
-                                                    title="Renewal opens 7 days before expiry; cancelled memberships can restart."
-                                                    data-client-id="@member.UserId"
-                                                    data-member-name="@fullName"
-                                                    data-plan-name="@MembershipPlanPricing.GetName(member.MembershipPlan)"
-                                                    data-plan-price="@planPrice.ToString(System.Globalization.CultureInfo.InvariantCulture)"
-                                                    data-expired-date="@(member.MembershipEndDate?.ToString("MMM d, yyyy") ?? "No end date")"
-                                                    onclick="openAdminRenewal(this)">Renew membership</button>
-                                            <form asp-controller="Admin" asp-action="CancelMember" method="post" data-member-name="@fullName"
-                                                  data-email="@member.Email" data-price="₱@planPrice.ToString("N2")" data-paid="₱@paidAmount.ToString("N2")"
-                                                  data-days="@cancellationDays" data-used="@cancellationUsed" data-deduction="₱@cancellationDeduction.ToString("N2")"
-                                                  data-refund="₱@cancellationRefund.ToString("N2")" onsubmit="return showCancellationMessage(this);">
-                                                @Html.AntiForgeryToken()
-                                                <input type="hidden" name="id" value="@member.UserId" />
-                                                <button class="am-menu-button" type="submit">Cancel membership</button>
-                                            </form>
-                                            <form asp-controller="Admin" asp-action="TerminateMember" method="post" onsubmit="return confirm('Terminate @fullName membership?');">
-                                                @Html.AntiForgeryToken()
-                                                <input type="hidden" name="id" value="@member.UserId" />
-                                                <button class="am-menu-button" type="submit">Terminate</button>
-                                            </form>
-                                            <form asp-controller="Admin" asp-action="MarkMemberInactive" method="post" onsubmit="return confirm('Mark @fullName inactive?');">
-                                                @Html.AntiForgeryToken()
-                                                <input type="hidden" name="id" value="@member.UserId" />
-                                                <button class="am-menu-button" type="submit">Mark inactive</button>
-                                            </form>
-                                        </div>
-                                    </details>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-                <div class="am-pager">
-                    <span class="am-page-info">Showing @Model.Count of @ViewBag.TotalCount members</span>
-                    <div class="am-page-actions">
-                        <a class="am-page @(currentPage <= 1 ? "disabled" : "")" asp-action="Members" asp-route-searchTerm="@ViewBag.SearchTerm" asp-route-status="@selectedStatus" asp-route-plan="@selectedPlan" asp-route-year="@selectedYear" asp-route-page="@(currentPage - 1)">Previous</a>
-                        <a class="am-page @(currentPage >= totalPages ? "disabled" : "")" asp-action="Members" asp-route-searchTerm="@ViewBag.SearchTerm" asp-route-status="@selectedStatus" asp-route-plan="@selectedPlan" asp-route-year="@selectedYear" asp-route-page="@(currentPage + 1)">Next</a>
+            <div class="mtop-tool">
+                <a class="am-add" asp-action="Payments" asp-route-managePlans="true" style="text-decoration:none">＋ Add membership plan</a>
+                <button class="am-add" type="button" onclick="openAdminAddMemberModal()">＋ Register member</button>
+                <details class="am-export">
+                    <summary>↧ EXPORT</summary>
+                    <div class="am-export-menu" id="memberExportMenu">
+                        <button type="button" onclick="exportMemberReport('pdf')">PDF / Print</button>
+                        <a asp-action="ExportMembers" asp-route-format="doc" asp-route-searchTerm="@ViewBag.SearchTerm" asp-route-status="@selectedStatus" asp-route-plan="@selectedPlan" asp-route-year="@selectedYear">Word document</a>
+                        <a asp-action="ExportMembers" asp-route-format="csv" asp-route-searchTerm="@ViewBag.SearchTerm" asp-route-status="@selectedStatus" asp-route-plan="@selectedPlan" asp-route-year="@selectedYear">CSV / Excel</a>
+                        <a asp-action="ExportMembers" asp-route-format="txt" asp-route-searchTerm="@ViewBag.SearchTerm" asp-route-status="@selectedStatus" asp-route-plan="@selectedPlan" asp-route-year="@selectedYear">Text file</a>
                     </div>
-                </div>
-            </section>
-        </div>
-    </section>
-    <div id="adminPaymentModal" class="admin-member-modal">
-        <div class="admin-member-dialog">
-            <h3>Record member payment</h3>
-            <p id="adminPaymentMember"></p>
-            <p>Cash only · Remaining balance: <strong id="adminPaymentBalance"></strong></p>
-            <form asp-controller="Admin" asp-action="RecordMemberPayment" method="post">
-                @Html.AntiForgeryToken()
-                <input id="adminPaymentId" type="hidden" name="id" />
-                <label for="adminPaymentAmount">Amount (₱)</label>
-                <input id="adminPaymentAmount" name="amount" type="number" min="0.01" step="0.01" required />
-                <div class="admin-modal-actions">
-                    <button type="button" onclick="closeAdminPayment()">Cancel</button>
-                    <button type="submit">Record payment</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <div id="adminAddMemberModal" class="admin-registration-modal" role="dialog" aria-modal="true" aria-label="Register member">
-        <div class="admin-registration-shell">
-            <iframe id="adminAddMemberFrame" class="admin-registration-frame" title="Member registration form"></iframe>
-        </div>
-    </div>
-
-    <div id="adminRenewalModal" class="admin-member-modal">
-        <div class="admin-member-dialog" role="dialog" aria-modal="true" aria-labelledby="adminRenewalTitle">
-            <h3 id="adminRenewalTitle">Renew membership payment</h3>
-            <p>Confirm the full cash renewal payment. A digital receipt will be sent to the member after renewal.</p>
-            <div class="admin-renewal-grid">
-                <div><small>Member</small><strong id="adminRenewalMember"></strong></div>
-                <div><small>Plan</small><strong id="adminRenewalPlan"></strong></div>
-                <div><small>Current plan ends</small><strong id="adminRenewalExpiry"></strong></div>
-                <div><small>Payment required</small><strong id="adminRenewalPrice"></strong></div>
+                </details>
             </div>
-            <form asp-controller="Admin" asp-action="RenewMember" method="post" onsubmit="return lockAdminRenewal(this)">
-                @Html.AntiForgeryToken()
-                <input id="adminRenewalId" type="hidden" name="id" />
-                <input id="adminRenewalAmount" type="hidden" name="amount" />
-                <div class="admin-modal-actions">
-                    <button type="button" onclick="closeAdminRenewal()">Cancel</button>
-                    <button type="submit">Pay and renew</button>
-                </div>
+        </div>
+
+        <div class="am-head">
+            <form class="am-search" method="get" asp-action="Members">
+                <input type="hidden" name="status" value="@selectedStatus" />
+                <input type="hidden" name="plan" value="@selectedPlan" />
+                <input type="hidden" name="year" value="@selectedYear" />
+                <input name="searchTerm" value="@ViewBag.SearchTerm" placeholder="Search members, IDs, or emails..." />
+                <button type="submit" style="height:56px !important; box-sizing:border-box !important; ">SEARCH</button>
+            </form>
+            <form class="am-filters" method="get" asp-action="Members">
+                <input type="hidden" name="searchTerm" value="@ViewBag.SearchTerm" />
+                <select name="year" aria-label="Joined year" onchange="this.form.submit()">
+                    <option value="">All years</option>
+                    @foreach (var year in availableYears)
+                    {
+                        <option value="@year" selected="@(selectedYear == year)">@year</option>
+                    }
+                </select>
+                <select name="status" onchange="this.form.submit()">
+                    <option value="">All Status</option>
+                    @foreach (var item in Enum.GetValues<MemberStatus>())
+                    {
+                        <option value="@item" selected="@(selectedStatus == item)">@item</option>
+                    }
+                </select>
+                <select name="plan" onchange="this.form.submit()">
+                    <option value="">All Plans</option>
+                    @foreach (var item in MembershipPlanPricing.GetActivePlans())
+                    {
+                        <option value="@((int)item.Plan)" selected="@(selectedPlan == item.Plan)">@item.Name</option>
+                    }
+                </select>
             </form>
         </div>
-    </div>
 
-    <dialog id="cancelMemberDialog" aria-labelledby="cancelMemberTitle" style="width:min(480px,90vw);padding:28px;background:#1b201c;color:white;border:1px solid #3c443d;border-radius:12px;">
-        <h2 id="cancelMemberTitle">Review cancellation receipt</h2>
-        <p id="cancelMemberMessage"></p>
-        <section style="border:1px solid #3c443d;margin:18px 0;">
-            <h3 style="margin:0;padding:16px;background:#b7ff1b;color:#182000">Membership cancellation</h3>
-            <div style="padding:18px;line-height:1.7">
-                <p>Send to: <strong id="receiptEmail"></strong></p>
-                <div>Plan price: <span id="receiptPrice"></span></div>
-                <div>Plan duration: <span id="receiptDays"></span> days</div>
-                <div>Payment received: <span id="receiptPaid"></span></div>
-                <div>Days used: <span id="receiptUsed"></span></div>
-                <div>Deduction: <span id="receiptDeduction"></span></div>
-                <p id="receiptCalculation" style="color:#b7ff1b;font-size:20px"></p>
+        <section class="am-card am-table-wrap">
+            <table class="am-table">
+                <thead>
+                    <tr>
+                        <th>Member</th>
+                        <th>Plan</th>
+                        <th>Trainer</th>
+                        <th>Schedule</th>
+                        <th>Joined</th>
+                        <th>Expires</th>
+                        <th>Status</th>
+                        <th aria-label="Actions"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="8" class="am-empty" style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;">No members found.</td>
+                        </tr>
+                    }
+                    @foreach (var member in Model)
+                    {
+                        var fullName = $"{member.FirstName} {member.LastName}";
+                        var initials = $"{member.FirstName.FirstOrDefault()}{member.LastName.FirstOrDefault()}";
+                        var trainer = member.AssignedTrainerId.HasValue && trainers.TryGetValue(member.AssignedTrainerId.Value, out var trainerName) ? trainerName : "—";
+                        var days = string.Join(", ", (member.PreferredDays ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).Select(day => day.Length > 3 ? day[..3] : day));
+                        var schedule = string.IsNullOrWhiteSpace(days) ? "—" : $"{days} · {member.PreferredTimeSlot ?? "Time not set"}";
+                        var badgeClass = member.Status is MemberStatus.Expired or MemberStatus.Terminated ? "expired" : member.Status is MemberStatus.Inactive or MemberStatus.Canceled ? "inactive" : "";
+                        var planPrice = MembershipPlanPricing.GetPrice(member.MembershipPlan);
+                        var paidAmount = member.Status == MemberStatus.Canceled ? 0m : planPrice;
+                        var cancellationEnd = member.MembershipEndDate ?? member.MembershipStartDate.AddMonths(MembershipPlanPricing.GetDurationMonths(member.MembershipPlan));
+                        var cancellationDays = Math.Max(1, (cancellationEnd.Date - member.MembershipStartDate.Date).Days);
+                        var cancellationUsed = Math.Clamp((DateTime.Today - member.MembershipStartDate.Date).Days, 0, cancellationDays);
+                        var cancellationDeduction = decimal.Round(planPrice / cancellationDays * cancellationUsed, 2);
+                        var cancellationRefund = Math.Max(0m, paidAmount - cancellationDeduction);
+                        <tr>
+                            <td style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;">
+                                <div class="am-member">
+                                    <span class="am-avatar">@initials</span>
+                                    <div>
+                                        <div class="am-name">@fullName</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;">@MembershipPlanPricing.GetName(member.MembershipPlan)</td>
+                            <td style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;">@trainer</td>
+                            <td class="am-schedule" style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;">@schedule</td>
+                            <td style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;">@member.MembershipStartDate.ToString("MMM dd, yyyy")</td>
+                            <td style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;">@(member.MembershipEndDate?.ToString("MMM dd, yyyy") ?? "—")</td>
+                            <td style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;"><span class="am-badge @badgeClass" style="background:transparent!important;padding:0!important;border:0!important;border-radius:0!important;box-shadow:none!important;">@member.Status</span></td>
+                            <td class="am-action" style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;">
+                                <details class="am-actions">
+                                    <summary aria-label="Member actions" title="Member actions">⋮</summary>
+                                    <div class="am-actions-menu">
+                                        <button class="am-menu-button" type="button"
+                                                data-can-renew="@(MembershipRenewalRules.CanRenew(member.Status, member.MembershipEndDate, DateTime.Today) ? "true" : "false")"
+                                                data-renewal-opens="@(member.MembershipEndDate?.AddDays(-7).ToString("MMM d, yyyy"))"
+                                                data-terminated="@(member.Status == MemberStatus.Terminated ? "true" : "false")"
+                                                title="Renewal opens 7 days before expiry; cancelled memberships can restart."
+                                                data-client-id="@member.UserId"
+                                                data-member-name="@fullName"
+                                                data-plan-name="@MembershipPlanPricing.GetName(member.MembershipPlan)"
+                                                data-plan-price="@planPrice.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+                                                data-expired-date="@(member.MembershipEndDate?.ToString("MMM d, yyyy") ?? "No end date")"
+                                                onclick="openAdminRenewal(this)">
+                                            Renew membership
+                                        </button>
+
+                                        <form asp-controller="Admin" asp-action="CancelMember" method="post" data-member-name="@fullName"
+                                              data-email="@member.Email" data-price="₱@planPrice.ToString("N2")" data-paid="₱@paidAmount.ToString("N2")"
+                                              data-days="@cancellationDays" data-used="@cancellationUsed" data-deduction="₱@cancellationDeduction.ToString("N2")"
+                                              data-refund="₱@cancellationRefund.ToString("N2")" onsubmit="return showCancellationMessage(this);">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@member.UserId" />
+                                            <button class="am-menu-button" type="submit">Cancel membership</button>
+                                        </form>
+
+                                        <form asp-controller="Admin" asp-action="TerminateMember" method="post"
+                                              data-confirm-title="Terminate membership?"
+                                              data-confirm-message="This will terminate @fullName's membership. Terminated memberships cannot be renewed."
+                                              data-confirm-button="Terminate"
+                                              data-confirm-danger="true"
+                                              onsubmit="return askConfirm(this)">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@member.UserId" />
+                                            <button class="am-menu-button" type="submit">Terminate</button>
+                                        </form>
+
+                                        <form asp-controller="Admin" asp-action="MarkMemberInactive" method="post"
+                                              data-confirm-title="Mark member inactive?"
+                                              data-confirm-message="@fullName will be marked as inactive."
+                                              data-confirm-button="Mark inactive"
+                                              onsubmit="return askConfirm(this)">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@member.UserId" />
+                                            <button class="am-menu-button" type="submit">Mark inactive</button>
+                                        </form>
+                                    </div>
+                                </details>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            <div class="am-pager">
+                <span class="pagination-summary am-page-info">Showing @Model.Count of @ViewBag.TotalCount members</span>
+                <div class="am-page-actions">
+                    <a class="am-page @(currentPage <= 1 ? "disabled" : "")" asp-action="Members" asp-route-searchTerm="@ViewBag.SearchTerm" asp-route-status="@selectedStatus" asp-route-plan="@selectedPlan" asp-route-year="@selectedYear" asp-route-page="@(currentPage - 1)">Previous</a>
+                    <a class="am-page @(currentPage >= totalPages ? "disabled" : "")" asp-action="Members" asp-route-searchTerm="@ViewBag.SearchTerm" asp-route-status="@selectedStatus" asp-route-plan="@selectedPlan" asp-route-year="@selectedYear" asp-route-page="@(currentPage + 1)">Next</a>
+                </div>
             </div>
         </section>
-        <p>Days used are counted from the day after the membership starts, whether the member attends or not. The refund is the amount paid minus the cost of elapsed membership days.</p>
-        <p>The refund breakdown will be emailed to the member. Management must process the refund separately.</p>
-        <div style="display:flex;justify-content:flex-end;gap:12px;margin-top:24px">
-            <button type="button" class="floating-cancel" onclick="document.getElementById('cancelMemberDialog').close()">Go back</button>
-            <button type="button" class="floating-confirm" id="confirmMemberCancellation" onclick="confirmCancellation()" style="background:#b7ff1b;color:#182000">Confirm and email receipt</button>
+    </div>
+</section>
+
+<div id="adminPaymentModal" class="admin-member-modal">
+    <div class="admin-member-dialog">
+        <h3>Record member payment</h3>
+        <p id="adminPaymentMember"></p>
+        <p>Cash only · Remaining balance: <strong id="adminPaymentBalance"></strong></p>
+        <form asp-controller="Admin" asp-action="RecordMemberPayment" method="post">
+            @Html.AntiForgeryToken()
+            <input id="adminPaymentId" type="hidden" name="id" />
+            <label for="adminPaymentAmount">Amount (₱)</label>
+            <input id="adminPaymentAmount" name="amount" type="number" min="0.01" step="0.01" required />
+            <div class="admin-modal-actions">
+                <button type="button" onclick="closeAdminPayment()">Cancel</button>
+                <button type="submit">Record payment</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="adminAddMemberModal" class="admin-registration-modal" role="dialog" aria-modal="true" aria-label="Register member">
+    <div class="admin-registration-shell">
+        <iframe id="adminAddMemberFrame" class="admin-registration-frame" title="Member registration form"></iframe>
+    </div>
+</div>
+
+<div id="adminRenewalModal" class="admin-member-modal">
+    <div class="admin-member-dialog" role="dialog" aria-modal="true" aria-labelledby="adminRenewalTitle">
+        <h3 id="adminRenewalTitle">Renew membership payment</h3>
+        <p>Confirm the full cash renewal payment. A digital receipt will be sent to the member after renewal.</p>
+        <div class="admin-renewal-grid">
+            <div><small>Member</small><strong id="adminRenewalMember"></strong></div>
+            <div><small>Plan</small><strong id="adminRenewalPlan"></strong></div>
+            <div><small>Current plan ends</small><strong id="adminRenewalExpiry"></strong></div>
+            <div><small>Payment required</small><strong id="adminRenewalPrice"></strong></div>
         </div>
-    </dialog>
-    <style>
-        #cancelMemberDialog::backdrop { background:rgba(0,0,0,.65); }
-        #cancelMemberDialog {
-            position:fixed !important;
-            inset:0 !important;
-            margin:auto !important;
-            max-height:90vh;
-            overflow-y:auto;
-            box-sizing:border-box;
-        }
-    </style>
-    <script>
-            if (window.self !== window.top) {
-                window.top.location.href = window.location.href;
-            }
+        <form asp-controller="Admin" asp-action="RenewMember" method="post" onsubmit="return lockAdminRenewal(this)">
+            @Html.AntiForgeryToken()
+            <input id="adminRenewalId" type="hidden" name="id" />
+            <input id="adminRenewalAmount" type="hidden" name="amount" />
+            <div class="admin-modal-actions">
+                <button type="button" onclick="closeAdminRenewal()">Cancel</button>
+                <button type="submit">Pay and renew</button>
+            </div>
+        </form>
+    </div>
+</div>
 
-            function openAdminAddMemberModal() {
-                const modal = document.getElementById('adminAddMemberModal');
-                const frame = document.getElementById('adminAddMemberFrame');
-                if (!frame.src) frame.src = '@Url.Action("AddMember", "FrontDesk", new { returnToAdmin = true })';
-                modal.classList.add('open');
-                document.body.style.overflow = 'hidden';
-            }
-
-            function closeAddMemberModal() {
-                document.getElementById('adminAddMemberModal').classList.remove('open');
-                document.body.style.overflow = '';
-            }
-
-            let pendingCancellationForm = null;
-            function showCancellationMessage(form) {
-                pendingCancellationForm = form;
-                document.getElementById('cancelMemberMessage').textContent = 'Cancel the membership of ' + form.dataset.memberName + '?';
-                for (const field of ['Email', 'Price', 'Days', 'Paid', 'Used', 'Deduction']) {
-                    document.getElementById('receipt' + field).textContent = form.dataset[field.toLowerCase()];
-                }
-                document.getElementById('receiptCalculation').textContent = 'Estimated refund: ' + form.dataset.refund;
-                document.getElementById('cancelMemberDialog').showModal();
-                return false;
-            }
-            function confirmCancellation() {
-                if (!pendingCancellationForm) return;
-                document.getElementById('confirmMemberCancellation').disabled = true;
-                HTMLFormElement.prototype.submit.call(pendingCancellationForm);
-                pendingCancellationForm = null;
-            }
-            function exportMemberReport(format) {
-                const details = document.querySelector('.am-export');
-                if (details) details.open = false;
-                if (format === 'pdf') window.print();
-            }
-
-            function openAdminPayment(id, name, balance) {
-                const modal = document.getElementById('adminPaymentModal');
-                document.getElementById('adminPaymentId').value = id;
-                document.getElementById('adminPaymentMember').textContent = name;
-                document.getElementById('adminPaymentBalance').textContent = '₱' + Number(balance).toLocaleString('en-PH', {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2
-                });
-                const amount = document.getElementById('adminPaymentAmount');
-                amount.value = '';
-                amount.max = balance;
-                modal.classList.add('open');
-                amount.focus();
-            }
-
-            function closeAdminPayment() {
-                document.getElementById('adminPaymentModal').classList.remove('open');
-            }
-
-            function formatRenewalPeso(value) {
-                return '₱' + Number(value).toLocaleString('en-PH', {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2
-                });
-            }
-
-            function openAdminRenewal(button) {
-                document.querySelectorAll('.am-actions[open]').forEach(function (menu) { menu.open = false; });
-                if (button.dataset.canRenew !== 'true') {
-                    document.getElementById('renewalNoticeText').textContent = button.dataset.terminated === 'true'
-                        ? 'Terminated memberships cannot be renewed.'
-                        : 'Active memberships can only be renewed during the last 7 days before their end date.';
-                    document.getElementById('renewalNoticeDate').textContent = button.dataset.terminated !== 'true' && button.dataset.renewalOpens
-                        ? `${button.dataset.memberName}'s membership ends on ${button.dataset.expiredDate}. Renewal opens on ${button.dataset.renewalOpens}.`
-                        : '';
-                    document.getElementById('renewalNotice').showModal();
-                    return;
-                }
-                document.getElementById('adminRenewalId').value = button.dataset.clientId;
-                document.getElementById('adminRenewalAmount').value = button.dataset.planPrice;
-                document.getElementById('adminRenewalMember').textContent = button.dataset.memberName;
-                document.getElementById('adminRenewalPlan').textContent = button.dataset.planName;
-                document.getElementById('adminRenewalExpiry').textContent = button.dataset.expiredDate;
-                document.getElementById('adminRenewalPrice').textContent = formatRenewalPeso(button.dataset.planPrice);
-                document.getElementById('adminRenewalModal').classList.add('open');
-            }
-
-            function closeAdminRenewal() {
-                document.getElementById('adminRenewalModal').classList.remove('open');
-            }
-
-            function lockAdminRenewal(form) {
-                const submit = form.querySelector('button[type="submit"]');
-                submit.disabled = true;
-                submit.textContent = 'Processing...';
-                return true;
-            }
-    </script>
+@* Generic confirmation (Terminate / Mark inactive). Rendered once, outside the table. *@
+<dialog id="confirmActionDialog" class="am-dialog" aria-labelledby="confirmActionTitle">
+    <h2 id="confirmActionTitle"></h2>
+    <p id="confirmActionMessage"></p>
+    <div class="am-dialog-actions">
+        <button type="button" class="am-dialog-cancel" onclick="closeConfirmAction()">Cancel</button>
+        <button type="button" class="am-dialog-confirm" id="confirmActionButton" onclick="runConfirmAction()">Confirm</button>
+    </div>
+</dialog>
 
 <dialog id="renewalNotice" aria-labelledby="renewalNoticeTitle" style="position:fixed;inset:0;margin:auto;width:min(460px,90vw);padding:28px;background:#1b201c;color:white;border:1px solid #3c443d;border-radius:12px;">
     <h2 id="renewalNoticeTitle">Membership renewal</h2>
@@ -941,4 +1026,184 @@
         <button type="button" class="floating-cancel" onclick="document.getElementById('renewalNotice').close()">Close</button>
     </div>
 </dialog>
-<style>#renewalNotice::backdrop { background:rgba(0,0,0,.65); }</style>
+
+<dialog id="cancelMemberDialog" aria-labelledby="cancelMemberTitle" style="width:min(480px,90vw);padding:28px;background:#1b201c;color:white;border:1px solid #3c443d;border-radius:12px;">
+    <h2 id="cancelMemberTitle">Review cancellation receipt</h2>
+    <p id="cancelMemberMessage"></p>
+    <section style="border:1px solid #3c443d;margin:18px 0;">
+        <h3 style="margin:0;padding:16px;background:#b7ff1b;color:#182000">Membership cancellation</h3>
+        <div style="padding:18px;line-height:1.7">
+            <p>Send to: <strong id="receiptEmail"></strong></p>
+            <div>Plan price: <span id="receiptPrice"></span></div>
+            <div>Plan duration: <span id="receiptDays"></span> days</div>
+            <div>Payment received: <span id="receiptPaid"></span></div>
+            <div>Days used: <span id="receiptUsed"></span></div>
+            <div>Deduction: <span id="receiptDeduction"></span></div>
+            <p id="receiptCalculation" style="color:#b7ff1b;"></p>
+        </div>
+    </section>
+    <p>Days used are counted from the day after the membership starts, whether the member attends or not. The refund is the amount paid minus the cost of elapsed membership days.</p>
+    <p>The refund breakdown will be emailed to the member. Management must process the refund separately.</p>
+    <div style="display:flex;justify-content:flex-end;gap:12px;margin-top:24px">
+        <button type="button" class="floating-cancel" onclick="document.getElementById('cancelMemberDialog').close()">Go back</button>
+        <button type="button" class="floating-confirm" id="confirmMemberCancellation" onclick="confirmCancellation()">Confirm and email receipt</button>
+    </div>
+</dialog>
+
+@if (resultSuccess != null || resultWarning != null || resultError != null)
+{
+    var kind = resultSuccess != null ? "success" : resultWarning != null ? "warning" : "error";
+    var title = kind == "success" ? "Success" : kind == "warning" ? "Completed with a note" : "Something went wrong";
+    var icon = kind == "success" ? "✓" : kind == "warning" ? "!" : "✕";
+    <dialog id="resultDialog" class="am-dialog am-result @kind" aria-labelledby="resultTitle">
+        <div class="am-result-icon" aria-hidden="true">@icon</div>
+        <h2 id="resultTitle">@title</h2>
+        <p>@(resultSuccess ?? resultWarning ?? resultError)</p>
+        <div class="am-dialog-actions" style="justify-content:center">
+            <button type="button" class="am-dialog-confirm" onclick="document.getElementById('resultDialog').close()">OK</button>
+        </div>
+    </dialog>
+    <script>
+        (() => {
+            const dialog = document.getElementById('resultDialog');
+            dialog.showModal();
+            dialog.addEventListener('click', e => { if (e.target === dialog) dialog.close(); });
+        })();
+    </script>
+}
+
+<script>
+    if (window.self !== window.top) {
+        window.top.location.href = window.location.href;
+    }
+
+    function openAdminAddMemberModal() {
+        const modal = document.getElementById('adminAddMemberModal');
+        const frame = document.getElementById('adminAddMemberFrame');
+        if (!frame.src) frame.src = '@Url.Action("AddMember", "FrontDesk", new { returnToAdmin = true })';
+        modal.classList.add('open');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeAddMemberModal() {
+        document.getElementById('adminAddMemberModal').classList.remove('open');
+        document.body.style.overflow = '';
+    }
+
+    let pendingCancellationForm = null;
+    function showCancellationMessage(form) {
+        pendingCancellationForm = form;
+        document.querySelectorAll('.am-actions[open]').forEach(m => m.open = false);
+        document.getElementById('cancelMemberMessage').textContent = 'Cancel the membership of ' + form.dataset.memberName + '?';
+        for (const field of ['Email', 'Price', 'Days', 'Paid', 'Used', 'Deduction']) {
+            document.getElementById('receipt' + field).textContent = form.dataset[field.toLowerCase()];
+        }
+        document.getElementById('receiptCalculation').textContent = 'Estimated refund: ' + form.dataset.refund;
+        document.getElementById('cancelMemberDialog').showModal();
+        return false;
+    }
+
+    function confirmCancellation() {
+        if (!pendingCancellationForm) return;
+        document.getElementById('confirmMemberCancellation').disabled = true;
+        HTMLFormElement.prototype.submit.call(pendingCancellationForm);
+        pendingCancellationForm = null;
+    }
+
+    function exportMemberReport(format) {
+        const details = document.querySelector('.am-export');
+        if (details) details.open = false;
+        if (format === 'pdf') window.print();
+    }
+
+    function openAdminPayment(id, name, balance) {
+        const modal = document.getElementById('adminPaymentModal');
+        document.getElementById('adminPaymentId').value = id;
+        document.getElementById('adminPaymentMember').textContent = name;
+        document.getElementById('adminPaymentBalance').textContent = '₱' + Number(balance).toLocaleString('en-PH', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+        const amount = document.getElementById('adminPaymentAmount');
+        amount.value = '';
+        amount.max = balance;
+        modal.classList.add('open');
+        amount.focus();
+    }
+
+    function closeAdminPayment() {
+        document.getElementById('adminPaymentModal').classList.remove('open');
+    }
+
+    function formatRenewalPeso(value) {
+        return '₱' + Number(value).toLocaleString('en-PH', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+    }
+
+    function openAdminRenewal(button) {
+        document.querySelectorAll('.am-actions[open]').forEach(function(menu) { menu.open = false; });
+        if (button.dataset.canRenew !== 'true') {
+            document.getElementById('renewalNoticeText').textContent = button.dataset.terminated === 'true'
+                ? 'Terminated memberships cannot be renewed.'
+                : 'Active memberships can only be renewed during the last 7 days before their end date.';
+            document.getElementById('renewalNoticeDate').textContent = button.dataset.terminated !== 'true' && button.dataset.renewalOpens
+                ? `${button.dataset.memberName}'s membership ends on ${button.dataset.expiredDate}. Renewal opens on ${button.dataset.renewalOpens}.`
+                : '';
+            document.getElementById('renewalNotice').showModal();
+            return;
+        }
+        document.getElementById('adminRenewalId').value = button.dataset.clientId;
+        document.getElementById('adminRenewalAmount').value = button.dataset.planPrice;
+        document.getElementById('adminRenewalMember').textContent = button.dataset.memberName;
+        document.getElementById('adminRenewalPlan').textContent = button.dataset.planName;
+        document.getElementById('adminRenewalExpiry').textContent = button.dataset.expiredDate;
+        document.getElementById('adminRenewalPrice').textContent = formatRenewalPeso(button.dataset.planPrice);
+        document.getElementById('adminRenewalModal').classList.add('open');
+    }
+
+    function closeAdminRenewal() {
+        document.getElementById('adminRenewalModal').classList.remove('open');
+    }
+
+    function lockAdminRenewal(form) {
+        const submit = form.querySelector('button[type="submit"]');
+        submit.disabled = true;
+        submit.textContent = 'Processing...';
+        return true;
+    }
+
+    let pendingConfirmForm = null;
+
+    function askConfirm(form) {
+        pendingConfirmForm = form;
+        document.querySelectorAll('.am-actions[open]').forEach(m => m.open = false);
+        document.getElementById('confirmActionTitle').textContent = form.dataset.confirmTitle || 'Are you sure?';
+        document.getElementById('confirmActionMessage').textContent = form.dataset.confirmMessage || '';
+        const button = document.getElementById('confirmActionButton');
+        button.textContent = form.dataset.confirmButton || 'Confirm';
+        button.disabled = false;
+        button.classList.toggle('danger', form.dataset.confirmDanger === 'true');
+        document.getElementById('confirmActionDialog').showModal();
+        return false;
+    }
+
+    function closeConfirmAction() {
+        document.getElementById('confirmActionDialog').close();
+        pendingConfirmForm = null;
+    }
+
+    function runConfirmAction() {
+        if (!pendingConfirmForm) return;
+        document.getElementById('confirmActionButton').disabled = true;
+        HTMLFormElement.prototype.submit.call(pendingConfirmForm); // bypasses onsubmit
+        pendingConfirmForm = null;
+    }
+
+    // Clicking the dark backdrop closes these dialogs.
+    ['confirmActionDialog', 'cancelMemberDialog', 'renewalNotice'].forEach(id => {
+        const dialog = document.getElementById(id);
+        dialog?.addEventListener('click', e => { if (e.target === dialog) dialog.close(); });
+    });
+</script>

@@ -15,13 +15,13 @@
     .am-page {
         width: min(1160px, calc(100vw - 360px));
         margin: 24px auto;
-        font: 15px Arial, sans-serif;
+        font-family:Arial, sans-serif;
         color: #102630;
     }
 
     .am-title {
         margin: 0 0 22px;
-        font-size: 23px;
+        
         color: rgb(8, 75, 2);
     }
 
@@ -29,6 +29,19 @@
     {
         margin-top: 40px;
         margin-bottom: 20px;
+    }
+
+    /* Keep the title-to-search spacing at exactly 5px. This page-local rule
+       is intentionally last in the view so shared theme rules cannot replace it. */
+    main.am-page > header.role-page-header {
+        min-height: 0 !important;
+        height: auto !important;
+        margin: 0 0 5px !important;
+        padding: 0 !important;
+        border: 0 !important;
+    }
+    main.am-page > .atten-searchbar {
+        margin-top: 0 !important;
     }
 
     .am-search {
@@ -47,7 +60,7 @@
             border: 1px solid #c8d4cd;
             border-radius: 5px;
             padding: 0 14px;
-            font-size: 15px;
+            
         }
 
         .am-search button {
@@ -56,7 +69,7 @@
             border-radius: 5px;
             background: rgb(8, 61, 2);
             color: #fff;
-            font-size: 15px;
+            
             font-weight: 700;
         }
 
@@ -69,7 +82,7 @@
 
     .am-card-head h2 {
         color: #ffffff !important;
-        font-size: 15px;
+        
         font-weight: 700;
     }
 
@@ -83,7 +96,7 @@
             background: #394c55;
             color: #fff;
             text-align: left;
-            font-size: 12px;
+            
             letter-spacing: 0.5px;
         }
 
@@ -93,9 +106,10 @@
             }
 
         .am-table td {
-            padding: 12px 16px;
+            padding: 8px 16px;
             border-bottom: 1px solid #e6ebe8;
-            height: 72px;
+            height: 56px;
+            vertical-align: middle;
         }
 
     .member {
@@ -112,31 +126,26 @@
         place-items: center;
         background: #e7f0e9;
         color: #176328;
-        font-size: 12px;
+        
         font-weight: 700;
     }
 
     .badge {
         padding: 5px 10px;
         border-radius: 999px;
-        font-size: 11px;
+        
         font-weight: 700;
         text-transform: uppercase;
     }
 
     .badge-active {
-        background: #c9f4c9;
-        color: #176328;
-    }
-
-    .badge-checked {
-        background: #d9edf5;
-        color: #355963;
+        background: #27372b;
+        color: #b7ff1b;
     }
 
     .badge-none {
-        background: #ecefed;
-        color: #647069;
+        background: #303831;
+        color: #d7ddd8;
     }
 
     .action-cell {
@@ -149,8 +158,8 @@
         }
 
         .action-cell button {
-            min-width: 92px;
-            padding: 9px 12px;
+            min-width: 74px;
+            padding: 5px 8px;
             border: 0;
             border-radius: 5px;
             background: rgb(8, 75, 2);
@@ -165,71 +174,6 @@
                 cursor: not-allowed;
             }
 
-    .action-menu {
-        position: relative;
-        display: inline-block;
-    }
-
-        .action-menu summary {
-            list-style: none;
-            cursor: pointer;
-            width: 32px;
-            height: 34px;
-            display: grid;
-            place-items: center;
-            border: 0;
-            background: transparent;
-            color: #37433c;
-            border-radius: 6px;
-            font-size: 24px;
-            font-weight: 800;
-            line-height: 1;
-        }
-
-            .action-menu summary:hover {
-                background: #eef3f0;
-            }
-
-            .action-menu summary::-webkit-details-marker {
-                display: none;
-            }
-
-    .action-pop {
-        position: absolute;
-        right: 0;
-        top: 36px;
-        width: 140px;
-        background: #fff;
-        border: 1px solid #d8e0db;
-        border-radius: 6px;
-        box-shadow: 0 7px 20px rgba(0, 0, 0, 0.14);
-        z-index: 30;
-        overflow: hidden;
-    }
-
-        .action-pop form {
-            margin: 0;
-        }
-
-        .action-pop button {
-            width: 100%;
-            border: 0;
-            background: #fff;
-            text-align: left;
-            padding: 11px 14px;
-            font-size: 13px;
-            cursor: pointer;
-        }
-
-            .action-pop button:hover {
-                background: #edf6ef;
-            }
-
-            .action-pop button:disabled {
-                color: #aab2ad;
-                cursor: not-allowed;
-            }
-
     .am-footer {
         display: flex;
         align-items: center;
@@ -237,7 +181,7 @@
         padding: 16px 20px;
         background: #e8f6fc;
         color: #111;
-        font-size: 15px;
+        
     }
 
     .pager {
@@ -256,7 +200,7 @@
             background: #f7fbfc;
             color: #879397;
             text-decoration: none;
-            font-size: 13px;
+            
             font-weight: 400;
         }
 
@@ -305,13 +249,24 @@
                 height: 42px;
             }
     }
+
+    /* Final attendance spacing override. */
+    main.am-page > header.role-page-header {
+        min-height: 0 !important;
+        height: auto !important;
+        padding: 0 !important;
+        border: 0 !important;
+    }
+    main.am-page > .atten-searchbar { margin-top: 0 !important; }
 </style>
 
 <main class="am-page">
 
-    <header class="role-page-header">
-        <h1 class="am-title" style="color:#fff !important;">Attendance Monitoring</h1>
-    </header>
+    <div class="attendance-page title">
+        <header class="role-page-header">
+            <h1 class="am-title" style="font-weight:700!important;color:#fff !important;">Attendance Monitoring</h1>
+        </header>
+    </div>
 
     @if (TempData["SuccessMessage"] is string success)
     {
@@ -347,7 +302,7 @@
                     <th>CHECK-IN</th>
                     <th>MEMBERSHIP</th>
                     <th>STATUS</th>
-                    <th class="action-heading">ACTION</th>
+                    <th class="action-heading" aria-label="Actions"></th>
                 </tr>
             </thead>
 
@@ -356,7 +311,7 @@
                 @if (Model.Members.Count == 0)
                 {
                     <tr>
-                        <td colspan="6" style="text-align:center;color:#738078">No members found.</td>
+                        <td colspan="6" style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;text-align:center;color:#738078">No members found.</td>
                     </tr>
                 }
 
@@ -365,43 +320,39 @@
                     var badgeClass = member.Status == "Checked in" ? "badge-active" : "badge-none";
 
                     <tr>
-                        <td>
-                            <div class="member">
-                                <span class="avatar">@member.Initials</span>
-                                <span>@member.FullName</span>
+                        <td style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;">
+                            <div class="member" style="">
+                                <span class="avatar" style="">@member.Initials</span>
+                                <span style="">@member.FullName</span>
                             </div>
                         </td>
 
-                        <td>@(member.CheckInAt?.ToString("MMM d, yyyy") ?? "-")</td>
+                        <td style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;">@(member.CheckInAt?.ToString("MMM d, yyyy") ?? "-")</td>
 
-                        <td>@(member.CheckInAt?.ToString("hh:mm tt") ?? "-")</td>
+                        <td style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;">@(member.CheckInAt?.ToString("hh:mm tt") ?? "-")</td>
 
-                        <td>@member.Membership</td>
+                        <td style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;">@member.Membership</td>
 
-                        <td>
-                            <span class="badge @badgeClass">@member.Status</span>
+                        <td style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;">
+                            <span class="badge @badgeClass" style="background:transparent!important;padding:0!important;border:0!important;border-radius:0!important;box-shadow:none!important;">@member.Status</span>
                         </td>
 
-                        <td class="action-cell">
+                        <td class="action-cell" style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;">
                             <form asp-action="UpdateAttendance" method="post">
                                 @Html.AntiForgeryToken()
-                                <input type="hidden" name="id" value="@member.ClientId" />
-                                <input type="hidden" name="attendanceAction" value="checkin" />
-                                <input type="hidden" name="searchTerm" value="@Model.SearchTerm" />
-                                <input type="hidden" name="page" value="@Model.Page" />
+                                <input type="hidden" name="id" value="@member.ClientId"  style=""/>
+                                <input type="hidden" name="attendanceAction" value="checkin"  style=""/>
+                                <input type="hidden" name="searchTerm" value="@Model.SearchTerm"  style=""/>
+                                <input type="hidden" name="page" value="@Model.Page"  style=""/>
                                 @if (member.CanCheckIn)
                                 {
-                                    <button type="submit" class="@(member.ReminderEmailFailed ? "email-failed-checkin" : "")">Check In</button>
+                                    <button type="submit" class="@(member.ReminderEmailFailed ? "email-failed-checkin" : "")" style="">Check In</button>
                                 }
                                 else
                                 {
-                                    <button type="button" class="@(member.ReminderEmailFailed ? "email-failed-checkin" : "")" disabled>Checked In</button>
+                                    <button type="button" class="@(member.ReminderEmailFailed ? "email-failed-checkin" : "")" disabled style="">Checked In</button>
                                 }
                             </form>
-                            @if (member.ReminderEmailFailed)
-                            {
-                                <small class="attendance-email-failed">Reminder email failed</small>
-                            }
                         </td>
                     </tr>
                 }
@@ -412,7 +363,7 @@
 
         <footer class="am-footer">
 
-            <span>
+            <span class="pagination-summary">
                 Showing @Model.Members.Count of @Model.TotalCount
                 (page @Model.Page of @Model.TotalPages)
             </span>

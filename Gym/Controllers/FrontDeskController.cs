@@ -19,6 +19,7 @@ namespace Gym.Controllers
         private readonly DailyMemberReminderSender _dailyReminderSender;
         private readonly ITimeLimitedDataProtector _reminderProtector;
         private readonly EquipmentEvidenceService _equipmentEvidence;
+        private readonly WalkInRegistrationService _walkInRegistration;
 
         public FrontDeskController(
             IMemberService memberService,
@@ -27,7 +28,8 @@ namespace Gym.Controllers
             SetupService setupService,
             DailyMemberReminderSender dailyReminderSender,
             IDataProtectionProvider dataProtectionProvider,
-            EquipmentEvidenceService equipmentEvidence)
+            EquipmentEvidenceService equipmentEvidence,
+            WalkInRegistrationService walkInRegistration)
         {
             _memberService = memberService;
             _context = context;
@@ -35,6 +37,7 @@ namespace Gym.Controllers
             _setupService = setupService;
             _dailyReminderSender = dailyReminderSender;
             _equipmentEvidence = equipmentEvidence;
+            _walkInRegistration = walkInRegistration;
             _reminderProtector = dataProtectionProvider
                 .CreateProtector("Gym.TrainerSessionReminder.v1")
                 .ToTimeLimitedDataProtector();
@@ -227,7 +230,9 @@ namespace Gym.Controllers
             const int pageSize = 10;
             var notificationQuery = _context.FrontDeskEmailNotifications
                 .AsNoTracking()
-                .Where(item => item.StaffId == 0 || item.StaffId == userId)
+                // Front Desk sees delivery activity; admin operational activity
+                // is kept in the separate Admin notifications feed.
+                .Where(item => (item.StaffId == 0 || item.StaffId == userId) && item.Status != "Activity")
                 .OrderByDescending(item => item.CreatedDate);
             var totalCount = await notificationQuery.CountAsync();
             var totalPages = Math.Max(1, (int)Math.Ceiling(totalCount / (double)pageSize));
@@ -651,12 +656,12 @@ namespace Gym.Controllers
                 AvailableByEquipment = allEquipment.GroupBy(item => item.EquipmentName, StringComparer.OrdinalIgnoreCase)
                     .ToDictionary(group => group.Key,
                         group => Math.Max(0, group.Where(EquipmentStock.IsInventory).Sum(item => item.Quantity)
-                            - group.Where(item => !EquipmentStock.IsInventory(item)).Sum(item => item.Quantity)),
+                            - group.Where(item => EquipmentStock.IsActiveReport(item)).Sum(item => item.Quantity)),
                         StringComparer.OrdinalIgnoreCase),
                 TotalAssets = allEquipment.Where(EquipmentStock.IsInventory).Sum(item => item.Quantity),
                 GoodQuantity = allEquipment.GroupBy(item => item.EquipmentName, StringComparer.OrdinalIgnoreCase)
                     .Sum(group => Math.Max(0, group.Where(EquipmentStock.IsInventory).Sum(item => item.Quantity)
-                        - group.Where(item => !EquipmentStock.IsInventory(item)).Sum(item => item.Quantity))),
+                        - group.Where(item => EquipmentStock.IsActiveReport(item)).Sum(item => item.Quantity))),
                 InMaintenance = allEquipment
                     .Where(item => item.Status == "Needs Maintenance")
                     .Sum(item => item.Quantity),
@@ -715,6 +720,11 @@ namespace Gym.Controllers
 
             if (!ModelState.IsValid)
             {
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                    return UnprocessableEntity(new { errors = ModelState.Values
+                        .SelectMany(value => value.Errors).Select(error => error.ErrorMessage)
+                        .Where(message => !string.IsNullOrWhiteSpace(message))
+                        .DefaultIfEmpty("Complete all required equipment fields.").ToArray() });
                 TempData["ErrorMessage"] = string.Join(" ", ModelState.Values
                     .SelectMany(value => value.Errors)
                     .Select(error => error.ErrorMessage)
@@ -730,7 +740,7 @@ namespace Gym.Controllers
             var equipment = new Equipment
             {
                 EquipmentName = catalogItem!.Name,
-                Category = "General",
+                Category = "Report",
                 Quantity = form.Quantity,
                 AvailableQuantity = 0,
                 Status = form.Condition,
@@ -750,7 +760,11 @@ namespace Gym.Controllers
                 _equipmentEvidence.Delete(evidencePhotoPath);
                 throw;
             }
-            TempData["SuccessMessage"] = "Equipment issue report submitted successfully.";
+            TempData["FormConfirmationMessage"] = "Equipment issue report submitted successfully.";
+            TempData["FormConfirmationTitle"] = "Report submitted";
+            TempData["FormConfirmationAction"] = "AddEquipment";
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                return Json(new { redirectUrl = Url.Action(nameof(Equipment)) });
             return RedirectToAction(nameof(Equipment));
         }
 
@@ -880,63 +894,37 @@ namespace Gym.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> WalkInRegister(WalkInRegistrationViewModel form)
         {
-            if (!await _context.WalkInPaymentTypes.AnyAsync(item => item.IsActive))
-            {
-                TempData["ErrorMessage"] = "Walk-in registration is unavailable. An administrator must add an active walk-in payment type first.";
-                return RedirectToAction(nameof(WalkInClient));
-            }
-            var rate = await _context.WalkInPaymentTypes.AsNoTracking().FirstOrDefaultAsync(item => item.Id == form.PaymentTypeId && item.IsActive);
-            if (rate == null)
-            {
-                TempData["ErrorMessage"] = "Select an active walk-in payment type.";
-                return RedirectToAction(nameof(WalkInClient));
-            }
-            form.AmountPaid = rate.Amount;
+            // Amount and receipt selection are server-controlled. Required inputs
+            // must pass validation before the shared service can save anything.
             ModelState.Remove(nameof(form.AmountPaid));
             ModelState.Remove(nameof(form.IssueDigitalReceipt));
             if (!ModelState.IsValid)
             {
-                TempData["ErrorMessage"] = "Please complete all required walk-in registration fields.";
+                TempData["WalkInRegistrationError"] = "Please complete all required walk-in registration fields.";
                 return RedirectToAction(nameof(WalkInClient));
             }
-
-            var firstName = RegistrationName.Normalize(form.FirstName);
-            var lastName = RegistrationName.Normalize(form.LastName);
-            var existingNames = await _context.WalkInClients.AsNoTracking()
-                .Select(item => item.FirstName + " " + item.LastName).ToListAsync();
-            if (existingNames.Any(name => RegistrationName.Same(name, firstName + " " + lastName)))
+            WalkInClient registered;
+            try
             {
-                TempData["ErrorMessage"] = "A walk-in with this full name is already registered. Use the existing client's return-visit action.";
+                registered = await _walkInRegistration.RegisterAsync(form);
+            }
+            catch (InvalidOperationException ex)
+            {
+                TempData["WalkInRegistrationError"] = ex.Message;
                 return RedirectToAction(nameof(WalkInClient));
             }
-            var contact = form.ContactNumber.Trim();
-            var email = string.IsNullOrWhiteSpace(form.Email) ? null : form.Email.Trim();
-            var today = DateTime.Today;
-            var tomorrow = today.AddDays(1);
-            var alreadyRegisteredToday = await _context.WalkInClients.AsNoTracking()
-                .AnyAsync(item => item.RegisteredAt >= today && item.RegisteredAt < tomorrow &&
-                    ((!string.IsNullOrWhiteSpace(email) && item.Email == email) ||
-                     item.ContactNumber == contact ||
-                     (item.FirstName == firstName && item.LastName == lastName)));
-            if (alreadyRegisteredToday)
+            catch (DbUpdateException)
             {
-                TempData["ErrorMessage"] = "This walk-in client has already been registered today. Registration is available again tomorrow.";
+                TempData["WalkInRegistrationError"] = "Registration could not be saved. No walk-in payment was recorded. Please try again.";
                 return RedirectToAction(nameof(WalkInClient));
             }
+            var firstName = registered.FirstName;
+            var lastName = registered.LastName;
+            var email = registered.Email;
+            var registeredAt = registered.RegisteredAt;
 
-            var registeredAt = DateTime.Now;
-            _context.WalkInClients.Add(new WalkInClient
-            {
-                FirstName = firstName, LastName = lastName,
-                ContactNumber = contact,
-                Email = email,
-                PaymentTypeName = rate.Name, ReasonForVisit = form.ReasonForVisit, PaymentMethod = "Cash",
-                AmountPaid = form.AmountPaid, IssueDigitalReceipt = email != null,
-                LiabilityAccepted = false, Status = "Checked-in",
-                RegisteredAt = registeredAt
-            });
-            await _context.SaveChangesAsync();
-
+            TempData["RegistrationSuccess"] = "Walk-in registration succeeded. Payment recorded.";
+            try {
             if (email != null)
             {
                 var (sent, error) = await _gmailService.SendWalkInReceiptAsync(
@@ -962,6 +950,12 @@ namespace Gym.Controllers
                     "The walk-in client did not provide an email address.");
                 TempData["SuccessMessage"] = "Walk-in client registered successfully.";
             }
+            } catch (Exception) { TempData["ErrorMessage"] = "Registration succeeded, but the receipt could not be delivered. Do not register again."; }
+            TempData["WalkInRegistrationSuccess"] = TempData["RegistrationSuccess"];
+            TempData.Remove("RegistrationSuccess");
+            TempData["WalkInReceiptWarning"] = TempData["ErrorMessage"];
+            TempData.Remove("ErrorMessage");
+            TempData.Remove("SuccessMessage");
             return RedirectToAction(nameof(WalkInClient));
         }
 
@@ -1045,6 +1039,8 @@ namespace Gym.Controllers
                 });
             }
 
+            TempData["RegistrationSuccess"] = $"Member '{form.FullName}' registered successfully. Payment recorded.";
+            try {
             var initialPayment = registeredMember.Payments.Single();
             var (receiptSent, receiptError) = await _gmailService.SendMemberPaymentReceiptAsync(
                 registeredMember.Email, form.FullName, initialPayment.TransactionCode,
@@ -1057,9 +1053,17 @@ namespace Gym.Controllers
                 ? $"Member '{form.FullName}' registered, payment recorded, and receipt emailed successfully."
                 : $"Member '{form.FullName}' registered and payment recorded, but the receipt could not be emailed. {receiptError}";
 
-            return returnToAdmin
-                ? RedirectToAction("Members", "Admin", new { registrationComplete = true })
-                : RedirectToAction(nameof(Member), new { registrationComplete = true });
+            } catch (Exception) { TempData["ErrorMessage"] = "Registration succeeded, but the receipt could not be delivered. Do not register again."; }
+            return RedirectToAction(nameof(MemberRegistrationComplete), new { returnToAdmin });
+        }
+
+        [HttpGet]
+        public IActionResult MemberRegistrationComplete(bool returnToAdmin = false)
+        {
+            if (TempData.Peek("RegistrationSuccess") is not string)
+                return returnToAdmin ? RedirectToAction("Members", "Admin") : RedirectToAction(nameof(Member));
+            ViewBag.ReturnToAdmin = returnToAdmin;
+            return View();
         }
 
         [HttpPost]

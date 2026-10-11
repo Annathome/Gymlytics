@@ -1,4 +1,4 @@
-﻿using Gym.Models;
+using Gym.Models;
 using Gym.Services;
 using Gym.Data;
 using Microsoft.AspNetCore.Authentication;
@@ -73,7 +73,7 @@ namespace Gym.Controllers
                 return View(model);
             }
 
-            // Redirect to Login page upon successful setup
+            TempData["RegistrationSuccess"] = "Administrator registration succeeded. You can now log in.";
             return RedirectToAction("Login");
         }
 
@@ -207,7 +207,10 @@ namespace Gym.Controllers
                 return View(model);
             }
 
-            return RedirectToAction("CheckEmail", new { email = model.Email });
+            TempData["RegistrationSuccess"] = "Staff registration submitted successfully. Check the email invitation to activate the account.";
+            TempData["CompletionTitle"] = "Registration submitted";
+            TempData["CompletionReturnUrl"] = Url.Action("UserRoles", "Admin");
+            return RedirectToAction("Index", "Completion");
         }
 
         // GET: /Account/CheckEmail

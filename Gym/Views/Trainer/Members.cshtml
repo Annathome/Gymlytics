@@ -5,22 +5,22 @@
 }
 
 <style>
-    .tm-page { width: min(1180px, calc(100vw - 340px)); margin: 30px auto; color: #f0f7f1; font-size: 15px; }
-    .tm-head { margin-bottom: 22px; }
+    .tm-page { width: min(1180px, calc(100vw - 340px)); margin: 30px auto; color: #f0f7f1;  }
+    .tm-head { margin-bottom: 30px; }
     body.trainer-shell .tm-page .tm-head { border-bottom: none !important; }
-    .tm-head h1 { margin: 0 0 6px; color: #7cef72; font-size: 29px; }
+    .tm-head h1 { margin: 0 0 6px; color: #7cef72;  }
     .tm-head p { margin: 0; color: #b9cbbb; }
     .tm-search { display: flex; gap: 10px; margin-bottom: 20px; }
     .tm-search input { flex: 1; height: 44px; padding: 0 14px; border: 1px solid #287524; border-radius: 7px; background: #061f0c; color: #fff; }
     .tm-search button { width: 100px; border: 0; border-radius: 7px; background: #18752c; color: #fff; font-weight: 700; }
     .tm-card { overflow: hidden; border: 2px solid #535159; border-radius: 9px; background: #083013; box-shadow: 0 10px 24px rgba(0, 0, 0, .48); }
     .tm-table { width: 100%; border-collapse: collapse; }
-    .tm-table th { padding: 14px 16px; background: #102f18; color: #d9e7db; text-align: left; font-size: 12px; letter-spacing: .5px; }
+    .tm-table th { padding: 14px 16px; background: #102f18; color: #d9e7db; text-align: left;  letter-spacing: .5px; }
     .tm-table td { padding: 15px 16px; border-top: 1px solid rgba(124,239,114,.15); color: #e8f1e9; }
     .tm-member { display: flex; align-items: center; gap: 11px; }
     .tm-avatar { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 50%; background: rgba(124,239,114,.18); color: #7cef72; font-weight: 700; }
     .tm-schedule { max-width: 265px; color: #b9cbbb; }
-    .tm-status { display: inline-block; padding: 5px 10px; border-radius: 999px; background: #d5f5da; color: #176b2c; font-size: 11px; font-weight: 700; }
+    .tm-status { display: inline-block; padding: 5px 10px; border-radius: 999px; background: #d5f5da; color: #176b2c;  font-weight: 700; }
     .tm-status.cancelled, .tm-status.expired, .tm-status.inactive { background: #f8d5d5; color: #a71920; }
     .tm-empty { padding: 45px 20px !important; text-align: center; color: #b9cbbb !important; }
     .tm-foot { min-height: 68px; display: flex; align-items: center; padding: 14px 18px; border-top: 1px solid #535159; color: #b9cbbb; }
@@ -31,30 +31,30 @@
 </style>
 
 <main class="tm-page">
-    <header class="tm-head"><h1>My Members</h1><p>@Model.TotalCount assigned member@(Model.TotalCount == 1 ? "" : "s")</p></header>
-    <form class="tm-search" method="get" asp-action="Members">
+    <header class="tm-head"><h1 style="font-weight:700!important;margin-bottom: 0px !important;">My Members</h1><p style="margin-top: 0px !important;">@Model.TotalCount assigned member@(Model.TotalCount == 1 ? "" : "s")</p></header>
+    <form class="tm-search" method="get" asp-action="Members" style="margin-top:-30px !important;">
         <input name="searchTerm" value="@Model.SearchTerm" placeholder="Search assigned members by name or membership number..." />
         <button type="submit" class="search-btn">Search</button>
     </form>
-    <section class="tm-card">
+    <section class="tm-card" style="margin-top:-10px !important;">
         <table class="tm-table">
             <thead><tr><th>MEMBER</th><th>PLAN</th><th>GYM GOAL</th><th>TRAINING SCHEDULE</th><th>JOINED</th><th>EXPIRES</th><th>STATUS</th></tr></thead>
             <tbody>
-                @if (Model.Members.Count == 0) { <tr><td colspan="7" class="tm-empty">No members are assigned to this trainer.</td></tr> }
+                @if (Model.Members.Count == 0) { <tr><td colspan="7" class="tm-empty" style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;">No members are assigned to this trainer.</td></tr> }
                 @foreach (var member in Model.Members)
                 {
                     var statusClass = member.Status.ToString().ToLowerInvariant();
                     <tr>
-                        <td><div class="tm-member"><span class="tm-avatar">@member.Initials</span><strong>@member.FullName</strong></div></td>
-                        <td>@MembershipPlanPricing.GetName(member.Plan)</td><td>@member.GymGoal</td><td class="tm-schedule">@member.TrainingSchedule</td>
-                        <td>@member.JoinedDate.ToString("MMM d, yyyy")</td><td>@(member.ExpirationDate?.ToString("MMM d, yyyy") ?? "—")</td>
-                        <td><span class="tm-status @statusClass">@member.Status</span></td>
+                        <td style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;"><div class="tm-member" style=""><span class="tm-avatar" style="">@member.Initials</span><strong style="">@member.FullName</strong></div></td>
+                        <td style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;">@MembershipPlanPricing.GetName(member.Plan)</td><td style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;">@member.GymGoal</td><td class="tm-schedule" style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;">@member.TrainingSchedule</td>
+                        <td style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;">@member.JoinedDate.ToString("MMM d, yyyy")</td><td style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;">@(member.ExpirationDate?.ToString("MMM d, yyyy") ?? "—")</td>
+                        <td style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;"><span class="tm-status @statusClass" style="background:transparent!important;padding:0!important;border:0!important;border-radius:0!important;box-shadow:none!important;">@member.Status</span></td>
                     </tr>
                 }
             </tbody>
         </table>
         <footer class="tm-foot">
-            <span>Showing @Model.Members.Count of @Model.TotalCount (page @Model.Page of @Model.TotalPages)</span>
+            <span class="pagination-summary">Showing @Model.Members.Count of @Model.TotalCount (page @Model.Page of @Model.TotalPages)</span>
             <nav class="tm-pager">
                 <a asp-action="Members" asp-route-searchTerm="@Model.SearchTerm" asp-route-page="@(Model.Page - 1)" class="@(Model.Page <= 1 ? "disabled" : "")">Previous</a>
                 <a asp-action="Members" asp-route-searchTerm="@Model.SearchTerm" asp-route-page="@(Model.Page + 1)" class="@(Model.Page >= Model.TotalPages ? "disabled" : "")">Next</a>

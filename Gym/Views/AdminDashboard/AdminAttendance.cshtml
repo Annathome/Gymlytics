@@ -19,7 +19,8 @@
         display: flex;
         gap: 10px;
         align-items: center;
-        padding-bottom: 18px;
+        margin-bottom: 5px;
+        padding-bottom: 0;
         border-bottom: 1px solid #303430;
     }
 
@@ -28,7 +29,7 @@
         padding: 10px 16px;
         background: transparent !important;
         color: #d7ddd8 !important;
-        font-size: 15px !important;
+        
         font-weight: 700;
         line-height: 1.2;
     }
@@ -38,8 +39,8 @@
         gap: 10px;
         flex: 1;
         max-width: 804px;
-        margin-top:30px;
-        margin-bottom: 10px;
+        margin-top: 0;
+        margin-bottom: 24px;
     }
 
         .aa-search input {
@@ -64,7 +65,7 @@
             border: 0;
             background: #b7ff1b;
             color: #101510;
-            font-size: 10px;
+            
             font-weight: 800;
         }
 
@@ -85,7 +86,7 @@
             border: 1px solid #7fae1b;
             color: #b7ff1b;
             padding: 0 16px;
-            font-size: 10px;
+            
             font-weight: 800;
             text-align: center;
             box-sizing: border-box;
@@ -116,7 +117,7 @@
             color: #dce3dd;
             text-align: left;
             text-decoration: none;
-            font: 11px Arial;
+            font-family:Arial;
         }
 
             .aa-export-menu a:hover,
@@ -132,7 +133,7 @@
 
         .aa-heading h1 {
             margin: 0 0 5px;
-            font-size: 30px;
+            
             color: #dce3dd;
             font-weight: 700;
             font-family: "Inria Serif",serif;
@@ -142,7 +143,7 @@
         .aa-heading p {
             margin: 0;
             color: #b7ff1b;
-            font-size: 10px;
+            
         }
 
     /* Stats */
@@ -164,7 +165,7 @@
 
     .aa-label {
         color: #aeb6b0;
-        font-size: 9px;
+        
         font-weight: 800;
         letter-spacing: .08em;
         text-transform: uppercase;
@@ -172,7 +173,7 @@
 
     .aa-value {
         margin-top: 10px;
-        font-size: 28px;
+        
         font-weight: 800;
     }
 
@@ -194,7 +195,7 @@
             margin: 0;
             padding: 14px;
             background: transparent;
-            font-size: 13px;
+            
         }
 
     .aa-table-wrap {
@@ -217,14 +218,14 @@
 
         .aa-table th {
             color: #cbd1cc;
-            font-size: 9px;
+            
             letter-spacing: .08em;
             text-transform: uppercase;
             background: #9ba49d;
         }
 
         .aa-table td {
-            font-size: 12px;
+            
         }
 
     .aa-member {
@@ -244,14 +245,14 @@
         border-radius: 50%;
         background: #27372b;
         color: #b7ff1b;
-        font-size: 10px;
+        
     }
 
     .aa-badge {
         padding: 4px 8px;
         background: #353735;
         color: #c4cac5;
-        font-size: 9px;
+        
         font-weight: 800;
         text-transform: uppercase;
     }
@@ -312,7 +313,7 @@
             background: transparent;
             color: #e5eae6;
             text-align: left;
-            font-size: 11px;
+            
         }
 
             .aa-menu button:hover {
@@ -345,7 +346,7 @@
 
     .aa-info {
         color: #aab3ac;
-        font-size: 15px;
+        
     }
 
     .aa-pages {
@@ -364,7 +365,7 @@
         background: transparent;
         color: #fff;
         text-decoration: none;
-        font-size: 10px;
+        
         font-weight: 700;
         text-transform: uppercase;
         box-sizing: border-box;
@@ -388,7 +389,7 @@
         .aa-table th,
         .aa-table td {
             padding: 8px 5px;
-            font-size: 9px;
+            
         }
 
         .aa-avatar {
@@ -471,8 +472,8 @@
 
     <div class="aa-toolbar">
         <div class="aa-heading">
-            <h1>Attendance</h1>
-            <p class="dashboard-caption" style="font-family:'Inria Serif',serif!important;font-size:14px!important;font-weight:400!important;color:#aeb7b0!important;line-height:1.4!important;">Live check-ins and member attendance</p>
+            <h1 style="font-weight:700!important;margin-bottom: 0px !important;">Attendance</h1>
+            <p class="dashboard-caption" style="color:#aeb7b0!important;line-height:1.4!important;">Live check-ins and member attendance</p>
         </div>
 
         <details class="aa-export">
@@ -489,15 +490,15 @@
     <div class="aa-stats">
         <div class="aa-stat">
             <div class="aa-label">Members checked in</div>
-            <div class="aa-value">@Model.MembersCheckedIn</div>
+            <div class="aa-value" style="">@Model.MembersCheckedIn</div>
         </div>
         <div class="aa-stat">
             <div class="aa-label">Walk-ins today</div>
-            <div class="aa-value">@Model.WalkInsToday</div>
+            <div class="aa-value" style="">@Model.WalkInsToday</div>
         </div>
         <div class="aa-stat">
             <div class="aa-label">Currently in gym</div>
-            <div class="aa-value active">@Model.CurrentlyInGym</div>
+            <div class="aa-value active" style="">@Model.CurrentlyInGym</div>
         </div>
     </div>
 
@@ -517,39 +518,39 @@
                         <th>Membership</th>
                         <th>Check-in</th>
                         <th>Status</th>
-                        <th>Action</th>
+                        <th aria-label="Actions"></th>
                     </tr>
                 </thead>
                 <tbody>
                     @if (Model.Members.Count == 0)
                     {
                         <tr>
-                            <td colspan="6" class="aa-empty">No members found.</td>
+                            <td colspan="6" class="aa-empty" style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;">No members found.</td>
                         </tr>
                     }
                     @foreach (var member in Model.Members)
                     {
                         var badgeClass = member.Status.ToLowerInvariant().Replace(' ', '-');
                         <tr>
-                            <td>
-                                <div class="aa-member">
-                                    <span class="aa-avatar">@member.Initials</span>
-                                    <span>@member.FullName</span>
+                            <td style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;">
+                                <div class="aa-member" style="">
+                                    <span class="aa-avatar" style="">@member.Initials</span>
+                                    <span style="">@member.FullName</span>
                                 </div>
                             </td>
-                            <td>Member</td>
-                            <td>@member.Membership</td>
-                            <td>@(member.CheckInAt?.ToString("h:mm tt") ?? "—")</td>
-                            <td><span class="aa-badge @badgeClass">@member.Status</span></td>
-                            <td class="aa-action">
+                            <td style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;">Member</td>
+                            <td style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;">@member.Membership</td>
+                            <td style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;">@(member.CheckInAt?.ToString("h:mm tt") ?? "—")</td>
+                            <td style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;"><span class="aa-badge @badgeClass" style="background:transparent!important;padding:0!important;border:0!important;border-radius:0!important;box-shadow:none!important;">@member.Status</span></td>
+                            <td class="aa-action" style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;">
                                 <details class="aa-actions">
                                     <summary title="Attendance actions">⋮</summary>
-                                    <div class="aa-menu">
+                                    <div class="aa-menu" style="">
                                         <form asp-controller="Admin" asp-action="UpdateAttendance" method="post">
                                             @Html.AntiForgeryToken()
-                                            <input type="hidden" name="id" value="@member.ClientId" />
-                                            <input type="hidden" name="attendanceAction" value="checkin" />
-                                            <button type="submit" disabled="@(!member.CanCheckIn)">Check In</button>
+                                            <input type="hidden" name="id" value="@member.ClientId"  style=""/>
+                                            <input type="hidden" name="attendanceAction" value="checkin"  style=""/>
+                                            <button type="submit" disabled="@(!member.CanCheckIn)" style="">Check In</button>
                                         </form>
                                     </div>
                                 </details>
@@ -561,7 +562,7 @@
         </div>
 
         <div class="aa-pager">
-            <span class="aa-info">Showing @Model.Members.Count of @Model.TotalCount members</span>
+            <span class="pagination-summary aa-info">Showing @Model.Members.Count of @Model.TotalCount members</span>
             <div class="aa-pages">
                 <a class="aa-page @(Model.Page <= 1 ? "disabled" : "")" asp-action="Attendance" asp-route-searchTerm="@Model.SearchTerm" asp-route-page="@(Model.Page - 1)">Previous</a>
                 <a class="aa-page @(Model.Page >= Model.TotalPages ? "disabled" : "")" asp-action="Attendance" asp-route-searchTerm="@Model.SearchTerm" asp-route-page="@(Model.Page + 1)">Next</a>

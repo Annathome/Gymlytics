@@ -27,18 +27,18 @@
     body.admin-shell .user-activity-page .activity-back { color:#b7ff1b !important; margin-bottom:24px !important; gap:10px !important; }
     body.admin-shell .user-activity-page .activity-back:hover { color:#fff !important; }
     body.admin-shell .user-activity-page .activity-heading { margin-bottom:28px !important; padding-left:18px; border-left:4px solid #b7ff1b; }
-    body.admin-shell .user-activity-page .activity-heading h1 { color:#fff !important; font-size:30px !important; margin:0 0 8px !important; }
+    body.admin-shell .user-activity-page .activity-heading h1 { color:#fff !important;  margin:0 0 8px !important; }
     body.admin-shell .user-activity-page .activity-heading p { color:#d0d4d1 !important; }
     body.admin-shell .user-activity-page .user-activity-card { border:1px solid #68686d !important; border-radius:14px !important; box-shadow:0 12px 28px #0003 !important; }
     body.admin-shell .user-activity-page .activity-card-heading { display:flex; align-items:center; gap:12px; padding:20px 24px; background:#303430; color:#fff; }
     body.admin-shell .user-activity-page .activity-card-heading i { color:#b7ff1b; }
-    body.admin-shell .user-activity-page .activity-card-heading h2 { margin:0; font-size:20px !important; color:#fff !important; }
+    body.admin-shell .user-activity-page .activity-card-heading h2 { margin:0;  color:#fff !important; }
     body.admin-shell .user-activity-page .activity-row { padding:16px 24px !important; gap:16px; border-color:#727177 !important; }
     body.admin-shell .user-activity-page .activity-event { gap:14px !important; color:#fff; }
     body.admin-shell .user-activity-page .activity-icon { display:inline-flex; align-items:center; justify-content:center; width:36px; height:36px; border-radius:50%; background:#42464a; color:#e0e4e1; }
     body.admin-shell .user-activity-page .activity-login .activity-icon { background:#b7ff1b18; color:#b7ff1b; }
-    body.admin-shell .user-activity-page .activity-label { color:#fff !important; font-size:16px !important; }
-    body.admin-shell .user-activity-page .activity-time { color:#e0e2e1 !important; font-size:13px !important; white-space:nowrap; }
+    body.admin-shell .user-activity-page .activity-label { color:#fff !important;  }
+    body.admin-shell .user-activity-page .activity-time { color:#e0e2e1 !important;  white-space:nowrap; }
     body.admin-shell .user-activity-page .activity-pagination { padding:18px 24px; border-radius:12px; gap:16px; flex-wrap:wrap; color:#e0e2e1 !important; }
     body.admin-shell .user-activity-page .activity-pagination .btn { border:1px solid #b7ff1b !important; color:#b7ff1b !important; background:transparent !important; }
     body.admin-shell .user-activity-page .activity-pagination .btn:hover { background:#b7ff1b !important; color:#1b201c !important; }
@@ -56,7 +56,7 @@
     </a>
     <!-- Header Section -->
     <div class="activity-heading mb-4">
-        <h1 class="h4 fw-bold mb-1">@(user?.DisplayName ?? "User") Activity</h1>
+        <h1 class="h4 fw-bold mb-1" style="font-weight:700!important;margin-bottom: 0px !important;">@(user?.DisplayName ?? "User") Activity</h1>
         <p class="text-muted mb-0 fs-6">@(user?.Email)</p>
     </div>
     <!-- Activity Log Card -->
@@ -94,7 +94,7 @@
     @if (Model?.Items != null && Model.Items.Any())
     {
         <div class="activity-pagination d-flex justify-content-between align-items-center text-muted small mt-3">
-            <span>Page @Model.Page of @Model.TotalPages &middot; @Model.TotalCount records</span>
+            <span class="pagination-summary">Page @Model.Page of @Model.TotalPages &middot; @Model.TotalCount records</span>
             <div class="activity-pagination-buttons d-flex gap-2">
                 <a asp-controller="Admin"
                    asp-action="UserActivity"

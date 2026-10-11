@@ -1,0 +1,15 @@
+<partial name="_FormConfirmation" />
+<span hidden id="registration-draft-context" data-user="@User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value"></span>
+@if (TempData["RegistrationSuccess"] is string registrationSuccess)
+{
+    // Registration forms run in iframes. Their redirect loads this layout before
+    // navigating the parent, so retain the notice for the visible parent page.
+    if (Context.Request.Headers["Sec-Fetch-Dest"].ToString() == "iframe")
+    {
+        TempData.Keep("RegistrationSuccess");
+    }
+    <div class="registration-notice" data-registration-succeeded role="status" aria-live="polite">
+        <span class="confirmation-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="m6 12 4 4 8-8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg></span>
+        <div><strong>Registration complete</strong><p>@registrationSuccess</p></div>
+    </div>
+}

@@ -1,0 +1,146 @@
+@model List<Gym.Models.Equipment>
+@{
+    var currentPage = ViewBag.Page is int p ? p : 1;
+    var totalPages = ViewBag.TotalPages is int tp ? tp : 1;
+    var totalCount = ViewBag.TotalCount is int tc ? tc : Model.Count;
+}
+
+<style>
+    .erh-card {
+        margin-top: 36px;
+        overflow: hidden;
+        background: #5e5d63;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, .35);
+    }
+
+    .erh-scroll {
+        overflow-x: auto;
+    }
+
+    .erh-table {
+        width: 100%;
+        min-width: 760px;
+        border-collapse: collapse;
+        text-align: center;
+        color: #fff;
+    }
+
+        .erh-table thead th {
+            padding: 22px 16px;
+            background: #2e332f;
+            font-weight: 400;
+            text-transform: uppercase;
+        }
+
+        .erh-table tbody td {
+            padding: 18px 16px;
+            border-bottom: 1px solid #3c3c40;
+            vertical-align: middle;
+        }
+
+    .erh-good {
+        color: #b7ff1b;
+    }
+
+    .erh-table a {
+        color: #b7ff1b;
+        text-decoration: none;
+    }
+
+        .erh-table a:hover {
+            text-decoration: underline;
+        }
+
+    .erh-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        min-height: 80px;
+        padding: 14px 24px;
+        box-sizing: border-box;
+        background: #5e5d63;
+    }
+
+        .erh-footer > span {
+            color: #aab3ac;
+        }
+
+    .erh-pages {
+        display: flex;
+        gap: 14px;
+    }
+
+    .erh-page-button {
+        min-width: 102px;
+        height: 54px;
+        display: grid;
+        place-items: center;
+        padding: 0 18px;
+        border: 1px solid #74777a;
+        background: transparent;
+        color: #b7ff1b;
+        text-decoration: none;
+        text-transform: uppercase;
+        box-sizing: border-box;
+    }
+
+        .erh-page-button.disabled {
+            opacity: .4;
+            pointer-events: none;
+        }
+
+        .erh-page-button:not(.disabled):hover {
+            border-color: #b7ff1b;
+        }
+</style>
+
+<section id="equipment-report-history" class="erh-card">
+    <div class="erh-scroll">
+        <table class="erh-table">
+            <thead>
+                <tr>
+                    <th>Reported on</th>
+                    <th>Equipment</th>
+                    <th>Quantity affected</th>
+                    <th>Current status</th>
+                    <th>Evidence</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Count == 0)
+                {
+                    <tr><td colspan="5">No equipment reports yet.</td></tr>
+                }
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.AddedDate.ToString("MMM d, yyyy · h:mm tt")</td>
+                        <td>@item.EquipmentName</td>
+                        <td>@item.Quantity</td>
+                        <td class="@(item.Status == "Good" ? "erh-good" : "")">
+                            @(item.Status == "Good" ? "Resolved — Good condition" : item.Status)
+                        </td>
+                        <td>
+                            @if (!string.IsNullOrWhiteSpace(item.EvidencePhotoPath))
+                            {
+                                <a href="@item.EvidencePhotoPath" target="_blank" rel="noopener">View photo</a>
+                            }
+                            else
+                            {
+                                <span>—</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <footer class="erh-footer">
+        <span>Page @currentPage of @totalPages · @totalCount record(s)</span>
+        <nav class="erh-pages" aria-label="Equipment report pages">
+            <a class="erh-page-button @(currentPage <= 1 ? "disabled" : "")" href="?page=@(currentPage - 1)">Previous</a>
+            <a class="erh-page-button @(currentPage >= totalPages ? "disabled" : "")" href="?page=@(currentPage + 1)">Next</a>
+        </nav>
+    </footer>
+</section>

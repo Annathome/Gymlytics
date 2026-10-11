@@ -13,13 +13,13 @@
         max-width: 1050px;
         margin: 32px auto;
         color: #d9eadc;
-        font: 15px Arial, sans-serif;
+        font-family:Arial, sans-serif;
     }
 
         .availability-page h1 {
             margin: 0 0 7px;
             color: #63ff43;
-            font-size: 31px;
+            
         }
 
         .availability-page .lead {
@@ -46,7 +46,7 @@
         .availability-card h2 {
             margin: 0 0 20px;
             color: #65ff49;
-            font-size: 21px;
+            
         }
 
     .availability-days {
@@ -124,7 +124,7 @@
         padding: 14px;
         color: #b7cbb9;
         line-height: 1.5;
-        font-size: 15px;
+        
     }
 
     .availability-actions {
@@ -160,8 +160,8 @@
 </style>
 
 <main class="availability-page">
-    <h1>Weekly Availability</h1>
-    <p class="lead">Set the days and hours you are in the gym and the number of members you can manage each week.</p>
+    <h1 style="font-weight:700!important;margin-bottom: 0px !important;">Weekly Availability</h1>
+    <p class="lead" style="margin-bottom:40px !important;">Set the days and hours you are in the gym and the number of members you can manage each week.</p>
 
     @if (TempData["SuccessMessage"] is string success)
     {
@@ -170,7 +170,7 @@
 
     <form method="post" asp-action="Availability" class="availability-card">
         @Html.AntiForgeryToken()
-        <div asp-validation-summary="ModelOnly"></div>
+        <div asp-validation-summary="All"></div>
 
         <h2>Days available</h2>
         <div class="availability-days">
@@ -253,7 +253,7 @@
 <style>
     body.trainer-shell .availability-page { padding-bottom: 36px; }
     body.trainer-shell .availability-page > h1 { letter-spacing: -.3px; }
-    body.trainer-shell .availability-page .lead { color:#d4dbd5 !important; font-size:16px; margin-bottom:35px !important; }
+    body.trainer-shell .availability-page .lead { color:#d4dbd5 !important;  margin-bottom:35px !important; }
     body.trainer-shell .availability-card {
         padding: 30px 34px 28px;
         border: none !important;
@@ -261,18 +261,18 @@
         background: #5e5d63;
         box-shadow: 0 10px 24px rgba(0,0,0,.24);
     }
-    body.trainer-shell .availability-card h2 { color:#eef3ee; font-size:22px; margin-bottom:22px; }
+    body.trainer-shell .availability-card h2 { color:#eef3ee;  margin-bottom:22px; }
     body.trainer-shell .availability-days { gap:12px; }
     body.trainer-shell .day-choice span { padding:13px 5px; border-color:#4b8d50; transition:background .15s,border-color .15s,color .15s; }
     body.trainer-shell .day-choice span:hover { border-color:#b7ff1b; color:#fff; background:#354d38; }
     body.trainer-shell .day-choice input:checked + span { border-color:#b7ff1b; background:#185d25; box-shadow:inset 0 3px #b7ff1b; }
     body.trainer-shell .availability-fields { gap:22px; margin-top:26px; }
-    body.trainer-shell .availability-field label { color:#fff; font-size:14px; }
+    body.trainer-shell .availability-field label { color:#fff;  }
     body.trainer-shell .availability-field input,
     body.trainer-shell .availability-field select { height:48px; border-color:#c1c7c2; border-radius:4px; }
     body.trainer-shell .availability-field input:focus,
     body.trainer-shell .availability-field select:focus { border-color:#b7ff1b; outline:2px solid rgba(183,255,27,.2); outline-offset:2px; }
-    body.trainer-shell .availability-note { margin:20px 0 0; padding:12px 14px; color:#d0d7d1; font-size:13px; border-left:2px solid #b7ff1b; background:rgba(27,32,28,.22); }
+    body.trainer-shell .availability-note { margin:20px 0 0; padding:12px 14px; color:#d0d7d1;  border-left:2px solid #b7ff1b; background:rgba(27,32,28,.22); }
     body.trainer-shell .availability-actions { margin-top:24px; }
     body.trainer-shell .availability-save { padding:13px 22px; border:1px solid #b7ff1b; border-radius:0; background:#b7ff1b; color:#101510; transition:background .15s,color .15s; }
     body.trainer-shell .availability-save:hover { background:#1b201c; color:#b7ff1b; }

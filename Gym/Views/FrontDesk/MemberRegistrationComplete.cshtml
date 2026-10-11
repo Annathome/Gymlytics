@@ -1,0 +1,24 @@
+@{
+    Layout = null;
+    var message = TempData["RegistrationSuccess"] as string;
+    var destination = ViewBag.ReturnToAdmin == true ? Url.Action("Members", "Admin") : Url.Action("Member", "FrontDesk");
+    ViewData["Title"] = "Registration complete";
+    ViewData["Message"] = message ?? "The membership and its payment have been saved successfully.";
+    ViewData["Warning"] = TempData["ErrorMessage"] as string;
+    ViewData["ReturnUrl"] = destination;
+    ViewData["ReturnLabel"] = "Back to members";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Registration complete</title>
+    <link rel="stylesheet" href="~/css/system-typography.css" asp-append-version="true" />
+</head>
+<body class="completion-page">
+    <partial name="_CompletionCard" />
+    <span hidden id="registration-draft-context" data-user="@User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value"></span>
+    <script src="~/js/registration-drafts.js" asp-append-version="true"></script>
+</body>
+</html>

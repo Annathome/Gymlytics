@@ -1,754 +1,634 @@
-﻿@model Gym.Models.PagedResult<Gym.Models.UserRoleViewModel>
+@model Gym.Models.PagedResult<Gym.Models.UserRoleViewModel>
 @{
     ViewData["Title"] = "User Role";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
 <style>
-        * {
-            box-sizing: border-box;
-        }
+    * {
+        box-sizing: border-box;
+    }
 
-        .page-wrap {
-            font-family: 'Inter', sans-serif;
-            margin: 0;
-            max-width: none;
-            width: 100%;
-            color: #9ba49d;
-        }
+    .page-wrap {
+        font-family: 'Inter', sans-serif;
+        margin: 0;
+        max-width: none;
+        width: 100%;
+        color: #9ba49d;
+        font-size: 12px;
+    }
 
-        .page-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 20px;
-        }
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 20px;
+    }
 
-            .page-header h1 {
-                font-size: 1.75rem;
-                font-weight: 700;
-                margin: 0 0 4px 0;
-            }
+    .page-header h1 {
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin: 0 0 4px 0;
+        color: #ffffff;
+    }
 
-            .page-header p {
-                color: #6b7280;
-                margin: 0;
-                font-size: 0.95rem;
-            }
+    .page-header p {
+        color: #aeb7b0;
+        margin: 0;
+        font-size: 12px;
+    }
 
-        .btn-invite {
-            background: #fff;
-            border: 1px solid #d1d5db;
-            border-radius: 8px;
-            padding: 10px 18px;
-            font-weight: 600;
-            font-size: 0.9rem;
-            color: #1a1a1a;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            white-space: nowrap;
-            text-decoration: none;
-            transition: background 0.15s ease;
-            cursor: pointer;
-        }
+    .btn-invite {
+        background: #b7ff1b;
+        border: 1px solid #b7ff1b;
+        border-radius: 8px;
+        padding: 10px 18px;
+        font-weight: 600;
+        font-size: 12px;
+        color: #1a1a1a;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        white-space: nowrap;
+        text-decoration: none;
+        transition: background 0.15s ease;
+        cursor: pointer;
+    }
 
-        .registry-overlay {
-            position: fixed;
-            inset: 0;
-            z-index: 7000;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            padding: 24px;
-            background: rgba(0, 0, 0, .72);
-        }
+    .btn-invite:hover {
+        background: #a3e617;
+        color: #1a1a1a;
+    }
 
-        .registry-overlay.open { display: flex; }
+    .registry-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 7000;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        background: rgba(0, 0, 0, .72);
+    }
 
-        .registry-dialog {
-            position: relative;
-            width: min(680px, 96vw);
-            height: min(560px, 92vh);
-            overflow: hidden;
-            border: 0;
-            border-radius: 12px;
-            background: #171b18;
-            box-shadow: 0 24px 70px rgba(0, 0, 0, .35);
-        }
+    .registry-overlay.open { display: flex; }
 
-        .registry-frame {
-            width: 100%;
-            height: 100%;
-            border: 0;
-            background: #171b18;
-        }
+    .registry-dialog {
+        position: relative;
+        width: min(680px, 96vw);
+        height: min(560px, 92vh);
+        overflow: hidden;
+        border: 0;
+        border-radius: 12px;
+        background: #171b18;
+        box-shadow: 0 24px 70px rgba(0, 0, 0, .35);
+    }
 
-        .registry-close {
-            position: absolute;
-            top: 12px;
-            right: 14px;
-            z-index: 2;
-            width: 38px;
-            height: 38px;
-            border: 0;
-            border-radius: 5px;
-            background: #111;
-            color: #fff;
-            font-size: 23px;
-            line-height: 1;
-            cursor: pointer;
-        }
+    .registry-frame {
+        width: 100%;
+        height: 100%;
+        border: 0;
+        background: #171b18;
+    }
 
-            .btn-invite:hover {
-                background: #f3f4f6;
-                color: #1a1a1a;
-            }
+    .card {
+        background: #272b28;
+        border: 1px solid #343b37;
+        border-radius: 14px;
+        overflow: visible;
+    }
 
-        .alert-banner {
-            border-radius: 10px;
-            padding: 12px 16px;
-            margin-bottom: 16px;
-            font-size: 0.9rem;
-        }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
 
-        .alert-success {
-            background: #dcfce7;
-            color: #15803d;
-        }
+    .card-table th {
+        background: #272b28;
+        color: #8f9b92;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+        padding: 16px 16px;
+        border-bottom: 1px solid #343b37;
+        text-align: left;
+    }
 
-        .alert-error {
-            background: #fee2e2;
-            color: #b91c1c;
-        }
+    .card-table td {
+        padding: 16px 16px;
+        text-align: left;
+        border-bottom: 1px solid #343b37;
+        font-size: 12px;
+        color: #d1d5db;
+        vertical-align: middle;
+    }
 
-        /* Banner Styles for Confirmation Alerts */
-        .alert-warning-banner {
-            background: #fffbeb;
-            border: 1px solid #fef3c7;
-            border-radius: 10px;
-            padding: 14px 18px;
-            margin-bottom: 16px;
-            font-size: 0.9rem;
-            color: #92400e;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+    .card-table tbody tr:last-child td {
+        border-bottom: none;
+    }
 
-        .alert-warning-actions {
-            display: flex;
-            gap: 8px;
-        }
+    .user-cell {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
 
-        .btn-confirm-danger {
-            background: #b91c1c;
-            color: #fff;
-            border: none;
-            padding: 6px 14px;
-            border-radius: 6px;
-            font-weight: 600;
-            font-size: 0.82rem;
-            cursor: pointer;
-            text-decoration: none;
-        }
+    .avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: #1e3a2f;
+        color: #b7ff1b;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: 700;
+        flex-shrink: 0;
+    }
 
-            .btn-confirm-danger:hover {
-                background: #991b1b;
-                color: #fff;
-            }
+    .user-name-text span {
+        color: #ffffff !important;
+        font-size: 12px !important;
+        font-weight: 500;
+        text-decoration: none !important;
+    }
 
-        .btn-confirm-cancel {
-            background: #e5e7eb;
-            color: #374151;
-            border: none;
-            padding: 6px 14px;
-            border-radius: 6px;
-            font-weight: 600;
-            font-size: 0.82rem;
-            cursor: pointer;
-            text-decoration: none;
-        }
+    .badge-role, .badge-status {
+        font-size: 12px;
+        font-weight: 600;
+        color: #b7ff1b;
+        background: transparent;
+        padding: 0;
+    }
 
-            .btn-confirm-cancel:hover {
-                background: #d1d5db;
-                color: #1f2937;
-            }
+    .access-text, .last-login {
+        color: #9ba49d;
+        font-size: 12px;
+    }
 
-        .card {
-            background: #fff;
-            border: 1px solid #e5e7eb;
-            border-radius: 14px;
-            overflow: visible;
-        }
+    .actions-cell {
+        position: relative;
+        text-align: right;
+        width: 50px;
+        white-space: nowrap;
+    }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
+    .menu-dots-btn {
+        background: none;
+        border: none;
+        color: #9ca3af;
+        font-size: 16px;
+        cursor: pointer;
+        padding: 4px 8px;
+        border-radius: 6px;
+    }
 
-        .card-table th {
-            background: #343735;
-            color: #ccd2cd;
-            font-size: 12px;
-            letter-spacing: .08em;
-            text-transform: uppercase;
-        }
+    /* Fixed action menu styling to prevent horizontal stretching / incorrect layout */
+    .action-menu {
+        display: none !important;
+        position: absolute;
+        right: 0;
+        top: 100%;
+        background: #1f2937;
+        border: 1px solid #374151;
+        border-radius: 8px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+        width: 180px;
+        min-width: 180px;
+        z-index: 99999;
+        padding: 6px 0;
+        text-align: left;
+        flex-direction: column;
+    }
 
-        .card-table th,
-        .card-table td {
-            padding: 14px 13px;
-            text-align: left;
-            border-bottom: 1px solid #313632;
-        }
+    .action-menu.open {
+        display: flex !important;
+    }
 
-        .card td {
-            font-size: 13px;
-        }
+    .action-menu-item {
+        display: block;
+        width: 100%;
+        padding: 8px 16px;
+        text-align: left;
+        background: transparent;
+        border: none;
+        color: #e5e7eb;
+        text-decoration: none;
+        font-size: 12px;
+        cursor: pointer;
+        white-space: nowrap;
+    }
 
-        /* thead th {
-            text-align: left;
-            font-size: 0.8rem;
-            font-weight: 500;
-            color: #9ca3af;
-            padding: 14px 20px;
-            border-bottom: 1px solid #eee;
-        }
+    .action-menu-item:hover {
+        background: #374151;
+        color: #ffffff;
+    }
 
-        tbody td {
-            padding: 16px 20px;
-            border-bottom: 1px solid #f0f0f0;
-            font-size: 0.9rem;
-            vertical-align: middle;
-        }
+    .action-menu-item.danger {
+        color: #f87171;
+    }
 
-        tbody tr:last-child td {
-            border-bottom: none;
-        } */
+    .action-menu-item.danger:hover {
+        background: #7f1d1d;
+        color: #fca5a5;
+    }
 
-        .user-cell {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
+    .pager {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px;
+        font-size: 12px;
+        color: #8f9b92;
+        border-top: 1px solid #343b37;
+    }
 
-        .avatar {
-            width: 34px;
-            height: 34px;
-            border-radius: 50%;
-            background: #dbeafe;
-            color: #1e40af;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.75rem;
-            font-weight: 700;
-            flex-shrink: 0;
-        }
+    .pager .btn-invite {
+        background: transparent;
+        border: 1px solid #48544d;
+        color: #8f9b92;
+        padding: 6px 14px;
+        font-size: 12px;
+        border-radius: 6px;
+    }
 
-        .badge-role, .badge-status {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 999px;
-            font-size: 0.78rem;
-            font-weight: 600;
-        }
+    .pager .btn-invite:hover:not(.pager-disabled) {
+        border-color: #b7ff1b;
+        color: #b7ff1b;
+        background: transparent;
+    }
 
-        .badge-super-admin {
-            background: #ede9fe;
-            color: #6d28d9;
-        }
+    .pager-disabled {
+        pointer-events: none;
+        opacity: 0.4;
+    }
 
-        .badge-staff {
-            background: #dbeafe;
-            color: #1d4ed8;
-        }
+    .footer-note {
+        margin-top: 24px;
+        font-size: 12px;
+        color: #8f9b92;
+    }
 
-        .badge-trainer {
-            background: #dcfce7;
-            color: #15803d;
-        }
+    .footer-note strong {
+        display: block;
+        color: #ffffff;
+        font-size: 12px;
+        margin-bottom: 6px;
+    }
 
-        .badge-default {
-            background: #f3f4f6;
-            color: #6b7280;
-        }
+    .footer-note-items {
+        display: flex;
+        gap: 24px;
+        flex-wrap: wrap;
+    }
 
-        .badge-active {
-            background: #dcfce7;
-            color: #15803d;
-        }
+    .floating-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,.6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 2000;
+        font-size: 12px;
+    }
 
-        .badge-pending {
-            background: #fef3c7;
-            color: #b45309;
-        }
+    .floating-card {
+        width: min(460px,calc(100vw - 32px));
+        background: #272b28;
+        color: #fff;
+        border: 1px solid #343b37;
+        border-radius: 14px;
+        padding: 24px;
+        box-shadow: 0 20px 50px rgba(0,0,0,.4);
+    }
 
-        .badge-suspended {
-            background: #fee2e2;
-            color: #b91c1c;
-        }
+    .floating-card h3 {
+        margin: 0 0 8px;
+        font-size: 14px;
+        font-weight: 700;
+        color: #fff;
+    }
 
-        .access-text {
-            color: #4b5563;
-        }
+    .floating-card p {
+        color: #9ba49d;
+        margin: 0 0 20px;
+        font-size: 12px;
+    }
 
-        .last-login {
-            color: #4b5563;
-        }
+    .floating-warning {
+        color: #f59e0b;
+        background: #382c1b;
+        border: 1px solid #5a4520;
+        border-radius: 8px;
+        padding: 10px 12px;
+        margin-bottom: 20px;
+        font-size: 12px;
+    }
 
-        .actions-cell {
-            position: relative;
-            text-align: right;
-        }
+    .floating-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+    }
 
-        .menu-dots-btn {
-            background: none;
-            border: none;
-            color: #9ca3af;
-            font-size: 1.1rem;
-            cursor: pointer;
-            padding: 4px 8px;
-            border-radius: 6px;
-        }
+    .floating-cancel, .floating-confirm {
+        border-radius: 8px;
+        padding: 8px 14px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+    }
 
-        .action-menu {
-            display: none;
-            position: absolute;
-            right: 20px;
-            top: 40px;
-            background: #fff;
-            border: 1px solid #e5e7eb;
-            border-radius: 10px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-            min-width: 180px;
-            z-index: 20;
-            overflow: hidden;
-        }
+    .floating-cancel {
+        background: #343b37;
+        border: 1px solid #48544d;
+        color: #d1d5db;
+    }
 
-            .action-menu.open {
-                display: block;
-            }
+    .floating-confirm {
+        background: #b7ff1b;
+        border: 1px solid #b7ff1b;
+        color: #1a1a1a;
+    }
+</style>
 
-            .action-menu form, .action-menu a {
-                margin: 0;
-            }
-
-        .action-menu-item {
-            display: block;
-            width: 100%;
-            text-align: left;
-            background: none;
-            border: none;
-            padding: 10px 16px;
-            font-size: 0.85rem;
-            color: #1a1a1a;
-            cursor: pointer;
-            text-decoration: none;
-        }
-
-            .action-menu-item:hover {
-                background: #f9fafb;
-                color: #1a1a1a;
-            }
-
-            .action-menu-item.danger {
-                color: #b91c1c;
-            }
-
-        .footer-note {
-            margin-top: 20px;
-            display: flex;
-            gap: 24px;
-            flex-wrap: wrap;
-            font-size: 0.85rem;
-            color: #6b7280;
-        }
-
-            .footer-note strong {
-                display: block;
-                color: #1a1a1a;
-                font-size: 0.9rem;
-                margin-bottom: 8px;
-            }
-
-        .footer-note-items {
-            display: flex;
-            gap: 24px;
-            flex-wrap: wrap;
-        }
-
-        .footer-note-item {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .pager {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 16px;
-            font-size: 0.85rem;
-            color: #6b7280;
-        }
-
-        .pager-disabled {
-            pointer-events: none;
-            opacity: 0.4;
-        }
-
-        .user-name-button { appearance:none; border:0 !important; outline:0 !important; box-shadow:none !important; background:transparent; padding:0; color:#1a1a1a; font:inherit; cursor:pointer; text-align:left; display:flex; align-items:center; gap:12px; }
-        .user-name-button:hover,.user-name-button:focus { color:rgb(8,61,2); border:0; outline:0; box-shadow:none; }
-        .user-name-text { display:flex; flex-direction:column; }
-        html body.admin-shell .page-wrap .card-table .user-name-button .user-name-text,
-        html body.admin-shell .page-wrap .card-table .user-name-button .user-name-text span {
-            color:#b7ff1b !important;
-            font-size:16px !important;
-            text-decoration:none !important;
-        }
-        html body.admin-shell .user-name-button:is(:hover, :focus-visible) .user-name-text {
-            text-decoration:none !important;
-        }
-        .details-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px 16px; margin:18px 0; }
-        .details-field { min-width:0; }
-        .details-field.full { grid-column:1/-1; }
-        .details-field label { display:block; color:#6b7280; font-size:.78rem; margin-bottom:4px; }
-        .details-value,.password-input { width:100%; min-height:40px; border:1px solid #d1d5db; border-radius:7px; padding:9px 10px; background:#f9fafb; color:#1f2937; }
-        .password-input { background:#fff; }
-        .password-note { color:#6b7280; font-size:.78rem; margin-top:5px; }
-        @@media (max-width:600px) { .details-grid { grid-template-columns:1fr; } .details-field.full { grid-column:auto; } }
-
-        .floating-overlay { position:fixed; inset:0; background:rgba(0,0,0,.5); display:flex; align-items:center; justify-content:center; z-index:2000; }
-        .floating-card { width:min(460px,calc(100vw - 32px)); background:#fffef8; border-radius:14px; padding:24px; box-shadow:0 20px 50px rgba(0,0,0,.2); font-family:"Inria Serif",serif; }
-        .floating-card h3 { margin:0 0 8px; font-size:1.2rem; font-weight:700; }
-        .floating-card p { color:#4b5563; margin:0 0 20px; }
-        .floating-warning { color:#b45309; background:#fffbeb; border:1px solid #fde68a; border-radius:8px; padding:10px 12px; margin-bottom:20px; font-size:.88rem; }
-        .floating-actions { display:flex; justify-content:flex-end; gap:10px; }
-        .floating-cancel,.floating-confirm { border-radius:8px; padding:9px 15px; font-family:"Inria Serif",serif; font-weight:700; cursor:pointer; }
-        .floating-cancel { background:#eef7ec; border:1px solid #8aac80; color:rgb(8,61,2); }
-        .floating-confirm { background:rgb(8,61,2); border:1px solid rgb(8,61,2); color:#d8c38a; }
-        .floating-success { background:rgb(8,61,2); border-color:rgb(8,61,2); }
-    </style>
-    <section class="page-wrap">
-        <div class="page-header">
-            <div>
-                <h1>User roles</h1>
-                <p class="dashboard-caption" style="font-family:'Inria Serif',serif!important;font-size:14px!important;font-weight:400!important;color:#aeb7b0!important;line-height:1.4!important;">Login authentication and access control</p>
-            </div>
-            <div style="display:flex;gap:10px;align-items:center;">
-                <button type="button" class="btn-invite" onclick="openStaffRegistry()">
-                    + Invite staff
-                </button>
-            </div>
+<section class="page-wrap">
+    <div class="page-header">
+        <div>
+            <h1>User roles</h1>
+            <p>Login authentication and access control</p>
         </div>
+        <div>
+            <button type="button" class="btn-invite" onclick="openStaffRegistry()">
+                + INVITE STAFF
+            </button>
+        </div>
+    </div>
 
-        <div class="card">
-            <table class="card-table">
-                <thead>
-                    <tr>
-                        <th>User</th>
-                        <th>Role</th>
-                        <th>Status</th>
-                        <th>Access</th>
-                        <th>Today's attendance</th>
-                        <th>Last login</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @if (Model == null || Model.Items.Count == 0)
+    <div class="card">
+        <table class="card-table">
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th>Access</th>
+                    <th>Today's attendance</th>
+                    <th>Last login</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model == null || Model.Items.Count == 0)
+                {
+                    <tr><td colspan="7" class="text-center text-muted py-4">No users found.</td></tr>
+                }
+                else
+                {
+                    @foreach (var user in Model.Items)
                     {
-                        <tr><td colspan="7" class="text-center text-muted py-4">No users found.</td></tr>
-                    }
-                    else
-                    {
-                        @foreach (var user in Model.Items)
-                        {
-                            <tr>
-                                <td>
-                                    <div class="user-cell">
-                                        <div style="display:flex;align-items:center;gap:12px;">
-                                            <span class="avatar">@user.Initials</span>
-                                            <span class="user-name-text">
-                                                <span style="color:#fff!important;font-size:16px!important;text-decoration:none!important;">@user.DisplayName</span>
-                                            </span>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <span class="badge-role @user.RoleBadgeClass">@user.RoleLabel</span>
-                                </td>
-                                <td>
-                                    <span class="badge-status @user.StatusBadgeClass">@user.Status</span>
-                                </td>
-                                <td class="access-text">@user.Access</td>
-                                <td class="last-login">@user.TodayAttendanceDisplay</td>
-                                <td class="last-login">@user.LastLoginDisplay</td>
-                                <td class="actions-cell">
-                                    <button type="button" class="menu-dots-btn" onclick="toggleMenu('@user.Id')">&#8942;</button>
-                                    <div class="action-menu" id="menu-@user.Id">
-                                        <a class="action-menu-item" asp-controller="Admin" asp-action="UserActivity" asp-route-id="@user.Id">
-                                            View activity
-                                        </a>
+                        <tr>
+                            <td>
+                                <div class="user-cell">
+                                    <span class="avatar">@user.Initials</span>
+                                    <span class="user-name-text">
+                                        <span>@user.DisplayName</span>
+                                    </span>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge-role @user.RoleBadgeClass">@user.RoleLabel</span>
+                            </td>
+                            <td>
+                                <span class="badge-status @user.StatusBadgeClass">@user.Status</span>
+                            </td>
+                            <td class="access-text">@user.Access</td>
+                            <td class="last-login">@user.TodayAttendanceDisplay</td>
+                            <td class="last-login">@user.LastLoginDisplay</td>
+                            <td class="actions-cell">
+                                <button type="button" class="menu-dots-btn" onclick="toggleMenu('@user.Id')">&#8942;</button>
+                                <div class="action-menu" id="menu-@user.Id">
+                                    <a class="action-menu-item" asp-controller="Admin" asp-action="UserActivity" asp-route-id="@user.Id">
+                                        View activity
+                                    </a>
 
-                                        @if (user.TracksStaffAttendance && user.Status == "Active" && user.TodayAttendanceStatus != "Absent")
-                                        {
-                                            <button type="button" class="action-menu-item danger"
-                                                    data-name="@user.DisplayName"
-                                                    data-username="@user.Username"
-                                                    data-action-name="Mark absent"
-                                                    data-question="Do you want to mark this user absent"
-                                                    data-message="Mark this staff member absent for today. Any later login using this account will not change the absent status."
-                                                    data-url="@Url.Action("MarkStaffAbsent", "Admin", new { id = user.Id, page = Model.Page })"
-                                                    onclick="openUserActionModal(this)">Mark absent</button>
-                                        }
-
-                                        @if (user.Status == "Active")
-                                        {
-                                            <button type="button" class="action-menu-item"
-                                                    data-name="@user.DisplayName"
-                                                    data-username="@user.Username"
-                                                    data-action-name="Suspend account"
-                                                    data-question="Do you want to suspend the account for"
-                                                    data-message="This user will no longer be able to log in until reactivated."
-                                                    data-url="@Url.Action("SuspendUser", "Admin", new { id = user.Id })"
-                                                    onclick="openUserActionModal(this)">Suspend account</button>
-                                        }
-                                        @if (user.Status == "Suspended")
-                                        {
-                                            <button type="button" class="action-menu-item"
-                                                    data-name="@user.DisplayName"
-                                                    data-username="@user.Username"
-                                                    data-action-name="Reactivate account"
-                                                    data-question="Do you want to reactivate the account for"
-                                                    data-message="This user will regain access to their account."
-                                                    data-url="@Url.Action("ReactivateUser", "Admin", new { id = user.Id })"
-                                                    onclick="openUserActionModal(this)">Reactivate account</button>
-                                        }
-
+                                    @if (user.TracksStaffAttendance && user.Status == "Active" && user.TodayAttendanceStatus != "Absent")
+                                    {
                                         <button type="button" class="action-menu-item danger"
                                                 data-name="@user.DisplayName"
                                                 data-username="@user.Username"
-                                                data-action-name="Delete account"
-                                                data-question="Do you want to delete the account for"
-                                                data-message="This action permanently removes the account and cannot be undone."
-                                                data-url="@Url.Action("DeleteUser", "Admin", new { id = user.Id })"
-                                                onclick="openUserActionModal(this)">Delete account</button>
-                                    </div>
-                                </td>
-                            </tr>
-                        }
-                    }
-                </tbody>
-            </table>
-            @if (Model != null && Model.Items.Count > 0)
-            {
-                <div class="pager">
-                    <span>Page @Model.Page of @Model.TotalPages &middot; @Model.TotalCount users</span>
-                    <div style="display:flex;gap:8px;">
-                        <a asp-action="UserRoles" asp-route-page="@(Model.Page - 1)"
-                           class="btn-invite @(Model.HasPrevious ? "" : "pager-disabled")">
-                            Previous
-                        </a>
-                        <a asp-action="UserRoles" asp-route-page="@(Model.Page + 1)"
-                           class="btn-invite @(Model.HasNext ? "" : "pager-disabled")">
-                            Next
-                        </a>
-                    </div>
-                </div>
-            }
-        </div>
+                                                data-action-name="Mark absent"
+                                                data-question="Do you want to mark this user absent"
+                                                data-message="Mark this staff member absent for today. Any later login using this account will not change the absent status."
+                                                data-url="@Url.Action("MarkStaffAbsent", "Admin", new { id = user.Id, page = Model.Page })"
+                                                onclick="openUserActionModal(this)">Mark absent</button>
+                                    }
 
-        <div class="footer-note">
-            <div>
-                <strong>Login security</strong>
-                <div class="footer-note-items">
-                    <div class="footer-note-item">Password + email verification</div>
-                    <div class="footer-note-item">Session auto-expires after 30 min idle</div>
+                                    @if (user.Status == "Active")
+                                    {
+                                        <button type="button" class="action-menu-item"
+                                                data-name="@user.DisplayName"
+                                                data-username="@user.Username"
+                                                data-action-name="Suspend account"
+                                                data-question="Do you want to suspend the account for"
+                                                data-message="This user will no longer be able to log in until reactivated."
+                                                data-url="@Url.Action("SuspendUser", "Admin", new { id = user.Id })"
+                                                onclick="openUserActionModal(this)">Suspend account</button>
+                                    }
+                                    @if (user.Status == "Suspended")
+                                    {
+                                        <button type="button" class="action-menu-item"
+                                            data-name="@user.DisplayName"
+                                            data-username="@user.Username"
+                                            data-action-name="Suspend account"
+                                            data-question="Do you want to suspend the account for"
+                                            data-message="This user will no longer be able to log in until reactivated."
+                                            data-url="@Url.Action("SuspendUser", "Admin", new { id = user.Id, page = Model.Page })"
+                                            onclick="openUserActionModal(this)">Suspend account</button>
+                                     }
+
+                                    
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+
+        @if (Model != null && Model.Items.Count > 0)
+        {
+            <div class="pager">
+                <span>Page @Model.Page of @Model.TotalPages &middot; @Model.TotalCount users</span>
+                <div style="display:flex;gap:8px;">
+                    <a asp-action="UserRoles" asp-route-page="@(Model.Page - 1)"
+                       class="btn-invite @(Model.HasPrevious ? "" : "pager-disabled")">
+                        Previous
+                    </a>
+                    <a asp-action="UserRoles" asp-route-page="@(Model.Page + 1)"
+                       class="btn-invite @(Model.HasNext ? "" : "pager-disabled")">
+                        Next
+                    </a>
                 </div>
             </div>
-        </div>
-    </section>
+        }
+    </div>
 
-    <div id="userActionModal" class="floating-overlay" style="display:none;">
-        <div class="floating-card" role="dialog" aria-modal="true">
-            <h3 id="userActionTitle">Confirm action</h3>
-            <p id="userActionUser"></p>
-            <div class="floating-warning" id="userActionMessage"></div>
-            <div class="floating-actions">
-                <button type="button" class="floating-cancel" onclick="closeUserActionModal()">Cancel</button>
-                <form id="userActionForm" method="post">
-                    @Html.AntiForgeryToken()
-                    <button type="submit" class="floating-confirm" id="userActionConfirm">OK</button>
-                </form>
+    <div class="footer-note">
+        <div>
+            <strong>Login security</strong>
+            <div class="footer-note-items">
+                <div>Password + email verification</div>
+                <div>Session auto-expires after 30 min idle</div>
             </div>
         </div>
     </div>
+</section>
 
-    @* Account owners manage their own passwords through password recovery.
-    <div id="userDetailsModal" class="floating-overlay" style="display:none;">
-        <div class="floating-card" role="dialog" aria-modal="true" aria-labelledby="userDetailsTitle">
-            <h3 id="userDetailsTitle">User information</h3>
-            <form asp-controller="Admin" asp-action="ResetUserPassword" method="post">
+<div id="userActionModal" class="floating-overlay" style="display:none;">
+    <div class="floating-card" role="dialog" aria-modal="true">
+        <h3 id="userActionTitle">Confirm action</h3>
+        <p id="userActionUser"></p>
+        <div class="floating-warning" id="userActionMessage"></div>
+        <div class="floating-actions">
+            <button type="button" class="floating-cancel" onclick="closeUserActionModal()">Cancel</button>
+            <form id="userActionForm" method="post">
                 @Html.AntiForgeryToken()
-                <input type="hidden" name="Id" id="detailsUserId" />
-                <input type="hidden" name="page" value="@Model.Page" />
-                <div class="details-grid">
-                    <div class="details-field full"><label>Full name</label><div class="details-value" id="detailsName"></div></div>
-                    <div class="details-field"><label>Username</label><div class="details-value" id="detailsUsername"></div></div>
-                    <div class="details-field"><label>Role</label><div class="details-value" id="detailsRole"></div></div>
-                    <div class="details-field full"><label>Email</label><div class="details-value" id="detailsEmail"></div></div>
-                    <div class="details-field"><label>Contact</label><div class="details-value" id="detailsPhone"></div></div>
-                    <div class="details-field"><label>Status</label><div class="details-value" id="detailsStatus"></div></div>
-                    <div class="details-field"><label for="newPassword">New password</label><input class="password-input" id="newPassword" name="NewPassword" type="password" minlength="8" required autocomplete="new-password" /></div>
-                    <div class="details-field"><label for="confirmPassword">Confirm password</label><input class="password-input" id="confirmPassword" name="ConfirmPassword" type="password" minlength="8" required autocomplete="new-password" /></div>
-                    <div class="details-field full password-note">Leave the account details unchanged; submitting this form replaces only the login password.</div>
-                </div>
-                <div class="floating-actions">
-                    <button type="button" class="floating-cancel" onclick="closeUserDetails()">Cancel</button>
-                    <button type="submit" class="floating-confirm">Update password</button>
-                </div>
+                <button type="submit" class="floating-confirm" id="userActionConfirm">OK</button>
             </form>
         </div>
     </div>
+</div>
 
-    *@
-    @if (TempData["SuccessMessage"] is string successMessage)
-    {
-        <div id="userResultModal" class="floating-overlay">
-            <div class="floating-card" role="alertdialog" aria-modal="true">
-                <h3 style="color:#166534;">Process successful</h3>
-                <p>@successMessage</p>
-                <div class="floating-actions"><button type="button" class="floating-confirm floating-success" onclick="closeUserResultModal()">OK</button></div>
-            </div>
-        </div>
-    }
-    else if (TempData["ErrorMessage"] is string errorMessage)
-    {
-        <div id="userResultModal" class="floating-overlay">
-            <div class="floating-card" role="alertdialog" aria-modal="true">
-                <h3 style="color:#b91c1c;">Action unsuccessful</h3>
-                <p>@errorMessage</p>
-                <div class="floating-actions"><button type="button" class="floating-confirm" onclick="closeUserResultModal()">Close</button></div>
-            </div>
-        </div>
-    }
-
-    <div class="registry-overlay" id="staffRegistrationSuccess" role="alertdialog" aria-modal="true" aria-labelledby="staffSuccessTitle">
-        <div style="width:min(520px,90vw);padding:32px;background:#1b201c;color:white;border:1px solid #3c443d;border-radius:14px;text-align:center">
-            <h2 id="staffSuccessTitle" style="color:#b7ff1b">Account created</h2>
-            <p>The account is pending email verification. A confirmation link was sent to <strong id="staffSuccessEmail"></strong>.</p>
-            <p>The recipient must verify their email to complete registration.</p>
-            <button type="button" class="floating-confirm" onclick="finishStaffRegistration()">Back to User Role Dashboard</button>
+@if (TempData["SuccessMessage"] is string successMessage)
+{
+    <div id="userResultModal" class="floating-overlay">
+        <div class="floating-card" role="alertdialog" aria-modal="true">
+            <h3 style="color:#b7ff1b;">Process successful</h3>
+            <p>@successMessage</p>
+            <div class="floating-actions"><button type="button" class="floating-confirm" onclick="closeUserResultModal()">OK</button></div>
         </div>
     </div>
-    <div class="registry-overlay" id="staffRegistryModal" role="dialog" aria-modal="true" aria-label="Register new user">
-        <div class="registry-dialog">
-            <iframe class="registry-frame" id="staffRegistryFrame" title="Staff registration form" data-src="@Url.Action("RegisterStaff", "Account")"></iframe>
+}
+else if (TempData["ErrorMessage"] is string errorMessage)
+{
+    <div id="userResultModal" class="floating-overlay">
+        <div class="floating-card" role="alertdialog" aria-modal="true">
+            <h3 style="color:#f87171;">Action unsuccessful</h3>
+            <p>@errorMessage</p>
+            <div class="floating-actions"><button type="button" class="floating-cancel" onclick="closeUserResultModal()">Close</button></div>
         </div>
     </div>
+}
 
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        function openStaffRegistry() {
-            const modal = document.getElementById('staffRegistryModal');
-            const frame = document.getElementById('staffRegistryFrame');
-            if (!frame.getAttribute('src')) frame.src = frame.dataset.src;
-            modal.classList.add('open');
-            document.body.style.overflow = 'hidden';
-        }
+<div class="registry-overlay" id="staffRegistrationSuccess" role="alertdialog" aria-modal="true" aria-labelledby="staffSuccessTitle">
+    <div style="width:min(520px,90vw);padding:32px;background:#272b28;color:white;border:1px solid #343b37;border-radius:14px;text-align:center;font-size:12px;">
+        <h2 id="staffSuccessTitle" style="color:#b7ff1b;font-size:14px;">Account created</h2>
+        <p>The account is pending email verification. A confirmation link was sent to <strong id="staffSuccessEmail"></strong>.</p>
+        <p>The recipient must verify their email to complete registration.</p>
+        <button type="button" class="floating-confirm" style="margin-top:12px;" onclick="finishStaffRegistration()">Back to User Role Dashboard</button>
+    </div>
+</div>
+<div class="registry-overlay" id="staffRegistryModal" role="dialog" aria-modal="true" aria-label="Register new user">
+    <div class="registry-dialog">
+        <iframe class="registry-frame" id="staffRegistryFrame" title="Staff registration form" data-src="@Url.Action("RegisterStaff", "Account")"></iframe>
+    </div>
+</div>
 
-        function closeStaffRegistry() {
-            document.getElementById('staffRegistryModal').classList.remove('open');
-            document.body.style.overflow = '';
-        }
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    function openStaffRegistry() {
+        const modal = document.getElementById('staffRegistryModal');
+        const frame = document.getElementById('staffRegistryFrame');
+        if (!frame.getAttribute('src')) frame.src = frame.dataset.src;
+        modal.classList.add('open');
+        document.body.style.overflow = 'hidden';
+    }
 
-        function finishStaffRegistration() {
-            closeStaffRegistry();
-            window.location.assign('@Url.Action("UserRoles", "Admin")');
-        }
+    function closeStaffRegistry() {
+        document.getElementById('staffRegistryModal').classList.remove('open');
+        document.body.style.overflow = '';
+    }
 
-        function showStaffRegistrationSuccess(email) {
-            closeStaffRegistry();
-            document.getElementById('staffSuccessEmail').textContent = email;
-            document.getElementById('staffRegistrationSuccess').classList.add('open');
-            document.body.style.overflow = 'hidden';
-            document.querySelector('#staffRegistrationSuccess button').focus();
-        }
+    function finishStaffRegistration() {
+        closeStaffRegistry();
+        window.location.assign('@Url.Action("UserRoles", "Admin")');
+    }
 
-        document.getElementById('staffRegistryFrame').addEventListener('load', function () {
-            // Older confirmation pages may navigate within the frame.
-            try {
-                const confirmation = this.contentDocument.querySelector('[data-staff-confirmation-email]');
-                if (confirmation) {
-                    showStaffRegistrationSuccess(confirmation.dataset.staffConfirmationEmail);
-                    return;
-                }
-                const dashboardPath = new URL('@Url.Action("UserRoles", "Admin")', window.location.origin).pathname;
-                if (this.contentWindow.location.pathname.toLowerCase() === dashboardPath.toLowerCase()) {
-                    finishStaffRegistration();
-                }
-            } catch (_) {
-                // External email pages cannot be inspected across origins.
+    function showStaffRegistrationSuccess(email) {
+        closeStaffRegistry();
+        document.getElementById('staffSuccessEmail').textContent = email;
+        document.getElementById('staffRegistrationSuccess').classList.add('open');
+        document.body.style.overflow = 'hidden';
+        document.querySelector('#staffRegistrationSuccess button').focus();
+    }
+
+    document.getElementById('staffRegistryFrame').addEventListener('load', function () {
+        try {
+            const confirmation = this.contentDocument.querySelector('[data-staff-confirmation-email]');
+            if (confirmation) {
+                showStaffRegistrationSuccess(confirmation.dataset.staffConfirmationEmail);
+                return;
             }
+            const dashboardPath = new URL('@Url.Action("UserRoles", "Admin")', window.location.origin).pathname;
+            if (this.contentWindow.location.pathname.toLowerCase() === dashboardPath.toLowerCase()) {
+                finishStaffRegistration();
+            }
+        } catch (_) {}
+    });
+
+    function openUserActionModal(button) {
+        document.getElementById('userActionTitle').textContent = button.dataset.actionName + '?';
+        const username = button.dataset.username || button.dataset.name;
+        const question = button.dataset.question || ('Do you want to continue with');
+        document.getElementById('userActionUser').textContent = question + ' "' + username + '"?';
+        document.getElementById('userActionMessage').textContent = button.dataset.message;
+        document.getElementById('userActionForm').action = button.dataset.url;
+        document.getElementById('userActionConfirm').textContent = button.dataset.actionName;
+        document.getElementById('userActionModal').style.display = 'flex';
+    }
+
+    function closeUserActionModal() {
+        document.getElementById('userActionModal').style.display = 'none';
+    }
+
+    function closeUserResultModal() {
+        const modal = document.getElementById('userResultModal');
+        if (modal) modal.style.display = 'none';
+    }
+
+    function toggleMenu(id) {
+        var menu = document.getElementById('menu-' + id);
+        var wasOpen = menu.classList.contains('open');
+
+        document.querySelectorAll('.action-menu.open').forEach(function (m) { 
+            m.classList.remove('open'); 
         });
 
-        function openUserActionModal(button) {
-            document.getElementById('userActionTitle').textContent = button.dataset.actionName + '?';
-            const username = button.dataset.username || button.dataset.name;
-            const question = button.dataset.question || ('Do you want to continue with');
-            document.getElementById('userActionUser').textContent = question + ' "' + username + '"?';
-            document.getElementById('userActionMessage').textContent = button.dataset.message;
-            document.getElementById('userActionForm').action = button.dataset.url;
-            document.getElementById('userActionConfirm').textContent = button.dataset.actionName;
-            document.getElementById('userActionModal').style.display = 'flex';
+        if (!wasOpen) {
+            menu.classList.add('open');
         }
+    }
 
-        function openUserDetails(button) {
-            document.getElementById('detailsUserId').value = button.dataset.id;
-            document.getElementById('detailsName').textContent = button.dataset.name || '—';
-            document.getElementById('detailsUsername').textContent = button.dataset.username || '—';
-            document.getElementById('detailsEmail').textContent = button.dataset.email || '—';
-            document.getElementById('detailsPhone').textContent = button.dataset.phone || '—';
-            document.getElementById('detailsRole').textContent = button.dataset.role || '—';
-            document.getElementById('detailsStatus').textContent = button.dataset.status || '—';
-            document.getElementById('newPassword').value = '';
-            document.getElementById('confirmPassword').value = '';
-            document.getElementById('userDetailsModal').style.display = 'flex';
+    document.addEventListener('click', function (e) {
+        if (!e.target.closest('.actions-cell') && !e.target.closest('.action-menu')) {
+            document.querySelectorAll('.action-menu.open').forEach(function (m) { 
+                m.classList.remove('open'); 
+            });
         }
+    });
 
-        function closeUserDetails() {
-            document.getElementById('userDetailsModal').style.display = 'none';
-        }
-
-        function closeUserActionModal() {
-            document.getElementById('userActionModal').style.display = 'none';
-        }
-
-        function closeUserResultModal() {
-            const modal = document.getElementById('userResultModal');
-            if (modal) modal.style.display = 'none';
-        }
-
-        function toggleMenu(id) {
-            var menu = document.getElementById('menu-' + id);
-            var wasOpen = menu.classList.contains('open');
-            document.querySelectorAll('.action-menu.open').forEach(function (m) { m.classList.remove('open'); });
-            if (!wasOpen) menu.classList.add('open');
-        }
-
-        document.addEventListener('click', function (e) {
-            if (!e.target.closest('.actions-cell')) {
-                document.querySelectorAll('.action-menu.open').forEach(function (m) { m.classList.remove('open'); });
-            }
-        });
-
-        document.getElementById('staffRegistryModal').addEventListener('click', function (e) {
+    const staffRegistryModal = document.getElementById('staffRegistryModal');
+    if (staffRegistryModal) {
+        staffRegistryModal.addEventListener('click', function (e) {
             if (e.target === this) closeStaffRegistry();
         });
+    }
 
-        document.addEventListener('keydown', function (e) {
-            if (e.key === 'Escape') closeStaffRegistry();
-        });
-    </script>
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') closeStaffRegistry();
+    });
+</script>

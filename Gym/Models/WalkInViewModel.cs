@@ -5,11 +5,11 @@ namespace Gym.Models;
 public class WalkInRegistrationViewModel
 {
     [Required] public int? PaymentTypeId { get; set; }
-    [Required, CompleteRegistrationName, Display(Name = "First name")] public string FirstName { get; set; } = string.Empty;
-    [Required, CompleteRegistrationName, Display(Name = "Last name")] public string LastName { get; set; } = string.Empty;
-    [Required, Phone, Display(Name = "Contact number")] public string ContactNumber { get; set; } = string.Empty;
-    [Required(ErrorMessage = "Email is required."), EmailAddress, Display(Name = "Email")] public string Email { get; set; } = string.Empty;
-    [Required, Display(Name = "Reason for visit")] public string ReasonForVisit { get; set; } = "Day Pass";
+    [Required, StringLength(100), CompleteRegistrationName, Display(Name = "First name")] public string FirstName { get; set; } = string.Empty;
+    [Required, StringLength(100), CompleteRegistrationName, Display(Name = "Last name")] public string LastName { get; set; } = string.Empty;
+    [Required, RegularExpression(@"^[0-9]{11}$", ErrorMessage = "Enter exactly 11 digits (0-9). Letters, spaces, and symbols are not allowed."), Display(Name = "Contact number")] public string ContactNumber { get; set; } = string.Empty;
+    [Required(ErrorMessage = "Email is required."), EmailAddress, StringLength(100), Display(Name = "Email")] public string Email { get; set; } = string.Empty;
+    [Required, StringLength(50), Display(Name = "Reason for visit")] public string ReasonForVisit { get; set; } = "Day Pass";
     [Range(0.01, 1000000, ErrorMessage = "Amount paid must be greater than zero.")]
     [Display(Name = "Amount paid")] public decimal AmountPaid { get; set; }
     [Display(Name = "Issue digital receipt")] public bool IssueDigitalReceipt { get; set; }

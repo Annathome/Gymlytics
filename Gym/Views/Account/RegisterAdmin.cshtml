@@ -1,4 +1,4 @@
-﻿@model Gym.Models.AdminViewModel
+@model Gym.Models.AdminViewModel
 @{
     ViewData["Title"] = "Admin Registration";
     Layout = "~/Views/Shared/_LoginLayout.cshtml";
@@ -6,7 +6,7 @@
 
 <!DOCTYPE html>
 <html lang="en">
-<head>
+<head><link rel="stylesheet" href="~/css/system-typography.css" asp-append-version="true" />
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Admin Registration</title>
@@ -96,7 +96,7 @@
             align-items: center;
             justify-content: center; /* Centers the text and dotted lines */
             text-transform: uppercase;
-            font-size: 18px;
+
             font-style: italic;
             font-weight: 300;
             color: #fff;
@@ -117,7 +117,7 @@
         }
 
             html body #admin-setup .reminder h6 {
-                font-size: 14px !important;
+                
                 color: #fff;
                 letter-spacing: 0.5px;
                 line-height: 1.4;
@@ -135,31 +135,31 @@
         }
 
             html body #admin-setup .form-group label {
-                color: rgb(14,197,45);
+                color: #b7ff1b;
                 font-weight: 600;
-                font-size: 16px !important;
+                
                 margin-bottom: 5px;
                 display: block;
             }
 
             html body #admin-setup .form-group input.form-control {
-                border: 1px solid rgb(14,197,45) !important;
+                border: 1px solid #b7ff1b !important;
                 padding: 10px 12px;
                 width: 100%;
                 border-radius: 8px;
-                font-size: 1rem;
+                
                 outline: none;
                 transition: all 0.2s ease-in-out;
             }
 
                 html body #admin-setup .form-group input::placeholder {
-                    color: rgba(14,197,45, 0.6);
-                    font-size: 14px !important;
+                color: #000;
+                    
                 }
 
                 html body #admin-setup .form-group input.form-control:focus,
-                html body #admin-setup .form-group input.form-control:hover {
-                    border-color: rgb(14,197,45) !important;
+                html body #admin-setup .form-group input.form-control:hover  {
+                border-color: #b7ff1b !important;
                     box-shadow: 2px 2px 4px rgba(96,94,105, 0.3);
                     background: #fff;
                 }
@@ -168,10 +168,9 @@
             width: 100%;
             height: 45px;
             margin-top: 10px;
-            background: rgb(178,233,197);
             color: #000;
+            background: rgb(178, 233, 197) !important;
             border: none;
-            font-size: 16px !important;
             font-weight: 600;
             border-radius: 8px;
             cursor: pointer;
@@ -179,8 +178,14 @@
         }
 
             .btn-submit:hover {
-                background: rgb(14,197,45);
-                color: #fff;
+                background: #b7ff1b;
+                color: #000;
+            }
+
+            html body #admin-setup .btn-submit:hover,
+            html body #admin-setup .btn-submit:focus {
+                background: #b7ff1b !important;
+                color: #000 !important;
             }
     </style>
 </head>
@@ -200,7 +205,7 @@
 
             <form asp-controller="Account" asp-action="RegisterAdmin" method="post">
                 @Html.AntiForgeryToken()
-                <div asp-validation-summary="ModelOnly" class="text-danger mb-2 small text-center"></div>
+                <div asp-validation-summary="All" class="text-danger mb-2 small text-center"></div>
 
                 <!-- 3. ADDED FULL NAME FIELD -->
                 <div class="form-group">

@@ -1,4 +1,4 @@
-﻿using Gym.Models;
+using Gym.Models;
 using Gym.Services;
 using System;
 using System.Collections.Generic;
@@ -149,9 +149,9 @@ namespace Gym.Services
         public async Task<bool> UpdateEquipmentStatusAsync(int equipmentId, string status)
         {
             var equipment = await _equipmentRepository.GetByIdAsync(equipmentId);
-            if (equipment == null || EquipmentStock.IsInventory(equipment) ||
-                status is not ("Needs Maintenance" or "Out of Order")) return false;
+            if (equipment == null || status is not ("Good" or "Out of Order")) return false;
 
+            if (EquipmentStock.IsReport(equipment)) equipment.Category = "Report";
             equipment.Status = status;
             await _equipmentRepository.UpdateAsync(equipment);
             return true;

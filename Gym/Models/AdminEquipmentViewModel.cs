@@ -5,7 +5,9 @@ public sealed class AdminEquipmentViewModel
     public string Tab { get; set; } = "equipment";
     public List<EquipmentInventoryRow> Inventory { get; set; } = new();
     public List<Equipment> Items { get; set; } = new();
+    public Dictionary<string, int> AvailableByEquipment { get; set; } = new(StringComparer.OrdinalIgnoreCase);
     public List<EquipmentNameCatalog> EquipmentNames { get; set; } = new();
+
     public string SearchTerm { get; set; } = string.Empty;
     public int TotalAssets { get; set; }
     public int Available { get; set; }

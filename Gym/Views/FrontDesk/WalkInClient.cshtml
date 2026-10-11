@@ -8,6 +8,9 @@
     var totalCount = ViewBag.TotalCount is int itemCount ? itemCount : Model.Count;
     Layout = isAdmin ? "~/Views/Shared/_AdminLayout.cshtml" : "~/Views/Shared/_FrontDeskLayout.cshtml";
     ViewData["Title"] = "Walk-in Clients";
+    var registrationError = TempData["WalkInRegistrationError"] as string;
+    var registrationSuccess = TempData["WalkInRegistrationSuccess"] as string;
+    var receiptWarning = TempData["WalkInReceiptWarning"] as string;
     var paymentTypes = ViewBag.WalkInPaymentTypes as List<Gym.Models.WalkInPaymentType> ?? new();
 }
 
@@ -21,7 +24,7 @@
     .wi-page {
         width: min(1100px, calc(100vw - 360px));
         margin: 26px auto;
-        font: 15px Arial, sans-serif;
+        font-family:Arial, sans-serif;
         color: #102630;
     }
 
@@ -29,11 +32,12 @@
         display: flex;
         justify-content: space-between;
         align-items: flex-end;
+        margin-bottom: 30px;
         margin-bottom: 18px;
     }
 
         .wi-head h2 {
-            font-size: 15px;
+            
             margin: 0 0 5px;
         }
 
@@ -61,9 +65,9 @@
     }
 
     .wi-footer { display:flex; align-items:center; justify-content:space-between; min-height:80px; padding:14px 20px; background:#5E5D63; box-sizing:border-box; }
-    .wi-footer > span { color:#aab3ac; font-size:15px; }
+    .wi-footer > span { color:#aab3ac;  }
     .wi-pages { display:flex; gap:12px; }
-    .wi-page-button { min-width:102px; height:50px; display:grid; place-items:center; padding:0 18px; border:1px solid #74777a; border-radius:5px; background:transparent; color:#fff; text-decoration:none; font-size:10px; font-weight:700; text-transform:uppercase; box-sizing:border-box; }
+    .wi-page-button { min-width:102px; height:50px; display:grid; place-items:center; padding:0 18px; border:1px solid #74777a; border-radius:5px; background:transparent; color:#fff; text-decoration:none;  font-weight:700; text-transform:uppercase; box-sizing:border-box; }
     .wi-page-button.disabled { opacity:.4; pointer-events:none; }
 
     .wi-table {
@@ -75,7 +79,7 @@
             padding: 14px 20px;
             background: #e5f4fb;
             text-align: left;
-            font-size: 13px;
+            
             letter-spacing: 0.5px;
         }
 
@@ -88,12 +92,20 @@
         display: inline-block;
         background: #e3f1f7;
         padding: 6px 8px;
-        font-size: 12px;
+        
+    }
+    .wi-card .wi-pay {
+        padding: 6px 14px;
+        line-height: 1.2;
+        white-space: nowrap;
     }
 
-    .wi-pay { border: 0; border-radius: 6px; background: #083d02; color: #fff; padding: 9px 16px; font-weight: 700; cursor: pointer; }
-    .wi-pay:disabled { background:#d8e0dc; color:#647169; cursor:not-allowed; }
-    .wi-visits { display: block; margin-top: 4px; color: #738078; font-size: 12px; }
+        .wi-card .wi-pay:disabled {
+            padding: 6px 14px;
+            background: transparent;
+            color: #9ba49d;
+            cursor: not-allowed;
+        }
     .wi-modal-backdrop { display:none; position:fixed; inset:0; z-index:1200; align-items:center; justify-content:center; padding:20px; background:rgba(7,25,15,.58); }
     .wi-modal-backdrop.show { display:flex; }
     .wi-modal { width:min(430px,100%); padding:24px; border:1px solid #737278; border-radius:10px; background:#5e5d63; color:#fff; box-shadow:0 18px 55px rgba(0,0,0,.25); }
@@ -101,15 +113,15 @@
     .wi-form-grid { display:grid; grid-template-columns:1fr 1fr; gap:15px; }
     .wi-form-group { margin-bottom:15px; }
     .wi-form-group.full { grid-column:1 / -1; }
-    .wi-form-group label { display:block; margin-bottom:6px; font-size:12px; font-weight:700; text-transform:uppercase; }
+    .wi-form-group label { display:block; margin-bottom:6px;  font-weight:700; text-transform:uppercase; }
     .wi-form-group input, .wi-form-group select { width:100%; height:44px; padding:0 12px; border:1px solid #d7ddd9; border-radius:5px; background:transparent; color:#fff; box-sizing:border-box; }
     .wi-form-group select option { background:#5e5d63; color:#fff; }
     .wi-form-group select option:hover,
     .wi-form-group select option:checked { background:#5e5d63; color:#a8df32; }
-    .wi-modal h2 { margin:0 0 7px; font-size:21px; }
+    .wi-modal h2 { margin:0 0 7px;  }
     .wi-modal p { margin:0 0 20px; color:#fff; }
     .wi-modal label { display:block; margin-bottom:7px; font-weight:700; }
-    .wi-modal input { width:100%; height:44px; padding:0 12px; border:1px solid #d7ddd9; border-radius:6px; background:transparent; color:#fff; box-sizing:border-box; font-size:16px; }
+    .wi-modal input { width:100%; height:44px; padding:0 12px; border:1px solid #d7ddd9; border-radius:6px; background:transparent; color:#fff; box-sizing:border-box;  }
     .wi-modal-actions { display:flex; justify-content:flex-end; gap:10px; margin-top:22px; }
     .wi-cancel { padding:10px 17px; border:1px solid #d7ddd9; border-radius:6px; background:transparent; color:#fff; cursor:pointer; }
 
@@ -146,7 +158,7 @@
             border: 1px solid #cad6d0;
             border-radius: 6px;
             padding: 0 14px;
-            font-size: 15px;
+            
             box-sizing: border-box;
         }
 
@@ -158,7 +170,7 @@
             border-radius: 6px;
             background: rgb(8, 61, 2);
             color: #fff;
-            font-size: 13px;
+            
             font-weight: 700;
             cursor: pointer;
         }
@@ -193,15 +205,40 @@
                 width: 76px;
             }
     }
+
+    /* Keep the walk-in page title/subtitle and search controls 5px apart.
+       This page-local rule is intentionally final and high priority so shared
+       dashboard header spacing cannot override it. */
+    main.wi-page > header.wi-head {
+        min-height: 0 !important;
+        height: auto !important;
+        margin: 0 0 5px !important;
+        padding: 0 !important;
+        border: 0 !important;
+    }
+
+    main.wi-page > header.wi-head h1,
+    main.wi-page > header.wi-head h2 {
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
+    }
+
+    main.wi-page > header.wi-head p {
+        margin-bottom: 0 !important;
+    }
+
+    main.wi-page > form.wi-search {
+        margin-top: 0 !important;
+    }
 </style>
 
 <main class="wi-page">
 
     <header class="wi-head">
         <div>
-            <h1 style="color:#fff !important;">Walk-in Client Registration</h1>
+            <h1 style="font-weight:700!important;color:#fff !important;margin-bottom: 0px !important;" class="form-dialog-title">Walk-in Client Registration</h1>
 
-            <p class="dashboard-caption" style="font-family:'Inria Serif',serif!important;font-size:14px!important;font-weight:400!important;color:#aeb7b0!important;line-height:1.4!important;">
+            <p class="dashboard-caption" style="color:#aeb7b0!important;line-height:1.4!important;">
                 Quickly register a new visitor and grant temporary facility access.
             </p>
         </div>
@@ -211,7 +248,7 @@
             {
                 <a class="wi-add" asp-controller="Admin" asp-action="Payments" asp-route-manageWalkInTypes="true" style="display:inline-flex;text-decoration:none">＋ Add walk-in payment type</a>
             }
-            <button type="button" class="wi-add" id="openWalkInRegistration" style="font-size:15px !important;">
+            <button type="button" class="wi-add" id="openWalkInRegistration" style="">
                 ＋ Register Walk-in
             </button>
         </div>
@@ -247,7 +284,7 @@
 
     <section class="wi-card">
 
-        <h2 style="font-size: 18px; margin: 0 0 14px;">
+        <h2 style=" margin: 0 0 14px;">
             Recent Walk-in Registrations
         </h2>
         <table class="wi-table">
@@ -266,7 +303,7 @@
                 @if (Model.Count == 0)
                 {
                     <tr>
-                        <td colspan="6" class="walkin-empty-message" style="text-align: center;">
+                        <td colspan="6" class="walkin-empty-message" style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;text-align: center;">
                             No walk-in registrations yet.
                         </td>
                     </tr>
@@ -275,34 +312,33 @@
                 @foreach (var item in Model)
                 {
                     <tr>
-                        <td>
-                            <div class="wi-member-name">
-                                <span class="wi-avatar">@($"{item.FirstName?.FirstOrDefault()}{item.LastName?.FirstOrDefault()}".Trim().ToUpperInvariant())</span>
-                                <span>@item.FirstName @item.LastName</span>
+                        <td style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;">
+                            <div class="wi-member-name" style="">
+                                <span class="wi-avatar" style="">@($"{item.FirstName?.FirstOrDefault()}{item.LastName?.FirstOrDefault()}".Trim().ToUpperInvariant())</span>
+                                <span style="">@item.FirstName @item.LastName</span>
                             </div>
                         </td>
 
-                        <td>
+                        <td style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;">
                             @item.ContactNumber
                         </td>
 
-                        <td>
-                            <span class="reason">
+                        <td style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;">
+                            <span class="reason" style="">
                                 @item.ReasonForVisit
                             </span>
                         </td>
 
-                        <td>
+                        <td style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;">
                             @item.LastVisitAt.ToString("MMM d, yyyy · h:mm tt")
-                            <span class="wi-visits">@item.VisitCount visit(s)</span>
                         </td>
 
-                        <td>
+                        <td style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;">
                             @item.FirstRegisteredAt.ToString("MMM d, yyyy")
                         </td>
 
-                        <td>
-                            <button type="button" class="wi-pay" style="font-size:15px !important;"
+                        <td style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;">
+                            <button type="button" class="wi-pay" style=""
                                     data-id="@item.WalkInClientId"
                                     data-name="@item.FirstName @item.LastName"
                                     disabled="@(item.LastVisitAt.Date == DateTime.Today)">
@@ -314,7 +350,7 @@
             </tbody>
         </table>
         <footer class="wi-footer">
-            <span>Showing @Model.Count of @totalCount registrations</span>
+            <span class="pagination-summary">Showing @Model.Count of @totalCount registrations</span>
             <nav class="wi-pages" aria-label="Walk-in registration pages">
                 <a class="wi-page-button @(currentPage <= 1 ? "disabled" : "")"
                    asp-controller="@walkInController" asp-action="WalkInClient"
@@ -329,13 +365,29 @@
 </main>
 
 <style>
+    #walkInSuccessDialog {
+        position: fixed;
+        inset: 0;
+        margin: auto; /* restores the centering a global reset removed */
+        padding: 0;
+        border: 0;
+        background: transparent;
+        width: min(560px, calc(100vw - 32px));
+        height: fit-content; /* needed so margin:auto centers vertically */
+        max-height: 90vh;
+        overflow: auto;
+    }
+
+        #walkInSuccessDialog::backdrop {
+            background: rgba(0, 0, 0, .65);
+        }
     html body #walkInRegistrationModal { background:rgba(0,0,0,.7); }
     html body #walkInRegistrationModal .wi-register-modal {
         background:#1b201c !important; color:#fff !important;
         border:1px solid #3c443d !important; border-radius:14px;
         padding:28px; box-shadow:0 18px 55px #0006;
     }
-    html body #walkInRegistrationModal h2 { color:#fff !important; font-size:28px !important; }
+    html body #walkInRegistrationModal h2 { color:#fff !important;  }
     html body #walkInRegistrationModal p { color:#fff !important; margin-bottom:24px; }
     html body #walkInRegistrationModal .wi-form-grid { border:1px solid #3c443d; padding:16px; gap:20px 16px; }
     html body #walkInRegistrationModal label { color:#fff !important; text-transform:none !important; }
@@ -354,14 +406,20 @@
         box-shadow:0 0 0 1000px #1b201c inset !important; caret-color:#fff;
     }
     html body #walkInRegistrationModal #walkInAmount { margin-top:4px; }
-    html body #walkInRegistrationModal label[for="walkInAmount"] { margin-top:16px; }
 </style>
-<div class="wi-modal-backdrop" id="walkInRegistrationModal" aria-hidden="true">
+<div class="wi-modal-backdrop @(registrationError != null ? "show" : "")" id="walkInRegistrationModal" aria-hidden="@(registrationError == null ? "true" : "false")">
     <section class="wi-modal wi-register-modal" role="dialog" aria-modal="true" aria-labelledby="walkInRegistrationTitle">
-        <h2 id="walkInRegistrationTitle">Register walk-in client</h2>
+        <h2 id="walkInRegistrationTitle" class="form-dialog-title">Register walk-in client</h2>
         <p>Each client can be registered only once per day. Receipts are emailed automatically.</p>
         <form asp-action="WalkInRegister" asp-controller="@walkInController" method="post" id="walkInRegistrationForm">
             @Html.AntiForgeryToken()
+            @if (registrationError != null)
+            {
+                <div class="form-error-summary" role="alert" tabindex="-1">
+                    <strong>Please correct the following before submitting:</strong>
+                    <ul><li data-form-server-error>@registrationError</li></ul>
+                </div>
+            }
             <div class="wi-form-grid">
                 <div class="wi-form-group">
                     <label for="walkInFirstName">First name *</label>
@@ -388,9 +446,11 @@
                             <option value="@rate.Id" data-amount="@rate.Amount.ToString(System.Globalization.CultureInfo.InvariantCulture)">@rate.Name — ₱@rate.Amount.ToString("N2")</option>
                         }
                     </select>
+                    @if (paymentTypes.Count == 0) { <small>Ask an administrator to add a walk-in payment type in Payments.</small> }
+                </div>
+                <div class="wi-form-group">
                     <label for="walkInAmount">Amount paid (₱)</label>
                     <input id="walkInAmount" name="AmountPaid" type="number" min="0.01" step="0.01" readonly required />
-                    @if (paymentTypes.Count == 0) { <small>Ask an administrator to add a walk-in payment type in Payments.</small> }
                 </div>
             </div>
             <div class="wi-modal-actions">
@@ -429,6 +489,13 @@
 <script>
     (() => {
         const registrationModal = document.getElementById('walkInRegistrationModal');
+        if (registrationModal.classList.contains('show')) {
+            window.addEventListener('load', () => {
+                const summary = registrationModal.querySelector('.form-error-summary');
+                summary?.scrollIntoView({ block: 'nearest' });
+                summary?.focus({ preventScroll: true });
+            });
+        }
         const closeRegistration = () => { registrationModal.classList.remove('show'); registrationModal.setAttribute('aria-hidden', 'true'); };
         document.getElementById('openWalkInRegistration').addEventListener('click', () => {
             registrationModal.classList.add('show');
@@ -466,6 +533,30 @@
         });
     })();
 </script>
+@if (registrationSuccess != null)
+{
+    var confirmationData = new Microsoft.AspNetCore.Mvc.ViewFeatures.ViewDataDictionary(ViewData);
+    confirmationData["Title"] = "Registration complete";
+    confirmationData["Message"] = registrationSuccess;
+    confirmationData["Warning"] = receiptWarning;
+    confirmationData["ReturnUrl"] = Url.Action("WalkInClient", walkInController);
+    confirmationData["ReturnLabel"] = "Done — return to list";
+    <dialog id="walkInSuccessDialog" aria-labelledby="completion-title">
+        @await Html.PartialAsync("_CompletionCard", null, confirmationData)
+    </dialog>
+    <script>
+        (() => {
+            const dialog = document.getElementById('walkInSuccessDialog');
+            dialog.showModal();
+            dialog.querySelector('.completion-return').addEventListener('click', event => {
+                event.preventDefault();
+                dialog.close();
+            });
+            dialog.addEventListener('close', () => document.getElementById('openWalkInRegistration').focus());
+        })();
+    </script>
+}
+
 <script>
     document.querySelectorAll('select[data-amount-target]').forEach(select => {
         select.addEventListener('change', () => {
