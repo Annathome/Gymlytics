@@ -327,7 +327,21 @@
             color: #ff8e8e;
         }
 
-        .am-badge.inactive,
+        .am-badge.overdue {
+            background: #3a3422;
+            color: #ffd166;
+        }
+
+        .am-badge.expiringsoon {
+            background: #382c1b;
+            color: #f5a623;
+        }
+
+        .am-badge.inactive {
+            background: #382c1b;
+            color: #f5a623;
+        }
+
         .am-badge.canceled {
             background: #353735;
             color: #c4cac5;
@@ -798,7 +812,7 @@
                 <p class="dashboard-caption" style="color:#aeb7b0!important;line-height:1.4!important;">@ViewBag.ActiveCount ACTIVE · @ViewBag.ExpiringCount EXPIRING MEMBERSHIP</p>
             </div>
             <div class="mtop-tool">
-                <a class="am-add" asp-action="Payments" asp-route-managePlans="true" style="text-decoration:none">＋ Add membership plan</a>
+                <a class="am-add" asp-action="Payments" asp-route-managePlans="true" asp-route-returnTo="Members" style="text-decoration:none">＋ Add membership plan</a>
                 <button class="am-add" type="button" onclick="openAdminAddMemberModal()">＋ Register member</button>
                 <details class="am-export">
                     <summary>↧ EXPORT</summary>
@@ -874,7 +888,16 @@
                         var trainer = member.AssignedTrainerId.HasValue && trainers.TryGetValue(member.AssignedTrainerId.Value, out var trainerName) ? trainerName : "—";
                         var days = string.Join(", ", (member.PreferredDays ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).Select(day => day.Length > 3 ? day[..3] : day));
                         var schedule = string.IsNullOrWhiteSpace(days) ? "—" : $"{days} · {member.PreferredTimeSlot ?? "Time not set"}";
-                        var badgeClass = member.Status is MemberStatus.Expired or MemberStatus.Terminated ? "expired" : member.Status is MemberStatus.Inactive or MemberStatus.Canceled ? "inactive" : "";
+                        var badgeClass = member.Status switch
+                        {
+                            MemberStatus.Overdue => "overdue",
+                            MemberStatus.ExpiringSoon => "expiringsoon",
+                            MemberStatus.Expired => "expired",
+                            MemberStatus.Inactive => "inactive",
+                            MemberStatus.Canceled => "canceled",
+                            MemberStatus.Terminated => "terminated",
+                            _ => ""
+                        };
                         var planPrice = MembershipPlanPricing.GetPrice(member.MembershipPlan);
                         var paidAmount = member.Status == MemberStatus.Canceled ? 0m : planPrice;
                         var cancellationEnd = member.MembershipEndDate ?? member.MembershipStartDate.AddMonths(MembershipPlanPricing.GetDurationMonths(member.MembershipPlan));
@@ -924,26 +947,32 @@
                                             <button class="am-menu-button" type="submit">Cancel membership</button>
                                         </form>
 
-                                        <form asp-controller="Admin" asp-action="TerminateMember" method="post"
-                                              data-confirm-title="Terminate membership?"
-                                              data-confirm-message="This will terminate @fullName's membership. Terminated memberships cannot be renewed."
-                                              data-confirm-button="Terminate"
-                                              data-confirm-danger="true"
-                                              onsubmit="return askConfirm(this)">
-                                            @Html.AntiForgeryToken()
-                                            <input type="hidden" name="id" value="@member.UserId" />
-                                            <button class="am-menu-button" type="submit">Terminate</button>
-                                        </form>
+                                        @if (member.Status is MemberStatus.Inactive or MemberStatus.Terminated)
+                                        {
+                                            <form asp-controller="Admin" asp-action="ReactivateMember" method="post"
+                                                  data-confirm-title="Reactivate membership?"
+                                                  data-confirm-message="Restore @fullName's membership and access?"
+                                                  data-confirm-button="Reactivate"
+                                                  onsubmit="return askConfirm(this)">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="id" value="@member.UserId" />
+                                                <button class="am-menu-button" type="submit">Reactivate membership</button>
+                                            </form>
+                                        }
+                                        else
+                                        {
+                                            <form asp-controller="Admin" asp-action="TerminateMember" method="post"
+                                                  data-confirm-title="Terminate membership?"
+                                                  data-confirm-message="This will terminate @fullName's membership. Terminated memberships cannot be renewed."
+                                                  data-confirm-button="Terminate"
+                                                  data-confirm-danger="true"
+                                                  onsubmit="return askConfirm(this)">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="id" value="@member.UserId" />
+                                                <button class="am-menu-button" type="submit">Terminate</button>
+                                            </form>
 
-                                        <form asp-controller="Admin" asp-action="MarkMemberInactive" method="post"
-                                              data-confirm-title="Mark member inactive?"
-                                              data-confirm-message="@fullName will be marked as inactive."
-                                              data-confirm-button="Mark inactive"
-                                              onsubmit="return askConfirm(this)">
-                                            @Html.AntiForgeryToken()
-                                            <input type="hidden" name="id" value="@member.UserId" />
-                                            <button class="am-menu-button" type="submit">Mark inactive</button>
-                                        </form>
+                                        }
                                     </div>
                                 </details>
                             </td>
@@ -1008,7 +1037,7 @@
     </div>
 </div>
 
-@* Generic confirmation (Terminate / Mark inactive). Rendered once, outside the table. *@
+@* Generic membership action confirmation. Rendered once, outside the table. *@
 <dialog id="confirmActionDialog" class="am-dialog" aria-labelledby="confirmActionTitle">
     <h2 id="confirmActionTitle"></h2>
     <p id="confirmActionMessage"></p>

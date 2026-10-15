@@ -886,6 +886,7 @@
 
         <form asp-controller="Admin" asp-action="SaveMembershipPlan" method="post" style="border:1px solid #3c443d;padding:14px;margin-bottom:18px">
             @Html.AntiForgeryToken()
+            <input type="hidden" name="returnTo" value="@Context.Request.Query["returnTo"]" />
             <strong style="color: #b7ff1b">Add new plan</strong>
 
             <div class="ap-plan-row">
@@ -917,6 +918,7 @@
             <div style="border-top:1px solid #3c443d;padding:14px 0">
                 <form id="savePlan-@((int)plan.Plan)" asp-controller="Admin" asp-action="SaveMembershipPlan" method="post">
                     @Html.AntiForgeryToken()
+                    <input type="hidden" name="returnTo" value="@Context.Request.Query["returnTo"]" />
                     <input type="hidden" name="planId" value="@((int)plan.Plan)" />
 
                     <div class="ap-plan-row">
@@ -938,6 +940,7 @@
                     <button type="submit" form="savePlan-@((int)plan.Plan)">Save changes</button>
                     <form asp-controller="Admin" asp-action="DeleteMembershipPlan" method="post" onsubmit="return requestPlanDeletion(this)">
                         @Html.AntiForgeryToken()
+                        <input type="hidden" name="returnTo" value="@Context.Request.Query["returnTo"]" />
                         <input type="hidden" name="planId" value="@((int)plan.Plan)" />
                         <button type="submit" class="ap-delete-plan">Delete plan</button>
                     </form>
@@ -1000,6 +1003,9 @@
     function closeDeletePlanConfirmation() {
         document.getElementById('deletePlanConfirmation').classList.remove('open');
         pendingDeletePlanForm = null;
+        if (new URLSearchParams(window.location.search).get('returnTo') === 'Members') {
+            window.location.assign('@Url.Action("Members", "Admin")');
+        }
     }
 
     function confirmPlanDeletion() {

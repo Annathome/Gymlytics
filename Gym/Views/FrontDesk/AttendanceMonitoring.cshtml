@@ -350,7 +350,7 @@
                                 }
                                 else
                                 {
-                                    <button type="button" class="@(member.ReminderEmailFailed ? "email-failed-checkin" : "")" disabled style="">Checked In</button>
+                                    <button type="button" class="@(member.ReminderEmailFailed ? "email-failed-checkin" : "")" disabled style="">@(member.CheckInAt.HasValue ? "Checked In" : "Unavailable")</button>
                                 }
                             </form>
                         </td>

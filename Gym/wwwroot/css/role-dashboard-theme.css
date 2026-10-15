@@ -3931,3 +3931,35 @@ body.frontdesk-shell .fd-dashboard .fd-summary-card {
         border:1px solid #b7ff1b !important;
     }
 }
+
+/* Keep the Front Desk member action menu above the table and pagination card. */
+body.frontdesk-shell .page-container .table-card {
+    overflow: visible !important;
+}
+
+body.frontdesk-shell .page-container .action-menu {
+    z-index: 1000000 !important;
+}
+
+/* Staff Members and Payments row actions use white three-dot icons without a button border. */
+body.frontdesk-shell .page-container button.action-btn,
+body.frontdesk-shell .page-container button.action-btn:hover,
+body.frontdesk-shell .pay-row-action details > summary,
+body.frontdesk-shell .pay-row-action details > summary:hover {
+    border: 0 !important;
+    border-color: transparent !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    color: #f2f2f2 !important;
+    box-shadow: none !important;
+}
+
+body.frontdesk-shell .page-container button.action-btn:focus-visible {
+    outline: 2px solid #b7ff1b !important;
+    outline-offset: 2px !important;
+}
+
+body.frontdesk-shell .pay-row-action details > summary:focus-visible {
+    outline: 2px solid #b7ff1b !important;
+    outline-offset: 2px !important;
+}

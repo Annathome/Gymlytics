@@ -280,12 +280,20 @@ namespace Gym.Controllers
             return RedirectToAction(nameof(Members));
         }
 
-        [HttpPost("/Admin/Members/MarkInactive")]
+        [HttpPost("/Admin/Members/Reactivate")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> MarkMemberInactive(int id)
+        public async Task<IActionResult> ReactivateMember(int id)
         {
-            await _memberService.DeleteClientAsync(id);
-            TempData["SuccessMessage"] = "Member marked as inactive.";
+            var member = await _context.Clients.AsNoTracking()
+                .FirstOrDefaultAsync(client => client.UserId == id && client.Role == UserRole.Client);
+            if (member == null || member.Status is not (MemberStatus.Inactive or MemberStatus.Terminated))
+            {
+                TempData["ErrorMessage"] = "Only inactive or terminated memberships can be reactivated.";
+                return RedirectToAction(nameof(Members));
+            }
+
+            await _memberService.ReactivateClientAsync(id);
+            TempData["SuccessMessage"] = "Membership reactivated successfully.";
             return RedirectToAction(nameof(Members));
         }
 
@@ -363,6 +371,14 @@ namespace Gym.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> TerminateMember(int id)
         {
+            var member = await _context.Clients.AsNoTracking()
+                .FirstOrDefaultAsync(client => client.UserId == id && client.Role == UserRole.Client);
+            if (member == null || member.Status is MemberStatus.Inactive or MemberStatus.Terminated)
+            {
+                TempData["ErrorMessage"] = "This membership is already inactive or terminated.";
+                return RedirectToAction(nameof(Members));
+            }
+
             await _memberService.TerminateMembershipAsync(id);
             TempData["SuccessMessage"] = "Membership terminated successfully.";
             return RedirectToAction(nameof(Members));
@@ -506,7 +522,7 @@ namespace Gym.Controllers
 
         // GET: /Admin/Payments
         [HttpGet("/Admin/Payments")]
-        public async Task<IActionResult> Payments(string? searchTerm, PaymentStatus? status, int page = 1, bool printAll = false)
+        public async Task<IActionResult> Payments(string? searchTerm, PaymentStatus? status, int page = 1, bool printAll = false, bool managePlans = false, string? returnTo = null)
         {
             try
             {
@@ -565,6 +581,7 @@ namespace Gym.Controllers
                     WalkInPaymentTypes = await _context.WalkInPaymentTypes.AsNoTracking().OrderBy(item => item.Name).ToListAsync()
                 };
                 ViewBag.AutoPrint = printAll;
+                ViewBag.ReturnTo = returnTo == "Members" ? "Members" : "Payments";
                 return View("~/Views/AdminDashboard/AdminPayments.cshtml", model);
             }
             catch (Exception ex)
@@ -577,20 +594,31 @@ namespace Gym.Controllers
 
         [HttpPost("/Admin/Payments/Plans/Save")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> SaveMembershipPlan(int? planId, string name, decimal price, int durationMonths)
+        public async Task<IActionResult> SaveMembershipPlan(int? planId, string name, decimal price, int durationMonths, string? returnTo)
         {
+            var returnToMembers = returnTo == "Members";
+            IActionResult ReturnToOrigin() => returnToMembers
+                ? RedirectToAction(nameof(Members))
+                : RedirectToAction(nameof(Payments), new { managePlans = true });
+
             name = name?.Trim() ?? string.Empty;
             if (string.IsNullOrWhiteSpace(name) || name.Length > 100 || price <= 0 || price > 10_000_000m || durationMonths is < 1 or > 120)
             {
                 TempData["ErrorMessage"] = "Enter a plan name, valid price, and duration from 1 to 120 months.";
-                return RedirectToAction(nameof(Payments));
+                return ReturnToOrigin();
             }
+
+            price = decimal.Round(price, 2, MidpointRounding.AwayFromZero);
 
             MembershipPlanSetting setting;
             if (planId.HasValue)
             {
-                setting = await _context.MembershipPlanSettings.FirstOrDefaultAsync(item => (int)item.Plan == planId.Value)
-                    ?? throw new InvalidOperationException("Membership plan not found.");
+                setting = await _context.MembershipPlanSettings.FirstOrDefaultAsync(item => (int)item.Plan == planId.Value);
+                if (setting == null)
+                {
+                    TempData["ErrorMessage"] = "Membership plan not found. Refresh the page and try again.";
+                    return ReturnToOrigin();
+                }
             }
             else
             {
@@ -602,11 +630,22 @@ namespace Gym.Controllers
             if (await _context.MembershipPlanSettings.AnyAsync(item => item.Plan != setting.Plan && item.Name == name))
             {
                 TempData["ErrorMessage"] = "A membership plan with that name already exists.";
-                return RedirectToAction(nameof(Payments));
+                return ReturnToOrigin();
+            }
+
+            // A no-op save should not update UpdatedAt or issue a database write.
+            if (planId.HasValue && setting.Name == name && setting.Price == price &&
+                setting.DurationMonths == durationMonths && setting.IsActive)
+            {
+                if (returnToMembers)
+                    TempData["WarningMessage"] = "No changes were needed; the membership plan is already up to date.";
+                else
+                    TempData["SuccessMessage"] = "No changes were needed; the membership plan is already up to date.";
+                return ReturnToOrigin();
             }
 
             setting.Name = name;
-            setting.Price = decimal.Round(price, 2, MidpointRounding.AwayFromZero);
+            setting.Price = price;
             setting.DurationMonths = durationMonths;
             setting.IsActive = true;
             setting.UpdatedAt = DateTime.Now;
@@ -618,25 +657,29 @@ namespace Gym.Controllers
             TempData["FormConfirmationMessage"] = planId.HasValue ? "Membership plan updated." : "Membership plan added.";
             TempData["FormConfirmationTitle"] = "Membership plan saved";
             TempData["FormConfirmationAction"] = "SaveMembershipPlan";
-            return RedirectToAction(nameof(Payments));
+            return ReturnToOrigin();
         }
 
         [HttpPost("/Admin/Payments/Plans/Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteMembershipPlan(int planId)
+        public async Task<IActionResult> DeleteMembershipPlan(int planId, string? returnTo)
         {
+            IActionResult ReturnToOrigin() => returnTo == "Members"
+                ? RedirectToAction(nameof(Members))
+                : RedirectToAction(nameof(Payments), new { managePlans = true });
+
             var setting = await _context.MembershipPlanSettings.FirstOrDefaultAsync(item => (int)item.Plan == planId);
             if (setting == null)
             {
                 TempData["ErrorMessage"] = "Membership plan not found.";
-                return RedirectToAction(nameof(Payments));
+                return ReturnToOrigin();
             }
             setting.IsActive = false;
             setting.UpdatedAt = DateTime.Now;
             await _context.SaveChangesAsync();
             MembershipPlanPricing.Configure(setting.Plan, setting.Name, setting.Price, setting.DurationMonths, false);
             TempData["SuccessMessage"] = "Membership plan deleted from new registrations. Existing records were preserved.";
-            return RedirectToAction(nameof(Payments));
+            return ReturnToOrigin();
         }
 
         [HttpGet("/Admin/Payments/Export")]
@@ -772,14 +815,16 @@ namespace Gym.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateAttendance(int id, string attendanceAction)
         {
-            var clientExists = await _context.Clients.AnyAsync(client => client.UserId == id && client.Role == UserRole.Client);
+            var today = DateTime.Today;
+            var clientExists = await _context.Clients.AnyAsync(client => client.UserId == id &&
+                client.Role == UserRole.Client && client.IsActive && client.IsActiveMember &&
+                (!client.MembershipEndDate.HasValue || client.MembershipEndDate.Value >= today));
             if (!clientExists)
             {
                 TempData["ErrorMessage"] = "Member was not found.";
                 return RedirectToAction(nameof(Attendance));
             }
 
-            var today = DateTime.Today;
             if (!string.Equals(attendanceAction, "checkin", StringComparison.OrdinalIgnoreCase))
             {
                 TempData["ErrorMessage"] = "Only member check-in is available.";
@@ -852,6 +897,8 @@ namespace Gym.Controllers
                     Initials = (parts.Length > 1 ? $"{parts[0][0]}{parts[^1][0]}" : name[..Math.Min(2, name.Length)]).ToUpperInvariant(),
                     Membership = MembershipPlanPricing.GetName(client.MembershipPlan),
                     CheckInAt = log?.CheckInAt,
+                    IsEligibleForCheckIn = client.IsActive && client.IsActiveMember &&
+                        (!client.MembershipEndDate.HasValue || client.MembershipEndDate.Value >= today),
                     Status = log == null ? "Not checked in" : "Checked in"
                 };
             }).ToList();
@@ -1571,7 +1618,7 @@ namespace Gym.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> SuspendUser(int id)
+        public async Task<IActionResult> SuspendUser(int id, int page = 1)
         {
             if (!TryBlockSelfAction(id, out var selfActionResult))
             {
@@ -1580,17 +1627,17 @@ namespace Gym.Controllers
 
             var (success, error) = await _setupService.SuspendUserAsync(id);
             TempData[success ? "SuccessMessage" : "ErrorMessage"] = success ? "Account suspended." : error;
-            return RedirectToAction(nameof(UserRoles));
+            return RedirectToAction(nameof(UserRoles), new { page });
         }
 
         // POST: /Admin/ReactivateUser
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ReactivateUser(int id)
+        public async Task<IActionResult> ReactivateUser(int id, int page = 1)
         {
             var (success, error) = await _setupService.ReactivateUserAsync(id);
             TempData[success ? "SuccessMessage" : "ErrorMessage"] = success ? "Account reactivated." : error;
-            return RedirectToAction(nameof(UserRoles));
+            return RedirectToAction(nameof(UserRoles), new { page });
         }
 
         // POST: /Admin/DeleteUser
@@ -1607,6 +1654,17 @@ namespace Gym.Controllers
             var (success, error) = await _setupService.DeleteUserAsync(id);
             TempData[success ? "SuccessMessage" : "ErrorMessage"] = success ? "Account deleted." : error;
             return RedirectToAction(nameof(UserRoles));
+        }
+
+        [HttpPost("DeletePendingUser")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeletePendingUser(int id, int page = 1)
+        {
+            var deleted = await _setupService.PermanentlyDeletePendingStaffAsync(id);
+            TempData[deleted ? "SuccessMessage" : "ErrorMessage"] = deleted
+                ? "Pending account permanently deleted."
+                : "Only pending accounts can be permanently deleted; this account may have already been confirmed.";
+            return RedirectToAction(nameof(UserRoles), new { page });
         }
 
         /// <summary>

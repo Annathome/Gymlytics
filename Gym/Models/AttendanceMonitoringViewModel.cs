@@ -18,6 +18,7 @@ public class AttendanceMemberItem
     public string Membership { get; set; } = string.Empty;
     public DateTime? CheckInAt { get; set; }
     public string Status { get; set; } = "Not checked in";
-    public bool CanCheckIn => !CheckInAt.HasValue;
+    public bool IsEligibleForCheckIn { get; set; } = true;
+    public bool CanCheckIn => !CheckInAt.HasValue && IsEligibleForCheckIn;
     public bool ReminderEmailFailed { get; set; }
 }

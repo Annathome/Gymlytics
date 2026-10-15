@@ -550,7 +550,7 @@
                                             @Html.AntiForgeryToken()
                                             <input type="hidden" name="id" value="@member.ClientId"  style=""/>
                                             <input type="hidden" name="attendanceAction" value="checkin"  style=""/>
-                                            <button type="submit" disabled="@(!member.CanCheckIn)" style="">Check In</button>
+                                            <button type="submit" disabled="@(!member.CanCheckIn)" style="">@(member.CheckInAt.HasValue ? "Checked In" : member.IsEligibleForCheckIn ? "Check In" : "Unavailable")</button>
                                         </form>
                                     </div>
                                 </details>

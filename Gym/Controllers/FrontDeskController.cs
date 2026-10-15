@@ -779,9 +779,7 @@ namespace Gym.Controllers
             var tomorrow = today.AddDays(1);
 
             var clients = await _context.Clients.AsNoTracking()
-                .Where(client => client.Role == UserRole.Client &&
-                    client.IsActive && client.IsActiveMember &&
-                    (!client.MembershipEndDate.HasValue || client.MembershipEndDate.Value >= today))
+                .Where(client => client.Role == UserRole.Client)
                 .OrderBy(client => client.LastName)
                 .ThenBy(client => client.FirstName)
                 .ToListAsync();
@@ -813,6 +811,8 @@ namespace Gym.Controllers
                     Initials = initials.ToUpperInvariant(),
                     Membership = MembershipPlanPricing.GetName(client.MembershipPlan),
                     CheckInAt = log?.CheckInAt,
+                    IsEligibleForCheckIn = client.IsActive && client.IsActiveMember &&
+                        (!client.MembershipEndDate.HasValue || client.MembershipEndDate.Value >= today),
                     ReminderEmailFailed = failedReminderKeys.Contains($"DailyMemberReminder:{client.UserId}:{today:yyyyMMdd}"),
                     Status = log == null ? "Not checked in" : "Checked in"
                 };

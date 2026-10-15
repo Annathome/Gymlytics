@@ -466,7 +466,9 @@ namespace Gym.Services
 
                 var availability = await _context.TrainerAvailabilities.AsNoTracking()
                     .FirstOrDefaultAsync(item => item.TrainerId == form.SelectedTrainerId.Value);
-                if (availability != null)
+                if (availability != null &&
+                    !string.IsNullOrWhiteSpace(availability.AvailableDays) &&
+                    TrainerTimeSlots.Build(availability.StartTime, availability.EndTime).Count > 0)
                 {
                     var assignedCount = await _context.Clients.AsNoTracking()
                         .CountAsync(client => client.AssignedTrainerId == form.SelectedTrainerId.Value &&
@@ -510,26 +512,28 @@ namespace Gym.Services
                 var trainerAvailability = await _context.TrainerAvailabilities
                     .AsNoTracking()
                     .FirstOrDefaultAsync(item => item.TrainerId == form.SelectedTrainerId.Value);
-                if (trainerAvailability == null)
-                {
-                    throw new InvalidOperationException("The selected trainer has not configured training days yet.");
-                }
-
-                var availableDays = trainerAvailability.AvailableDays
+                var availableDays = trainerAvailability?.AvailableDays
                     .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-                    .ToList();
-                if (!TrainerTimeSlots.Build(trainerAvailability.StartTime, trainerAvailability.EndTime)
-                    .Contains(form.SelectedTimeSlot, StringComparer.OrdinalIgnoreCase))
+                    .ToList() ?? new List<string>();
+                var availableTimeSlots = trainerAvailability == null
+                    ? new List<string>()
+                    : TrainerTimeSlots.Build(trainerAvailability.StartTime, trainerAvailability.EndTime);
+
+                if (availableDays.Count > 0 && availableTimeSlots.Count > 0)
                 {
-                    throw new InvalidOperationException("Select a time slot within the trainer's current availability.");
-                }
-                form.SelectedDays = form.SelectedDays
-                    .Where(selectedDay => availableDays.Contains(selectedDay, StringComparer.OrdinalIgnoreCase))
-                    .Distinct(StringComparer.OrdinalIgnoreCase)
-                    .ToList();
-                if (form.SelectedDays.Count == 0)
-                {
-                    throw new InvalidOperationException("Select at least one of the trainer's available training days.");
+                    if (!availableTimeSlots.Contains(form.SelectedTimeSlot, StringComparer.OrdinalIgnoreCase))
+                    {
+                        throw new InvalidOperationException("Select a time slot within the trainer's current availability.");
+                    }
+
+                    form.SelectedDays = form.SelectedDays
+                        .Where(selectedDay => availableDays.Contains(selectedDay, StringComparer.OrdinalIgnoreCase))
+                        .Distinct(StringComparer.OrdinalIgnoreCase)
+                        .ToList();
+                    if (form.SelectedDays.Count == 0)
+                    {
+                        throw new InvalidOperationException("Select at least one of the trainer's available training days.");
+                    }
                 }
             }
 

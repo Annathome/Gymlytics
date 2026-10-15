@@ -158,10 +158,13 @@
     .badge-role, .badge-status {
         font-size: 12px;
         font-weight: 600;
-        color: #b7ff1b;
-        background: transparent;
         padding: 0;
     }
+
+    .badge-role { color: #b7ff1b; }
+    .badge-status.badge-active { color: #b7ff1b; }
+    .badge-status.badge-pending { color: #f5a623; }
+    .badge-status.badge-suspended { color: #ff6268; }
 
     .access-text, .last-login {
         color: #9ba49d;
@@ -296,12 +299,12 @@
     }
 
     .floating-card {
-        width: min(460px,calc(100vw - 32px));
-        background: #272b28;
+        width: min(550px,calc(100vw - 32px));
+        background: #1b201c;
         color: #fff;
-        border: 1px solid #343b37;
-        border-radius: 14px;
-        padding: 24px;
+        border: 1px solid #3b443d;
+        border-radius: 15px;
+        padding: 30px;
         box-shadow: 0 20px 50px rgba(0,0,0,.4);
     }
 
@@ -309,7 +312,7 @@
         margin: 0 0 8px;
         font-size: 14px;
         font-weight: 700;
-        color: #fff;
+        color: #b7ff1b;
     }
 
     .floating-card p {
@@ -331,27 +334,42 @@
     .floating-actions {
         display: flex;
         justify-content: flex-end;
-        gap: 10px;
+        gap: 12px;
+        margin-top: 22px;
     }
 
     .floating-cancel, .floating-confirm {
-        border-radius: 8px;
-        padding: 8px 14px;
-        font-size: 12px;
-        font-weight: 600;
+        min-height: 53px;
+        border-radius: 0;
+        padding: 0 20px;
+        font-size: 14px;
+        font-weight: 500;
+        text-transform: uppercase;
         cursor: pointer;
     }
 
     .floating-cancel {
-        background: #343b37;
-        border: 1px solid #48544d;
-        color: #d1d5db;
+        background: #292d2a;
+        border: 1px solid #59615b;
+        color: #fff;
     }
 
     .floating-confirm {
         background: #b7ff1b;
         border: 1px solid #b7ff1b;
         color: #1a1a1a;
+    }
+
+    .floating-confirm.confirm-danger {
+        background: #f12b2f;
+        border-color: #f12b2f;
+        color: #171717;
+    }
+
+    .floating-confirm.confirm-warning {
+        background: #f5a623;
+        border-color: #f5a623;
+        color: #171717;
     }
 </style>
 
@@ -411,9 +429,37 @@
                             <td class="actions-cell">
                                 <button type="button" class="menu-dots-btn" onclick="toggleMenu('@user.Id')">&#8942;</button>
                                 <div class="action-menu" id="menu-@user.Id">
-                                    <a class="action-menu-item" asp-controller="Admin" asp-action="UserActivity" asp-route-id="@user.Id">
-                                        View activity
-                                    </a>
+                                    @if (user.Status != "Pending")
+                                    {
+                                        <a class="action-menu-item" asp-controller="Admin" asp-action="UserActivity" asp-route-id="@user.Id">
+                                            View activity
+                                        </a>
+                                    }
+
+                                    @if (user.Status == "Pending")
+                                    {
+                                        <button type="button" class="action-menu-item danger"
+                                                data-name="@user.DisplayName"
+                                                data-username="@user.Username"
+                                                data-action-name="Delete pending account"
+                                                data-confirm-level="danger"
+                                                data-question="Permanently delete the pending account for"
+                                                data-message="This permanently removes the unconfirmed account and its staff logs from the database. This cannot be undone. Confirmed or registered accounts are not eligible for permanent deletion."
+                                                data-url="@Url.Action("DeletePendingUser", "Admin", new { id = user.Id, page = Model.Page })"
+                                                onclick="openUserActionModal(this)">Delete pending account</button>
+                                    }
+                                    else if (!user.IsMainAdmin && user.Status != "Deleted")
+                                    {
+                                        <button type="button" class="action-menu-item danger"
+                                                data-name="@user.DisplayName"
+                                                data-username="@user.Username"
+                                                data-action-name="Delete account"
+                                                data-confirm-level="danger"
+                                                data-question="Soft delete the registered account for"
+                                                data-message="This account will be removed from the system and cannot sign in. Its data will remain stored in the database."
+                                                data-url="@Url.Action("DeleteUser", "Admin", new { id = user.Id })"
+                                                onclick="openUserActionModal(this)">Delete account</button>
+                                    }
 
                                     @if (user.TracksStaffAttendance && user.Status == "Active" && user.TodayAttendanceStatus != "Absent")
                                     {
@@ -421,6 +467,7 @@
                                                 data-name="@user.DisplayName"
                                                 data-username="@user.Username"
                                                 data-action-name="Mark absent"
+                                                data-confirm-level="warning"
                                                 data-question="Do you want to mark this user absent"
                                                 data-message="Mark this staff member absent for today. Any later login using this account will not change the absent status."
                                                 data-url="@Url.Action("MarkStaffAbsent", "Admin", new { id = user.Id, page = Model.Page })"
@@ -433,9 +480,10 @@
                                                 data-name="@user.DisplayName"
                                                 data-username="@user.Username"
                                                 data-action-name="Suspend account"
+                                                data-confirm-level="warning"
                                                 data-question="Do you want to suspend the account for"
                                                 data-message="This user will no longer be able to log in until reactivated."
-                                                data-url="@Url.Action("SuspendUser", "Admin", new { id = user.Id })"
+                                                data-url="@Url.Action("SuspendUser", "Admin", new { id = user.Id, page = Model.Page })"
                                                 onclick="openUserActionModal(this)">Suspend account</button>
                                     }
                                     @if (user.Status == "Suspended")
@@ -443,11 +491,11 @@
                                         <button type="button" class="action-menu-item"
                                             data-name="@user.DisplayName"
                                             data-username="@user.Username"
-                                            data-action-name="Suspend account"
-                                            data-question="Do you want to suspend the account for"
-                                            data-message="This user will no longer be able to log in until reactivated."
-                                            data-url="@Url.Action("SuspendUser", "Admin", new { id = user.Id, page = Model.Page })"
-                                            onclick="openUserActionModal(this)">Suspend account</button>
+                                            data-action-name="Reactivate account"
+                                            data-question="Do you want to restore access for"
+                                            data-message="This account will be able to sign in again."
+                                            data-url="@Url.Action("ReactivateUser", "Admin", new { id = user.Id, page = Model.Page })"
+                                            onclick="openUserActionModal(this)">Reactivate account</button>
                                      }
 
                                     
@@ -587,7 +635,11 @@ else if (TempData["ErrorMessage"] is string errorMessage)
         document.getElementById('userActionUser').textContent = question + ' "' + username + '"?';
         document.getElementById('userActionMessage').textContent = button.dataset.message;
         document.getElementById('userActionForm').action = button.dataset.url;
-        document.getElementById('userActionConfirm').textContent = button.dataset.actionName;
+        const confirmButton = document.getElementById('userActionConfirm');
+        confirmButton.textContent = button.dataset.actionName;
+        confirmButton.classList.remove('confirm-danger', 'confirm-warning');
+        if (button.dataset.confirmLevel === 'danger') confirmButton.classList.add('confirm-danger');
+        else if (button.dataset.confirmLevel === 'warning') confirmButton.classList.add('confirm-warning');
         document.getElementById('userActionModal').style.display = 'flex';
     }
 

@@ -6,6 +6,9 @@
 }
 
 <style>
+    .ae-photo { color: #b7ff1b !important; text-decoration: none; }
+    .ae-photo:hover, .ae-photo:focus-visible { color: #b7ff1b !important; text-decoration: underline; }
+
     body > .container {
         max-width: none !important;
         width: 100% !important;
@@ -860,7 +863,7 @@
                         <td style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;">
                             @if (!string.IsNullOrWhiteSpace(item.EvidencePhotoPath))
                             {
-                                <a class="ae-photo" href="@item.EvidencePhotoPath" target="_blank" rel="noopener" style="">View photo</a>
+                                <a class="ae-photo" href="@item.EvidencePhotoPath" target="_blank" rel="noopener">View photo</a>
                             }
                             else
                             {

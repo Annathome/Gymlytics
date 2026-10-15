@@ -48,19 +48,19 @@
 
     .status-badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-weight: 600; }
     .badge-active { background-color: #dcfce7; color: #15803d; }
-    .badge-overdue { background-color: #fef3c7; color: #b45309; }
-    .badge-expiringsoon { background-color: #ffedd5; color: #c2410c; }
+    .badge-overdue { background-color: #fef3c7; color: #ffd166; }
+    .badge-expiringsoon { background-color: #ffedd5; color: #f5a623; }
     .badge-expired { background-color: #fee2e2; color: #b91c1c; }
-    .badge-inactive { background-color: #f4f4f5; color: #52525b; }
-    .badge-canceled { background-color: #f3e8ff; color: #7e22ce; }
-    .badge-terminated { background-color: #fecaca; color: #7f1d1d; }
+    .badge-inactive { background-color: #382c1b; color: #f5a623; }
+    .badge-canceled { background-color: #353735; color: #c4cac5; }
+    .badge-terminated { background-color: #432525; color: #ff8e8e; }
 
     .action-cell { position: relative; text-align: center; }
     .action-heading { text-align: center !important; width: 76px; }
     .schedule-cell { white-space: nowrap; }
     .action-btn { background: none; border: none; color: #a1a1aa; cursor: pointer; padding: 4px 8px; border-radius: 6px; }
     .action-btn:hover { color: #52525b;  background:  rgba(0, 0, 0, .65);}
-    .action-menu { display: none; position: absolute; right: 16px; top: calc(100% - 4px); background: #fffef8; border: 1px solid #e4e4e7; border-radius: 8px; box-shadow: 0 4px 12px rgba(16,24,40,.1); min-width: 170px; z-index: 20; overflow: hidden; }
+    .action-menu { display: none; position: absolute; right: 16px; top: calc(100% - 4px); background: #fffef8; border: 1px solid #e4e4e7; border-radius: 8px; box-shadow: 0 4px 12px rgba(16,24,40,.1); min-width: 170px; z-index: 1000000; overflow: hidden; }
     .action-menu.open { display: block; }
     .action-menu form { margin: 0; }
     .menu-item { width: 100%; text-align: left; background: none; border: none; padding: 10px 14px; color: #27272a; cursor: pointer; }
@@ -116,6 +116,8 @@
     .member-filter-form .filter-select { min-width: 145px; height: 38px; border: 1px solid #3a403b; border-radius: 2px; background: #292d2a; color: #fff; }
     .page-container .table-card { border: 1px solid #303630; border-radius: 2px; background: #1c1f1d; overflow: visible; }
     .page-container .members-table { color: #f3f5f3; }
+    .page-container .members-table,
+    .page-container .members-table * { font-size: 12px !important; }
     .page-container .members-table th { padding: 12px 13px; background: #343735; border-color: #3a3f3b; color: #cbd1cc; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }
     .page-container .members-table td { padding: 13px; border-color: #343934; }
     .page-container .member-name-btn { color: #fff; }
@@ -465,7 +467,16 @@
                                             Cancel membership
                                         </button>
                                     }
-                                    @if (member.Status != Gym.Models.MemberStatus.Terminated)
+                                    @if (member.Status is Gym.Models.MemberStatus.Inactive or Gym.Models.MemberStatus.Terminated)
+                                    {
+                                        <form asp-action="ReactivateMember" asp-controller="FrontDesk" method="post"
+                                              onsubmit="return confirm('Reactivate this membership?')">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@member.Id" />
+                                            <button type="submit" class="menu-item">Reactivate membership</button>
+                                        </form>
+                                    }
+                                    else if (member.Status != Gym.Models.MemberStatus.Terminated)
                                     {
                                         <button type="button" class="menu-item menu-item-danger"
                                                 onclick="openTerminateModal(@member.Id, '@Html.Raw(System.Text.Encodings.Web.JavaScriptEncoder.Default.Encode(member.FullName))')" style="">
@@ -791,8 +802,47 @@
 
     function closeAllActionMenus(except) {
         document.querySelectorAll('.action-menu.open').forEach(function(menu) {
-            if (menu !== except) menu.classList.remove('open');
+            if (menu !== except) {
+                closeActionMenu(menu);
+            }
         });
+    }
+
+    function closeActionMenu(menu) {
+        menu.classList.remove('open');
+        var placeholder = menu._actionMenuPlaceholder;
+        if (placeholder && placeholder.parentNode) {
+            placeholder.parentNode.insertBefore(menu, placeholder);
+            placeholder.remove();
+        }
+        menu._actionMenuPlaceholder = null;
+        menu.style.position = '';
+        menu.style.left = '';
+        menu.style.right = '';
+        menu.style.top = '';
+        menu.style.maxHeight = '';
+        menu.style.overflowY = '';
+        menu.style.zIndex = '';
+    }
+
+    function positionActionMenu(menu, button) {
+        const buttonRect = button.getBoundingClientRect();
+        menu.style.position = 'fixed';
+        menu.style.left = '0';
+        menu.style.right = 'auto';
+        menu.style.top = '0';
+        menu.style.maxHeight = 'calc(100vh - 16px)';
+        menu.style.overflowY = 'auto';
+        menu.style.zIndex = '1000000';
+
+        const menuRect = menu.getBoundingClientRect();
+        const gap = 8;
+        const top = buttonRect.bottom + menuRect.height <= window.innerHeight - gap
+            ? buttonRect.bottom
+            : Math.max(gap, buttonRect.top - menuRect.height);
+        const left = Math.max(gap, Math.min(buttonRect.right - menuRect.width, window.innerWidth - menuRect.width - gap));
+        menu.style.top = `${top}px`;
+        menu.style.left = `${left}px`;
     }
 
     function toggleActionMenu(event, button) {
@@ -800,12 +850,23 @@
         var menu = button.nextElementSibling;
         var isOpen = menu.classList.contains('open');
         closeAllActionMenus(isOpen ? null : menu);
-        menu.classList.toggle('open', !isOpen);
+        if (isOpen) {
+            closeActionMenu(menu);
+        } else {
+            var placeholder = document.createComment('member-action-menu');
+            menu.parentNode.insertBefore(placeholder, menu);
+            menu._actionMenuPlaceholder = placeholder;
+            document.body.appendChild(menu);
+            menu.classList.add('open');
+            positionActionMenu(menu, button);
+        }
     }
 
     document.addEventListener('click', function() {
         closeAllActionMenus(null);
     });
+    window.addEventListener('resize', function() { closeAllActionMenus(null); });
+    document.addEventListener('scroll', function() { closeAllActionMenus(null); }, true);
 
     document.addEventListener('DOMContentLoaded', function() {
         var searchInput = document.getElementById('searchTermInput');

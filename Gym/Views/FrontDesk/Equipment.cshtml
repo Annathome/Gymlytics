@@ -5,6 +5,9 @@
 }
 
 <style>
+    .eq-photo { color: #b7ff1b !important; text-decoration: none; }
+    .eq-photo:hover, .eq-photo:focus-visible { color: #b7ff1b !important; text-decoration: underline; }
+
     body > .container {
         max-width: none;
         margin: 0;
@@ -501,7 +504,7 @@
                         <td style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;">
                             @if (!string.IsNullOrWhiteSpace(item.EvidencePhotoPath))
                             {
-                                <a href="@item.EvidencePhotoPath" target="_blank" rel="noopener" style="">View photo</a>
+                                <a class="eq-photo" href="@item.EvidencePhotoPath" target="_blank" rel="noopener">View photo</a>
                             }
                             else
                             {

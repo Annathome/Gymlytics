@@ -688,8 +688,9 @@
         function applyTrainerAvailability(clearWhenSelfGuided) {
             const trainerId = trainerSelect.value;
             const availableDays = trainerAvailableDays[trainerId];
+            const configuredSlots = trainerId ? trainerTimeSlots[trainerId] : null;
 
-            if (!trainerId || !availableDays) {
+            if (!trainerId || !availableDays || availableDays.length === 0 || !configuredSlots || configuredSlots.length === 0) {
                 dayButtons.forEach(function (button) {
                     button.disabled = false;
                     if (clearWhenSelfGuided) button.classList.remove("selected");
@@ -716,8 +717,9 @@
         const trainerTimeSlots = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(addMember.TrainerTimeSlots));
         function updateTrainerTimeSlots() {
             const previousValue = timeSelect.value;
-            const slots = trainerSelect.value
-                ? (trainerTimeSlots[trainerSelect.value] || []).map(value => ({ value, text: value.replace(' - ', ' – ') }))
+            const configuredSlots = trainerSelect.value ? trainerTimeSlots[trainerSelect.value] : null;
+            const slots = configuredSlots && configuredSlots.length
+                ? configuredSlots.map(value => ({ value, text: value.replace(' - ', ' – ') }))
                 : defaultTimeSlots;
             timeSelect.replaceChildren(new Option(slots.length ? 'Select time slot' : 'No availability set for this trainer', ''));
             slots.forEach(slot => timeSelect.add(new Option(slot.text, slot.value)));

@@ -59,6 +59,7 @@ builder.Services.AddScoped<WalkInRegistrationService>();
 builder.Services.AddScoped<DailyMemberReminderSender>();
 builder.Services.AddScoped<EquipmentEvidenceService>();
 builder.Services.AddHostedService<MembershipExpirationReminderService>();
+builder.Services.AddHostedService<MemberInactivityService>();
 builder.Services.AddHostedService<WeeklyAttendanceEmailService>();
 builder.Services.AddHostedService<DailyMemberReminderService>();
 

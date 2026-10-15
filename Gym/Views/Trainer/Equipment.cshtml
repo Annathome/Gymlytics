@@ -5,6 +5,9 @@
 }
 
 <style>
+    .te-photo { color: #b7ff1b !important; text-decoration: none; }
+    .te-photo:hover, .te-photo:focus-visible { color: #b7ff1b !important; text-decoration: underline; }
+
     .trainer-equipment {
         width: min(1100px, calc(100vw - 340px));
         margin: 30px auto;
@@ -275,7 +278,7 @@
                         <td style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;">
                             @if (!string.IsNullOrWhiteSpace(item.EvidencePhotoPath))
                             {
-                                <a href="@item.EvidencePhotoPath" target="_blank" rel="noopener" style="">View photo</a>
+                                <a class="te-photo" href="@item.EvidencePhotoPath" target="_blank" rel="noopener">View photo</a>
                             }
                             else { <span style="">—</span> }
                         </td>

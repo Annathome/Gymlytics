@@ -434,6 +434,23 @@ namespace Gym.Services
             await command.ExecuteNonQueryAsync();
         }
 
+        public async Task<bool> PermanentlyDeletePendingStaffAsync(int staffId)
+        {
+            await using var connection = new SqlConnection(_connectionString);
+            await connection.OpenAsync();
+
+            const string sql = """
+                DELETE FROM dbo.Staff
+                WHERE Id = @Id
+                  AND Status = 'Pending'
+                  AND Role <> 'MainAdmin';
+                """;
+
+            await using var command = new SqlCommand(sql, connection);
+            command.Parameters.AddWithValue("@Id", staffId);
+            return await command.ExecuteNonQueryAsync() > 0;
+        }
+
         public async Task<List<UserRoleViewModel>>
             GetAllUsersAsync()
         {
@@ -460,6 +477,7 @@ namespace Gym.Services
                 LEFT JOIN dbo.StaffAttendanceLogs attendance
                     ON attendance.StaffId = staff.Id
                    AND attendance.AttendanceDate = CAST(GETDATE() AS DATE)
+                WHERE staff.Status <> 'Deleted'
                 ORDER BY
                     CASE staff.Status
                         WHEN 'Pending' THEN 0
@@ -501,7 +519,8 @@ namespace Gym.Services
 
             const string sql = """
                 SELECT COUNT(*)
-                FROM dbo.Staff;
+                FROM dbo.Staff
+                WHERE Status <> 'Deleted';
 
                 SELECT
                     staff.Id,
@@ -518,6 +537,7 @@ namespace Gym.Services
                 LEFT JOIN dbo.StaffAttendanceLogs attendance
                     ON attendance.StaffId = staff.Id
                    AND attendance.AttendanceDate = CAST(GETDATE() AS DATE)
+                WHERE staff.Status <> 'Deleted'
                 ORDER BY
                     CASE staff.Status
                         WHEN 'Pending' THEN 0
@@ -844,9 +864,11 @@ namespace Gym.Services
             await connection.OpenAsync();
 
             const string sql = """
-                DELETE FROM dbo.Staff
+                UPDATE dbo.Staff
+                SET Status = 'Deleted'
                 WHERE Id = @Id
-                  AND Role <> 'MainAdmin';
+                  AND Role <> 'MainAdmin'
+                  AND Status IN ('Active', 'Suspended');
                 """;
 
             await using var command =
@@ -860,7 +882,7 @@ namespace Gym.Services
                 ? (true, null)
                 : (
                     false,
-                    "That account cannot be deleted.");
+                    "That account cannot be deleted or is no longer registered.");
         }
 
         public async Task<(
@@ -965,7 +987,20 @@ namespace Gym.Services
                     null,
                     null,
                     null,
-                    "Your account has been suspended.");
+                    "This account is suspended and cannot log in until an administrator reactivates it.");
+            }
+
+            if (status != "Active")
+            {
+                return (
+                    false,
+                    null,
+                    0,
+                    null,
+                    null,
+                    null,
+                    null,
+                    "This account is no longer active and cannot log in.");
             }
 
             string normalizedRole =
