@@ -1019,14 +1019,14 @@ namespace Gym.Services
                 null);
         }
 
-        public async Task<(int Id, string Hash)?> FindPasswordResetAccountAsync(string email)
+        public async Task<(int Id, string Hash, string Username)?> FindPasswordResetAccountAsync(string email)
         {
             await using var connection = new SqlConnection(_connectionString);
             await connection.OpenAsync();
-            await using var command = new SqlCommand("SELECT Id, PasswordHash FROM dbo.Staff WHERE Email = @Email AND Status = 'Active'", connection);
+            await using var command = new SqlCommand("SELECT Id, PasswordHash, Username FROM dbo.Staff WHERE Email = @Email AND Status = 'Active'", connection);
             command.Parameters.Add("@Email", SqlDbType.NVarChar, 255).Value = email;
             await using var reader = await command.ExecuteReaderAsync();
-            return await reader.ReadAsync() ? (reader.GetInt32(0), reader.GetString(1)) : null;
+            return await reader.ReadAsync() ? (reader.GetInt32(0), reader.GetString(1), reader.GetString(2)) : null;
         }
 
         public async Task<bool> CompletePasswordResetAsync(int id, string previousHash, string newHash)

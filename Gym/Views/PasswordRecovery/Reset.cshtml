@@ -9,13 +9,53 @@
         <form method="post" asp-action="Reset">
             <input asp-for="Token" type="hidden" />
             <div asp-validation-summary="All" role="alert"></div>
+            <label asp-for="Username">Username</label>
+            <input asp-for="Username" type="text" readonly autocomplete="username" />
             <label asp-for="Password">New password</label>
-            <input asp-for="Password" type="password" required minlength="8" maxlength="128" autocomplete="new-password" />
+            <div class="password-field">
+                <input asp-for="Password" type="password" required minlength="8" maxlength="128" autocomplete="new-password" />
+                <button class="password-toggle" type="button" aria-label="Show new password" aria-pressed="false" data-password-toggle="Password">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Zm10 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" /></svg>
+                </button>
+            </div>
             <label asp-for="ConfirmPassword">Confirm password</label>
-            <input asp-for="ConfirmPassword" type="password" required minlength="8" maxlength="128" autocomplete="new-password" />
+            <div class="password-field confirm-password-field">
+                <input asp-for="ConfirmPassword" type="password" required minlength="8" maxlength="128" autocomplete="new-password" />
+                <button class="password-toggle" type="button" aria-label="Show confirmation password" aria-pressed="false" data-password-toggle="ConfirmPassword">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Zm10 3.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" /></svg>
+                </button>
+            </div>
             <button type="submit">Update password</button>
         </form>
         <a asp-action="Index">Request another reset link</a>
     }
     <a asp-controller="Account" asp-action="Login">Back to login</a>
 </main>
+<style>
+    .reset-password-card .password-field { position:relative; }
+    .reset-password-card .password-field input { padding-right:56px; }
+    .reset-password-card .password-toggle {
+        position:absolute; right:8px; top:50%; transform:translateY(-50%);
+        display:grid; place-items:center; width:40px!important; height:40px!important;
+        min-height:40px!important; margin:0!important; padding:8px!important;
+        border:0!important; background:transparent!important; color:#b7ff1b!important;
+        opacity:1!important; filter:none!important;
+        cursor:pointer;
+    }
+    .reset-password-card .password-toggle:hover { color:#b7ff1b!important; }
+    .reset-password-card .password-toggle svg { width:22px; height:22px; fill:currentColor!important; }
+    .reset-password-card .password-toggle:focus-visible { outline:2px solid #b7ff1b; }
+</style>
+<script>
+    document.querySelectorAll('[data-password-toggle]').forEach(function (button) {
+        button.addEventListener('click', function () {
+            var input = document.getElementById(button.dataset.passwordToggle);
+            if (!input) return;
+            var visible = input.type === 'password';
+            input.type = visible ? 'text' : 'password';
+            button.setAttribute('aria-pressed', String(visible));
+            button.setAttribute('aria-label', (visible ? 'Hide ' : 'Show ') +
+                (input.id === 'Password' ? 'new password' : 'confirmation password'));
+        });
+    });
+</script>

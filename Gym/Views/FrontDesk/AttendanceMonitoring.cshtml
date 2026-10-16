@@ -289,7 +289,7 @@
 
        
 
-        <div class="am-card-head">
+        <div class="am-card-head table-title-bar">
             <h2>Daily Check-in Log</h2>
         </div>
 
@@ -346,11 +346,11 @@
                                 <input type="hidden" name="page" value="@Model.Page"  style=""/>
                                 @if (member.CanCheckIn)
                                 {
-                                    <button type="submit" class="@(member.ReminderEmailFailed ? "email-failed-checkin" : "")" style="">Check In</button>
+                                    <button type="submit" class="attendance-checkin-button @(member.ReminderEmailFailed ? "email-failed-checkin" : "")" style="width:128px!important;min-width:128px!important;height:36px!important;min-height:36px!important;box-sizing:border-box!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;padding:0 10px!important;line-height:1.2!important;white-space:nowrap!important;">Check In</button>
                                 }
                                 else
                                 {
-                                    <button type="button" class="@(member.ReminderEmailFailed ? "email-failed-checkin" : "")" disabled style="">@(member.CheckInAt.HasValue ? "Checked In" : "Unavailable")</button>
+                                    <button type="button" class="attendance-checkin-button @(member.ReminderEmailFailed ? "email-failed-checkin" : "")" disabled style="width:128px!important;min-width:128px!important;height:36px!important;min-height:36px!important;box-sizing:border-box!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;padding:0 10px!important;line-height:1.2!important;white-space:nowrap!important;">@(member.CheckInAt.HasValue ? "Checked In" : "Unavailable")</button>
                                 }
                             </form>
                         </td>

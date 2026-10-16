@@ -35,7 +35,7 @@ public class PasswordRecoveryController(SetupService setup, HashingService hashi
         var account = await setup.FindPasswordResetAccountAsync(email);
         if (account.HasValue)
         {
-            var token = protector.Protect(JsonSerializer.Serialize(new ResetData(account.Value.Id, account.Value.Hash)), TimeSpan.FromMinutes(30));
+            var token = protector.Protect(JsonSerializer.Serialize(new ResetData(account.Value.Id, account.Value.Hash, account.Value.Username)), TimeSpan.FromMinutes(30));
             var baseUrl = configuration["AppSettings:BaseUrl"]?.TrimEnd('/');
             if (Uri.TryCreate(baseUrl, UriKind.Absolute, out var uri) && uri.Scheme == "https")
                 await mail.SendPasswordResetLinkAsync(email, baseUrl + Url.Action("Reset", "PasswordRecovery", new { token }));
@@ -44,7 +44,17 @@ public class PasswordRecoveryController(SetupService setup, HashingService hashi
     }
 
     [HttpGet]
-    public IActionResult Reset(string token) => View(new PasswordRecoveryModel { Token = token });
+    public IActionResult Reset(string token)
+    {
+        var model = new PasswordRecoveryModel { Token = token };
+        try
+        {
+            var data = JsonSerializer.Deserialize<ResetData>(protector.Unprotect(token ?? "", out _));
+            model.Username = data?.Username;
+        }
+        catch { }
+        return View(model);
+    }
 
     [HttpPost, ValidateAntiForgeryToken]
     public async Task<IActionResult> Reset(PasswordRecoveryModel model)
@@ -64,5 +74,5 @@ public class PasswordRecoveryController(SetupService setup, HashingService hashi
         ViewBag.Message = "Your password has been changed. You can now sign in with your new password.";
         return View(new PasswordRecoveryModel());
     }
-    public record ResetData(int Id, string Hash);
+    public record ResetData(int Id, string Hash, string? Username = null);
 }

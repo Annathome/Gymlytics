@@ -308,9 +308,11 @@ namespace Gym.Services
                 email.From.Add(new MailboxAddress(_config["SmtpSettings:SenderName"], _config["SmtpSettings:SenderEmail"]));
                 email.To.Add(MailboxAddress.Parse(recipientEmail));
                 email.Subject = "YOKOKS Gym password reset";
-                email.Body = new TextPart("html") { Text = $@"<div style='max-width:540px;margin:auto;background:#1b201c;color:white;font-family:Arial,sans-serif;padding:24px;border:1px solid #b7ff1b'>
+                email.Body = new TextPart("html") { Text = $@"<div style='max-width:540px;margin:auto;background:#1b201c;color:white;font-family:Arial,sans-serif;padding:24px;border:1px solid #b7ff1b;color-scheme:light;supported-color-schemes:light'>
                     <h2 style='color:#b7ff1b'>Reset your password</h2><p>Use the button below to choose a new password. This link expires in 30 minutes and can only be used once.</p>
-                    <p><a href='{System.Net.WebUtility.HtmlEncode(resetUrl)}' style='display:inline-block;background:#b7ff1b;color:#182000;padding:14px 22px;text-decoration:none'>Reset password</a></p>
+                    <table role='presentation' cellspacing='0' cellpadding='0' border='0'><tr><td bgcolor='#b7ff1b' style='background-color:#b7ff1b!important'>
+                    <a href='{System.Net.WebUtility.HtmlEncode(resetUrl)}' bgcolor='#b7ff1b' style='display:inline-block;background-color:#b7ff1b!important;color:#182000!important;padding:14px 22px;text-decoration:none;font-weight:bold'>Reset password</a>
+                    </td></tr></table>
                     <p>If you did not request this, you can ignore this email. Your password has not changed.</p></div>" };
                 using var smtp = new SmtpClient();
                 await smtp.ConnectAsync(_config["SmtpSettings:Server"], int.Parse(_config["SmtpSettings:Port"]!), SecureSocketOptions.StartTls);

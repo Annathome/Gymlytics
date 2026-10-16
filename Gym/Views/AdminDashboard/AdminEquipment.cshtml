@@ -170,7 +170,7 @@
         }
 
         .ae-value.maintenance {
-            color: #ffbd2e;
+            color: #e0ad45;
         }
 
         .ae-value.out {
@@ -235,7 +235,7 @@
 
         .ae-status.needs-maintenance {
             background: #44351e;
-            color: #ffbd2e;
+            color: #e0ad45;
         }
 
         .ae-status.out-of-order {
@@ -762,7 +762,7 @@
             <h1 style="font-weight:700!important;margin-bottom: 0px !important;">@(Model.Tab == "reports" ? "Equipment Report" : "Equipment")</h1>
             <p class="dashboard-caption" style="color:#aeb7b0!important;line-height:1.4!important;">@Model.TotalAssets total items · @(Model.Maintenance + Model.OutOfService) need attention</p>
         </div>
-        <div class="equipbtn"><button class="ae-add" type="button" onclick="openEquipmentModal()">＋ Report equipment issue</button>
+        <div class="equipbtn">
             <button class="ae-add" type="button" onclick="openEquipmentNameModal()">＋ Add equipment</button>
             @if (Model.Tab == "reports") {
 
@@ -807,6 +807,7 @@
     </div>
 
     <div class="ae-card">
+        <div class="table-title-bar">@(Model.Tab == "reports" ? "Equipment Reports List" : "Equipment Inventory")</div>
         @if (Model.Tab == "equipment")
         {
             <table class="ae-table">

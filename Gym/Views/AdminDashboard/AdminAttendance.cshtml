@@ -274,6 +274,29 @@
         overflow: visible !important;
     }
 
+    .aa-checkin-form { margin: 0; }
+    .aa-checkin-button {
+        min-width: 90px;
+        min-height: 40px;
+        padding: 8px 12px;
+        border: 1px solid #b7ff1b;
+        border-radius: 0;
+        background: #b7ff1b;
+        color: #101510;
+        font-weight: 500;
+        cursor: pointer;
+    }
+    .aa-checkin-button:hover:not(:disabled) {
+        background: transparent;
+        color: #b7ff1b;
+    }
+    .aa-checkin-button:disabled {
+        border-color: #858a87;
+        background: #858a87;
+        color: #454a46;
+        cursor: not-allowed;
+    }
+
     .aa-actions {
         position: relative;
         display: inline-block;
@@ -508,7 +531,7 @@
     </form>
 
     <div class="aa-card">
-        <h2>Live Log</h2>
+        <h2 class="table-title-bar">Live Log</h2>
         <div class="aa-table-wrap">
             <table class="aa-table">
                 <thead>
@@ -543,17 +566,12 @@
                             <td style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;">@(member.CheckInAt?.ToString("h:mm tt") ?? "—")</td>
                             <td style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;"><span class="aa-badge @badgeClass" style="background:transparent!important;padding:0!important;border:0!important;border-radius:0!important;box-shadow:none!important;">@member.Status</span></td>
                             <td class="aa-action" style="height:48px!important;padding:6px 13px!important;vertical-align:middle!important;box-sizing:border-box!important;">
-                                <details class="aa-actions">
-                                    <summary title="Attendance actions">⋮</summary>
-                                    <div class="aa-menu" style="">
-                                        <form asp-controller="Admin" asp-action="UpdateAttendance" method="post">
-                                            @Html.AntiForgeryToken()
-                                            <input type="hidden" name="id" value="@member.ClientId"  style=""/>
-                                            <input type="hidden" name="attendanceAction" value="checkin"  style=""/>
-                                            <button type="submit" disabled="@(!member.CanCheckIn)" style="">@(member.CheckInAt.HasValue ? "Checked In" : member.IsEligibleForCheckIn ? "Check In" : "Unavailable")</button>
-                                        </form>
-                                    </div>
-                                </details>
+                                <form class="aa-checkin-form" asp-controller="Admin" asp-action="UpdateAttendance" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@member.ClientId" />
+                                    <input type="hidden" name="attendanceAction" value="checkin" />
+                                    <button class="aa-checkin-button" type="submit" disabled="@(!member.CanCheckIn)" style="width:128px!important;min-width:128px!important;height:36px!important;min-height:36px!important;box-sizing:border-box!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;padding:0 10px!important;line-height:1.2!important;white-space:nowrap!important;">@(member.CheckInAt.HasValue ? "Checked In" : member.IsEligibleForCheckIn ? "Check In" : "Unavailable")</button>
+                                </form>
                             </td>
                         </tr>
                     }

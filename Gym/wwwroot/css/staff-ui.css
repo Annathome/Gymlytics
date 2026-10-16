@@ -69,7 +69,7 @@
     body.frontdesk-shell .fd-trainer-days { display:block;  line-height:1.6!important; color:#c4ccc6!important; }
     body.frontdesk-shell .fd-slot-count { display:inline-flex!important; align-items:center; justify-content:center; min-width:32px; height:32px; padding:4px 9px!important; border-radius:8px!important;  font-weight:700!important; }
     body.frontdesk-shell .fd-slot-count.capacity-ready { background:#35491e!important; color:#b7ff1b!important; }
-    body.frontdesk-shell .fd-slot-count.capacity-warning { background:#51391e!important; color:#ffad33!important; }
+    body.frontdesk-shell .fd-slot-count.capacity-warning { background:#51391e!important; color:#e0ad45!important; }
     body.frontdesk-shell .fd-slot-count.capacity-low { background:#512c30!important; color:#ff6b6b!important; }
     body.frontdesk-shell .frontdesk-main td.pay-transaction-code { color:#b7ff1b!important; }
     body.frontdesk-shell .frontdesk-main { color:#fff!important; font-family:"Inria Serif",serif!important; }
